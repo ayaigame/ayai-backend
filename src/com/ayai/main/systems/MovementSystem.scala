@@ -1,8 +1,8 @@
-package com.ayai.system
+package com.ayai.main.systems
 
 import com.artemis.systems.EntityProcessingSystem
 import com.artemis.Aspect
-import com.ayai.Position
+import com.ayai.main.components.Position
 import com.artemis.ComponentMapper
 import java.util.Map
 import com.artemis.Entity

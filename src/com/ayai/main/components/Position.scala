@@ -1,4 +1,4 @@
-package com.ayai
+package com.ayai.main.components
 
 import com.artemis.Component
 
