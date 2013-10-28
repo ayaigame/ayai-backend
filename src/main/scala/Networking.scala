@@ -1,4 +1,4 @@
-package com.ayai.main
+package com.ayai.networking
 
 import akka.actor._
 import akka.routing.RoundRobinRouter
@@ -14,11 +14,10 @@ class ConnectionActor extends Actor {
 
   def createConnection(ip: String, port: Int) = {
       println("I'm an actor!")
-      return true
   }
 
   def receive = {
     case CreateConnection(ip, port) =>
-      sender ! Result(calculatePiFor(start, nrOfElements))
+      sender ! createConnection(ip, port)
   }
 }
