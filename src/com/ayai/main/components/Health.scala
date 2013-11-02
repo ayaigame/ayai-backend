@@ -2,14 +2,7 @@ package com.ayai.main.components
 
 import com.artemis.Component
 
-class Health extends Component{
-  private var currentHealth : Int = _
-  private var maximumHealth : Int = _
-  
-  def Health(maximumHealth : Int) {
-    this.currentHealth = maximumHealth
-    this.maximumHealth = maximumHealth
-  }
+class Health(var currentHealth: Int, var maximumHealth: Int) extends Component{
   
   def getCurrentHealth() : Int = {
     return this.currentHealth
