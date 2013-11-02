@@ -11,8 +11,8 @@ object TestMain extends App {
   override def main(args: Array[String]) {
       println("compiled")
 
-      val myActor = Actor.actorOf[ConnectionActor].start()
-      myActor ! CreateConnection("localhost", 8000)
+      // val myActor = Actor.actorOf[ConnectionActor].start()
+      // myActor ! CreateConnection("localhost", 8000)
 
       var world: World = new World()
       world.setSystem(new MovementSystem())
