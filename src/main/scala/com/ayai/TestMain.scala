@@ -1,21 +1,38 @@
 package com.ayai.main
 
-import com.ayai.main.systems._;
-import com.ayai.networking._
+import com.ayai.main.systems._
 import com.artemis.World
+import com.artemis.Entity
+import com.artemis.managers.GroupManager
+import com.ayai.main.components.Player
+import com.artemis.ComponentType
+import java.lang.Boolean
+import com.ayai.main.components.Position
 
-import akka.actor._
-import akka.actor.Actor._
-
-object TestMain extends App {
-  override def main(args: Array[String]) {
+object TestMain  {
+  
+  var running : Boolean = _
+  
+  def main(args: Array[String]) {
       println("compiled")
-
-      // val myActor = Actor.actorOf[ConnectionActor].start()
-      // myActor ! CreateConnection("localhost", 8000)
-
+      running = true
       var world: World = new World()
+      world.setManager(new GroupManager())
       world.setSystem(new MovementSystem())
       world.initialize()
+      world.addEntity(EntityFactory.createPlayer(world, 200, 200))
+      
+      
+      while(running) {
+        world.setDelta(5)
+        world.process()
+        
+        render(world)
+      }
+  }
+  
+  def render(world : World) {
+    Thread.sleep(1000)
+    println(world.getEntity(0).getComponent(classOf[Position]).x)
   }
 }
