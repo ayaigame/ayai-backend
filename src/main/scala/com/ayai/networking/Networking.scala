@@ -1,4 +1,4 @@
-package com.ayai.networking
+package com.ayai.main.networking
 
 import akka.actor._
 import akka.routing.RoundRobinRouter

@@ -5,6 +5,7 @@ import com.artemis.World
 import com.artemis.Entity
 import com.artemis.managers.GroupManager
 import com.ayai.main.components.Player
+import com.ayai.main.networking._
 import com.artemis.ComponentType
 import java.lang.Boolean
 import com.ayai.main.components.Position
@@ -22,13 +23,17 @@ object TestMain  {
       world.initialize()
       world.addEntity(EntityFactory.createPlayer(world, 200, 200))
       
+      var networkFactory = new NetworkFactory()
+      val testConnection = networkFactory.makeConnection("localhost", 8007)
       
-      while(running) {
-        world.setDelta(5)
-        world.process()
+      testConnection.run()
+
+      // while(running) {
+      //   world.setDelta(5)
+      //   world.process()
         
-        render(world)
-      }
+      //   render(world)
+      // }
   }
   
   def render(world : World) {
