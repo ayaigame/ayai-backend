@@ -5,6 +5,10 @@ import java.io._
 import scala.io._
 import scala.util.parsing.json._
 
+
+// use:
+// echo "{\"player_id\": 1}" | nc 144.118.167.159 8007
+// to test
 class SocketConnection(ip: String, port: Int) extends Connection(ip: String, port: Int) {
   def run() : Unit = {
     val server = new ServerSocket(port)
