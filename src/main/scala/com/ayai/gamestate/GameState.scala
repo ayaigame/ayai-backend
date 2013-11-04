@@ -2,8 +2,9 @@ package com.ayai.main.gamestate
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
-import com.ayai.main.systems._
+import com.ayai.main.components._
 import com.artemis.World
+import com.artemis.Entity
 
 object GameState  {
   var rooms = new ArrayBuffer[Room]()
@@ -17,6 +18,8 @@ object GameState  {
   * and I don't think our playerIds will have a good distribution of hash codes.
   */
   var index = new HashMap[Int, Int]()
+  var nextRoomId = 0
+  var nextPlayerId = 0
 
   def getRoomJSON(roomId: Int): String = {
     return "{}"
@@ -25,8 +28,26 @@ object GameState  {
   def getPlayerRoomJSON(playerId: Int): String = {
     return index.get(playerId) match {
         case Some(roomId: Int) => getRoomJSON(roomId)
-        case _ => "{\"error\": \"No player found with id\"}" //$playerId.\"}"
+        case _ => "{\"error\": \"No player found with id " + playerId.toString() + ".\"}"
         //Scala string interpolation doesn't work with the \ escape character...
       }
+  }
+
+  def createRoom(): Room = {
+    val newRoom = new Room(nextRoomId)
+    rooms += newRoom
+    nextRoomId = nextRoomId + 1
+    return newRoom
+  }
+
+  def getNextPlayerId(): Int = {
+    val temp = nextPlayerId
+    nextPlayerId = nextPlayerId + 1
+    return temp
+  }
+
+  def addPlayer(roomId: Int, player: Entity) = {
+    index += (player.getComponent(classOf[Player]).playerId -> roomId)
+    rooms(roomId).addEntity(player)
   }
 }

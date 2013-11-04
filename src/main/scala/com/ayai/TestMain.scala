@@ -21,9 +21,14 @@ object TestMain  {
     world.setManager(new GroupManager())
     world.setSystem(new MovementSystem())
     world.initialize()
-    world.addEntity(EntityFactory.createPlayer(world, 200, 200))
+
+    var firstRoom: Room = GameState.createRoom()
+
+    val startingRoom = firstRoom.getRoomId
+    world.addEntity(EntityFactory.createPlayer(world, startingRoom, 200, 200))
     
-    println(GameState.getPlayerRoomJSON(1))
+
+    println(GameState.getPlayerRoomJSON(0))
     
     // while(running) {
     //   world.setDelta(5)

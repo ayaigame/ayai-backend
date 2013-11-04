@@ -1,16 +1,24 @@
 package com.ayai.main.gamestate
 
-import com.artemis.Component
+import com.artemis.Entity
 import scala.collection.mutable.ArrayBuffer
 import scala.util.parsing.json._
 
-class Room {
+class Room(roomId: Int) {
 	var map = new ArrayBuffer[ArrayBuffer[Int]]()
 	var portals = new ArrayBuffer[Portal]()
-  var entities = new ArrayBuffer[Component]()
+  var entities = new ArrayBuffer[Entity]()
+
+  def getRoomId(): Int = {
+    return roomId
+  }
 
   def intializeMap(mapJSON: String) = {
     val result = JSON.parseFull(mapJSON)
     println(result)
+  }
+
+  def addEntity(entity: Entity) = {
+    entities += entity
   }
 }
