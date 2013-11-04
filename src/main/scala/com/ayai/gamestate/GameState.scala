@@ -7,6 +7,7 @@ import com.artemis.World
 import com.artemis.Entity
 
 object GameState  {
+  // Stores all the rooms. rooms(roomId) will return the correct room.
   var rooms = new ArrayBuffer[Room]()
 
   /*
@@ -21,13 +22,9 @@ object GameState  {
   var nextRoomId = 0
   var nextPlayerId = 0
 
-  def getRoomJSON(roomId: Int): String = {
-    return "{}"
-  }
-
   def getPlayerRoomJSON(playerId: Int): String = {
     return index.get(playerId) match {
-        case Some(roomId: Int) => getRoomJSON(roomId)
+        case Some(roomId: Int) => rooms(roomId).jsonify()
         case _ => "{\"error\": \"No player found with id " + playerId.toString() + ".\"}"
         //Scala string interpolation doesn't work with the \ escape character...
       }

@@ -21,4 +21,8 @@ class Room(roomId: Int) {
   def addEntity(entity: Entity) = {
     entities += entity
   }
+
+  def jsonify(): String = {
+    return "{}"
+  }
 }
