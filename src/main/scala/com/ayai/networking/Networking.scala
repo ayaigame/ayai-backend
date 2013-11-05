@@ -12,12 +12,12 @@ case class TerminateConnection(ip: String, port: Int) extends NetworkMessage
 
 class ConnectionActor extends Actor {
 
-  def createConnection(ip: String, port: Int, connectionType: NetworkType = new SocketConnectionType) = {
+  def createConnection(port: Int, connectionType: NetworkType = new SocketConnectionType) = {
       println("I'm an actor!")
   }
 
   def receive = {
-    case CreateConnection(ip, port) =>
-      sender ! createConnection(ip, port)
+    case CreateConnection(port) =>
+      sender ! createConnection(port)
   }
 }

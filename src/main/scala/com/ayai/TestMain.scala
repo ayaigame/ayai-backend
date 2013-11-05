@@ -24,7 +24,7 @@ object TestMain  {
       world.addEntity(EntityFactory.createPlayer(world, 200, 200))
       
       var networkFactory = new NetworkFactory()
-      val testConnection = networkFactory.makeConnection("localhost", 8007)
+      val testConnection = networkFactory.makeConnection(8007)
       
       testConnection.run()
 
