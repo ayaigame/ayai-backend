@@ -9,3 +9,5 @@ mainClass in (Compile, run) := Some("com.ayai.main.TestMain")
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
  
 libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.2"
+
+libraryDependencies += "net.liftweb" %% "lift-json" % "2.5.1"

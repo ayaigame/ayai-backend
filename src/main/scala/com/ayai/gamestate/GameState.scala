@@ -30,8 +30,8 @@ object GameState  {
       }
   }
 
-  def createRoom(): Room = {
-    val newRoom = new Room(nextRoomId)
+  def createRoom(mapJSON: String): Room = {
+    val newRoom = new Room(nextRoomId, mapJSON)
     rooms += newRoom
     nextRoomId = nextRoomId + 1
     return newRoom

@@ -10,6 +10,9 @@ import com.artemis.ComponentType
 import java.lang.Boolean
 import com.ayai.main.components.Position
 
+import com.ayai.main.data._
+
+
 object TestMain  {
 
   var running : Boolean = _
@@ -22,11 +25,9 @@ object TestMain  {
     world.setSystem(new MovementSystem())
     world.initialize()
 
-    var firstRoom: Room = GameState.createRoom()
-
+    var firstRoom: Room = GameState.createRoom(Data.map)
     val startingRoom = firstRoom.getRoomId
     world.addEntity(EntityFactory.createPlayer(world, startingRoom, 200, 200))
-    
 
     println(GameState.getPlayerRoomJSON(0))
     

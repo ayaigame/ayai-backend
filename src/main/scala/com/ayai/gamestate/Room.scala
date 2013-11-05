@@ -3,9 +3,20 @@ package com.ayai.main.gamestate
 import com.artemis.Entity
 import scala.collection.mutable.ArrayBuffer
 import scala.util.parsing.json._
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
-class Room(roomId: Int) {
-	var map = new ArrayBuffer[ArrayBuffer[Int]]()
+class Room(roomId: Int, mapJSON: String) {
+	var doubleGameMap: List[List[Double]] = JSON.parseFull(mapJSON) match {
+    case Some(e: List[List[Double]]) => e
+    case _ => {
+      println("Error: map parsing error.")
+      List(List(0))
+    }
+  }
+
+  var gameMap = doubleGameMap.map((l: List[Double]) => l.map((d: Double) => d.toInt))
+
 	var portals = new ArrayBuffer[Portal]()
   var entities = new ArrayBuffer[Entity]()
 
@@ -13,16 +24,11 @@ class Room(roomId: Int) {
     return roomId
   }
 
-  def intializeMap(mapJSON: String) = {
-    val result = JSON.parseFull(mapJSON)
-    println(result)
-  }
-
   def addEntity(entity: Entity) = {
     entities += entity
   }
 
   def jsonify(): String = {
-    return "{}"
+    compact(render(gameMap.map((l: List[Int]) => compact(render(l)))))
   }
 }
