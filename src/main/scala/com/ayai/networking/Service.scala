@@ -1,5 +1,9 @@
-package com.ayai.main.networking
+// package com.ayai.main.networking
 
-class Sevice extends Actor {
-  
-}
+// import akka.actor.Actor
+// import akka.actor.ActorSystem
+// import akka.actor.Props
+
+// class Sevice extends Actor {
+
+// }

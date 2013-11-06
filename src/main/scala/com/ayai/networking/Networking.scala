@@ -1,23 +1,25 @@
-package com.ayai.main.networking
+// package com.ayai.main.networking
 
-import akka.actor._
-import akka.routing.RoundRobinRouter
-import akka.util.Duration
-import akka.util.duration._
+// import akka.actor._
+// import akka.routing.RoundRobinRouter
+// import akka.util.Duration
+// import akka.util.duration._
 
-sealed trait NetworkMessage
+// sealed trait NetworkMessage
 
-case class CreateConnection(ip: String, port: Int) extends NetworkMessage
-case class TerminateConnection(ip: String, port: Int) extends NetworkMessage
+// case class CreateConnection(s: Socket) extends NetworkMessage
+// case class TerminateConnection() extends NetworkMessage
+// case class ReadFromConnection() extends NetworkMessage
+// case class WriteToConnection() extends NetworkMessage
 
-class ConnectionActor extends Actor {
+// class ConnectionActor extends Actor {
 
-  def createConnection(port: Int, connectionType: NetworkType = new SocketConnectionType) = {
-      println("I'm an actor!")
-  }
+//   def createConnection(port: Int, connectionType: NetworkType = new SocketConnectionType) = {
+//       println("I'm an actor!")
+//   }
 
-  def receive = {
-    case CreateConnection(port) =>
-      sender ! createConnection(port)
-  }
-}
+//   def receive = {
+//     case CreateConnection(s) =>
+//       sender ! createConnection(port)
+//   }
+// }

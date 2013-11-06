@@ -8,10 +8,9 @@ import scala.util.parsing.json._
 import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.event.Logging
 
-class SocketConnection extends Connection {
-  // s: Socket = new Socket()
-
+class SocketConnection(s: Socket) extends Actor {
   def read(): String = {
     "{}"
   }
@@ -20,9 +19,16 @@ class SocketConnection extends Connection {
     println(json)
   }
 
+  // def receive = {
+  //   case ReadFromConnection() =>
+  //     sender ! read()
+  //   case WriteToConnection(json: String) =>
+  //     sender ! write(json)
+  //   case _ => println("ERRRORRRRORORORORR")
+  // }
   def receive = {
-    case CreateConnection(port) =>
-      sender ! createConnection(port)
+    case "hello" => println("hello back at you")
+    case _       => println("huh?")
   }
 }
 

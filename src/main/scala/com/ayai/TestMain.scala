@@ -23,10 +23,12 @@ object TestMain  {
       world.initialize()
       world.addEntity(EntityFactory.createPlayer(world, 200, 200))
       
-      var networkFactory = new NetworkFactory()
-      val testConnection = networkFactory.makeConnection(8007)
+      // var networkFactory = new NetworkFactory()
+      // val testConnection: Connection = networkFactory.makeConnection()
       
-      testConnection.run()
+      var receptionist = new Receptionist(8007)
+
+      receptionist.start()
 
       // while(running) {
       //   world.setDelta(5)

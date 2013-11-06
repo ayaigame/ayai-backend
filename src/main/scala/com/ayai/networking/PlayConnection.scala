@@ -1,5 +1,15 @@
-package com.ayai.main.networking
+// package com.ayai.main.networking
 
-class PlayConnection(ip: String, port: Int) extends Connection(ip: String, port: Int) {
-	def run() : Unit = {}
-}
+// class PlayConnection() extends Connection() {
+//   def read(): String = {
+//     "{}"
+//   }
+
+//   def write(json: String) = {
+//     println(json)
+//   }
+
+//   // def receive = {
+//   //   println("I'm receiving or something.")
+//   // }
+// }
