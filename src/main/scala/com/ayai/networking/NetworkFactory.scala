@@ -4,7 +4,7 @@
 // case class SocketConnectionType extends NetworkType
 // case class PlayConnectionType extends NetworkType
 
-// class NetworkFactory {
+// class NetworkFactory() {
 //   def makeConnection(connectionType: NetworkType = SocketConnectionType()): Connection = connectionType match {
 //     case SocketConnectionType() =>
 //       return (new SocketConnection())

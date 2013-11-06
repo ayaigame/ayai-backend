@@ -15,9 +15,7 @@ class Receptionist(port: Int) extends Thread {
     while (true) {
       val s = server.accept()
 
-      // val connection: Connection = new SocketConnection(s)
-
-      val connection = system.actorOf(Props(new SocketConnection(s)), name = "connectionactor")
+      val connection: Connection= new SocketConnection(s)
 
       val helloActor = system.actorOf(Props(new RoomService(connection)), name = "helloactor")
       helloActor ! StartConnection()

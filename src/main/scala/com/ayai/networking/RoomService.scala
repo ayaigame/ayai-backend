@@ -10,22 +10,24 @@ import java.io._
 import scala.io._
 import scala.util.parsing.json._
 
-class RoomService(connectionRef: ActorRef) extends Actor {
-// class RoomService(connection: SocketConnection) extends Actor {
-  // def doStuff = {
-  //   while(true)
-  //     var request = connectionRef ! ReadFromConnection()
-  //     val result = JSON.parseFull(request)
-  //     val player_id = result match {
-  //       case Some(e: Map[String, Int]) => e("player_id")
-  //       case _ => "Failed player request."
-  //     }
-  //     println(player_id)
-  //   }
-  // }
+class RoomService(connection: Connection) extends Actor {
+  def serve = {
+    while(connection.isConnected()) {
+      var request = connection.read()
+      if(request.length > 0) {
+        val result = JSON.parseFull(request)
+        val player_id = result match {
+          case Some(e: Map[String, Int]) => e("player_id")
+          case _ => "Failed player request."
+        }
+        connection.write(player_id.toString())
+      }
+    }
+    connection.kill()
+  }
 
   def receive = {
-    case StartConnection() => connectionRef ! ReadFromConnection()
-    case _       => println("huh?")
+    case StartConnection() => serve
+    case _ => println("Error: incomprehensible message.")
   }
 }

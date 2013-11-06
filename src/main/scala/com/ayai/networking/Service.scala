@@ -4,6 +4,6 @@
 // import akka.actor.ActorSystem
 // import akka.actor.Props
 
-// class Sevice extends Actor {
+// class Service extends Actor {
 
 // }

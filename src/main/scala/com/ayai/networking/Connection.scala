@@ -17,11 +17,14 @@ case class StartConnection() extends NetworkMessage
 case class TerminateConnection() extends NetworkMessage
 case class ReadFromConnection() extends NetworkMessage
 case class WriteToConnection(json: String) extends NetworkMessage
+case class ResponseMessage extends NetworkMessage
 
-// abstract class Connection extends Actor {
-//   def read(): String
+abstract class Connection {
+  def read(): String
 
-//   def write(json: String)
+  def write(json: String)
 
-//   // def receive
-// }
+  def isConnected(): Boolean
+
+  def kill()
+}

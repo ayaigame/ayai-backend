@@ -23,19 +23,16 @@ object TestMain  {
       world.initialize()
       world.addEntity(EntityFactory.createPlayer(world, 200, 200))
       
-      // var networkFactory = new NetworkFactory()
-      // val testConnection: Connection = networkFactory.makeConnection()
-      
       var receptionist = new Receptionist(8007)
 
       receptionist.start()
 
-      // while(running) {
-      //   world.setDelta(5)
-      //   world.process()
+      while(running) {
+        world.setDelta(5)
+        world.process()
         
-      //   render(world)
-      // }
+        render(world)
+      }
   }
   
   def render(world : World) {
