@@ -1,5 +1,6 @@
 package com.ayai.main
 
+import com.ayai.main.gamestate.GameState
 import com.ayai.main.components.Player
 import com.artemis.Entity
 import com.artemis.World
@@ -13,7 +14,7 @@ object EntityFactory {
   /**
    * might have to do some networking stuff, dont know yet
    */
-  def createPlayer(world : World, x: Int, y : Int) : Entity = {
+  def createPlayer(world : World, roomId: Int, x: Int, y : Int) : Entity = {
     var player : Entity = world.createEntity()
     var position : Position = new Position(3,3)
     var velocity : Velocity = new Velocity(3,4)
@@ -25,7 +26,8 @@ object EntityFactory {
     var health : Health = new Health(200,200);
     player.addComponent(health)
     
-    player.addComponent(new Player());
+    player.addComponent(new Player(GameState.getNextPlayerId()));
+    GameState.addPlayer(roomId, player)
     world.getManager(classOf[GroupManager]).add(player, Constants.PLAYER_CHARACTER)
     return player;
   }
