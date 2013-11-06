@@ -7,5 +7,7 @@ scalaVersion := "2.10.3"
 mainClass in (Compile, run) := Some("com.ayai.main.TestMain")
  
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
- 
+
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.3"
+
+libraryDependencies += "net.liftweb" %% "lift-json" % "2.5.1"

@@ -1,5 +1,7 @@
 package com.ayai.main.networking
 
+import com.ayai.main.gamestate._
+
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
@@ -16,11 +18,14 @@ class RoomService(connection: Connection) extends Actor {
       var request = connection.read()
       if(request.length > 0) {
         val result = JSON.parseFull(request)
-        val player_id = result match {
-          case Some(e: Map[String, Int]) => e("player_id")
-          case _ => "Failed player request."
+        val playerId: Int = result match {
+          case Some(e: Map[String, Double]) => e("player_id").toInt
+          case _ => {
+            println("Failed player request.")
+            -1
+          }
         }
-        connection.write(player_id.toString())
+        connection.write(GameState.getPlayerRoomJSON(playerId))
       }
     }
     connection.kill()
