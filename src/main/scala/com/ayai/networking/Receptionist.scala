@@ -10,19 +10,17 @@ class Receptionist(port: Int) extends Thread {
   val server = new ServerSocket(port)
 
   override def run() = {
-    println("I'M RUNNING")
+    val system = ActorSystem("HelloSystem")
+
     while (true) {
       val s = server.accept()
-      println("GOT TO DA SPOT")
 
       // val connection: Connection = new SocketConnection(s)
-      val connection = new SocketConnection(s)
 
-      val system = ActorSystem("HelloSystem")
+      val connection = system.actorOf(Props(new SocketConnection(s)), name = "connectionactor")
 
       val helloActor = system.actorOf(Props(new RoomService(connection)), name = "helloactor")
-      helloActor ! "hello"
-      helloActor ! "buenos dias"
+      helloActor ! StartConnection()
     }
   }
 }

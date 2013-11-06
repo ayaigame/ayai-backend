@@ -27,7 +27,7 @@ class SocketConnection(s: Socket) extends Actor {
   //   case _ => println("ERRRORRRRORORORORR")
   // }
   def receive = {
-    case "hello" => println("hello back at you")
+    case ReadFromConnection() => println("hello from SocketConnection")
     case _       => println("huh?")
   }
 }
