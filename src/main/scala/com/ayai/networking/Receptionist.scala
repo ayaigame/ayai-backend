@@ -1,5 +1,6 @@
 package com.ayai.main.networking
 
+import java.rmi.server.UID
 import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
@@ -17,7 +18,8 @@ class Receptionist(port: Int) extends Thread {
 
       val connection: Connection= new SocketConnection(s)
 
-      val helloActor = system.actorOf(Props(new RoomService(connection)), name = "helloactor")
+
+      val helloActor = system.actorOf(Props(new RoomService(connection)), name = (new UID()).toString)
       helloActor ! StartConnection()
     }
   }

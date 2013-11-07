@@ -1,9 +1,9 @@
-// package com.ayai.main.networking
+package com.ayai.main.networking
 
-// import akka.actor.Actor
-// import akka.actor.ActorSystem
-// import akka.actor.Props
+import akka.actor.Actor
+import akka.actor.ActorSystem
+import akka.actor.Props
 
-// class Service extends Actor {
-
-// }
+abstract class Service(connection: Connection) extends Actor {
+  def serve
+}

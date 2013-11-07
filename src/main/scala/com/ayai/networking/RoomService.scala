@@ -12,7 +12,7 @@ import java.io._
 import scala.io._
 import scala.util.parsing.json._
 
-class RoomService(connection: Connection) extends Actor {
+class RoomService(connection: Connection) extends Service(connection) {
   def serve = {
     while(connection.isConnected()) {
       var request = connection.read()
