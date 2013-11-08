@@ -31,4 +31,5 @@ class Room(roomId: Int, mapJSON: String) {
   def jsonify(): String = {
     compact(render(gameMap.map((l: List[Int]) => compact(render(l)))))
   }
+
 }

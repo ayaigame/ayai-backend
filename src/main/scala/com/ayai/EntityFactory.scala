@@ -8,6 +8,8 @@ import com.ayai.main.components.Position
 import com.ayai.main.components.Health
 import com.artemis.managers.GroupManager
 import com.ayai.main.components.Velocity
+import com.artemis.Component
+import com.ayai.main.components.Containable
 
 object EntityFactory {
   
@@ -16,7 +18,7 @@ object EntityFactory {
    */
   def createPlayer(world : World, roomId: Int, x: Int, y : Int) : Entity = {
     var player : Entity = world.createEntity()
-    var position : Position = new Position(3,3)
+    var position : Position = new Position(x,y)
     var velocity : Velocity = new Velocity(3,4)
     player.addComponent(position)
     
@@ -29,6 +31,21 @@ object EntityFactory {
     player.addComponent(new Player(GameState.getNextPlayerId()));
     GameState.addPlayer(roomId, player)
     world.getManager(classOf[GroupManager]).add(player, Constants.PLAYER_CHARACTER)
-    return player;
+    println("Entity: " + player.getId())
+    TestMain.map.addEntity(player.getId(),x,y)
+    player;
+  }
+
+  def createItem(world : World, x : Int, y :Int, name : String) : Entity = {
+    var item : Entity = world.createEntity()
+    var position : Position = new Position(x, y)
+    item.addComponent(position)
+
+    var containable : Containable = new Containable(3, name)
+    item.addComponent(containable)
+
+    world.getManager(classOf[GroupManager]).add(item,"ITEM")
+    TestMain.map.addEntity(item.getId(),x,y)
+    item
   }
 }
