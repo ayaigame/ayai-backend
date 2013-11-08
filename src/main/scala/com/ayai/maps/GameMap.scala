@@ -35,20 +35,20 @@ class GameMap(var width : Int, var height : Int) {
 
 	//get position of entity
 	def getPosition(id : Int) : Position = {
-		return coordByEnitity(id)
+		coordByEnitity(id)
 	}
 
 	//return if an entity is in this location
 	def isOccupied(x : Int, y : Int) : Boolean = {
-		return (entityByCoord(x)(y) > -1)
+		entityByCoord(x)(y) > -1
 	}
 
 	def getEntityId(x : Int, y : Int) : Int = {
-		return entityByCoord(x)(y)
+		entityByCoord(x)(y)
 	}
 
 	def getJSONMap() : String =  {
-		return ""
+		""
 	}
 
 }

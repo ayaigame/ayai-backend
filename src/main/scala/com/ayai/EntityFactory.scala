@@ -33,7 +33,7 @@ object EntityFactory {
     world.getManager(classOf[GroupManager]).add(player, Constants.PLAYER_CHARACTER)
     println("Entity: " + player.getId())
     TestMain.map.addEntity(player.getId(),x,y)
-    return player;
+    player;
   }
 
   def createItem(world : World, x : Int, y :Int, name : String) : Entity = {
@@ -46,6 +46,6 @@ object EntityFactory {
 
     world.getManager(classOf[GroupManager]).add(item,"ITEM")
     TestMain.map.addEntity(item.getId(),x,y)
-    return item
+    item
   }
 }
