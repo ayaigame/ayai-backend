@@ -1,14 +1,14 @@
-package ayai.main.systems
+package ayai.systems
 
 import com.artemis.systems.EntityProcessingSystem
 import com.artemis.Aspect
-import ayai.main.components.Position
+import ayai.components.Position
 import com.artemis.ComponentMapper
 import java.util.Map
 import com.artemis.Entity
-import ayai.main.components.Velocity
+import ayai.components.Velocity
 import com.artemis.annotations.Mapper
-import ayai.main.maps.GameMap
+import ayai.maps.GameMap
 
 class MovementSystem(map : GameMap, a: Aspect = Aspect.getAspectFor(classOf[Position], classOf[Velocity])) extends EntityProcessingSystem(a) {    
   @Mapper

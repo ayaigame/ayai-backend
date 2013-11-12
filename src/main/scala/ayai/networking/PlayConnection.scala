@@ -1,4 +1,4 @@
-// package ayai.main.networking
+// package ayai.networking
 
 // class PlayConnection() extends Connection() {
 //   def read(): String = {

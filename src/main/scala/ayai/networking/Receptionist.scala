@@ -1,4 +1,4 @@
-package ayai.main.networking
+package ayai.networking
 
 import java.rmi.server.UID
 import akka.actor.Actor

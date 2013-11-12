@@ -1,6 +1,6 @@
-package ayai.main.networking
+package ayai.networking
 
-import ayai.main.gamestate._
+import ayai.gamestate._
 
 import akka.actor.Actor
 import akka.actor.ActorRef

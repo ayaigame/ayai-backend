@@ -1,17 +1,17 @@
-package ayai.main
+package ayai
 
-import ayai.main.systems._
-import ayai.main.gamestate._
+import ayai.systems._
+import ayai.gamestate._
 import com.artemis.World
 import com.artemis.Entity
 import com.artemis.managers.GroupManager
-import ayai.main.components.Player
-import ayai.main.networking._
+import ayai.components.Player
+import ayai.networking._
 import com.artemis.ComponentType
 import java.lang.Boolean
-import ayai.main.components.Position
-import ayai.main.maps.GameMap
-import ayai.main.data._
+import ayai.components.Position
+import ayai.maps.GameMap
+import ayai.data._
 import scala.util.parsing.json.JSONObject
 
 object TestMain  {

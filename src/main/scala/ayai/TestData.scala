@@ -1,4 +1,4 @@
-package ayai.main.data
+package ayai.data
 
 object Data {
   val map: String = """[

@@ -1,15 +1,15 @@
-package ayai.main
+package ayai
 
-import ayai.main.gamestate.GameState
-import ayai.main.components.Player
+import ayai.gamestate.GameState
+import ayai.components.Player
 import com.artemis.Entity
 import com.artemis.World
-import ayai.main.components.Position
-import ayai.main.components.Health
+import ayai.components.Position
+import ayai.components.Health
 import com.artemis.managers.GroupManager
-import ayai.main.components.Velocity
+import ayai.components.Velocity
 import com.artemis.Component
-import ayai.main.components.Containable
+import ayai.components.Containable
 
 object EntityFactory {
   

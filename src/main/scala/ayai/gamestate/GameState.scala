@@ -1,8 +1,8 @@
-package ayai.main.gamestate
+package ayai.gamestate
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
-import ayai.main.components._
+import ayai.components._
 import com.artemis.World
 import com.artemis.Entity
 

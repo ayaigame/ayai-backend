@@ -1,6 +1,6 @@
-package ayai.main.maps
+package ayai.maps
 
-import ayai.main.components.Position
+import ayai.components.Position
 import scala.collection.mutable.Map
 class GameMap(var width : Int, var height : Int) {
 	//this is a map of the normal values (or terrain values if needed)

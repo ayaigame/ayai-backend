@@ -1,5 +1,7 @@
 bin/
 .DS_Store
 project/
-target/
+target/*
+!target/start
 /.cache
+*.swp

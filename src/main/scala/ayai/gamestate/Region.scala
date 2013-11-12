@@ -1,4 +1,4 @@
-package ayai.main.gamestate
+package ayai.gamestate
 
 class Region (val x1: Int,
               val y1: Int,
