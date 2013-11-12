@@ -4,7 +4,7 @@ version := "1.0"
  
 scalaVersion := "2.10.3"
 
-mainClass in (Compile, run) := Some("com.ayai.main.TestMain")
+mainClass in (Compile, run) := Some("ayai.main.TestMain")
  
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
