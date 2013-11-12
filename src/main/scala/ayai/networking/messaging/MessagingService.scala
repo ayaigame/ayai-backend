@@ -1,7 +1,7 @@
-package com.ayai.main.networking.messaging
+package ayai.main.networking.messaging
 
-import com.ayai.main.gamestate._
-import com.ayai.main.networking.Connection
+import ayai.main.gamestate._
+import ayai.main.networking.Connection
 
 import akka.actor.Actor
 import akka.actor.ActorRef

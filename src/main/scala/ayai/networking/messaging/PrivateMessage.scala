@@ -1,4 +1,4 @@
-package com.ayai.main.networking.messaging
+package ayai.main.networking.messaging
 
 import akka.actor._
 import scala.slick.driver.H2Driver.simple._

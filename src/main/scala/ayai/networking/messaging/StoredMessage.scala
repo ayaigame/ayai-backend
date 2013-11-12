@@ -1,4 +1,4 @@
-package com.ayai.main.networking.messaging
+package ayai.main.networking.messaging
 import scala.slick.driver.H2Driver.simple._
 
 case class StoredMessage(id: Option[Int], message: String, sender: String, receiver: String, received: Boolean)
