@@ -1,5 +1,9 @@
 bin/
 .DS_Store
-project/
-target/
+project/*
+!project/plugins.sbt
+target/*
+!target/start
 /.cache
+*.swp
+*.db
