@@ -1,4 +1,4 @@
-package ayai.main.components
+package ayai.components
 
 class Enemy {
 

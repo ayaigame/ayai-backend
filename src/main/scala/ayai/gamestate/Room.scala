@@ -1,4 +1,4 @@
-package ayai.main.gamestate
+package ayai.gamestate
 
 import com.artemis.Entity
 import scala.collection.mutable.ArrayBuffer

@@ -1,4 +1,4 @@
-// package ayai.main.networking
+// package ayai.networking
 
 // sealed trait NetworkType
 // case class SocketConnectionType extends NetworkType

@@ -1,4 +1,4 @@
-package ayai.main.systems
+package ayai.systems
 
 /**
  * Josh this is where you should start

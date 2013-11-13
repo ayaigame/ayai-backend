@@ -1,4 +1,4 @@
-package ayai.main.networking
+package ayai.networking
 
 import java.net.{ServerSocket, Socket}
 

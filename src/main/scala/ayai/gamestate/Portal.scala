@@ -1,4 +1,4 @@
-package ayai.main.gamestate
+package ayai.gamestate
 
 class Portal(val targetRoom: Int,
              val myRegion: Region,
