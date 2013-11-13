@@ -18,6 +18,9 @@ case class TerminateConnection() extends NetworkMessage
 case class ReadFromConnection() extends NetworkMessage
 case class WriteToConnection(json: String) extends NetworkMessage
 case class ResponseMessage extends NetworkMessage
+case class FlushMessages() extends NetworkMessage
+case class AddMessage(message: String) extends NetworkMessage
+case class InterpretMessage extends NetworkMessage
 
 abstract class Connection {
   def read(): String

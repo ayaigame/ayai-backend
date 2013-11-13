@@ -1,5 +1,12 @@
 package ayai.apps
 
+import akka.actor.Actor
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
+import akka.actor.Props
+
+import java.rmi.server.UID
+
 import ayai.systems._
 import ayai.gamestate._
 import com.artemis.World
@@ -32,10 +39,19 @@ object GameLoop {
     println(arrayToString(map.map))
     var firstRoom: Room = GameState.createRoom(arrayToString(map.map))
     val startingRoom = firstRoom.getRoomId
-    world.addEntity(EntityFactory.createPlayer(world, startingRoom, 2, 2))
-    world.addEntity(EntityFactory.createItem(world,1,3,"ItemTest"))    
-    var receptionist = new Receptionist(8007)
+    var firstPlayer = EntityFactory.createPlayer(world, startingRoom, 2, 2)
+    world.addEntity(firstPlayer)
+    var testItem = EntityFactory.createItem(world,1,3,"ItemTest")
+    world.addEntity(testItem)
+
+    val networkSystem = ActorSystem("NetworkSystem")    
+    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
+    var receptionist = new Receptionist(8007, networkSystem, messageQueue)
     receptionist.start()
+
+    println("!!!!!!!!!!!!!")
+    println(firstPlayer.getId())
+    println(testItem.getId())
 
     while(running) {
       world.setDelta(1)

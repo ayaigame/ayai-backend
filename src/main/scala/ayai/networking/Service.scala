@@ -5,5 +5,5 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 
 abstract class Service(connection: Connection) extends Actor {
-  def serve
+  def acceptMessages
 }
