@@ -29,14 +29,19 @@ object MessagingApp {
   
     // Create User + Message + Actors + Fluff
     val u = new User(1, "tim", "tim")
-    val pm = new PublicMessage("hello", u)
-    val mh = new MessageHolder(pm)
+
+    val prm = new PrivateMessage("A special hello to you", u, u)
+    val prmh = new MessageHolder(prm)
+
+    val pum = new PublicMessage("Hello to everyone!", u)
+    val pumh = new MessageHolder(pum)
 
     val system = ActorSystem("test")
-    val mr =  system.actorOf(Props[MessageReceiver], name="mr")
-    val ms = system.actorOf(Props[MessageSender], name="1")
+    val mr =  system.actorOf(Props[MessageReceiver], name="mr1")
+    val ms = system.actorOf(Props[MessageSender], name="ms1")
     
     // Send Message
-    mr ! mh
+    mr ! pumh
+    mr ! prmh
   }
 }

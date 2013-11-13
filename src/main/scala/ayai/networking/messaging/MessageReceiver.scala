@@ -18,35 +18,53 @@ class MessageReceiver extends Actor {
 
   def receive = {
     case MessageHolder(message) =>
+      println("MessageHolder")
       val received = reroute(message)
       store(message, received)
 
     case _ => println("Unknown message type")
    }
 
-  def store(message: Message, received: Boolean) = {
+  private def store(message: Message, received: Boolean) = {
+    var storedMessage = None : Option[NewStoredMessage]
     message match {
       case PrivateMessage(message, sender, receiver) =>
-        Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
-          StoredMessages.autoInc.insert(NewStoredMessage(message, sender.id, receiver.id, received))
-        }
+        storedMessage = Some(NewStoredMessage(message, sender.id, receiver.id, received))
       case PublicMessage(message, sender) =>
-        Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
-          StoredMessages.autoInc.insert(NewStoredMessage(message, sender.id, -1, true))
-        }
+        storedMessage = Some(NewStoredMessage(message, sender.id, -1, true))
     }
+
+    storedMessage match {
+      case None => 
+        println("Should not get here - this is a private method")
+      case Some(message) =>
+        Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
+          StoredMessages.autoInc.insert(message)
+        }
+    }  
+
   }
 
-  def reroute(message: Message) = {
-    val targetSelection = context.system.actorSelection("user/" + 1).resolveOne(1.seconds)
-    val targetRef = Await.result(targetSelection, 1.seconds)
-    if(targetRef.isTerminated) {
-      println("User not found/online")
-      false
-    } else {
-      val messageHolder = new MessageHolder(message)
-      targetRef ! messageHolder
-      true
+  def reroute(message: Message) : Boolean = {
+    val messageHolder = new MessageHolder(message)
+
+    message match {
+      case PrivateMessage(message, sender, receiver) =>
+        println("PrivateMessage")
+        val targetFuture = context.system.actorSelection("user/ms" + receiver.id).resolveOne(100.milliseconds)
+        val targetRef = Await.result(targetFuture, 100.milliseconds)
+        if(targetRef.isTerminated) {
+          println("User not found/online")
+          return false
+        } else {
+          targetRef ! messageHolder
+          return true
+        }
+      case PublicMessage(message, sender) =>
+        println("PublicMessage")
+        val targetSelection = context.system.actorSelection("user/ms*")
+        targetSelection ! messageHolder
+        return false
     }
   }
   
