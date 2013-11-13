@@ -1,6 +1,7 @@
 bin/
 .DS_Store
-project/
+project/*
+!project/plugins.sbt
 target/*
 !target/start
 /.cache
