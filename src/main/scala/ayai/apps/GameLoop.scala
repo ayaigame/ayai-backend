@@ -1,4 +1,4 @@
-package ayai
+package ayai.apps
 
 import ayai.systems._
 import ayai.gamestate._
@@ -14,7 +14,7 @@ import ayai.maps.GameMap
 import ayai.data._
 import scala.util.parsing.json.JSONObject
 
-object TestMain  {
+object GameLoop {
   def arrayToString(a: Array[Array[Int]]) : String = {
        val str = for (l <- a) yield l.mkString("[", ",", "]")
        str.mkString("[",",\n","]")

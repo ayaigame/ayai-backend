@@ -1,4 +1,4 @@
-package ayai
+package ayai.apps
 
 import ayai.gamestate.GameState
 import ayai.components.Player
@@ -32,7 +32,7 @@ object EntityFactory {
     GameState.addPlayer(roomId, player)
     world.getManager(classOf[GroupManager]).add(player, Constants.PLAYER_CHARACTER)
     println("Entity: " + player.getId())
-    TestMain.map.addEntity(player.getId(),x,y)
+    GameLoop.map.addEntity(player.getId(),x,y)
     player;
   }
 
@@ -46,7 +46,7 @@ object EntityFactory {
 
     world.getManager(classOf[GroupManager]).add(item,"ITEM")
     
-    TestMain.map.addEntity(item.getId(),x,y)
+    GameLoop.map.addEntity(item.getId(),x,y)
     item
   }
 }
