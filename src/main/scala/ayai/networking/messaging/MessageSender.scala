@@ -4,20 +4,8 @@ package ayai.networking.messaging
  * Actor that sends messages to a player over a websocket
  */
 
-/** Ayai Imports **/
-import ayai.persistence.User
-import ayai.networking.Connection
-
 /** Akka Imports **/
 import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
-
-/** External Imports **/
-import scala.slick.driver.H2Driver.simple._
-
-case class CheckIn(receiver: User)
 
 class MessageSender extends Actor {
 

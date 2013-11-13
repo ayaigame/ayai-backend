@@ -5,29 +5,14 @@ package ayai.networking.messaging
  * and forwards them to the actor that forwards messages back to players
  */
 
-/** Ayai Imports **/
-import ayai.persistence.User
-import ayai.networking.Connection
-
 /** Akka Imports **/
 import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
 
 /** External Imports **/
-import scala.slick.driver.H2Driver.simple._
+import scala.slick.driver.H2Driver.simple.{Database,Session}
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
-trait Message { 
-  val message: String
-  val sender: User
-}
-
-case class PublicMessage(message: String, sender: User) extends Message
-case class PrivateMessage(message: String, sender: User, receiver: User) extends Message
-case class MessageHolder(held: Message)
 
 class MessageReceiver extends Actor {
 

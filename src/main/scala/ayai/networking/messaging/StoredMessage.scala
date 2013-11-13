@@ -5,7 +5,7 @@ package ayai.networking.messaging
  */
 
 /** Ayai Imports */
-import ayai.persistence._
+import ayai.persistence.Users
 
 /** External Imports */
 import scala.slick.driver.H2Driver.simple._
