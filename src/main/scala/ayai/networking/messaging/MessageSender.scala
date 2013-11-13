@@ -4,6 +4,9 @@ package ayai.networking.messaging
  * Actor that sends messages to a player over a websocket
  */
 
+/** Ayai Imports **/
+import ayai.persistence.User
+
 /** Akka Imports **/
 import akka.actor.Actor
 
