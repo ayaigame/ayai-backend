@@ -36,6 +36,7 @@ class MessageReceiver extends Actor {
         }
     }
   }
+
   def reroute(message: Message) = {
     val targetSelection = context.system.actorSelection("user/" + 1).resolveOne(1.seconds)
     val targetRef = Await.result(targetSelection, 1.seconds)
@@ -46,7 +47,6 @@ class MessageReceiver extends Actor {
       val messageHolder = new MessageHolder(message)
       targetRef ! messageHolder
       true
-
     }
   }
   
