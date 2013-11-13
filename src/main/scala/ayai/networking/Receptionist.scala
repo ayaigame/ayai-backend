@@ -16,7 +16,7 @@ class Receptionist(port: Int, networkSystem: ActorSystem, queue: ActorRef) exten
     while (true) {
       val s = server.accept()
 
-      val connection: Connection= new SocketConnection(s)
+      val connection: Connection = new SocketConnection(s)
 
       val roomService = networkSystem.actorOf(Props(new RoomService(connection, queue)), name = (new UID()).toString)
       roomService ! StartConnection()

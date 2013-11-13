@@ -11,16 +11,18 @@ import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-sealed trait NetworkMessage
+sealed trait NetworkAkkaMessage
 
-case class StartConnection() extends NetworkMessage
-case class TerminateConnection() extends NetworkMessage
-case class ReadFromConnection() extends NetworkMessage
-case class WriteToConnection(json: String) extends NetworkMessage
-case class ResponseMessage extends NetworkMessage
-case class FlushMessages() extends NetworkMessage
-case class AddMessage(message: String) extends NetworkMessage
-case class InterpretMessage extends NetworkMessage
+case class StartConnection() extends NetworkAkkaMessage
+case class TerminateConnection() extends NetworkAkkaMessage
+case class ReadFromConnection() extends NetworkAkkaMessage
+case class WriteToConnection(json: String) extends NetworkAkkaMessage
+case class ResponseMessage extends NetworkAkkaMessage
+case class FlushMessages() extends NetworkAkkaMessage
+case class QueuedMessages(messages: Array[NetworkMessage]) extends NetworkAkkaMessage
+case class AddRawMessage(message: String) extends NetworkAkkaMessage
+case class AddInterpretedMessage(message: NetworkMessage) extends NetworkAkkaMessage
+case class InterpretMessage(message: String) extends NetworkAkkaMessage
 
 abstract class Connection {
   def read(): String

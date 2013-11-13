@@ -5,21 +5,31 @@ package ayai.networking
 
 /** Akka Imports **/
 import akka.actor.Actor
+import akka.actor.ActorRef
 
-class NetworkMessageQueue extends Actor{
-  var messages : Array[NetworkMessage] = new Array[NetworkMessage](0)
+import scala.collection.mutable.ArrayBuffer
+
+class NetworkMessageQueue(interpreter: ActorRef) extends Actor{
+  var messages : ArrayBuffer[NetworkMessage] = new ArrayBuffer[NetworkMessage]()
 
   def flushMessages = {
-    println("Flush messages")
+    var currentMessages: Array[NetworkMessage] = messages.toArray
+    messages = new ArrayBuffer[NetworkMessage]()
+    sender ! new QueuedMessages(currentMessages)
   }
 
-  def addMessage(message: String) = {
-    println(message) 
+  def addRawMessage(message: String) = {
+    interpreter ! new InterpretMessage(message)
+  }
+
+  def addInterpretedMessage(message: NetworkMessage) = {
+    messages:+ message
   }
 
   def receive = {
     case FlushMessages() => flushMessages
-    case AddMessage(message: String) => addMessage(message)
-    case _ => println("Error: incomprehensible message.")
+    case AddRawMessage(message: String) => addRawMessage(message)
+    case AddInterpretedMessage(message) => addInterpretedMessage(message)
+    case _ => println("Error: from queue.")
   }
 }

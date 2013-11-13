@@ -21,6 +21,12 @@ import ayai.maps.GameMap
 import ayai.data._
 import scala.util.parsing.json.JSONObject
 
+import scala.concurrent.Await
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.duration._
+
+
 object GameLoop {
   def arrayToString(a: Array[Array[Int]]) : String = {
        val str = for (l <- a) yield l.mkString("[", ",", "]")
@@ -44,11 +50,14 @@ object GameLoop {
     var testItem = EntityFactory.createItem(world,1,3,"ItemTest")
     world.addEntity(testItem)
 
-    val networkSystem = ActorSystem("NetworkSystem")    
-    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
+    implicit val timeout = Timeout(5 seconds)
+    val networkSystem = ActorSystem("NetworkSystem")
+    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter()), name = (new UID()).toString)
+    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue(interpreter)), name = (new UID()).toString)
     var receptionist = new Receptionist(8007, networkSystem, messageQueue)
     receptionist.start()
 
+    //This is to demonstrate how to get the Ids for the GroupManager
     println("!!!!!!!!!!!!!")
     println(firstPlayer.getId())
     println(testItem.getId())
@@ -56,7 +65,11 @@ object GameLoop {
     while(running) {
       world.setDelta(1)
       world.process()
-      
+
+      val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
+      val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
+      println("Messages: " + result.messages.toString)
+
       render(world)
     }
   }
