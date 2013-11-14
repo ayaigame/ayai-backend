@@ -60,9 +60,9 @@ object GameLoop {
     receptionist.start()
 
     //This is to demonstrate how to get the Ids for the GroupManager
-    println("!!!!!!!!!!!!!")
-    println(firstPlayer.getId())
-    println(testItem.getId())
+    // println("!!!!!!!!!!!!!")
+    // println(firstPlayer.getId())
+    // println(testItem.getId())
 
     while(running) {
       world.setDelta(1)
@@ -72,11 +72,9 @@ object GameLoop {
       val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
 
       result.messages.foreach { message =>
-        println("HEY THERE WAS A MESSAGE")
         messageProcessor ! new ProcessMessage(message)
       }
-      println("Messages: " + result.messages.toString)
-      Thread.sleep(10000)
+      Thread.sleep(1000)
       // render(world)
     }
   }

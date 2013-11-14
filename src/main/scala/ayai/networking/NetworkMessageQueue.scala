@@ -19,7 +19,7 @@ class NetworkMessageQueue extends Actor{
   }
 
   def addInterpretedMessage(message: NetworkMessage) = {
-    messages:+ message
+    messages += message
   }
 
   def receive = {

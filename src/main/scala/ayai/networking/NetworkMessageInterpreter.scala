@@ -16,9 +16,8 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
             -1
           }
         }
-        println(playerId)
 
-        sender ! AddInterpretedMessage(new PlayerRequest(connectionId, playerId))
+        queue ! AddInterpretedMessage(new PlayerRequest(connectionId, playerId))
   }
 
   def receive = {

@@ -13,6 +13,8 @@ class Receptionist(port: Int, manager: ActorRef) extends Thread {
     while (true) {
       val s = server.accept()
 
+      println("Connection Accepted!!!" + s.toString)
+      
       manager ! CreateConnection(s)
     }
   }
