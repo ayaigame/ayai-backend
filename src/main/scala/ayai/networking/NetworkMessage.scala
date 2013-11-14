@@ -4,6 +4,6 @@ package ayai.networking
 import akka.actor.Actor
 
 abstract class NetworkMessage(connectionId: Int) {
-
+  def getConnectionId: Int = connectionId
 }
 

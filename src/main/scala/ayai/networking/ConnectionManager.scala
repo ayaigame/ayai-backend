@@ -22,8 +22,14 @@ class ConnectionManager(networkSystem: ActorSystem, interpreter: ActorRef) exten
     connectionReader ! StartConnection()
   }
 
+  def writeToConnection(connectionId: Int, json: String) = {
+    val connection = connections(connectionId)
+    connection.write(json)
+  }
+
   def receive = {
     case CreateConnection(s) => createSocketConenction(s)
+    case WriteToConnection(connectionId, json) => writeToConnection(connectionId, json)
     case _ => println("Error: from connection manager.")
   }
 }

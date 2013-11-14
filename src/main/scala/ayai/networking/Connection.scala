@@ -17,7 +17,8 @@ case class CreateConnection(s: Socket) extends NetworkAkkaMessage
 case class StartConnection() extends NetworkAkkaMessage
 case class TerminateConnection() extends NetworkAkkaMessage
 case class ReadFromConnection() extends NetworkAkkaMessage
-case class WriteToConnection(json: String) extends NetworkAkkaMessage
+case class WriteToConnection(connectionId: Int, json: String) extends NetworkAkkaMessage
+case class ProcessMessage(message: NetworkMessage) extends NetworkAkkaMessage
 case class ResponseMessage extends NetworkAkkaMessage
 case class FlushMessages() extends NetworkAkkaMessage
 case class QueuedMessages(messages: Array[NetworkMessage]) extends NetworkAkkaMessage

@@ -55,6 +55,7 @@ object GameLoop {
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val connectionManager = networkSystem.actorOf(Props(new ConnectionManager(networkSystem, interpreter)), name = (new UID()).toString)
+    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(connectionManager)), name = (new UID()).toString)
     val receptionist = new Receptionist(8007, connectionManager)
     receptionist.start()
 
@@ -69,9 +70,14 @@ object GameLoop {
 
       val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
       val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
-      println("Messages: " + result.messages.toString)
 
-      render(world)
+      result.messages.foreach { message =>
+        println("HEY THERE WAS A MESSAGE")
+        messageProcessor ! new ProcessMessage(message)
+      }
+      println("Messages: " + result.messages.toString)
+      Thread.sleep(10000)
+      // render(world)
     }
   }
   
