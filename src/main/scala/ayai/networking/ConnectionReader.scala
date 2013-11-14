@@ -1,15 +1,7 @@
 package ayai.networking
 
-import ayai.gamestate._
-
-import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
-
-import java.net.{ServerSocket, Socket}
-import java.io._
-import scala.io._
+/** Akka Imports **/
+import akka.actor.{Actor, ActorRef}
 
 class ConnectionReader(connection: Connection, interpreter: ActorRef) extends Service(connection) {
   def acceptMessages = {
@@ -21,7 +13,6 @@ class ConnectionReader(connection: Connection, interpreter: ActorRef) extends Se
     }
     connection.kill()
   }
-        // connection.write(GameState.getPlayerRoomJSON(playerId))
 
   def receive = {
     case StartConnection() => acceptMessages

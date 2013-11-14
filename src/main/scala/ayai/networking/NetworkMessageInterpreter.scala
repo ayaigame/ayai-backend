@@ -1,9 +1,9 @@
 package ayai.networking
 
 /** Akka Imports **/
-import akka.actor.Actor
-import akka.actor.ActorRef
+import akka.actor.{Actor, ActorRef}
 
+/** External Imports **/
 import scala.util.parsing.json._
 
 class NetworkMessageInterpreter(queue: ActorRef) extends Actor {

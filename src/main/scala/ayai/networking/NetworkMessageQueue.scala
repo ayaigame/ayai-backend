@@ -1,17 +1,17 @@
 package ayai.networking
 
-/** Ayai Imports **/
-// import ayai.networking.Connection
-
 /** Akka Imports **/
 import akka.actor.Actor
-import akka.actor.ActorRef
 
+/** External Imports **/
 import scala.collection.mutable.ArrayBuffer
 
 class NetworkMessageQueue extends Actor{
   var messages : ArrayBuffer[NetworkMessage] = new ArrayBuffer[NetworkMessage]()
 
+  /**
+  * Returns all the messages in the queue to the sender and clears out the queue.
+  **/
   def flushMessages = {
     var currentMessages: Array[NetworkMessage] = messages.toArray
     messages = new ArrayBuffer[NetworkMessage]()
