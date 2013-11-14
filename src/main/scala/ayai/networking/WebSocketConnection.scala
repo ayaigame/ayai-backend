@@ -1,14 +1,16 @@
-// package ayai.networking
+ package ayai.networking
 
-// import java.net.{ServerSocket, Socket}
-// import java.io._
-// import scala.io._
-// import scala.util.parsing.json._
+ import java.net.{ServerSocket, Socket}
+ import java.io._
+ import scala.io._
+ import scala.util.parsing.json._
 
-// import akka.actor.Actor
-// import akka.actor.ActorSystem
-// import akka.actor.Props
+ import akka.actor.Actor
+ import akka.actor.ActorSystem
+ import akka.actor.Props
 
+ class WebSocketConnection(id : Int) extends Connection(id) { 	
+ }
 // class WebSocketConnection(id: Int, s: HookupServerClient) extends Connection(id) {
 //   val in = new BufferedSource(s.getInputStream())
 //   val out = new PrintStream(s.getOutputStream())

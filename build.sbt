@@ -13,6 +13,8 @@ resolvers += "Typesafe snapshots" at "http://repo.typesafe.com/typesafe/snapshot
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.3"
 
+libraryDependencies += "org.mashupbots.socko" %% "socko-webserver" % "0.3.1"
+
 libraryDependencies += "net.liftweb" %% "lift-json" % "2.5.1"
 
 libraryDependencies ++= List(
