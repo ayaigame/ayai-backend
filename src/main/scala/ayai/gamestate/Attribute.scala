@@ -1,6 +1,5 @@
 package ayai.gamestate
 
 
-object Attribute {
-	
+class Attribute(var test : Any) {
 }

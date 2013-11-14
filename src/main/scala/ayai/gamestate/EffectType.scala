@@ -4,11 +4,11 @@ class EffectType extends Enumeration {
 	type EffectType = Value
 
 	//percentage - add percentage of value to attribute
-	val Percentage = EffectType("Percentage")
+	val Percentage = Value("Percentage")
 	//multiplier - multiple value of attribute and add to it
-	val Multiplier = EffectType("Multiplier")
+	val Multiplier = Value("Multiplier")
 	//addition - add value to attribute
-	val Addition = EffectType("Addition")
+	val Addition = Value("Addition")
 	//for a timed period add value to attribute
-	val TimedInterval = EffectType("Timed")
+	val TimedInterval = Value("Timed")
 }
