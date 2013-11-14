@@ -5,6 +5,9 @@ package ayai.networking.messaging
  * and forwards them to the actor that forwards messages back to players
  */
 
+/** Ayai Imports **/
+import ayai.persistence.{StoredMessage, StoredMessages, NewStoredMessage}
+
 /** Akka Imports **/
 import akka.actor.Actor
 
@@ -27,6 +30,10 @@ class MessageReceiver extends Actor {
 
   private def store(message: Message, received: Boolean) = {
     var storedMessage = None : Option[NewStoredMessage]
+
+    // Create the type of stored message based on the type of message we receive
+    // This is since Public Messages do not have a reciever and are automatically
+    // considered "received"
     message match {
       case PrivateMessage(message, sender, receiver) =>
         storedMessage = Some(NewStoredMessage(message, sender.id, receiver.id, received))
@@ -34,6 +41,7 @@ class MessageReceiver extends Actor {
         storedMessage = Some(NewStoredMessage(message, sender.id, -1, true))
     }
 
+    // Insert the message into the DB
     storedMessage match {
       case None => 
         println("Should not get here - this is a private method")
@@ -49,19 +57,19 @@ class MessageReceiver extends Actor {
     val messageHolder = new MessageHolder(message)
 
     message match {
+      // Attempt to send Private message
       case PrivateMessage(message, sender, receiver) =>
-        println("PrivateMessage")
         val targetFuture = context.system.actorSelection("user/ms" + receiver.id).resolveOne(100.milliseconds)
         val targetRef = Await.result(targetFuture, 100.milliseconds)
-        if(targetRef.isTerminated) {
+        if(targetRef.isTerminated) { // If the receiving user's actor isn't open, mark as not received
           println("User not found/online")
           return false
         } else {
           targetRef ! messageHolder
           return true
         }
+      // Send Public Message to every message sender
       case PublicMessage(message, sender) =>
-        println("PublicMessage")
         val targetSelection = context.system.actorSelection("user/ms*")
         targetSelection ! messageHolder
         return false
