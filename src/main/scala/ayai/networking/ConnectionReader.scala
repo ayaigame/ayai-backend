@@ -11,13 +11,12 @@ import java.net.{ServerSocket, Socket}
 import java.io._
 import scala.io._
 
-class RoomService(connection: Connection, queue: ActorRef) extends Service(connection) {
+class ConnectionReader(connection: Connection, interpreter: ActorRef) extends Service(connection) {
   def acceptMessages = {
     while(connection.isConnected()) {
       var request = connection.read()
       if(request.length > 0) {
-        var message = new AddRawMessage(request)
-        queue ! message
+        interpreter ! new InterpretMessage(connection.getId, request)
       }
     }
     connection.kill()

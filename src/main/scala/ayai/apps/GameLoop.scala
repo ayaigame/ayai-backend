@@ -52,9 +52,10 @@ object GameLoop {
 
     implicit val timeout = Timeout(5 seconds)
     val networkSystem = ActorSystem("NetworkSystem")
-    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter()), name = (new UID()).toString)
-    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue(interpreter)), name = (new UID()).toString)
-    var receptionist = new Receptionist(8007, networkSystem, messageQueue)
+    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
+    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
+    val connectionManager = networkSystem.actorOf(Props(new ConnectionManager(networkSystem, interpreter)), name = (new UID()).toString)
+    val receptionist = new Receptionist(8007, connectionManager)
     receptionist.start()
 
     //This is to demonstrate how to get the Ids for the GroupManager

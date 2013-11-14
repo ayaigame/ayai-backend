@@ -2,11 +2,12 @@ package ayai.networking
 
 /** Akka Imports **/
 import akka.actor.Actor
+import akka.actor.ActorRef
 
 import scala.util.parsing.json._
 
-class NetworkMessageInterpreter extends Actor {
-  def interpretMessage(message: String) = {
+class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
+  def interpretMessage(connectionId: Int, message: String) = {
         val result = JSON.parseFull(message)
         val playerId: Int = result match {
           case Some(e: Map[String, Double]) => e("player_id").toInt
@@ -17,11 +18,11 @@ class NetworkMessageInterpreter extends Actor {
         }
         println(playerId)
 
-        sender ! AddInterpretedMessage(new PlayerRequest(playerId))
+        sender ! AddInterpretedMessage(new PlayerRequest(connectionId, playerId))
   }
 
   def receive = {
-    case InterpretMessage(message) => interpretMessage(message)
+    case InterpretMessage(connectionId, message) => interpretMessage(connectionId, message)
     case _ => println("Error: from interpreter.")
   }
 }
