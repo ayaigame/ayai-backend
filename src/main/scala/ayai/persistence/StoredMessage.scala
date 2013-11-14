@@ -1,11 +1,8 @@
-package ayai.networking.messaging
+package ayai.persistence
 /**
- * ayai.networking.messaging.StoredMessage
+ * ayai.persistence.StoredMessage
  * Database object for storing Messages
  */
-
-/** Ayai Imports */
-import ayai.persistence.Users
 
 /** External Imports */
 import scala.slick.driver.H2Driver.simple._
