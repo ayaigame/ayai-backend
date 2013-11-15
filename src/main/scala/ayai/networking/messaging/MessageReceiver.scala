@@ -18,6 +18,7 @@ import scala.concurrent.Await
 
 
 class MessageReceiver extends Actor {
+  var typeOfMessage: String = ""
 
   def receive = {
     case MessageHolder(message) =>
@@ -59,10 +60,10 @@ class MessageReceiver extends Actor {
     message match {
       // Attempt to send Private message
       case PrivateMessage(message, sender, receiver) =>
+        typeOfMessage = "private"
         val targetFuture = context.system.actorSelection("user/ms" + receiver.id).resolveOne(100.milliseconds)
         val targetRef = Await.result(targetFuture, 100.milliseconds)
-        if(targetRef.isTerminated) { // If the receiving user's actor isn't open, mark as not received
-          println("User not found/online")
+        if(targetRef.isTerminated) {
           return false
         } else {
           targetRef ! messageHolder
@@ -70,6 +71,7 @@ class MessageReceiver extends Actor {
         }
       // Send Public Message to every message sender
       case PublicMessage(message, sender) =>
+        typeOfMessage = "public"
         val targetSelection = context.system.actorSelection("user/ms*")
         targetSelection ! messageHolder
         return false
