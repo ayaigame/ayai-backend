@@ -1,17 +1,21 @@
 package ayai.networking.messaging
 
+/** Ayai Imports **/
 import ayai.persistence.User
 
+/** Akka Imports **/
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.testkit.{TestKit, TestActorRef, ImplicitSender, DefaultTimeout}
+
+/** External Imports **/
 import org.scalatest.WordSpecLike
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.MustMatchers
 
- 
+
 class MessagingTest extends TestKit(ActorSystem("testSystem")) with WordSpecLike with MustMatchers with BeforeAndAfter{
 
   val u = new User(1, "tim", "tim")
