@@ -15,6 +15,7 @@ import scala.concurrent.Await
 
 
 class MessageReceiver extends Actor {
+  var typeOfMessage: String = ""
 
   def receive = {
     case MessageHolder(message) =>
@@ -50,18 +51,17 @@ class MessageReceiver extends Actor {
 
     message match {
       case PrivateMessage(message, sender, receiver) =>
-        println("PrivateMessage")
+        typeOfMessage = "private"
         val targetFuture = context.system.actorSelection("user/ms" + receiver.id).resolveOne(100.milliseconds)
         val targetRef = Await.result(targetFuture, 100.milliseconds)
         if(targetRef.isTerminated) {
-          println("User not found/online")
           return false
         } else {
           targetRef ! messageHolder
           return true
         }
       case PublicMessage(message, sender) =>
-        println("PublicMessage")
+        typeOfMessage = "public"
         val targetSelection = context.system.actorSelection("user/ms*")
         targetSelection ! messageHolder
         return false
