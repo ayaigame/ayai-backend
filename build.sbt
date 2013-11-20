@@ -15,6 +15,8 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.3"
 
 libraryDependencies += "net.liftweb" %% "lift-json" % "2.5.1"
 
+libraryDependencies += "org.mashupbots.socko" %% "socko-webserver" % "0.3.1"
+
 libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "test"

@@ -1,0 +1,46 @@
+<html><head><title>Messaging WS Example</title></head>
+<body>
+<script type="text/javascript">
+  var sendSocket;
+  var receiveSocket;
+
+  if (!window.WebSocket) {
+    window.WebSocket = window.MozWebSocket;
+  }
+
+  if (window.WebSocket) {
+    sendSocket = new WebSocket("ws://localhost:7001/websocket/");
+
+    sendSocket.onopen = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value +  "Sending Web Socket opened!\n"; };
+    sendSocket.onclose = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + "Sending Web Socket closed\n"; };
+
+    receiveSocket = new WebSocket("ws://localhost:7002/websocket/");
+    receiveSocket.onopen = function(event) { var ta = document.getElementById('responseText'); ta.value =  ta.value + "Receiving Web Socket opened!\n"; 
+      receiveSocket.send("SYN");};
+    receiveSocket.onclose = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + "Receiving Web Socket closed\n"; };
+    receiveSocket.onmessage = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + '\n' + event.data + "\n" };
+
+  } else { 
+    alert("Your browser does not support Web Sockets.");
+  }
+  
+  function send(message) {
+    if (!window.WebSocket) { return; }
+    if (sendSocket.readyState == WebSocket.OPEN) {
+      sendSocket.send(message);
+    } else {
+      alert("The socket is not open.");
+    }
+  }
+</script>
+<h1>Messaging WS Example</h1>
+
+<form onsubmit="return false;">
+  <input type="text" name="message"/>
+  <input type="button" value="Send Web Socket Data" onclick="send(this.form.message.value)" />
+  
+  <h3>Output</h3>
+  <textarea id="responseText" style="width: 500px; height:300px;"></textarea>
+</form>
+</body>
+</html>
