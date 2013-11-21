@@ -24,6 +24,9 @@ import akka.actor.Props
 
 /** External Imports **/
 import net.liftweb.json._
+import scala.concurrent.duration._
+import scala.concurrent.Await
+import scala.util.{Success, Failure}
 
 /** MessageSenderWSApp
  * Handles sending messages back over websocket
@@ -32,6 +35,7 @@ import net.liftweb.json._
 object MessageSenderWSApp extends Logger {
   def run(as: ActorSystem) {
     val actorSystem = as
+
     val routes = Routes({
       case WebSocketHandshake(wsHandshake) => wsHandshake match {
         case Path("/websocket/") => {
@@ -48,9 +52,19 @@ object MessageSenderWSApp extends Logger {
         user match {
           case Some(fUser) =>
             val actorName = "ms" + fUser.id
-            actorSystem.actorOf(Props[MessageSender], name=actorName ) ! wsFrame
+            try { 
+              // Try and see if there is an existing actor
+              val actorFuture = actorSystem.actorSelection("user/"+actorName).resolveOne(500.milliseconds)
+              val actorRef = Await.result(actorFuture, 500.milliseconds)
+              actorRef ! wsFrame
+            } catch {
+              // Otherwise, create a new one and associate it with the frame
+              case e: Exception =>
+                actorSystem.actorOf(Props[MessageSender], name=actorName ) ! wsFrame
+            }
+
           case _ =>
-            println("Cant find you")
+            println("Can't find you")
         }
       }
     })
