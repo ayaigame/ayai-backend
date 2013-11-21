@@ -9,6 +9,7 @@ package ayai.networking.messaging
 
 /** Ayai Imports **/
 import ayai.persistence.User
+import ayai.persistence.UserQuery
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.HttpResponseStatus
@@ -74,6 +75,14 @@ object MessageReceiverWSApp extends Logger {
 
       val message = compact(render(rootJSON \ "message"))
       val user = new User(1, "tim", "tim")
+
+      UserQuery.getByID(1) match {
+        case Some(tim)  =>
+          println("Got: " + tim)
+        case _ =>
+          println("Got nothing...")
+      }
+
       var mh:MessageHolder = null
 
       msgType match {
