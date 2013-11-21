@@ -40,7 +40,18 @@ object MessageSenderWSApp extends Logger {
       }
 
       case WebSocketFrame(wsFrame) => {
-        actorSystem.actorOf(Props[MessageSender], name="ms1") ! wsFrame
+        val rootJSON = parse(wsFrame.readText)
+
+        val tempUsername: String = compact(render(rootJSON \ "username"))
+        val user = UserQuery.getByUsername(tempUsername.substring(1, tempUsername.length - 1))
+
+        user match {
+          case Some(fUser) =>
+            val actorName = "ms" + fUser.id
+            actorSystem.actorOf(Props[MessageSender], name=actorName ) ! wsFrame
+          case _ =>
+            println("Cant find you")
+        }
       }
     })
 
@@ -62,11 +73,13 @@ object MessageSenderWSApp extends Logger {
 object MessageReceiverWSApp extends Logger {
   val actorSystem = ActorSystem("MessageReceiverWSActorSystem")
   val routes = Routes({
+
     case WebSocketHandshake(wsHandshake) => wsHandshake match {
       case Path("/websocket/") => {
         wsHandshake.authorize()
       }
     }
+
     case WebSocketFrame(wsFrame) => {
       val rootJSON = parse(wsFrame.readText)
 
@@ -74,27 +87,31 @@ object MessageReceiverWSApp extends Logger {
       val msgType:String = tempType.substring(1, tempType.length - 1)
 
       val message = compact(render(rootJSON \ "message"))
-      val user = new User(1, "tim", "tim")
+      var sender = None: Option[User]
 
-      UserQuery.getByID(1) match {
-        case Some(tim)  =>
-          println("Got: " + tim)
+
+      val tempSender: String = compact(render(rootJSON \ "sender"))
+      sender = UserQuery.getByUsername(tempSender.substring(1, tempSender.length - 1))
+
+      sender match {
+        case Some(sUser)  =>
+          println("Got: " + sUser)
+          var mh:MessageHolder = null
+
+          msgType match {
+            case "public" =>
+              mh = new MessageHolder(new PublicMessage(message, sUser))
+            case "private" =>
+              //val receiver: String = compact(render(rootJSON \ "receiver"))
+              mh = new MessageHolder(new PrivateMessage(message, sUser, sUser))
+            case _ =>
+              println(msgType)
+          }
+          actorSystem.actorOf(Props[MessageReceiver]) ! mh
+
         case _ =>
           println("Got nothing...")
       }
-
-      var mh:MessageHolder = null
-
-      msgType match {
-        case "public" =>
-          mh = new MessageHolder(new PublicMessage(message, user))
-        case "private" =>
-          //val receiver: String = compact(render(rootJSON \ "receiver"))
-          mh = new MessageHolder(new PrivateMessage(message, user, user))
-        case _ =>
-          println(msgType)
-      }
-      actorSystem.actorOf(Props[MessageReceiver]) ! mh
     }
   })
 

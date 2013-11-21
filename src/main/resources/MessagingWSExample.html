@@ -16,7 +16,9 @@
 
     receiveSocket = new WebSocket("ws://localhost:7002/websocket/");
     receiveSocket.onopen = function(event) { var ta = document.getElementById('responseText'); ta.value =  ta.value + "Receiving Web Socket opened!\n"; 
-      receiveSocket.send("SYN");};
+      var msgJSON = {'username': 'tim'};
+      console.log(msgJSON);
+      receiveSocket.send(JSON.stringify(msgJSON));};
     receiveSocket.onclose = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + "Receiving Web Socket closed\n"; };
     receiveSocket.onmessage = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + '\n' + event.data + "\n" };
 
@@ -27,7 +29,7 @@
   function send(message) {
     if (!window.WebSocket) { return; }
     if (sendSocket.readyState == WebSocket.OPEN) {
-      var msgJSON = {'type': 'public', 'message': message};
+      var msgJSON = {'type': 'public', 'message': message, 'sender': 'bob'};
       console.log(msgJSON); 
       sendSocket.send(JSON.stringify(msgJSON));
     } else {
