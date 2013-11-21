@@ -1,4 +1,5 @@
 package ayai.networking.messaging
+
 /** ayai.networking.messaging.MessageWSApp
  * An example socko server that runs both a sender and a receiver for WS events and passes them to actors
  * We only need one of each socko server - they handle creating as many actors as is needed
@@ -19,6 +20,9 @@ import org.mashupbots.socko.webserver.WebServerConfig
 /** Akka Imports **/
 import akka.actor.ActorSystem
 import akka.actor.Props
+
+/** External Imports **/
+import net.liftweb.json._
 
 /** MessageSenderWSApp
  * Handles sending messages back over websocket
@@ -63,9 +67,24 @@ object MessageReceiverWSApp extends Logger {
       }
     }
     case WebSocketFrame(wsFrame) => {
+      val rootJSON = parse(wsFrame.readText)
+
+      val tempType:String = compact(render(rootJSON \ "type"))
+      val msgType:String = tempType.substring(1, tempType.length - 1)
+
+      val message = compact(render(rootJSON \ "message"))
       val user = new User(1, "tim", "tim")
-      val pumsg = new PublicMessage(wsFrame.readText, user)
-      val mh = MessageHolder(pumsg)
+      var mh:MessageHolder = null
+
+      msgType match {
+        case "public" =>
+          mh = new MessageHolder(new PublicMessage(message, user))
+        case "private" =>
+          //val receiver: String = compact(render(rootJSON \ "receiver"))
+          mh = new MessageHolder(new PrivateMessage(message, user, user))
+        case _ =>
+          println(msgType)
+      }
       actorSystem.actorOf(Props[MessageReceiver]) ! mh
     }
   })

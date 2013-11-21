@@ -27,7 +27,9 @@
   function send(message) {
     if (!window.WebSocket) { return; }
     if (sendSocket.readyState == WebSocket.OPEN) {
-      sendSocket.send(message);
+      var msgJSON = {'type': 'public', 'message': message};
+      console.log(msgJSON); 
+      sendSocket.send(JSON.stringify(msgJSON));
     } else {
       alert("The socket is not open.");
     }
