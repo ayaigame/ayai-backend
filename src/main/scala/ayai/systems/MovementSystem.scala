@@ -17,9 +17,8 @@ class MovementSystem(map : GameMap, a: Aspect = Aspect.getAspectFor(classOf[Posi
   var velocityMapper: ComponentMapper[Velocity] = _
   
       override def process(e: Entity) {
-        }
+      }
 
                 //p.x += velocity.speed*world.delta
         //p.y += velocity.speed*world.delta
-    }
 }
