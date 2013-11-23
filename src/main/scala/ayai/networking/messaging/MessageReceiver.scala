@@ -25,13 +25,13 @@ class MessageReceiver extends Actor {
       println("MessageHolder")
       val received = reroute(message)
       store(message, received)
+      context.stop(self)
 
     case _ => println("Unknown message type")
    }
 
   private def store(message: Message, received: Boolean) = {
     var storedMessage = None : Option[NewStoredMessage]
-
     // Create the type of stored message based on the type of message we receive
     // This is since Public Messages do not have a reciever and are automatically
     // considered "received"
@@ -77,5 +77,4 @@ class MessageReceiver extends Actor {
         return false
     }
   }
-  
 }

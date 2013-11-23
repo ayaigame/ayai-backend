@@ -1,30 +1,19 @@
 package ayai.networking
 
-import java.net.{ServerSocket, Socket}
-
-import akka.actor._
-// import akka.routing.RoundRobinRouter
-// import akka.util._
-// import akka.util.Duration
-
+/** Akka Imports **/
 import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
 
-sealed trait NetworkMessage
+import java.net.Socket
 
-case class StartConnection() extends NetworkMessage
-case class TerminateConnection() extends NetworkMessage
-case class ReadFromConnection() extends NetworkMessage
-case class WriteToConnection(json: String) extends NetworkMessage
-case class ResponseMessage extends NetworkMessage
+/** Socko Imports **/
+import org.mashupbots.socko.events.WebSocketFrameEvent
 
-abstract class Connection {
-  def read(): String
 
-  def write(json: String)
+case class ProcessMessage(message: NetworkMessage)
+case class FlushMessages()
+case class QueuedMessages(messages: Array[NetworkMessage])
+case class AddInterpretedMessage(message: NetworkMessage)
+case class InterpretMessage(message: WebSocketFrameEvent)
+case class ConnectionWrite(json: String)
 
-  def isConnected(): Boolean
-
-  def kill()
-}
+case class NetworkMessage(message: String)

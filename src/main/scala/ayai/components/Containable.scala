@@ -1,6 +1,7 @@
 package ayai.components
 
 import com.artemis.Component
+
 import ayai.gamestate.Effect
 import scala.collection.mutable.ArrayBuffer
 /*

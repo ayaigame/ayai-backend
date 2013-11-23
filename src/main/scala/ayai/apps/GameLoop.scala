@@ -1,5 +1,12 @@
 package ayai.apps
 
+import akka.actor.Actor
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
+import akka.actor.Props
+
+import java.rmi.server.UID
+
 import ayai.systems._
 import ayai.gamestate._
 import com.artemis.World
@@ -13,6 +20,12 @@ import ayai.components.Position
 import ayai.maps.GameMap
 import ayai.data._
 import scala.util.parsing.json.JSONObject
+
+import scala.concurrent.Await
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.duration._
+
 
 object GameLoop {
   def arrayToString(a: Array[Array[Int]]) : String = {
@@ -32,16 +45,38 @@ object GameLoop {
     println(arrayToString(map.map))
     var firstRoom: Room = GameState.createRoom(arrayToString(map.map))
     val startingRoom = firstRoom.getRoomId
-    world.addEntity(EntityFactory.createPlayer(world, startingRoom, 2, 2))
-    world.addEntity(EntityFactory.createItem(world,1,3,"ItemTest"))    
-    var receptionist = new Receptionist(8007)
-    receptionist.start()
+    var firstPlayer = EntityFactory.createPlayer(world, startingRoom, 2, 2)
+    world.addEntity(firstPlayer)
+    var testItem = EntityFactory.createItem(world,1,3,"ItemTest")
+    world.addEntity(testItem)
+
+    implicit val timeout = Timeout(5 seconds)
+    val networkSystem = ActorSystem("NetworkSystem")
+    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
+    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
+    // val connectionManager = networkSystem.actorOf(Props(new ConnectionManager(networkSystem, interpreter)), name = (new UID()).toString)
+    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem)), name = (new UID()).toString)
+    // val receptionist = new Receptionist(8007, connectionManager)
+    val receptionist = new SockoServer(networkSystem, interpreter)
+    receptionist.run(8007)
+
+    //This is to demonstrate how to get the Ids for the GroupManager
+    // println("!!!!!!!!!!!!!")
+    // println(firstPlayer.getId())
+    // println(testItem.getId())
 
     while(running) {
       world.setDelta(1)
       world.process()
-      
-      render(world)
+
+      val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
+      val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
+
+      result.messages.foreach { message =>
+        messageProcessor ! new ProcessMessage(message)
+      }
+      // Thread.sleep(1000)
+      // render(world)
     }
   }
   
