@@ -1,25 +1,26 @@
 package ayai.networking
 
-import java.net.{ServerSocket, Socket}
+import java.net.Socket
 
-import akka.actor._
-// import akka.routing.RoundRobinRouter
-// import akka.util._
-// import akka.util.Duration
+sealed trait NetworkAkkaMessage
 
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
+case class CreateConnection(s: Socket) extends NetworkAkkaMessage
+case class StartConnection() extends NetworkAkkaMessage
+case class TerminateConnection() extends NetworkAkkaMessage
+case class ReadFromConnection() extends NetworkAkkaMessage
+case class WriteToConnection(connectionId: Int, json: String) extends NetworkAkkaMessage
+case class ProcessMessage(message: NetworkMessage) extends NetworkAkkaMessage
+case class ResponseMessage extends NetworkAkkaMessage
+case class FlushMessages() extends NetworkAkkaMessage
+case class QueuedMessages(messages: Array[NetworkMessage]) extends NetworkAkkaMessage
+case class AddInterpretedMessage(message: NetworkMessage) extends NetworkAkkaMessage
+case class InterpretMessage(connectionId: Int, message: String) extends NetworkAkkaMessage
 
-sealed trait NetworkMessage
+abstract class Connection(id: Int) {
+  def getId(): Int = {
+    id
+  }
 
-case class StartConnection() extends NetworkMessage
-case class TerminateConnection() extends NetworkMessage
-case class ReadFromConnection() extends NetworkMessage
-case class WriteToConnection(json: String) extends NetworkMessage
-case class ResponseMessage extends NetworkMessage
-
-abstract class Connection {
   def read(): String
 
   def write(json: String)

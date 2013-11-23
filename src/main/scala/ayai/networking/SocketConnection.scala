@@ -9,7 +9,7 @@ import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-class SocketConnection(s: Socket) extends Connection {
+class SocketConnection(id: Int, s: Socket) extends Connection(id) {
   val in = new BufferedSource(s.getInputStream())
   val out = new PrintStream(s.getOutputStream())
 

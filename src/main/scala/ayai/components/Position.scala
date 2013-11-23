@@ -2,6 +2,6 @@ package ayai.components
 
 import com.artemis.Component
 
-class Position (var x : Int, var y: Int) extends Component{
+class Position (var x : Float, var y: Float) extends Component{
  
 }

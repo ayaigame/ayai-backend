@@ -19,7 +19,7 @@ object EntityFactory {
   def createPlayer(world : World, roomId: Int, x: Int, y : Int) : Entity = {
     var player : Entity = world.createEntity()
     var position : Position = new Position(x,y)
-    var velocity : Velocity = new Velocity(3,4)
+    var velocity : Velocity = new Velocity(1,1)
     player.addComponent(position)
     
     player.addComponent(velocity)
@@ -32,7 +32,6 @@ object EntityFactory {
     GameState.addPlayer(roomId, player)
     world.getManager(classOf[GroupManager]).add(player, Constants.PLAYER_CHARACTER)
     println("Entity: " + player.getId())
-    GameLoop.map.addEntity(player.getId(),x,y)
     player;
   }
 
@@ -41,12 +40,11 @@ object EntityFactory {
     var position : Position = new Position(x, y)
     item.addComponent(position)
 
-    var containable : Containable = new Containable(3, name)
+    var containable : Containable = new Containable(3, name, null)
     item.addComponent(containable)
 
     world.getManager(classOf[GroupManager]).add(item,"ITEM")
     
-    GameLoop.map.addEntity(item.getId(),x,y)
     item
   }
 }
