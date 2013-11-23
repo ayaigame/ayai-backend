@@ -12,8 +12,11 @@ import akka.actor.Actor
 
 class MessageSender extends Actor {
 
+  var lastMessage: String = ""
+
   def receive = {
     case MessageHolder(message) =>
+      lastMessage = message.message
       sendUser(message)
     case CheckIn(receiver) =>
       unreadMessages(receiver)
