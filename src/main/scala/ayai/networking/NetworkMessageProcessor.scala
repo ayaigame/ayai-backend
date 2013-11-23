@@ -10,11 +10,6 @@ import akka.actor.ActorRef
 
 class NetworkMessageProcessor(actorSystem: ActorSystem) extends Actor {
   def processMessage(message: NetworkMessage) = {
-    // var pR = message match {
-    //   case playerRequest: PlayerRequest => playerRequest
-    //   case _ => throw new ClassCastException
-    // }
-    // val roomJSON: String = GameState.getPlayerRoomJSON(0)//(pR.getPlayerId)
     val actorSelection = context.system.actorSelection("user/SockoSender*")
     actorSelection ! new ConnectionWrite("HI")
   }

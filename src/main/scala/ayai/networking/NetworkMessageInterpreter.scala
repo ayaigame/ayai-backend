@@ -4,11 +4,7 @@ package ayai.networking
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
 /** Socko Imports **/
-import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.routes._
-import org.mashupbots.socko.infrastructure.Logger
-import org.mashupbots.socko.webserver.WebServer
-import org.mashupbots.socko.webserver.WebServerConfig
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
 /** External Imports **/
@@ -19,7 +15,6 @@ import java.rmi.server.UID
 
 class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
-    println(wsFrame.readText)
     val rootJSON = parse(wsFrame.readText)
     val tempType:String = compact(render(rootJSON \ "type"))
     val msgType:String = tempType.substring(1, tempType.length - 1)
