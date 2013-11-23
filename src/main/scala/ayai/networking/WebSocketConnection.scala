@@ -9,8 +9,8 @@
  import akka.actor.ActorSystem
  import akka.actor.Props
 
- class WebSocketConnection(id : Int) extends Connection(id) { 	
- }
+ //class WebSocketConnection(id : Int) extends Connection(id) { 	
+// }
 // class WebSocketConnection(id: Int, s: HookupServerClient) extends Connection(id) {
 //   val in = new BufferedSource(s.getInputStream())
 //   val out = new PrintStream(s.getOutputStream())

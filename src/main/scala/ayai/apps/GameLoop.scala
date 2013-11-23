@@ -17,10 +17,8 @@ import ayai.networking._
 import com.artemis.ComponentType
 import java.lang.Boolean
 import ayai.components.Position
-import ayai.maps.GameMap
 import ayai.data._
 import scala.util.parsing.json.JSONObject
-
 import scala.concurrent.Await
 import akka.pattern.ask
 import akka.util.Timeout
@@ -33,17 +31,15 @@ object GameLoop {
        str.mkString("[",",\n","]")
   }
   var running : Boolean = _
-  var map : GameMap = new GameMap(10,10)
   def main(args: Array[String]) {
     println("compiled")
     running = true
     var world: World = new World()
     world.setManager(new GroupManager())
-    world.setSystem(new MovementSystem(map))
+    world.setSystem(new MovementSystem())
     world.initialize()
 
-    println(arrayToString(map.map))
-    var firstRoom: Room = GameState.createRoom(arrayToString(map.map))
+    var firstRoom: Room = GameState.createRoom(Data.map)
     val startingRoom = firstRoom.getRoomId
     var firstPlayer = EntityFactory.createPlayer(world, startingRoom, 2, 2)
     world.addEntity(firstPlayer)
@@ -83,19 +79,5 @@ object GameLoop {
     // sleep for one second (dont want to process too much now)
     Thread.sleep(10000)
     //print out map
-    println("New Map")
-    var r : Int = 0
-    var h = 0
-    for(r <- 0 to map.width-1) {
-      for (h <- 0 to map.height-1) {
-        if(map.isOccupied(r,h)) {
-          print(map.getEntityId(r,h))
-        } else {
-          print(map.map(r)(h))
-        }
-      }
-      println()
-    }
-    //println(world.getEntity(0).getComponent(classOf[Position]).x)
   }
 }
