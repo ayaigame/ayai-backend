@@ -54,10 +54,11 @@ object GameLoop {
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
-    val connectionManager = networkSystem.actorOf(Props(new ConnectionManager(networkSystem, interpreter)), name = (new UID()).toString)
-    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(connectionManager)), name = (new UID()).toString)
-    val receptionist = new Receptionist(8007, connectionManager)
-    receptionist.start()
+    // val connectionManager = networkSystem.actorOf(Props(new ConnectionManager(networkSystem, interpreter)), name = (new UID()).toString)
+    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem)), name = (new UID()).toString)
+    // val receptionist = new Receptionist(8007, connectionManager)
+    val receptionist = new SockoServer(networkSystem, interpreter)
+    receptionist.run(8007)
 
     //This is to demonstrate how to get the Ids for the GroupManager
     // println("!!!!!!!!!!!!!")
@@ -74,7 +75,7 @@ object GameLoop {
       result.messages.foreach { message =>
         messageProcessor ! new ProcessMessage(message)
       }
-      Thread.sleep(1000)
+      // Thread.sleep(1000)
       // render(world)
     }
   }

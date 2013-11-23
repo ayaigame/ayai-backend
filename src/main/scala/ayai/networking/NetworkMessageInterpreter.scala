@@ -1,27 +1,41 @@
 package ayai.networking
 
 /** Akka Imports **/
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+
+/** Socko Imports **/
+import org.mashupbots.socko.events.HttpResponseStatus
+import org.mashupbots.socko.routes._
+import org.mashupbots.socko.infrastructure.Logger
+import org.mashupbots.socko.webserver.WebServer
+import org.mashupbots.socko.webserver.WebServerConfig
+import org.mashupbots.socko.events.WebSocketFrameEvent
 
 /** External Imports **/
 import scala.util.parsing.json._
+import net.liftweb.json._
+
+import java.rmi.server.UID
 
 class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
-  def interpretMessage(connectionId: Int, message: String) = {
-        val result = JSON.parseFull(message)
-        val playerId: Int = result match {
-          case Some(e: Map[String, Double]) => e("player_id").toInt
-          case _ => {
-            println("Failed player request.")
-            -1
-          }
-        }
+  def interpretMessage(wsFrame: WebSocketFrameEvent) = {
+    println(wsFrame.readText)
+    val rootJSON = parse(wsFrame.readText)
+    val tempType:String = compact(render(rootJSON \ "type"))
+    val msgType:String = tempType.substring(1, tempType.length - 1)
 
-        queue ! AddInterpretedMessage(new PlayerRequest(connectionId, playerId))
+    msgType match {
+      case "init" =>
+        context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender"+ (new UID()).toString)
+      case "echo" =>
+        queue ! new AddInterpretedMessage(new NetworkMessage("echo"))
+      case _ =>
+        println("Unknown message in NetworkMessageInterpreter: " + msgType)
+    }
   }
 
   def receive = {
-    case InterpretMessage(connectionId, message) => interpretMessage(connectionId, message)
+    case InterpretMessage(message) => interpretMessage(message)
     case _ => println("Error: from interpreter.")
   }
 }

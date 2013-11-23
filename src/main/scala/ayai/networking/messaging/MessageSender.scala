@@ -18,7 +18,6 @@ class MessageSender extends Actor {
   var ws = None : Option[WebSocketFrameEvent]
 
   def receive = {
-
     case event : WebSocketFrameEvent =>
       ws = Some(event)
       println("Associated")

@@ -5,16 +5,18 @@ import ayai.gamestate._
 
 /** Akka Imports **/
 import akka.actor.Actor
+import akka.actor.ActorSystem
 import akka.actor.ActorRef
 
-class NetworkMessageProcessor(connectionManager: ActorRef) extends Actor {
+class NetworkMessageProcessor(actorSystem: ActorSystem) extends Actor {
   def processMessage(message: NetworkMessage) = {
-    var pR = message match {
-      case playerRequest: PlayerRequest => playerRequest
-      case _ => throw new ClassCastException
-    }
-    val roomJSON: String = GameState.getPlayerRoomJSON(pR.getPlayerId)
-    connectionManager ! new WriteToConnection(pR.getConnectionId, roomJSON)
+    // var pR = message match {
+    //   case playerRequest: PlayerRequest => playerRequest
+    //   case _ => throw new ClassCastException
+    // }
+    // val roomJSON: String = GameState.getPlayerRoomJSON(0)//(pR.getPlayerId)
+    val actorSelection = context.system.actorSelection("user/SockoSender*")
+    actorSelection ! new ConnectionWrite("HI")
   }
 
   def receive = {
