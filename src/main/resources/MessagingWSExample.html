@@ -4,6 +4,8 @@
   var sendSocket;
   var receiveSocket;
 
+
+  console.log(document.getElementById("btnSend"));
   if (!window.WebSocket) {
     window.WebSocket = window.MozWebSocket;
   }
@@ -15,19 +17,25 @@
     sendSocket.onclose = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + "Sending Web Socket closed\n"; };
 
     receiveSocket = new WebSocket("ws://localhost:7002/websocket/");
-    receiveSocket.onopen = function(event) { var ta = document.getElementById('responseText'); ta.value =  ta.value + "Receiving Web Socket opened!\n"; 
-      receiveSocket.send("SYN");};
+    receiveSocket.onopen = function(event) { var ta = document.getElementById('responseText'); ta.value =  ta.value + "Receiving Web Socket opened!\n";};
     receiveSocket.onclose = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + "Receiving Web Socket closed\n"; };
     receiveSocket.onmessage = function(event) { var ta = document.getElementById('responseText'); ta.value = ta.value + '\n' + event.data + "\n" };
 
   } else { 
     alert("Your browser does not support Web Sockets.");
   }
+  function register(username) {
+      var msgJSON = {'username': username};
+      console.log(msgJSON);
+      receiveSocket.send(JSON.stringify(msgJSON));
+      document.getElementById("btnRegister").disabled = true;
+      document.getElementById("btnSend").disabled = false;
+  }
   
-  function send(message) {
+  function send(message, username) {
     if (!window.WebSocket) { return; }
     if (sendSocket.readyState == WebSocket.OPEN) {
-      var msgJSON = {'type': 'public', 'message': message};
+      var msgJSON = {'type': 'public', 'message': message, 'sender': username};
       console.log(msgJSON); 
       sendSocket.send(JSON.stringify(msgJSON));
     } else {
@@ -38,11 +46,16 @@
 <h1>Messaging WS Example</h1>
 
 <form onsubmit="return false;">
+  <input type="text" name="username"/>
+  <input type="button" id="btnRegister" value="Log In" onclick="register(this.form.username.value)" />
   <input type="text" name="message"/>
-  <input type="button" value="Send Web Socket Data" onclick="send(this.form.message.value)" />
+  <input type="button" id="btnSend" value="Send Web Socket Data" onclick="send(this.form.message.value, this.form.username.value)" />
   
   <h3>Output</h3>
   <textarea id="responseText" style="width: 500px; height:300px;"></textarea>
 </form>
+  <script>
+  document.getElementById("btnSend").disabled = true;
+  </script>
 </body>
 </html>

@@ -40,7 +40,7 @@ class MessageSender extends Actor {
       case None =>
         println("WS not associated (anymore?)")
         println("Shutting down this actor")
-        context.stop(self)
+//        context.stop(self)
       case Some(writeTo) =>
         writeTo.writeText(message.sender.username + " said: " + message.message)
     }

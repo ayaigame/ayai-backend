@@ -9,6 +9,7 @@ package ayai.networking.messaging
 
 /** Ayai Imports **/
 import ayai.persistence.User
+import ayai.persistence.UserQuery
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.HttpResponseStatus
@@ -23,6 +24,9 @@ import akka.actor.Props
 
 /** External Imports **/
 import net.liftweb.json._
+import scala.concurrent.duration._
+import scala.concurrent.Await
+import scala.util.{Success, Failure}
 
 /** MessageSenderWSApp
  * Handles sending messages back over websocket
@@ -31,6 +35,7 @@ import net.liftweb.json._
 object MessageSenderWSApp extends Logger {
   def run(as: ActorSystem) {
     val actorSystem = as
+
     val routes = Routes({
       case WebSocketHandshake(wsHandshake) => wsHandshake match {
         case Path("/websocket/") => {
@@ -39,7 +44,28 @@ object MessageSenderWSApp extends Logger {
       }
 
       case WebSocketFrame(wsFrame) => {
-        actorSystem.actorOf(Props[MessageSender], name="ms1") ! wsFrame
+        val rootJSON = parse(wsFrame.readText)
+
+        val tempUsername: String = compact(render(rootJSON \ "username"))
+        val user = UserQuery.getByUsername(tempUsername.substring(1, tempUsername.length - 1))
+
+        user match {
+          case Some(fUser) =>
+            val actorName = "ms" + fUser.id
+            try { 
+              // Try and see if there is an existing actor
+              val actorFuture = actorSystem.actorSelection("user/"+actorName).resolveOne(500.milliseconds)
+              val actorRef = Await.result(actorFuture, 500.milliseconds)
+              actorRef ! wsFrame
+            } catch {
+              // Otherwise, create a new one and associate it with the frame
+              case e: Exception =>
+                actorSystem.actorOf(Props[MessageSender], name=actorName ) ! wsFrame
+            }
+
+          case _ =>
+            println("Can't find you")
+        }
       }
     })
 
@@ -61,11 +87,13 @@ object MessageSenderWSApp extends Logger {
 object MessageReceiverWSApp extends Logger {
   val actorSystem = ActorSystem("MessageReceiverWSActorSystem")
   val routes = Routes({
+
     case WebSocketHandshake(wsHandshake) => wsHandshake match {
       case Path("/websocket/") => {
         wsHandshake.authorize()
       }
     }
+
     case WebSocketFrame(wsFrame) => {
       val rootJSON = parse(wsFrame.readText)
 
@@ -73,19 +101,31 @@ object MessageReceiverWSApp extends Logger {
       val msgType:String = tempType.substring(1, tempType.length - 1)
 
       val message = compact(render(rootJSON \ "message"))
-      val user = new User(1, "tim", "tim")
-      var mh:MessageHolder = null
+      var sender = None: Option[User]
 
-      msgType match {
-        case "public" =>
-          mh = new MessageHolder(new PublicMessage(message, user))
-        case "private" =>
-          //val receiver: String = compact(render(rootJSON \ "receiver"))
-          mh = new MessageHolder(new PrivateMessage(message, user, user))
+
+      val tempSender: String = compact(render(rootJSON \ "sender"))
+      sender = UserQuery.getByUsername(tempSender.substring(1, tempSender.length - 1))
+
+      sender match {
+        case Some(sUser)  =>
+          println("Got: " + sUser)
+          var mh:MessageHolder = null
+
+          msgType match {
+            case "public" =>
+              mh = new MessageHolder(new PublicMessage(message, sUser))
+            case "private" =>
+              //val receiver: String = compact(render(rootJSON \ "receiver"))
+              mh = new MessageHolder(new PrivateMessage(message, sUser, sUser))
+            case _ =>
+              println(msgType)
+          }
+          actorSystem.actorOf(Props[MessageReceiver]) ! mh
+
         case _ =>
-          println(msgType)
+          println("Got nothing...")
       }
-      actorSystem.actorOf(Props[MessageReceiver]) ! mh
     }
   })
 
