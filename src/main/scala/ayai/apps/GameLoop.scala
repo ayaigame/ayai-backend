@@ -11,7 +11,10 @@ import ayai.systems._
 import ayai.gamestate._
 import com.artemis.World
 import com.artemis.Entity
-import com.artemis.managers.GroupManager
+import com.artemis.managers.{GroupManager, TagManager}
+import com.artemis.utils.ImmutableBag
+
+
 import ayai.components.Player
 import ayai.networking._
 import com.artemis.ComponentType
@@ -19,8 +22,11 @@ import java.lang.Boolean
 import ayai.components.Position
 import ayai.maps.GameMap
 import ayai.data._
-import scala.util.parsing.json.JSONObject
 
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
+
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Await
 import akka.pattern.ask
 import akka.util.Timeout
@@ -39,6 +45,7 @@ object GameLoop {
     running = true
     var world: World = new World()
     world.setManager(new GroupManager())
+    world.setManager(new TagManager())
     world.setSystem(new MovementSystem(map))
     world.initialize()
 
@@ -54,14 +61,9 @@ object GameLoop {
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
-    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem)), name = (new UID()).toString)
+    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world)), name = (new UID()).toString)
     val receptionist = new SockoServer(networkSystem, interpreter)
     receptionist.run(8007)
-
-    //This is to demonstrate how to get the Ids for the GroupManager
-    // println("!!!!!!!!!!!!!")
-    // println(firstPlayer.getId())
-    // println(testItem.getId())
 
     while(running) {
       world.setDelta(1)
@@ -73,28 +75,40 @@ object GameLoop {
       result.messages.foreach { message =>
         messageProcessor ! new ProcessMessage(message)
       }
-      // Thread.sleep(1000)
-      // render(world)
-    }
-  }
-  
-  def render(world : World) {
-    // sleep for one second (dont want to process too much now)
-    Thread.sleep(10000)
-    //print out map
-    println("New Map")
-    var r : Int = 0
-    var h = 0
-    for(r <- 0 to map.width-1) {
-      for (h <- 0 to map.height-1) {
-        if(map.isOccupied(r,h)) {
-          print(map.getEntityId(r,h))
-        } else {
-          print(map.map(r)(h))
-        }
+
+      case class JPlayer(id: Int, x: Int, y: Int)
+ 
+      val players: ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("PLAYERS");
+      val numEntities = players.size
+      var entityJString : String = "["
+   
+   
+      var aPlayers: ArrayBuffer[JPlayer] = ArrayBuffer()
+      
+      for( i <- 0 until numEntities) {
+   
+          val tempEntity : Entity = players.get(i)
+          val tempPos : Position = tempEntity.getComponent(classOf[Position])
+//          val tempId = world.getManager(classOf[TagManager]).getRegisteredTags(i)
+          val tempId = i
+          aPlayers += JPlayer(tempId, tempPos.x, tempPos.y)
+          
+          //entityJString += "{id:" + tempId + ", x: " + tempPos.x + ", y: " + tempPos.y + "},\n"
       }
-      println()
+   
+      entityJString += "]"
+      val json = (
+      ("type" -> "fullsync") ~
+      ("players" -> aPlayers.toList.map{ p =>
+      (("id" -> p.id) ~
+       ("x" -> p.x) ~
+       ("y" -> p.y))}))
+    
+      // println(compact(render(json)))
+      val actorSelection = networkSystem.actorSelection("user/SockoSender*")
+      actorSelection ! new ConnectionWrite(compact(render(json)))
+
+      Thread.sleep(1000 / 5)
     }
-    //println(world.getEntity(0).getComponent(classOf[Position]).x)
   }
 }

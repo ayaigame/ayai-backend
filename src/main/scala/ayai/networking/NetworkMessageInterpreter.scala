@@ -1,5 +1,8 @@
 package ayai.networking
 
+/** Ayai Imports **/
+import ayai.actions._
+
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
@@ -21,9 +24,33 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
 
     msgType match {
       case "init" =>
-        context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender"+ (new UID()).toString)
+        val id = "0"//= (new UID()).toString
+        context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
+        wsFrame.writeText("{\"type\": \"id\", \"id\": \"" + id + "\"}")
+        queue ! new AddInterpretedMessage(new AddNewPlayer(id))
       case "echo" =>
-        queue ! new AddInterpretedMessage(new NetworkMessage("echo"))
+        queue ! new AddInterpretedMessage(new JSONMessage("echo"))
+      case "move" =>
+        //TODO: Add exceptions and maybe parse shit a bit more intelligently
+        val tempId:String = compact(render(rootJSON \ "id"))
+        val id:String = tempId.substring(1, tempId.length - 1)        
+        val start:Boolean = compact(render(rootJSON \ "start")).toBoolean
+        val dir:Int = compact(render(rootJSON \ "dir")).toInt
+        val direction: MoveDirection = dir match {
+          case 0 => new UpDirection
+          case 1 => new UpRightDirection
+          case 2 => new RightDirection
+          case 3 => new DownRightDirection
+          case 4 => new DownDirection
+          case 5 => new DownLeftDirection
+          case 6 => new LeftDirection
+          case 7 => new UpLeftDirection
+          case _ => { 
+            println("Direction not found, in Interpreter")
+            new MoveDirection(0, 0)
+          }
+        } 
+        queue ! new AddInterpretedMessage(new MoveMessage(id, start, direction))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
     }

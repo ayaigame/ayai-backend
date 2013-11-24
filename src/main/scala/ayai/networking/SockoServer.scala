@@ -20,7 +20,7 @@ class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef) extends Logge
   val routes = Routes({
 
     case WebSocketHandshake(wsHandshake) => wsHandshake match {
-      case Path("/websocket/") => {
+      case Path("/") => {
         wsHandshake.authorize()
       }
     }
@@ -31,7 +31,7 @@ class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef) extends Logge
   })
 
   def run(port: Int) {
-    val webServer = new WebServer(WebServerConfig(port=port), routes, actorSystem)
+    val webServer = new WebServer(WebServerConfig(port=port, hostname="0.0.0.0"), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run { webServer.stop() }
     })
