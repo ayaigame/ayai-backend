@@ -24,7 +24,7 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
 
     msgType match {
       case "init" =>
-        val id = "0"//= (new UID()).toString
+        val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
         wsFrame.writeText("{\"type\": \"id\", \"id\": \"" + id + "\"}")
         queue ! new AddInterpretedMessage(new AddNewPlayer(id))

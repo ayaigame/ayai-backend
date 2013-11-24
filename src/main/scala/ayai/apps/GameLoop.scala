@@ -4,6 +4,8 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
 
 import java.rmi.server.UID
 
@@ -28,9 +30,8 @@ import net.liftweb.json.JsonDSL._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Await
-import akka.pattern.ask
-import akka.util.Timeout
 import scala.concurrent.duration._
+import scala.collection.JavaConversions._
 
 
 object GameLoop {
@@ -76,35 +77,27 @@ object GameLoop {
         messageProcessor ! new ProcessMessage(message)
       }
 
-      case class JPlayer(id: Int, x: Int, y: Int)
+      case class JPlayer(id: String, x: Int, y: Int)
  
-      val players: ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("PLAYERS");
-      val numEntities = players.size
-      var entityJString : String = "["
-   
-   
       var aPlayers: ArrayBuffer[JPlayer] = ArrayBuffer()
-      
-      for( i <- 0 until numEntities) {
-   
-          val tempEntity : Entity = players.get(i)
+
+      val tagManager = world.getManager(classOf[TagManager])
+      val playerTags: List[String] = tagManager.getRegisteredTags.toList
+
+      for (playerID <- playerTags) {
+          val tempEntity : Entity = tagManager.getEntity(playerID)
           val tempPos : Position = tempEntity.getComponent(classOf[Position])
-//          val tempId = world.getManager(classOf[TagManager]).getRegisteredTags(i)
-          val tempId = i
-          aPlayers += JPlayer(tempId, tempPos.x, tempPos.y)
-          
-          //entityJString += "{id:" + tempId + ", x: " + tempPos.x + ", y: " + tempPos.y + "},\n"
+          aPlayers += JPlayer(playerID, tempPos.x, tempPos.y)
       }
-   
-      entityJString += "]"
+      
       val json = (
-      ("type" -> "fullsync") ~
-      ("players" -> aPlayers.toList.map{ p =>
-      (("id" -> p.id) ~
-       ("x" -> p.x) ~
-       ("y" -> p.y))}))
+        ("type" -> "fullsync") ~
+        ("players" -> aPlayers.toList.map{ p =>
+        (("id" -> p.id) ~
+         ("x" -> p.x) ~
+         ("y" -> p.y))}))
     
-      // println(compact(render(json)))
+      println(compact(render(json)))
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 
