@@ -22,6 +22,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World) extends Ac
         p.addComponent(new Position(10, 10))
         p.addComponent(new Bounds(10, 10))
         p.addComponent(new Velocity(1, 1))
+        p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
@@ -31,7 +32,15 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World) extends Ac
         val e: Entity = world.getManager(classOf[TagManager]).getEntity(id)
         val movement = new MovementAction(direction)
         println(e.toString)
-        movement.process(e)
+//        movement.process(e)
+        if(start) {
+            //remove old movable
+            //currently not thread safe
+            e.removeComponent(classOf[Movable])
+            e.addComponent(new Movable(start, direction))
+          } else {
+            e.removeComponent(classOf[Movable])
+          }
       }
       case _ => println("Error from NetworkMessageProcessor.")
     } 

@@ -101,6 +101,8 @@ object GameLoop {
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 
+
+      //essentially a fake fps limiter
       Thread.sleep(1000 / 5)
     }
   }

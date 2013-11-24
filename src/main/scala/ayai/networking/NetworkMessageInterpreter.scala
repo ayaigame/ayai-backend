@@ -35,19 +35,22 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         val tempId:String = compact(render(rootJSON \ "id"))
         val id:String = tempId.substring(1, tempId.length - 1)        
         val start:Boolean = compact(render(rootJSON \ "start")).toBoolean
-        val dir:Int = compact(render(rootJSON \ "dir")).toInt
-        val direction: MoveDirection = dir match {
-          case 0 => new UpDirection
-          case 1 => new UpRightDirection
-          case 2 => new RightDirection
-          case 3 => new DownRightDirection
-          case 4 => new DownDirection
-          case 5 => new DownLeftDirection
-          case 6 => new LeftDirection
-          case 7 => new UpLeftDirection
-          case _ => { 
-            println("Direction not found, in Interpreter")
-            new MoveDirection(0, 0)
+        var direction : MoveDirection = new MoveDirection(0,0)
+        if(start) {
+          val dir:Int = compact(render(rootJSON \ "dir")).toInt
+          direction  = dir match {
+            case 0 => new UpDirection
+            case 1 => new UpRightDirection
+            case 2 => new RightDirection
+            case 3 => new DownRightDirection
+            case 4 => new DownDirection
+            case 5 => new DownLeftDirection
+            case 6 => new LeftDirection
+            case 7 => new UpLeftDirection
+            case _ => { 
+              println("Direction not found, in Interpreter")
+              new MoveDirection(0,0)
+            }
           }
         } 
         queue ! new AddInterpretedMessage(new MoveMessage(id, start, direction))
