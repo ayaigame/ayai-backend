@@ -36,8 +36,6 @@ class MovementSystem(map : GameMap, a: Aspect = Aspect.getAspectFor(classOf[Posi
       		var direction : MoveDirection = movable.direction
       		var movement : MovementAction = new MovementAction(direction)
       		movement.process(e)
-          var health : Health = e.getComponent(classOf[Health])
-          health = health - 1
       	}
       }
 
