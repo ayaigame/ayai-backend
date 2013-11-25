@@ -97,11 +97,11 @@ object GameLoop {
          ("x" -> p.x) ~
          ("y" -> p.y))}))
     
-      println(compact(render(json)))
+      //println(compact(render(json)))
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 
-      Thread.sleep(1000 / 5)
+      Thread.sleep(1000 / 60)
     }
   }
 }

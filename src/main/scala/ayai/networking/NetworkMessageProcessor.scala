@@ -13,13 +13,18 @@ import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.ActorRef
 
+/** External Imports **/
+import scala.util.Random
+
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World) extends Actor {
   def processMessage(message: NetworkMessage) {
     message match {
       case AddNewPlayer(id: String) => {
         println("Adding a player: " +  id)
         val p: Entity = world.createEntity
-        p.addComponent(new Position(10, 10))
+        val x: Int = Random.nextInt(750) + 10
+        val y: Int = Random.nextInt(260) + 10
+        p.addComponent(new Position(x, y))
         p.addComponent(new Bounds(10, 10))
         p.addComponent(new Velocity(1, 1))
         p.addToWorld
