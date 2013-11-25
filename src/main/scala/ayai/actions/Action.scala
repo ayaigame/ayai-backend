@@ -18,3 +18,8 @@ case class MovementAction(var direction : MoveDirection) extends Action {
 		position.y += direction.yDirection * velocity.y
 	}
 }
+case class ItemAction(var itemAction : ItemAct) extends Action {
+	def process(e : Entity) {
+		//get the inventory of the player and base it off what action of the command given
+	}
+}

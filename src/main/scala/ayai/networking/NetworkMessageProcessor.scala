@@ -41,6 +41,10 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World) extends Ac
           } else {
             e.removeComponent(classOf[Movable])
           }
+      } 
+      // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
+      case ItemMessage(id : String, itemAction : ItemAction) {
+
       }
       case _ => println("Error from NetworkMessageProcessor.")
     } 
