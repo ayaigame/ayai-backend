@@ -28,6 +28,7 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
         wsFrame.writeText("{\"type\": \"id\", \"id\": \"" + id + "\"}")
         queue ! new AddInterpretedMessage(new AddNewPlayer(id))
+        queue ! new AddInterpretedMessage(new SocketPlayerMap(wsFrame, id))
       case "echo" =>
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
       case "move" =>
@@ -50,7 +51,7 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
             new MoveDirection(0, 0)
           }
         } 
-        queue ! new AddInterpretedMessage(new MoveMessage(id, start, direction))
+        queue ! new AddInterpretedMessage(new MoveMessage(wsFrame, start, direction))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
     }

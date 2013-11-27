@@ -25,10 +25,16 @@ import ayai.components.Position
 import ayai.maps.GameMap
 import ayai.data._
 
+/** Socko Imports **/
+import org.mashupbots.socko.events.WebSocketFrameEvent
+
+
+import org.jboss.netty.channel.Channel
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.{immutable, mutable}
+import scala.collection.mutable._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.collection.JavaConversions._
@@ -44,6 +50,7 @@ object GameLoop {
   def main(args: Array[String]) {
     println("compiled")
     running = true
+    var socketMap: mutable.Map[Channel, String] = new java.util.HashMap[Channel, String]
     var world: World = new World()
     world.setManager(new GroupManager())
     world.setManager(new TagManager())
@@ -62,7 +69,8 @@ object GameLoop {
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
-    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world)), name = (new UID()).toString)
+    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
+
     val receptionist = new SockoServer(networkSystem, interpreter)
     receptionist.run(8007)
 
@@ -101,7 +109,7 @@ object GameLoop {
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 
-      Thread.sleep(1000 / 60)
+      Thread.sleep(1000 / 30)
     }
   }
 }

@@ -13,10 +13,16 @@ import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.ActorRef
 
+/** Socko Imports **/
+import org.mashupbots.socko.events.WebSocketFrameEvent
+
 /** External Imports **/
 import scala.util.Random
+import scala.collection.{immutable, mutable}
+import scala.collection.mutable._
+import org.jboss.netty.channel.Channel
 
-class NetworkMessageProcessor(actorSystem: ActorSystem, world: World) extends Actor {
+class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.Map[Channel, String]) extends Actor {
   def processMessage(message: NetworkMessage) {
     message match {
       case AddNewPlayer(id: String) => {
@@ -26,17 +32,22 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World) extends Ac
         val y: Int = Random.nextInt(260) + 10
         p.addComponent(new Position(x, y))
         p.addComponent(new Bounds(10, 10))
-        p.addComponent(new Velocity(1, 1))
+        p.addComponent(new Velocity(2, 2))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
       }
-      case MoveMessage(id: String, start: Boolean, direction: MoveDirection) => {
+      case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
         println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
+        val id: String = socketMap(webSocket.channel)
         val e: Entity = world.getManager(classOf[TagManager]).getEntity(id)
         val movement = new MovementAction(direction)
         println(e.toString)
         movement.process(e)
+      }
+      case SocketPlayerMap(webSocket: WebSocketFrameEvent, id: String) => {
+        println(webSocket)
+        socketMap(webSocket.channel) = id
       }
       case _ => println("Error from NetworkMessageProcessor.")
     } 
