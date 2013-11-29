@@ -50,11 +50,12 @@ object GameLoop {
   def main(args: Array[String]) {
     println("compiled")
     running = true
-    var socketMap: mutable.Map[Channel, String] = new java.util.HashMap[Channel, String]
+    var socketMap: mutable.ConcurrentMap[Channel, String] = new java.util.concurrent.ConcurrentHashMap[Channel, String]
     var world: World = new World()
     world.setManager(new GroupManager())
     world.setManager(new TagManager())
     world.setSystem(new MovementSystem(map))
+    world.setSystem(new CollisionSystem(world))
     world.initialize()
 
     println(arrayToString(map.map))
@@ -113,3 +114,5 @@ object GameLoop {
     }
   }
 }
+
+

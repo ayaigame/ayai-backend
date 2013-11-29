@@ -22,16 +22,16 @@ import scala.collection.{immutable, mutable}
 import scala.collection.mutable._
 import org.jboss.netty.channel.Channel
 
-class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.Map[Channel, String]) extends Actor {
+class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[Channel, String]) extends Actor {
   def processMessage(message: NetworkMessage) {
     message match {
       case AddNewPlayer(id: String) => {
         println("Adding a player: " +  id)
         val p: Entity = world.createEntity
-        val x: Int = Random.nextInt(750) + 10
-        val y: Int = Random.nextInt(260) + 10
+        val x: Int = Random.nextInt(750) + 32
+        val y: Int = Random.nextInt(260) + 32
         p.addComponent(new Position(x, y))
-        p.addComponent(new Bounds(10, 10))
+        p.addComponent(new Bounds(32, 32))
         p.addComponent(new Velocity(2, 2))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)

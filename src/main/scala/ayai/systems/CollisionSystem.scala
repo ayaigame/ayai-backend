@@ -5,6 +5,7 @@ package ayai.systems
  */
 
 /** Ayai Imports **/
+import ayai.actions._
 import ayai.components.{Position, Bounds}
 
 /** Artemis Imports **/
@@ -12,6 +13,9 @@ import com.artemis.{Aspect, ComponentManager, ComponentMapper, Entity, EntitySys
 import com.artemis.annotations.Mapper
 import com.artemis.managers.GroupManager
 import com.artemis.utils.{Bag, ImmutableBag, Utils}
+
+/** External Imports **/
+import scala.math.abs
 
 class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(classOf[Position], classOf[Bounds])) {
   @Mapper
@@ -38,6 +42,24 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
                               valueInRange(positionB.y, positionA.y, positionA.y + boundsA.height)
 
       if(xOverlap && yOverlap) {
+        if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
+          if(positionA.x < positionB.x) {
+            new MovementAction(new LeftDirection).process(entityA)
+            new MovementAction(new RightDirection).process(entityB)
+          } else {
+            new MovementAction(new RightDirection).process(entityA)
+            new MovementAction(new LeftDirection).process(entityB)
+          }
+        } else {
+          if(positionA.y < positionB.y) {
+            new MovementAction(new UpDirection).process(entityA)
+            new MovementAction(new DownDirection).process(entityB)
+          } else {
+            new MovementAction(new DownDirection).process(entityA)
+            new MovementAction(new UpDirection).process(entityB)
+          }
+        }
+
         println("OVERLAP!")
       }
 
@@ -47,13 +69,12 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
     true
   }
   override def processEntities(entities: ImmutableBag[Entity]) {
-    val enemies: ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("ENEMIES")
     val players: ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("PLAYERS")
     val pSize = players.size
-    val eSize = enemies.size
     for( i <- 0 until pSize) {
-      for( j <- 0 until eSize) {
-        handleCollision(players.get(i), enemies.get(j))
+      for( j <- (i + 1) until pSize) {
+        if(i != j) 
+          handleCollision(players.get(i), players.get(j))
       }
     }
   }
