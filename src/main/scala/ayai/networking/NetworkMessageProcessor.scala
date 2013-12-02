@@ -33,6 +33,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Position(x, y))
         p.addComponent(new Bounds(32, 32))
         p.addComponent(new Velocity(2, 2))
+        p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
@@ -43,7 +44,22 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         val e: Entity = world.getManager(classOf[TagManager]).getEntity(id)
         val movement = new MovementAction(direction)
         println(e.toString)
-        movement.process(e)
+//        movement.process(e)
+        e.removeComponent(classOf[Movable])
+        e.addComponent(new Movable(start, direction))
+
+        //if(start) {
+        //    //remove old movable
+        //    //currently not thread safe
+        //    e.removeComponent(classOf[Movable])
+        //    e.addComponent(new Movable(start, direction))
+        //  } else {
+        //    e.removeComponent(classOf[Movable])
+        //    e.addComponent(new Movable(start, direction))
+        //  }
+      } // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
+      case ItemMessage(id : String, itemAction : ItemAction) => {
+
       }
       case SocketPlayerMap(webSocket: WebSocketFrameEvent, id: String) => {
         println(webSocket)

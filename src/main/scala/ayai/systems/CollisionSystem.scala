@@ -60,7 +60,7 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
           }
         }
 
-        println("OVERLAP!")
+    //    println("OVERLAP!")
       }
 
   }
