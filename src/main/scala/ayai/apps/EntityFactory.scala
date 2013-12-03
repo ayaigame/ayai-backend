@@ -41,7 +41,7 @@ object EntityFactory {
     var position : Position = new Position(x, y)
     item.addComponent(position)
 
-    var containable : Containable = new Containable(3, name)
+    var containable : Containable = new Containable(3, name, null)
     item.addComponent(containable)
 
     world.getManager(classOf[GroupManager]).add(item,"ITEM")
