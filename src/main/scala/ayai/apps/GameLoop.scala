@@ -22,6 +22,7 @@ import ayai.networking._
 import com.artemis.ComponentType
 import java.lang.Boolean
 import ayai.components.Position
+import ayai.components._
 import ayai.maps.GameMap
 import ayai.data._
 
@@ -86,7 +87,7 @@ object GameLoop {
         messageProcessor ! new ProcessMessage(message)
       }
 
-      case class JPlayer(id: String, x: Int, y: Int)
+      case class JPlayer(id: String, x: Int, y: Int, currHealth : Int, maximumHealth : Int)
  
       var aPlayers: ArrayBuffer[JPlayer] = ArrayBuffer()
 
@@ -96,15 +97,18 @@ object GameLoop {
       for (playerID <- playerTags) {
           val tempEntity : Entity = tagManager.getEntity(playerID)
           val tempPos : Position = tempEntity.getComponent(classOf[Position])
-          aPlayers += JPlayer(playerID, tempPos.x, tempPos.y)
+          val tempHealth : Health = tempEntity.getComponent(classOf[Health])
+          aPlayers += JPlayer(playerID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth)
       }
-      
+
       val json = (
         ("type" -> "fullsync") ~
         ("players" -> aPlayers.toList.map{ p =>
         (("id" -> p.id) ~
          ("x" -> p.x) ~
-         ("y" -> p.y))}))
+         ("y" -> p.y) ~
+         ("currHealth" -> p.currHealth) ~
+         ("maximumHealth" -> p.maximumHealth))}))
     
       //println(compact(render(json)))
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")

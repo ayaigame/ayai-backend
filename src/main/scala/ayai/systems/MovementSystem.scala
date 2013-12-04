@@ -12,6 +12,8 @@ import ayai.actions._
 import ayai.components.Movable
 import ayai.components.Position
 import ayai.components.Velocity
+import ayai.components.Health
+
 import ayai.maps.GameMap
 
 
@@ -34,6 +36,8 @@ class MovementSystem(map : GameMap, a: Aspect = Aspect.getAspectFor(classOf[Posi
       		var direction : MoveDirection = movable.direction
       		var movement : MovementAction = new MovementAction(direction)
       		movement.process(e)
+          var health : Health = e.getComponent(classOf[Health])
+          health = health - 1
       	}
       }
 
