@@ -32,7 +32,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         val y: Int = Random.nextInt(260) + 32
         p.addComponent(new Position(x, y))
         p.addComponent(new Bounds(32, 32))
-        p.addComponent(new Velocity(2, 2))
+        p.addComponent(new Velocity(4, 4))
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
         p.addToWorld
