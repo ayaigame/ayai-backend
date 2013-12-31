@@ -21,7 +21,7 @@ class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef) extends Logge
 
     case WebSocketHandshake(wsHandshake) => wsHandshake match {
       case Path("/") => {
-        wsHandshake.authorize()
+        wsHandshake.authorize(onClose = Some(testOnCloseCallback))
       }
     }
 
@@ -29,6 +29,11 @@ class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef) extends Logge
         interpreter ! new InterpretMessage(wsFrame)
     }
   })
+
+  def testOnCloseCallback(webSocketId: String) {
+    System.out.println(s"Web Socket $webSocketId closed")
+    // TODO: Remove entity from game that should die
+  }
 
   def run(port: Int) {
     val webServer = new WebServer(WebServerConfig(port=port, hostname="0.0.0.0"), routes, actorSystem)

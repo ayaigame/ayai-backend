@@ -30,7 +30,6 @@ import ayai.data._
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
 
-import org.jboss.netty.channel.Channel
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
@@ -51,7 +50,7 @@ object GameLoop {
   def main(args: Array[String]) {
     println("compiled")
     running = true
-    var socketMap: mutable.ConcurrentMap[Channel, String] = new java.util.concurrent.ConcurrentHashMap[Channel, String]
+    var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
     world.setManager(new GroupManager())
     world.setManager(new TagManager())
