@@ -87,19 +87,30 @@ object GameLoop {
         messageProcessor ! new ProcessMessage(message)
       }
 
+      //used to send json messages
       case class JPlayer(id: String, x: Int, y: Int, currHealth : Int, maximumHealth : Int)
- 
+      case class JBullet(id: String, x: Int, y: Int)
+
       var aPlayers: ArrayBuffer[JPlayer] = ArrayBuffer()
+      var aBullets: ArrayBuffer[JBullet] = ArrayBuffer()
 
       val tagManager = world.getManager(classOf[TagManager])
       val playerTags: List[String] = tagManager.getRegisteredTags.toList
 
       for (playerID <- playerTags) {
+          //need better way of figuring if something is bullet, or figuring 
+          // out what each entity has
           val tempEntity : Entity = tagManager.getEntity(playerID)
-          val tempPos : Position = tempEntity.getComponent(classOf[Position])
-          val tempHealth : Health = tempEntity.getComponent(classOf[Health])
-          aPlayers += JPlayer(playerID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth)
+          if(tempEntity.getComponent(classOf[Bullet]) != null) {
+            val tempPos : Position = tempEntity.getComponent(classOf[Position])
+            aBullets += JBullet(playerID, tempPos.x, tempPos.y)
+          } else {
+            val tempPos : Position = tempEntity.getComponent(classOf[Position])
+            val tempHealth : Health = tempEntity.getComponent(classOf[Health])
+            aPlayers += JPlayer(playerID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth)
+          }
       }
+
 
       val json = (
         ("type" -> "fullsync") ~
@@ -108,9 +119,13 @@ object GameLoop {
          ("x" -> p.x) ~
          ("y" -> p.y) ~
          ("currHealth" -> p.currHealth) ~
-         ("maximumHealth" -> p.maximumHealth))}))
+         ("maximumHealth" -> p.maximumHealth))}) ~
+        ("bullets" -> aBullets.toList.map{ n => 
+        (("id" -> n.id) ~  
+         ("x" -> n.x) ~
+         ("y" -> n.y))}))
     
-      //println(compact(render(json)))
+      println(compact(render(json)))
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 

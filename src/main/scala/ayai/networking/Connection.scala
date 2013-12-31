@@ -24,5 +24,6 @@ case class JSONMessage(message: String) extends NetworkMessage
 case class AddNewPlayer(id: String) extends NetworkMessage
 case class MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) extends NetworkMessage
 case class ItemMessage(id : String, itemAction : ItemAction) extends NetworkMessage
+case class AttackMessage(webSocket: WebSocketFrameEvent) extends NetworkMessage
 case class SocketPlayerMap(webSocket: WebSocketFrameEvent, id: String) extends NetworkMessage
 

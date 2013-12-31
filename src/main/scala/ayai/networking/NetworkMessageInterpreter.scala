@@ -55,6 +55,9 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
           }
         } 
         queue ! new AddInterpretedMessage(new MoveMessage(wsFrame, start, direction))
+        case "attack" =>
+          println("Attafck Received")
+          queue ! new AddInterpretedMessage(new AttackMessage(wsFrame))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
     }
