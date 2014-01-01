@@ -39,6 +39,20 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
       }
+
+      case RemovePlayer(id: String) => {
+        println("Removing player: " + id)
+        var p = None : Option[Entity]
+        p = Some(world.getManager(classOf[TagManager]).getEntity(socketMap(id)))
+        p match {
+          case None =>
+            System.out.println(s"Can't find player attached to socket $id.")
+          case Some(player) =>
+            player.deleteFromWorld
+            socketMap.remove(id)
+        }
+      }
+
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
         println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
         val id: String = socketMap(webSocket.webSocketId)

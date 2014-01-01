@@ -15,7 +15,7 @@ import akka.actor.ActorRef
  * Runs a server which will pass packets on to the Interpreter
  **/
 
-class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef) extends Logger {
+class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef, queue: ActorRef) extends Logger {
   // val actorSystem = ActorSystem("MessageReceiverWSActorSystem")
   val routes = Routes({
 
@@ -32,7 +32,7 @@ class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef) extends Logge
 
   def testOnCloseCallback(webSocketId: String) {
     System.out.println(s"Web Socket $webSocketId closed")
-    // TODO: Remove entity from game that should die
+    queue ! new AddInterpretedMessage(new RemovePlayer(webSocketId))
   }
 
   def run(port: Int) {

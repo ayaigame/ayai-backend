@@ -72,7 +72,7 @@ object GameLoop {
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
 
-    val receptionist = new SockoServer(networkSystem, interpreter)
+    val receptionist = new SockoServer(networkSystem, interpreter, messageQueue)
     receptionist.run(8007)
 
     while(running) {
