@@ -20,9 +20,9 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.util.Random
 import scala.collection.{immutable, mutable}
 import scala.collection.mutable._
-import org.jboss.netty.channel.Channel
+import io.netty.channel.Channel
 
-class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[Channel, String]) extends Actor {
+class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
   def processMessage(message: NetworkMessage) {
     message match {
       case AddNewPlayer(id: String) => {
@@ -39,9 +39,23 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
       }
+
+      case RemovePlayer(id: String) => {
+        println("Removing player: " + id)
+        var p = None : Option[Entity]
+        p = Some(world.getManager(classOf[TagManager]).getEntity(socketMap(id)))
+        p match {
+          case None =>
+            System.out.println(s"Can't find player attached to socket $id.")
+          case Some(player) =>
+            player.deleteFromWorld
+            socketMap.remove(id)
+        }
+      }
+
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
         println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
-        val id: String = socketMap(webSocket.channel)
+        val id: String = socketMap(webSocket.webSocketId)
         val e: Entity = world.getManager(classOf[TagManager]).getEntity(id)
         val movement = new MovementAction(direction)
         println(e.toString)
@@ -59,12 +73,14 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         //    e.addComponent(new Movable(start, direction))
         //  }
       } // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
+
       case ItemMessage(id : String, itemAction : ItemAction) => {
 
       }
+
       case SocketPlayerMap(webSocket: WebSocketFrameEvent, id: String) => {
         println(webSocket)
-        socketMap(webSocket.channel) = id
+        socketMap(webSocket.webSocketId) = id
       }
       case _ => println("Error from NetworkMessageProcessor.")
     } 
