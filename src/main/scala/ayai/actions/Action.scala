@@ -23,3 +23,8 @@ case class ItemAction(var itemAction : ItemAct) extends Action {
 		//get the inventory of the player and base it off what action of the command given
 	}
 }
+case class AttackAction(var action : AttackAct) extends Action {
+	def process(e : Entity) {
+		//print somethign
+	}
+}

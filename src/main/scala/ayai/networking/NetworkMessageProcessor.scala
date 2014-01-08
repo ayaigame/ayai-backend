@@ -22,6 +22,7 @@ import scala.collection.{immutable, mutable}
 import scala.collection.mutable._
 import io.netty.channel.Channel
 
+
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
   def processMessage(message: NetworkMessage) {
     message match {
@@ -73,6 +74,27 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         //    e.addComponent(new Movable(start, direction))
         //  }
       } // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
+      case AttackMessage(webSocket : WebSocketFrameEvent) => {
+        //create a projectile
+        println("Created Bullet")
+        val id : String = socketMap(webSocket.channel)
+        val bulletId = (new UID()).toString
+        val initiator: Entity = world.getManager(classOf[TagManager]).getEntity(id)
+        val bullet : Entity = world.createEntity
+        bullet.addComponent(new Bullet(initiator, 10))
+        bullet.addComponent(new Bounds(8,8))
+        val position : Position = initiator.getComponent(classOf[Position])
+        bullet.addComponent(new Position(position.x, position.y))
+        bullet.addComponent(new Velocity(2,2))
+        val initMovement : Movable = initiator.getComponent(classOf[Movable])
+        if(initMovement.direction.xDirection == 0 && initMovement.direction.yDirection == 0) {
+          bullet.addComponent(new Movable(true, new DownDirection()))
+        } else {
+          bullet.addComponent(new Movable(true, initiator.getComponent(classOf[Movable]).direction))
+        }
+        bullet.addToWorld
+        world.getManager(classOf[GroupManager]).add(bullet, "BULLET")
+        world.getManager(classOf[TagManager]).register(bulletId, bullet)
 
       case ItemMessage(id : String, itemAction : ItemAction) => {
 
