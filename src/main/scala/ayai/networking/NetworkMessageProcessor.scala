@@ -22,6 +22,7 @@ import scala.collection.{immutable, mutable}
 import scala.collection.mutable._
 import io.netty.channel.Channel
 
+import java.rmi.server.UID
 
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
   def processMessage(message: NetworkMessage) {
@@ -77,7 +78,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       case AttackMessage(webSocket : WebSocketFrameEvent) => {
         //create a projectile
         println("Created Bullet")
-        val id : String = socketMap(webSocket.channel)
+        val id : String = socketMap(webSocket.webSocketId)
         val bulletId = (new UID()).toString
         val initiator: Entity = world.getManager(classOf[TagManager]).getEntity(id)
         val bullet : Entity = world.createEntity
@@ -95,6 +96,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         bullet.addToWorld
         world.getManager(classOf[GroupManager]).add(bullet, "BULLET")
         world.getManager(classOf[TagManager]).register(bulletId, bullet)
+      }
 
       case ItemMessage(id : String, itemAction : ItemAction) => {
 
