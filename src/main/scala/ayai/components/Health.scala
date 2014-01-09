@@ -30,4 +30,8 @@ class Health(var currentHealth: Int, var maximumHealth: Int) extends Component{
       currentHealth = 0
     }
   }
+
+  override def toString: String = {
+    "{\"current\": " + currentHealth + ", \"max\": " + maximumHealth + "}"
+  }
 }

@@ -58,14 +58,6 @@ object GameLoop {
     world.setSystem(new CollisionSystem(world))
     world.initialize()
 
-    println(arrayToString(map.map))
-    var firstRoom: Room = GameState.createRoom(arrayToString(map.map))
-    val startingRoom = firstRoom.getRoomId
-    var firstPlayer = EntityFactory.createPlayer(world, startingRoom, 2, 2)
-    world.addEntity(firstPlayer)
-    var testItem = EntityFactory.createItem(world,1,3,"ItemTest")
-    world.addEntity(testItem)
-
     implicit val timeout = Timeout(5 seconds)
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)

@@ -37,9 +37,11 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Velocity(4, 4))
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
+        p.addComponent(new Room(1, 3000, 3000))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
+        world.getManager(classOf[GroupManager]).add(p, "ROOM1")
       }
 
       case RemovePlayer(id: String) => {
