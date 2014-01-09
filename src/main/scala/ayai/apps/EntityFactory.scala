@@ -7,7 +7,7 @@ import com.artemis.World
 import ayai.components.Position
 import ayai.components.Health
 import com.artemis.managers.GroupManager
-import ayai.components.Velocity
+import ayai.components.*
 import com.artemis.Component
 import ayai.components.Containable
 
@@ -32,7 +32,6 @@ object EntityFactory {
     GameState.addPlayer(roomId, player)
     world.getManager(classOf[GroupManager]).add(player, Constants.PLAYER_CHARACTER)
     println("Entity: " + player.getId())
-    GameLoop.map.addEntity(player.getId(),x,y)
     player;
   }
 
@@ -46,7 +45,20 @@ object EntityFactory {
 
     world.getManager(classOf[GroupManager]).add(item,"ITEM")
     
-    GameLoop.map.addEntity(item.getId(),x,y)
     item
+  }
+
+  def createRoom(world : World) : Entity {
+    var room : Entity = world.createEntity
+    var tileMap : TileMap = new TileMap
+    var roomId : Room = new Room
+
+    room.addComponent(tileMap)
+    room.addComponent(roomId)
+
+    world.getManager(classOf[GroupManager]).add(room,"ROOMS")
+
+    room
+
   }
 }
