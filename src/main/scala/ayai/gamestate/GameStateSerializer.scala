@@ -15,8 +15,10 @@ import ayai.components.{Player, Position, Health, Room}
 import scala.collection.mutable.ArrayBuffer
 
 sealed trait QueryType
+sealed trait QueryResponse
 
 case class PlayerRadius(characterId: String) extends QueryType
+case class CharacterResponse(json: String)  extends QueryResponse
 case class SomeData
 
 class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
@@ -28,7 +30,6 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   //Returns a character's belongings and surroundings.
   def getPlayerRadius(characterId: String) = {
-    println("FETCHING PLAYER: " + characterId)
     val characterEntity : Entity = world.getManager(classOf[TagManager]).getEntity(characterId)
     val room = characterEntity.getComponent(classOf[Room])
 
@@ -54,7 +55,8 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
     json = json + "]}"
 
-    println(json)
+    //println(json)
+    // sender ! new CharacterResponse(json)
   }
 
   //Once players actually have belonging we'll want to implement this and use it in getPlayerRadius

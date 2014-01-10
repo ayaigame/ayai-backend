@@ -98,7 +98,10 @@ object GameLoop {
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             aBullets += JBullet(playerID, tempPos.x, tempPos.y)
           } else {
+
+            //This is how we get character specific info, once we actually integrate this in.
             serializer ! new PlayerRadius(playerID)
+
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             val tempHealth : Health = tempEntity.getComponent(classOf[Health])
             aPlayers += JPlayer(playerID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth)
@@ -119,7 +122,7 @@ object GameLoop {
          ("x" -> n.x) ~
          ("y" -> n.y))}))
     
-      //println(compact(render(json)))
+      // println(compact(render(json)))
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 
