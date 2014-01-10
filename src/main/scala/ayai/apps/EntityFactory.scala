@@ -7,7 +7,7 @@ import com.artemis.World
 import ayai.components.Position
 import ayai.components.Health
 import com.artemis.managers.GroupManager
-import ayai.components.*
+import ayai.components._
 import com.artemis.Component
 import ayai.components.Containable
 
@@ -48,10 +48,10 @@ object EntityFactory {
     item
   }
 
-  def createRoom(world : World) : Entity {
-    var room : Entity = world.createEntity
-    var tileMap : TileMap = new TileMap
-    var roomId : Room = new Room
+  def createRoom(world : World, id : Int) : Entity = {
+    var room : Entity = world.createEntity()
+    var tileMap : TileMap = new TileMap()
+    var roomId : Room = new Room(id)
 
     room.addComponent(tileMap)
     room.addComponent(roomId)

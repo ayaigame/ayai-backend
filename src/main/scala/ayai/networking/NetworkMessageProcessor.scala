@@ -1,7 +1,7 @@
 package ayai.networking
 
 /** Ayai Imports **/
-import ayai.gamestate._
+import ayai.gamestate.{Effect, EffectType, GameState}
 import ayai.actions._
 import ayai.components._
 
@@ -23,6 +23,7 @@ import scala.collection.mutable._
 import io.netty.channel.Channel
 
 import java.rmi.server.UID
+import ayai.apps.GameLoop
 
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
   def processMessage(message: NetworkMessage) {
@@ -37,6 +38,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Velocity(4, 4))
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
+        p.addComponent(new Room(GameLoop.defaultRoomId))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "PLAYERS")

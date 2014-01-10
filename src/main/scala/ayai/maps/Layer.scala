@@ -1,4 +1,4 @@
-package ayai.Layer
+package ayai.maps
 
 class Layer() {
 	
