@@ -58,19 +58,13 @@ object GameLoop {
     world.setSystem(new CollisionSystem(world))
     world.initialize()
 
-    println(arrayToString(map.map))
-    var firstRoom: Room = GameState.createRoom(arrayToString(map.map))
-    val startingRoom = firstRoom.getRoomId
-    var firstPlayer = EntityFactory.createPlayer(world, startingRoom, 2, 2)
-    world.addEntity(firstPlayer)
-    var testItem = EntityFactory.createItem(world,1,3,"ItemTest")
-    world.addEntity(testItem)
-
     implicit val timeout = Timeout(5 seconds)
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
+
+    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, 50)) , name = (new UID()).toString)
 
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue)
     receptionist.run(8007)
@@ -104,6 +98,10 @@ object GameLoop {
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             aBullets += JBullet(playerID, tempPos.x, tempPos.y)
           } else {
+
+            //This is how we get character specific info, once we actually integrate this in.
+            serializer ! new PlayerRadius(playerID)
+
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             val tempHealth : Health = tempEntity.getComponent(classOf[Health])
             aPlayers += JPlayer(playerID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth)
@@ -124,7 +122,7 @@ object GameLoop {
          ("x" -> n.x) ~
          ("y" -> n.y))}))
     
-      //println(compact(render(json)))
+      // println(compact(render(json)))
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 
