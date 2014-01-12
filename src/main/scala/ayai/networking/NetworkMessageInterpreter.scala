@@ -11,7 +11,7 @@ import org.mashupbots.socko.routes._
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
 /** External Imports **/
-import scala.util.parsing.json._
+import scala.util.Random
 import net.liftweb.json._
 
 import java.rmi.server.UID
@@ -26,15 +26,17 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
       case "init" =>
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
-        wsFrame.writeText("{\"type\": \"id\", \"id\": \"" + id + "\"}")
-        queue ! new AddInterpretedMessage(new AddNewPlayer(id))
+        val x: Int = Random.nextInt(750) + 32
+        val y: Int = Random.nextInt(260) + 32
+
+        wsFrame.writeText("{\"type\": \"id\", \"id\": \"" + id + "\", \"x\": " + x + ", \"y\": " + y +" }")
+        println("{\"type\": \"id\", \"id\": \"" + id + "\", \"x\": " + x + ", \"y\": " + y +" }")
+        queue ! new AddInterpretedMessage(new AddNewPlayer(id, x, y))
         queue ! new AddInterpretedMessage(new SocketPlayerMap(wsFrame, id))
       case "echo" =>
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
       case "move" =>
         //TODO: Add exceptions and maybe parse shit a bit more intelligently
-        val tempId:String = compact(render(rootJSON \ "id"))
-        val id:String = tempId.substring(1, tempId.length - 1)        
         val start:Boolean = compact(render(rootJSON \ "start")).toBoolean
         var direction : MoveDirection = new MoveDirection(0,0)
         if(start) {
@@ -55,9 +57,14 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
           }
         } 
         queue ! new AddInterpretedMessage(new MoveMessage(wsFrame, start, direction))
-        case "attack" =>
-          println("Attafck Received")
+      case "attack" =>
+          println("Attack Received")
           queue ! new AddInterpretedMessage(new AttackMessage(wsFrame))
+      case "chat" =>
+        val message = compact(render(rootJSON \ "message"))
+        val tempSender: String = compact(render(rootJSON \ "sender"))
+        val sender = tempSender.substring(1, tempSender.length - 1)
+        queue ! new AddInterpretedMessage(new PublicChatMessage(message, sender))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
     }

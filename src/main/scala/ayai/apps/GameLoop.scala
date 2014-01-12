@@ -10,7 +10,7 @@ import akka.util.Timeout
 import java.rmi.server.UID
 
 import ayai.systems._
-import ayai.gamestate.{Effect, EffectType, GameState}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer}
 import com.artemis.World
 import com.artemis.Entity
 import com.artemis.managers.{GroupManager, TagManager}
@@ -76,6 +76,8 @@ object GameLoop {
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
 
+    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, 50)) , name = (new UID()).toString)
+
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue)
     receptionist.run(8007)
     while(running) {
@@ -108,6 +110,10 @@ object GameLoop {
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             aBullets += JBullet(playerID, tempPos.x, tempPos.y)
           } else {
+
+            //This is how we get character specific info, once we actually integrate this in.
+            serializer ! new PlayerRadius(playerID)
+
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             val tempHealth : Health = tempEntity.getComponent(classOf[Health])
             val tempRoom : Room = tempEntity.getComponent(classOf[Room])
@@ -130,7 +136,8 @@ object GameLoop {
          ("x" -> n.x) ~
          ("y" -> n.y))}))
 
-      println(compact(render(json)))
+//      println(compact(render(json)))
+
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 

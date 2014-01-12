@@ -1,17 +1,17 @@
 package ayai.networking
 
 /** Ayai Imports **/
-import ayai.gamestate.{Effect, EffectType, GameState}
+import ayai.gamestate.{Effect, EffectType}
 import ayai.actions._
 import ayai.components._
+import ayai.networking.chat._
+import ayai.persistence.{User, UserQuery}
 
 import com.artemis.{Entity, World}
 import com.artemis.managers.{TagManager, GroupManager}
 
 /** Akka Imports **/
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.ActorRef
+import akka.actor.{Actor, ActorSystem, ActorRef, Props}
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
@@ -20,7 +20,6 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.util.Random
 import scala.collection.{immutable, mutable}
 import scala.collection.mutable._
-import io.netty.channel.Channel
 
 import java.rmi.server.UID
 import ayai.apps.GameLoop
@@ -28,20 +27,20 @@ import ayai.apps.GameLoop
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
   def processMessage(message: NetworkMessage) {
     message match {
-      case AddNewPlayer(id: String) => {
+      case AddNewPlayer(id: String, x: Int, y: Int) => {
         println("Adding a player: " +  id)
         val p: Entity = world.createEntity
-        val x: Int = Random.nextInt(750) + 32
-        val y: Int = Random.nextInt(260) + 32
         p.addComponent(new Position(x, y))
         p.addComponent(new Bounds(32, 32))
         p.addComponent(new Velocity(4, 4))
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
         p.addComponent(new Room(GameLoop.defaultRoomId))
+//        p.addComponent(new Room(1))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
+        world.getManager(classOf[GroupManager]).add(p, "ROOM1")
       }
 
       case RemovePlayer(id: String) => {
@@ -107,6 +106,20 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       case SocketPlayerMap(webSocket: WebSocketFrameEvent, id: String) => {
         println(webSocket)
         socketMap(webSocket.webSocketId) = id
+      }
+
+      case PublicChatMessage(message: String, sender: String) => {
+        // Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
+        var sUser = None: Option[User]
+        sUser = UserQuery.getByUsername(sender)
+        
+        sUser match {
+          case Some(user) =>
+            val mh = new ChatHolder(new PublicChat(message, user))
+            actorSystem.actorOf(Props(new ChatReceiver())) ! mh
+          case _ =>
+            println("Error from PublicChatMessage")
+        }
       }
       case _ => println("Error from NetworkMessageProcessor.")
     } 
