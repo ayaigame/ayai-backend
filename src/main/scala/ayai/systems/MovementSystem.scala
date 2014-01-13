@@ -17,7 +17,7 @@ import ayai.components.Health
 import ayai.maps.GameMap
 
 
-class MovementSystem(map : GameMap, a: Aspect = Aspect.getAspectFor(classOf[Position], classOf[Velocity],classOf[Movable])) extends EntityProcessingSystem(a) {    
+class MovementSystem(map : GameMap, a: Aspect = Aspect.getAspectForAll(classOf[Position], classOf[Velocity],classOf[Movable])) extends EntityProcessingSystem(a) {    
   @Mapper
   var positionMapper: ComponentMapper[Position] = _
   @Mapper

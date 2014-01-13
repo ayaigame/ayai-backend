@@ -10,7 +10,7 @@ import akka.util.Timeout
 import java.rmi.server.UID
 
 import ayai.systems._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, PlayerRadius}
 import com.artemis.World
 import com.artemis.Entity
 import com.artemis.managers.{GroupManager, TagManager}
@@ -41,9 +41,11 @@ import scala.collection.JavaConversions._
 
 import scala.collection.mutable.HashMap
 
+import scala.io.Source
+
 object GameLoop {
 
-  var roomHash : HashMap[Int, TileMap] = HashMap.empty[Int, TileMap]
+  var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
   var defaultRoomId : Int = 0
 
   def arrayToString(a: Array[Array[Int]]) : String = {
@@ -62,14 +64,15 @@ object GameLoop {
     world.setSystem(new MovementSystem(map))
     world.setSystem(new CollisionSystem(world))
     world.initialize()
-
-    println(arrayToString(map.map))
     
-//    val room : Entity = EntityFactory.createRoom(world, 0)
-    //create a room 
+    EntityFactory.loadRoomFromJson(world, new UID().hashCode, "map2.json")
     defaultRoomId = new UID().hashCode
-    roomHash += (defaultRoomId -> new TileMap)
-//    world.addToWorld(room)
+    val room : Entity = EntityFactory.createRoom(world, defaultRoomId)
+    roomHash.put(defaultRoomId, room)
+    //create a room 
+    room.addToWorld
+
+
     implicit val timeout = Timeout(5 seconds)
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)

@@ -8,7 +8,10 @@ import ayai.components.Position
 
 //128 x 128 is only default
 class TileMap(val array : Array[Array[Tile]] = Array.fill[Tile](128,128)(new Tile(0)), val tileSize : Int = 32) extends Component {
-
+	var file : String = ""
+	var width : Int = _
+	var height : Int = _
+	
 	//getMaximumPosition - get the maximum position value for x
 	def getMaximumWidth() : Int = {
 		return array.length * tileSize
