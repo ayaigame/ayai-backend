@@ -10,7 +10,7 @@ import akka.util.Timeout
 import java.rmi.server.UID
 
 import ayai.systems._
-import ayai.gamestate._
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, PlayerRadius}
 import com.artemis.World
 import com.artemis.Entity
 import com.artemis.managers.{GroupManager, TagManager}
@@ -39,8 +39,15 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.collection.JavaConversions._
 
+import scala.collection.mutable.HashMap
+
+import scala.io.Source
 
 object GameLoop {
+
+  var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
+  var defaultRoomId : Int = 0
+
   def arrayToString(a: Array[Array[Int]]) : String = {
        val str = for (l <- a) yield l.mkString("[", ",", "]")
        str.mkString("[",",\n","]")
@@ -57,6 +64,14 @@ object GameLoop {
     world.setSystem(new MovementSystem(map))
     world.setSystem(new CollisionSystem(world))
     world.initialize()
+    
+    EntityFactory.loadRoomFromJson(world, new UID().hashCode, "map2.json")
+    defaultRoomId = new UID().hashCode
+    val room : Entity = EntityFactory.createRoom(world, defaultRoomId)
+    roomHash.put(defaultRoomId, room)
+    //create a room 
+    room.addToWorld
+
 
     implicit val timeout = Timeout(5 seconds)
     val networkSystem = ActorSystem("NetworkSystem")
@@ -68,7 +83,6 @@ object GameLoop {
 
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue)
     receptionist.run(8007)
-
     while(running) {
       world.setDelta(1)
       world.process()
@@ -81,8 +95,9 @@ object GameLoop {
       }
 
       //used to send json messages
-      case class JPlayer(id: String, x: Int, y: Int, currHealth : Int, maximumHealth : Int)
+      case class JPlayer(id: String, x: Int, y: Int, currHealth : Int, maximumHealth : Int, roomId : Int)
       case class JBullet(id: String, x: Int, y: Int)
+//      case class JMap(id : String, roomId : Int, array)
 
       var aPlayers: ArrayBuffer[JPlayer] = ArrayBuffer()
       var aBullets: ArrayBuffer[JBullet] = ArrayBuffer()
@@ -104,7 +119,8 @@ object GameLoop {
 
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             val tempHealth : Health = tempEntity.getComponent(classOf[Health])
-            aPlayers += JPlayer(playerID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth)
+            val tempRoom : Room = tempEntity.getComponent(classOf[Room])
+            aPlayers += JPlayer(playerID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
           }
       }
 
@@ -116,13 +132,15 @@ object GameLoop {
          ("x" -> p.x) ~
          ("y" -> p.y) ~
          ("currHealth" -> p.currHealth) ~
-         ("maximumHealth" -> p.maximumHealth))}) ~
+         ("maximumHealth" -> p.maximumHealth) ~
+         ("room" -> p.roomId))}) ~
         ("bullets" -> aBullets.toList.map{ n => 
         (("id" -> n.id) ~  
          ("x" -> n.x) ~
          ("y" -> n.y))}))
-    
-      // println(compact(render(json)))
+
+//      println(compact(render(json)))
+
       val actorSelection = networkSystem.actorSelection("user/SockoSender*")
       actorSelection ! new ConnectionWrite(compact(render(json)))
 
