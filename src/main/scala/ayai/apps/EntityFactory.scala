@@ -79,7 +79,7 @@ object EntityFactory {
     file.close()
 
     val parsedJson = parse(lines)
-    val tmap = (parsedJson ).extract[TMap]
+    val tmap = parsedJson.extract[TMap]
     val bundles = (parsedJson \\ "layers").extract[List[Tiles]]
     bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width)}
 //           .foreach{j => println(compact(render(j)))}
