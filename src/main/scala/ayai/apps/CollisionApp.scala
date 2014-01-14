@@ -18,7 +18,7 @@ object CollisionApp {
     p.addComponent(new Position(10, 10))
     p.addComponent(new Bounds(10, 10))
     p.addToWorld
-    world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
+    world.getManager(classOf[GroupManager]).add(p, "CHARACTERS")
 
     // This Should Collide
     val colE: Entity = world.createEntity

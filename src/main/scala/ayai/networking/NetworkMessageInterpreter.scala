@@ -31,8 +31,8 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
 
         wsFrame.writeText("{\"type\": \"id\", \"id\": \"" + id + "\", \"x\": " + x + ", \"y\": " + y +" }")
         println("{\"type\": \"id\", \"id\": \"" + id + "\", \"x\": " + x + ", \"y\": " + y +" }")
-        queue ! new AddInterpretedMessage(new AddNewPlayer(id, x, y))
-        queue ! new AddInterpretedMessage(new SocketPlayerMap(wsFrame, id))
+        queue ! new AddInterpretedMessage(new AddNewCharacter(id, x, y))
+        queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
       case "echo" =>
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
       case "move" =>

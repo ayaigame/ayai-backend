@@ -9,7 +9,7 @@ import com.artemis.utils.{Bag, ImmutableBag}
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
 /** Ayai Imports **/
-import ayai.components.{Player, Position, Health, Room}
+import ayai.components.{Character, Position, Health, Room}
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
@@ -17,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
 sealed trait QueryType
 sealed trait QueryResponse
 
-case class PlayerRadius(characterId: String) extends QueryType
+case class CharacterRadius(characterId: String) extends QueryType
 case class CharacterResponse(json: String)  extends QueryResponse
 case class SomeData
 
@@ -29,7 +29,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
   }
 
   //Returns a character's belongings and surroundings.
-  def getPlayerRadius(characterId: String) = {
+  def getCharacterRadius(characterId: String) = {
     val characterEntity : Entity = world.getManager(classOf[TagManager]).getEntity(characterId)
     val room = characterEntity.getComponent(classOf[Room])
 
@@ -59,8 +59,8 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     // sender ! new CharacterResponse(json)
   }
 
-  //Once players actually have belonging we'll want to implement this and use it in getPlayerRadius
-  // def getPlayerBelongings(playerId: String) = {
+  //Once characters actually have belonging we'll want to implement this and use it in getCharacterRadius
+  // def getCharacterBelongings(characterId: String) = {
 
   // }
 
@@ -77,7 +77,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
   // }
 
   def receive = {
-    case PlayerRadius(characterId) => getPlayerRadius(characterId)
+    case CharacterRadius(characterId) => getCharacterRadius(characterId)
     case _ => println("Error: from serializer.")
   }
 }

@@ -19,24 +19,24 @@ object EntityFactory {
    * might have to do some networking stuff, dont know yet
    */
    /**
-  def createPlayer(world : World, roomId: Int, x: Int, y : Int) : Entity = {
-    var player : Entity = world.createEntity()
+  def createCharacter(world : World, roomId: Int, x: Int, y : Int) : Entity = {
+    var character : Entity = world.createEntity()
     var position : Position = new Position(x,y)
     var velocity : Velocity = new Velocity(3,4)
-    player.addComponent(position)
+    character.addComponent(position)
     
-    player.addComponent(velocity)
+    character.addComponent(velocity)
     
     
     var health : Health = new Health(200,200);
-    player.addComponent(health)
+    character.addComponent(health)
     
-    player.addComponent(new Player(GameState.getNextPlayerId()));
-    GameState.addPlayer(roomId, player)
-    world.getManager(classOf[GroupManager]).add(player, Constants.PLAYER_CHARACTER)
-    println("Entity: " + player.getId())
-    GameLoop.map.addEntity(player.getId(),x,y)
-    player;
+    character.addComponent(new Character(GameState.getNextCharacterId()));
+    GameState.addCharacter(roomId, character)
+    world.getManager(classOf[GroupManager]).add(character, Constants.PLAYER_CHARACTER)
+    println("Entity: " + character.getId())
+    GameLoop.map.addEntity(character.getId(),x,y)
+    character;
   }
 
   def createItem(world : World, x : Int, y :Int, name : String) : Entity = {

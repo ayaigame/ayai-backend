@@ -8,8 +8,8 @@ class Health(var currentHealth: Int, var maximumHealth: Int) extends Component{
     return this.currentHealth
   }
   
-  def setCurrentHealth(playerHealth : Int){
-    this.currentHealth = playerHealth
+  def setCurrentHealth(characterHealth : Int){
+    this.currentHealth = characterHealth
   }
   
   def getMaximumHealth() : Int = {

@@ -10,14 +10,14 @@ import akka.util.Timeout
 import java.rmi.server.UID
 
 import ayai.systems._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, PlayerRadius}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius}
 import com.artemis.World
 import com.artemis.Entity
 import com.artemis.managers.{GroupManager, TagManager}
 import com.artemis.utils.ImmutableBag
 
 
-import ayai.components.Player
+import ayai.components.Character
 import ayai.networking._
 import com.artemis.ComponentType
 import java.lang.Boolean
@@ -95,39 +95,39 @@ object GameLoop {
       }
 
       //used to send json messages
-      case class JPlayer(id: String, x: Int, y: Int, currHealth : Int, maximumHealth : Int, roomId : Int)
+      case class JCharacter(id: String, x: Int, y: Int, currHealth : Int, maximumHealth : Int, roomId : Int)
       case class JBullet(id: String, x: Int, y: Int)
 //      case class JMap(id : String, roomId : Int, array)
 
-      var aPlayers: ArrayBuffer[JPlayer] = ArrayBuffer()
+      var aCharacters: ArrayBuffer[JCharacter] = ArrayBuffer()
       var aBullets: ArrayBuffer[JBullet] = ArrayBuffer()
 
       val tagManager = world.getManager(classOf[TagManager])
-      val playerTags: List[String] = tagManager.getRegisteredTags.toList
+      val characterTags: List[String] = tagManager.getRegisteredTags.toList
 
-      for (playerID <- playerTags) {
+      for (characterID <- characterTags) {
           //need better way of figuring if something is bullet, or figuring 
           // out what each entity has
-          val tempEntity : Entity = tagManager.getEntity(playerID)
+          val tempEntity : Entity = tagManager.getEntity(characterID)
           if(tempEntity.getComponent(classOf[Bullet]) != null) {
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
-            aBullets += JBullet(playerID, tempPos.x, tempPos.y)
+            aBullets += JBullet(characterID, tempPos.x, tempPos.y)
           } else {
 
             //This is how we get character specific info, once we actually integrate this in.
-            serializer ! new PlayerRadius(playerID)
+            serializer ! new CharacterRadius(characterID)
 
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             val tempHealth : Health = tempEntity.getComponent(classOf[Health])
             val tempRoom : Room = tempEntity.getComponent(classOf[Room])
-            aPlayers += JPlayer(playerID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
+            aCharacters += JCharacter(characterID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
           }
       }
 
 
       val json = (
         ("type" -> "fullsync") ~
-        ("players" -> aPlayers.toList.map{ p =>
+        ("characters" -> aCharacters.toList.map{ p =>
         (("id" -> p.id) ~
          ("x" -> p.x) ~
          ("y" -> p.y) ~

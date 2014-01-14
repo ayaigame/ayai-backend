@@ -27,8 +27,8 @@ import ayai.apps.GameLoop
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
   def processMessage(message: NetworkMessage) {
     message match {
-      case AddNewPlayer(id: String, x: Int, y: Int) => {
-        println("Adding a player: " +  id)
+      case AddNewCharacter(id: String, x: Int, y: Int) => {
+        println("Adding a character: " +  id)
         val p: Entity = world.createEntity
         p.addComponent(new Position(x, y))
         p.addComponent(new Bounds(32, 32))
@@ -39,19 +39,19 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 //        p.addComponent(new Room(1))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)
-        world.getManager(classOf[GroupManager]).add(p, "PLAYERS")
+        world.getManager(classOf[GroupManager]).add(p, "CHARACTERS")
         world.getManager(classOf[GroupManager]).add(p, "ROOM1")
       }
 
-      case RemovePlayer(id: String) => {
-        println("Removing player: " + id)
+      case RemoveCharacter(id: String) => {
+        println("Removing character: " + id)
         var p = None : Option[Entity]
         p = Some(world.getManager(classOf[TagManager]).getEntity(socketMap(id)))
         p match {
           case None =>
-            System.out.println(s"Can't find player attached to socket $id.")
-          case Some(player) =>
-            player.deleteFromWorld
+            System.out.println(s"Can't find character attached to socket $id.")
+          case Some(character) =>
+            character.deleteFromWorld
             socketMap.remove(id)
         }
       }
@@ -103,7 +103,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 
       }
 
-      case SocketPlayerMap(webSocket: WebSocketFrameEvent, id: String) => {
+      case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
         println(webSocket)
         socketMap(webSocket.webSocketId) = id
       }

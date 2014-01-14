@@ -35,11 +35,11 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
       val boundsB = bm.get(entityB)
       // Remember to end a line with an operator of some sort (., +, &&, ||) if you need 
       // to not fall afoul of the automatic end of statement guesser
-      //are the two players within the same x position (is A between B's leftside and width length) 
+      //are the two characters within the same x position (is A between B's leftside and width length) 
       val xOverlap: Boolean = valueInRange(positionA.x, positionB.x, positionB.x + boundsB.width) ||
                               valueInRange(positionB.x, positionA.x, positionA.x + boundsA.width)
 
-      //are the two players within the same height area.
+      //are the two characters within the same height area.
       val yOverlap: Boolean = valueInRange(positionA.y, positionB.y, positionB.y + boundsB.height) ||
                               valueInRange(positionB.y, positionA.y, positionA.y + boundsA.height)
 
@@ -73,11 +73,11 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
       val boundsB = bm.get(entityB)
       // Remember to end a line with an operator of some sort (., +, &&, ||) if you need 
       // to not fall afoul of the automatic end of statement guesser
-      //are the two players within the same x position (is A between B's leftside and width length) 
+      //are the two characters within the same x position (is A between B's leftside and width length) 
       val xOverlap: Boolean = valueInRange(positionA.x, positionB.x, positionB.x + boundsB.width) ||
                               valueInRange(positionB.x, positionA.x, positionA.x + boundsA.width)
 
-      //are the two players within the same height area.
+      //are the two characters within the same height area.
       val yOverlap: Boolean = valueInRange(positionA.y, positionB.y, positionB.y + boundsB.height) ||
                               valueInRange(positionB.y, positionA.y, positionA.y + boundsA.height)
 
@@ -92,15 +92,15 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
     true
   }
   override def processEntities(entities: ImmutableBag[Entity]) {
-    val players: ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("PLAYERS")
+    val characters: ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("CHARACTERS")
     val bullets : ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("BULLETS")
     val bSize  = bullets.size
-    val pSize = players.size
-    //do players first
+    val pSize = characters.size
+    //do characters first
     for( i <- 0 until pSize) {
       for( j <- (i + 1) until pSize) {
           if(i != j) 
-            handleCollision(players.get(i), players.get(j))
+            handleCollision(characters.get(i), characters.get(j))
 
       }
     }
@@ -110,8 +110,8 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
       breakable {
         for( i <- 0 until pSize) {
         //could also set victim here, and let other systme (but that stuffs later)
-          if(bullets.get(j).getComponent(classOf[Bullet]).initiator != players.get(i)) {
-            handleBulletCollision(players.get(i), bullets.get(j))
+          if(bullets.get(j).getComponent(classOf[Bullet]).initiator != characters.get(i)) {
+            handleBulletCollision(characters.get(i), bullets.get(j))
             //now break out and go to next bullet
             break
           }

@@ -32,7 +32,7 @@ class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef, queue: ActorR
 
   def testOnCloseCallback(webSocketId: String) {
     System.out.println(s"Web Socket $webSocketId closed")
-    queue ! new AddInterpretedMessage(new RemovePlayer(webSocketId))
+    queue ! new AddInterpretedMessage(new RemoveCharacter(webSocketId))
   }
 
   def run(port: Int) {
