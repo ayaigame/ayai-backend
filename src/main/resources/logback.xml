@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- I did not write any of this, I got it from stackoverflow:
+	 http://stackoverflow.com/questions/11852689/how-to-turn-off-netty-library-debug-output
+	 All I did was change the logger name to be "i", which should mean that any package
+	 starting with "i" will be suppressed. Since the package that was spamming so much was
+	 "i.n.h.c.h.w.WebSocket08FrameEncoder" this made it stop.
+	 I'm sure at some point we'll actually want to change this to be 
+	 more useful. This link may help: http://logback.qos.ch/manual/configuration.html -->
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="i" level="WARN"/>
+</configuration>
