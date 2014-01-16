@@ -23,7 +23,6 @@ import com.artemis.ComponentType
 import java.lang.Boolean
 import ayai.components.Position
 import ayai.components._
-import ayai.maps.GameMap
 import ayai.data._
 
 /** Socko Imports **/
@@ -125,6 +124,7 @@ object GameLoop {
 
       val json = (
         ("type" -> "fullsync") ~
+        ("maps" -> "/assets/maps/map3.json") ~
         ("characters" -> aCharacters.toList.map{ p =>
         (("id" -> p.id) ~
          ("x" -> p.x) ~
@@ -138,9 +138,9 @@ object GameLoop {
          ("y" -> n.y))}))
 
 //      println(compact(render(json)))
+        val actorSelection = networkSystem.actorSelection("user/SockoSender/")
+        actorSelection ! new ConnectionWrite(compact(render(json)))
 
-      val actorSelection = networkSystem.actorSelection("user/SockoSender*")
-      actorSelection ! new ConnectionWrite(compact(render(json)))
 
       Thread.sleep(1000 / 30)
     }
