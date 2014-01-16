@@ -53,7 +53,6 @@ object GameLoop {
        str.mkString("[",",\n","]")
   }
   var running : Boolean = _
-  var map : GameMap = new GameMap(10,10)
   def main(args: Array[String]) {
     println("compiled")
     running = true
@@ -61,13 +60,12 @@ object GameLoop {
     var world: World = new World()
     world.setManager(new GroupManager())
     world.setManager(new TagManager())
-    world.setSystem(new MovementSystem(map))
+    world.setSystem(new MovementSystem(roomHash))
     world.setSystem(new CollisionSystem(world))
     world.initialize()
     
-    EntityFactory.loadRoomFromJson(world, new UID().hashCode, "map2.json")
+    val room : Entity = EntityFactory.loadRoomFromJson(world, new UID().hashCode, "map3.json")
     defaultRoomId = new UID().hashCode
-    val room : Entity = EntityFactory.createRoom(world, defaultRoomId)
     roomHash.put(defaultRoomId, room)
     //create a room 
     room.addToWorld

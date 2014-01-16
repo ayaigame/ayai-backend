@@ -53,10 +53,9 @@ object EntityFactory {
     item
   }
 	**/
-  def createRoom(world : World, roomId : Int, tileMap : TileMap = new TileMap()) : Entity = {
+  def createRoom(world : World, roomId : Int, tileMap : TileMap ) : Entity = {
   	var entityRoom : Entity = world.createEntity()
   	var room : Room = new Room(roomId)
-  	var tileMap : TileMap = new TileMap()
 
   	entityRoom.addComponent(room)
   	entityRoom.addComponent(tileMap)
