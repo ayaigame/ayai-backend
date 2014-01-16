@@ -44,7 +44,6 @@ import scala.collection.mutable.HashMap
 import scala.io.Source
 
 object GameLoop {
-
   var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
   var defaultRoomId : Int = 0
 
@@ -73,7 +72,7 @@ object GameLoop {
     room.addToWorld
 
 
-    implicit val timeout = Timeout(5 seconds)
+    implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
