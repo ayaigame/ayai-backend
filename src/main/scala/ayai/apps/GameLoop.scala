@@ -6,7 +6,6 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
-
 import java.rmi.server.UID
 
 import ayai.systems._
@@ -112,8 +111,9 @@ object GameLoop {
           } else {
 
             //This is how we get character specific info, once we actually integrate this in.
-            serializer ! new CharacterRadius(characterID)
-
+            val future = serializer ! new CharacterRadius(characterID)
+            //val actorSelection = networkSystem.actorSelection("user/SockoSender/"+characterID)
+        
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             val tempHealth : Health = tempEntity.getComponent(classOf[Health])
             val tempRoom : Room = tempEntity.getComponent(classOf[Room])
@@ -137,8 +137,9 @@ object GameLoop {
          ("x" -> n.x) ~
          ("y" -> n.y))}))
 
-//      println(compact(render(json)))
-        val actorSelection = networkSystem.actorSelection("user/SockoSender/")
+        
+        //println(compact(render(json)))
+        val actorSelection = networkSystem.actorSelection("user/SockoSender/*")
         actorSelection ! new ConnectionWrite(compact(render(json)))
 
 
