@@ -43,17 +43,11 @@ import scala.collection.mutable.HashMap
 import scala.io.Source
 
 object GameLoop {
-
   var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
-  var defaultRoomId : Int = 0
 
-  def arrayToString(a: Array[Array[Int]]) : String = {
-       val str = for (l <- a) yield l.mkString("[", ",", "]")
-       str.mkString("[",",\n","]")
-  }
   var running : Boolean = _
+
   def main(args: Array[String]) {
-    println("compiled")
     running = true
     var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
@@ -63,24 +57,26 @@ object GameLoop {
     world.setSystem(new CollisionSystem(world))
     world.initialize()
     
-    val room : Entity = EntityFactory.loadRoomFromJson(world, new UID().hashCode, "map3.json")
-    defaultRoomId = new UID().hashCode
-    roomHash.put(defaultRoomId, room)
+    val room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
+    roomHash.put(Constants.STARTING_ROOM_ID, room)
     //create a room 
     room.addToWorld
 
 
-    implicit val timeout = Timeout(2 seconds)
+    implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
+
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
 
-    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, 50)) , name = (new UID()).toString)
+    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)
 
 
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue)
-    receptionist.run(8007)
+    receptionist.run(Constants.SERVER_PORT)
+
+    //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
       world.setDelta(1)
       world.process()
@@ -146,7 +142,7 @@ object GameLoop {
         val actorSelection = networkSystem.actorSelection("user/SockoSender*")
         actorSelection ! new ConnectionWrite(compact(render(json)))*/
 
-      Thread.sleep(1000 / 30)
+      Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)
     }
   }
 }
