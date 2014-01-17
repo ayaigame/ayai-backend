@@ -1,0 +1,17 @@
+{
+	"items": [
+		{
+			"id": 0,
+			"name": "Iron Sword",
+			"equipable": true,
+			"type": "weapon",
+			"range": 0,
+			"damage": 3,
+			"damage-type": "physical",
+			"value": 10,
+			"weight": 10
+			}],
+
+	"external_items": [
+		"src/main/resources/configs/items/swords.json"]
+}

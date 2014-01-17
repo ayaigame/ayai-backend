@@ -6,6 +6,7 @@ import ayai.actions._
 import ayai.components._
 import ayai.networking.chat._
 import ayai.persistence.{User, UserQuery}
+import ayai.apps.Constants
 
 import com.artemis.{Entity, World}
 import com.artemis.managers.{TagManager, GroupManager}
@@ -35,7 +36,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Velocity(4, 4))
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
-        p.addComponent(new Room(GameLoop.defaultRoomId))
+        p.addComponent(new Room(Constants.STARTING_ROOM_ID))
 //        p.addComponent(new Room(1))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)

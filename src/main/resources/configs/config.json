@@ -1,3 +1,8 @@
 {
-	"network_timeout": 5
+	"SERVER_PORT": 8007,
+	"NETWORK_TIMEOUT": 5,
+	"LOAD_RADIUS": 50,
+	"FRAMES_PER_SECOND": 30,
+
+	"STARTING_ROOM": 1
 }
