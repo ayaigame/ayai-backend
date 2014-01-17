@@ -6,6 +6,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
+
 import java.rmi.server.UID
 
 import ayai.systems._
@@ -124,7 +125,6 @@ object GameLoop {
 
       val json = (
         ("type" -> "fullsync") ~
-        ("maps" -> "/assets/maps/map3.json") ~
         ("characters" -> aCharacters.toList.map{ p =>
         (("id" -> p.id) ~
          ("x" -> p.x) ~
@@ -139,9 +139,8 @@ object GameLoop {
 
         
         //println(compact(render(json)))
-        val actorSelection = networkSystem.actorSelection("user/SockoSender/*")
+        val actorSelection = networkSystem.actorSelection("user/SockoSender*")
         actorSelection ! new ConnectionWrite(compact(render(json)))
-
 
       Thread.sleep(1000 / 30)
     }
