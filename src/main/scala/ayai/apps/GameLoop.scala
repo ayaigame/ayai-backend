@@ -122,25 +122,25 @@ object GameLoop {
       }
 
 
-      /*val json = (
-        ("type" -> "fullsync") ~
-        ("maps" -> "/assets/maps/map3.json") ~
-        ("characters" -> aCharacters.toList.map{ p =>
-        (("id" -> p.id) ~
-         ("x" -> p.x) ~
-         ("y" -> p.y) ~
-         ("currHealth" -> p.currHealth) ~
-         ("maximumHealth" -> p.maximumHealth) ~
-         ("room" -> p.roomId))}) ~
-        ("bullets" -> aBullets.toList.map{ n => 
-        (("id" -> n.id) ~  
-         ("x" -> n.x) ~
-         ("y" -> n.y))}))
+      // val json = (
+      //   ("type" -> "fullsync") ~
+      //   ("maps" -> "/assets/maps/map3.json") ~
+      //   ("characters" -> aCharacters.toList.map{ p =>
+      //   (("id" -> p.id) ~
+      //    ("x" -> p.x) ~
+      //    ("y" -> p.y) ~
+      //    ("currHealth" -> p.currHealth) ~
+      //    ("maximumHealth" -> p.maximumHealth) ~
+      //    ("room" -> p.roomId))}) ~
+      //   ("bullets" -> aBullets.toList.map{ n => 
+      //   (("id" -> n.id) ~  
+      //    ("x" -> n.x) ~
+      //    ("y" -> n.y))}))
 
         
-        //println(compact(render(json)))
-        val actorSelection = networkSystem.actorSelection("user/SockoSender*")
-        actorSelection ! new ConnectionWrite(compact(render(json)))*/
+      //   //println(compact(render(json)))
+      //   val actorSelection = networkSystem.actorSelection("user/SockoSender*")
+      //   actorSelection ! new ConnectionWrite(compact(render(json)))
 
       Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)
     }
