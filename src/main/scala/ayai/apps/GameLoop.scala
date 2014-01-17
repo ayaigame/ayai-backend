@@ -6,7 +6,6 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
-
 import java.rmi.server.UID
 
 import ayai.systems._
@@ -125,6 +124,7 @@ object GameLoop {
 
       val json = (
         ("type" -> "fullsync") ~
+        ("maps" -> "/assets/maps/map3.json") ~
         ("characters" -> aCharacters.toList.map{ p =>
         (("id" -> p.id) ~
          ("x" -> p.x) ~
