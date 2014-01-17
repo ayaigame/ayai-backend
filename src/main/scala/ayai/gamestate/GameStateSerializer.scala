@@ -23,6 +23,7 @@ case class SomeData
 
 class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
+
   //Returns a list of entities contained within a room.
   def getRoomEntities(roomId: Int): ImmutableBag[Entity] = {
     world.getManager(classOf[GroupManager]).getEntities("ROOM" + roomId)
@@ -36,25 +37,25 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     val otherEntities: ImmutableBag[Entity] = getRoomEntities(room.id)
 
     var json = "{\"you\": " + getEntityInfo(characterEntity) + ", \"others\": ["
-
-    var entitiyJSONs = new ArrayBuffer[String]()
+    var entityJSONs = new ArrayBuffer[String]()
     for(i <- 0 until otherEntities.size()) {
       if(characterEntity.getId() != otherEntities.get(i).getId()) {
-        entitiyJSONs += getEntityInfo(otherEntities.get(i))
+        entityJSONs += getEntityInfo(otherEntities.get(i))
       }
     }
 
     //Kinda need a do-while because the first one doesn't prepend a comma
-    if(entitiyJSONs.size > 0 ) {
-      json = json + entitiyJSONs(0)
+    if(entityJSONs.size > 0 ) {
+      json = json + entityJSONs(0)
     }
 
-    for(i <- 1 until entitiyJSONs.size) {
-      json = json + ", " + entitiyJSONs(i)
+    for(i <- 1 until entityJSONs.size) {
+      json = json + ", " + entityJSONs(i)
     }
 
     json = json + "]}"
 
+    sender ! json
     //println(json)
     // sender ! new CharacterResponse(json)
   }

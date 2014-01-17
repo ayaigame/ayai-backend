@@ -6,6 +6,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
+import scala.concurrent.{ ExecutionContext, Promise }
 import java.rmi.server.UID
 
 import ayai.systems._
@@ -69,13 +70,14 @@ object GameLoop {
     room.addToWorld
 
 
-    implicit val timeout = Timeout(5 seconds)
+    implicit val timeout = Timeout(2 seconds)
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
 
     val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, 50)) , name = (new UID()).toString)
+
 
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue)
     receptionist.run(8007)
@@ -111,18 +113,20 @@ object GameLoop {
           } else {
 
             //This is how we get character specific info, once we actually integrate this in.
-            val future = serializer ! new CharacterRadius(characterID)
-            //val actorSelection = networkSystem.actorSelection("user/SockoSender/"+characterID)
-        
-            val tempPos : Position = tempEntity.getComponent(classOf[Position])
-            val tempHealth : Health = tempEntity.getComponent(classOf[Health])
-            val tempRoom : Room = tempEntity.getComponent(classOf[Room])
-            aCharacters += JCharacter(characterID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
+            val future1 = serializer ? new CharacterRadius(characterID)
+            val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
+            val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterID)
+            actorSelection ! new ConnectionWrite(compact(render(result1)))
+
+            // val tempPos : Position = tempEntity.getComponent(classOf[Position])
+            // val tempHealth : Health = tempEntity.getComponent(classOf[Health])
+            // val tempRoom : Room = tempEntity.getComponent(classOf[Room])
+            // aCharacters += JCharacter(characterID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
           }
       }
 
 
-      val json = (
+      /*val json = (
         ("type" -> "fullsync") ~
         ("maps" -> "/assets/maps/map3.json") ~
         ("characters" -> aCharacters.toList.map{ p =>
@@ -140,7 +144,7 @@ object GameLoop {
         
         //println(compact(render(json)))
         val actorSelection = networkSystem.actorSelection("user/SockoSender*")
-        actorSelection ! new ConnectionWrite(compact(render(json)))
+        actorSelection ! new ConnectionWrite(compact(render(json)))*/
 
       Thread.sleep(1000 / 30)
     }
