@@ -6,9 +6,9 @@ class Stats(stats: List[Stat]) extends Component{
 
 
 
-  override def toString: String = {
-    "{\"name\": " + name + "}"
-  }
+  // override def toString: String = {
+    // "{\"name\": " + name + "}"
+  // }
 
   
 }
