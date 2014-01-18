@@ -67,9 +67,11 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   //Returns the information about other entities within a room that a character might need to know
   def getEntityInfo(e: Entity): String = {
+    val entityId = e.getComponent(classOf[Character])
     val entityHealth = e.getComponent(classOf[Health])
     val entityPosition = e.getComponent(classOf[Position])
-    var entityInfo = "{\"health\": " + entityHealth.toString
+    var  entityInfo = "{ \"id\": " + entityId
+    entityInfo += ", \"health\": " + entityHealth.toString
     return entityInfo + ", \"position\": " + entityPosition.toString + "}"
   }
 

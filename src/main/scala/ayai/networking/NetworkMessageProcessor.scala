@@ -37,6 +37,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
         p.addComponent(new Room(Constants.STARTING_ROOM_ID))
+        p.addComponent(new Character(id))
 //        p.addComponent(new Room(1))
         p.addToWorld
         world.getManager(classOf[TagManager]).register(id, p)
