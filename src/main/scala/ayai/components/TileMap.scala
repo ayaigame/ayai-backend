@@ -4,10 +4,12 @@ import com.artemis.Component
 import ayai.maps.Tile
 import ayai.maps.Layer
 
+import scala.math._
+
 import ayai.components.Position
 
 //128 x 128 is only default
-class TileMap(val array : Array[Array[Tile]] = Array.fill[Tile](128,128)(new Tile(0)), val tileSize : Int = 32) extends Component {
+class TileMap(val array : Array[Array[Tile]], val tileSize : Int = 32) extends Component {
 	var file : String = ""
 	var width : Int = _
 	var height : Int = _
@@ -33,5 +35,21 @@ class TileMap(val array : Array[Array[Tile]] = Array.fill[Tile](128,128)(new Til
 
 	def valueToTile(value : Int) : Int = {
 		return (value / array.length)
+	}
+
+	def isPositionInBounds(position : Position) : Position = {
+
+		//check if its past the x boundaries
+		//println("Current X: " + position.x + " MaximumWidth: " + getMaximumWidth)
+		if(max(position.x, 0) <= 0)
+			position.x = 0
+		else if(min(position.x,getMaximumWidth-tileSize) >= getMaximumWidth-tileSize)
+			position.x = getMaximumWidth - tileSize
+
+		if(max(position.y, 0) <= 0) 
+			position.y = 0
+		else if(min(position.y,getMaximumHeight) >= getMaximumHeight-tileSize)
+			position.y = getMaximumHeight - tileSize
+		position
 	}
 }

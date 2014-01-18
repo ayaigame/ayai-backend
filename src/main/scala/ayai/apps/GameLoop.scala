@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
-
+import scala.concurrent.{ ExecutionContext, Promise }
 import java.rmi.server.UID
 
 import ayai.systems._
@@ -23,7 +23,6 @@ import com.artemis.ComponentType
 import java.lang.Boolean
 import ayai.components.Position
 import ayai.components._
-import ayai.maps.GameMap
 import ayai.data._
 
 /** Socko Imports **/
@@ -44,45 +43,40 @@ import scala.collection.mutable.HashMap
 import scala.io.Source
 
 object GameLoop {
-
   var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
-  var defaultRoomId : Int = 0
 
-  def arrayToString(a: Array[Array[Int]]) : String = {
-       val str = for (l <- a) yield l.mkString("[", ",", "]")
-       str.mkString("[",",\n","]")
-  }
   var running : Boolean = _
-  var map : GameMap = new GameMap(10,10)
+
   def main(args: Array[String]) {
-    println("compiled")
     running = true
     var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
     world.setManager(new GroupManager())
     world.setManager(new TagManager())
-    world.setSystem(new MovementSystem(map))
+    world.setSystem(new MovementSystem(roomHash))
     world.setSystem(new CollisionSystem(world))
     world.initialize()
     
-    EntityFactory.loadRoomFromJson(world, new UID().hashCode, "map2.json")
-    defaultRoomId = new UID().hashCode
-    val room : Entity = EntityFactory.createRoom(world, defaultRoomId)
-    roomHash.put(defaultRoomId, room)
+    val room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
+    roomHash.put(Constants.STARTING_ROOM_ID, room)
     //create a room 
     room.addToWorld
 
 
-    implicit val timeout = Timeout(5 seconds)
+    implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
+
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
 
-    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, 50)) , name = (new UID()).toString)
+    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)
+
 
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue)
-    receptionist.run(8007)
+    receptionist.run(Constants.SERVER_PORT)
+
+    //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
       world.setDelta(1)
       world.process()
@@ -113,38 +107,42 @@ object GameLoop {
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             aBullets += JBullet(characterID, tempPos.x, tempPos.y)
           } else {
-
+            
             //This is how we get character specific info, once we actually integrate this in.
-            serializer ! new CharacterRadius(characterID)
+            val future1 = serializer ? new CharacterRadius(characterID)
+            val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
+            val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterID)
+            actorSelection ! new ConnectionWrite(compact(render(result1)))
 
-            val tempPos : Position = tempEntity.getComponent(classOf[Position])
-            val tempHealth : Health = tempEntity.getComponent(classOf[Health])
-            val tempRoom : Room = tempEntity.getComponent(classOf[Room])
-            aCharacters += JCharacter(characterID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
+            // val tempPos : Position = tempEntity.getComponent(classOf[Position])
+            // val tempHealth : Health = tempEntity.getComponent(classOf[Health])
+            // val tempRoom : Room = tempEntity.getComponent(classOf[Room])
+            // aCharacters += JCharacter(characterID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
           }
       }
 
 
-      val json = (
-        ("type" -> "fullsync") ~
-        ("characters" -> aCharacters.toList.map{ p =>
-        (("id" -> p.id) ~
-         ("x" -> p.x) ~
-         ("y" -> p.y) ~
-         ("currHealth" -> p.currHealth) ~
-         ("maximumHealth" -> p.maximumHealth) ~
-         ("room" -> p.roomId))}) ~
-        ("bullets" -> aBullets.toList.map{ n => 
-        (("id" -> n.id) ~  
-         ("x" -> n.x) ~
-         ("y" -> n.y))}))
+      // val json = (
+      //   ("type" -> "fullsync") ~
+      //   ("maps" -> "/assets/maps/map3.json") ~
+      //   ("characters" -> aCharacters.toList.map{ p =>
+      //   (("id" -> p.id) ~
+      //    ("x" -> p.x) ~
+      //    ("y" -> p.y) ~
+      //    ("currHealth" -> p.currHealth) ~
+      //    ("maximumHealth" -> p.maximumHealth) ~
+      //    ("room" -> p.roomId))}) ~
+      //   ("bullets" -> aBullets.toList.map{ n => 
+      //   (("id" -> n.id) ~  
+      //    ("x" -> n.x) ~
+      //    ("y" -> n.y))}))
 
-//      println(compact(render(json)))
+        
+      //   //println(compact(render(json)))
+      //   val actorSelection = networkSystem.actorSelection("user/SockoSender*")
+      //   actorSelection ! new ConnectionWrite(compact(render(json)))
 
-      val actorSelection = networkSystem.actorSelection("user/SockoSender*")
-      actorSelection ! new ConnectionWrite(compact(render(json)))
-
-      Thread.sleep(1000 / 30)
+      Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)
     }
   }
 }
