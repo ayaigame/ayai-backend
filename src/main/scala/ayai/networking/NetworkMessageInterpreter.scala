@@ -33,6 +33,7 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         println("{\"type\": \"id\", \"id\": \"" + id + "\", \"x\": " + x + ", \"y\": " + y +" }")
         queue ! new AddInterpretedMessage(new AddNewCharacter(id, x, y))
         queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
+        queue ! new AddInterpretedMessage(new InitializeRoom(wsFrame, id))
       case "echo" =>
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
       case "move" =>

@@ -36,7 +36,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
     val otherEntities: ImmutableBag[Entity] = getRoomEntities(room.id)
 
-    var json = "{\"you\": " + getEntityInfo(characterEntity) + ", \"others\": ["
+    var json = "{\"type\" : \"update\", \"you\": " + getEntityInfo(characterEntity) + ", \"others\": ["
     var entityJSONs = new ArrayBuffer[String]()
     for(i <- 0 until otherEntities.size()) {
       if(characterEntity.getId() != otherEntities.get(i).getId()) {
@@ -81,4 +81,13 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     case CharacterRadius(characterId) => getCharacterRadius(characterId)
     case _ => println("Error: from serializer.")
   }
+
+   // { "map" : {
+   //    "root" : "assets/maps"
+   //    "tilemap" : "map3.json",
+   //    "tilesets" : [
+   //       {"image" : "sd33.png" },
+   //       {"image" : "blah_blah.png" }
+   //    ]
+   //  }}
 }

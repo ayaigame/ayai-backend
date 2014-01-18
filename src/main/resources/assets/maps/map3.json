@@ -53,11 +53,11 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"5202_1075650560.png",
+         "image":"sd33.png",
          "imageheight":640,
          "imagewidth":1200,
          "margin":0,
-         "name":"5202_1075650560",
+         "name":"sd33",
          "properties":
             {
 

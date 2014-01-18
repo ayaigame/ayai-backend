@@ -107,7 +107,7 @@ object GameLoop {
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             aBullets += JBullet(characterID, tempPos.x, tempPos.y)
           } else {
-
+            
             //This is how we get character specific info, once we actually integrate this in.
             val future1 = serializer ? new CharacterRadius(characterID)
             val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
