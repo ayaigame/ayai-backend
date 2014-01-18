@@ -13,6 +13,7 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 /** External Imports **/
 import scala.util.Random
 import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 import java.rmi.server.UID
 
@@ -29,8 +30,23 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         val x: Int = Random.nextInt(750) + 32
         val y: Int = Random.nextInt(260) + 32
 
-        wsFrame.writeText("{\"type\": \"id\", \"id\": \"" + id + "\", \"x\": " + x + ", \"y\": " + y +" }")
-        println("{\"type\": \"id\", \"id\": \"" + id + "\", \"x\": " + x + ", \"y\": " + y +" }")
+        val tilemap: String = "/assets/maps/map3.json"
+        val tileset: String = "/assets/tiles/sd33.png"
+
+
+           val json = (
+                ("type" -> "id") ~
+                ("id" -> id) ~
+                ("x" -> x) ~
+                ("y" -> y) ~
+                ("tilemap" -> tilemap) ~
+                ("tileset" -> tileset)
+                )
+
+
+        wsFrame.writeText(compact(render(json)))
+        println(compact(render(json)))
+
         queue ! new AddInterpretedMessage(new AddNewCharacter(id, x, y))
         queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
         // queue ! new AddInterpretedMessage(new InitializeRoom(wsFrame, id))

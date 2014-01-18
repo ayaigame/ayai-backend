@@ -112,7 +112,7 @@ object GameLoop {
             val future1 = serializer ? new CharacterRadius(characterID)
             val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
             val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterID)
-            actorSelection ! new ConnectionWrite(compact(render(result1)))
+            actorSelection ! new ConnectionWrite(result1)
 
             // val tempPos : Position = tempEntity.getComponent(classOf[Position])
             // val tempHealth : Health = tempEntity.getComponent(classOf[Health])
