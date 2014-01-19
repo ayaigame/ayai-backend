@@ -66,9 +66,9 @@ object EntityFactory {
   	entityRoom
   }
 
-  case class TMap(width : Int, height : Int)
+  case class TMap(id : Int, width : Int, height : Int)
   case class Tiles(data : List[Int], width : Int, height : Int)
-
+  case class Transport(start_x : Int, start_y : Int, end_x: Int, end_y : Int, roomTo : Int)
   def loadRoomFromJson(world : World, roomId : Int, jsonFile : String) : Entity = {
     implicit val formats = net.liftweb.json.DefaultFormats
     val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
@@ -83,9 +83,11 @@ object EntityFactory {
     bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width)}
 //           .foreach{j => println(compact(render(j)))}
     val arrayTile : Array[Array[Tile]] = Array.fill[Tile](tmap.width, tmap.height)(new Tile())
+    //get the overall size and id of maps
+    val id : Int = tmap.id
     val height : Int = tmap.height
     val width : Int = tmap.width
-     println("Need to test1: " + bundles(0).data(0))
+    //get and transorm tiles from a list to multi-dimensional array
     for(i <- 0 until (width*height)) {
         arrayTile(i/width)(i%height) = new Tile(bundles(0).data(i))
       }
@@ -94,7 +96,7 @@ object EntityFactory {
     tileMap.width = tmap.width
     tileMap.file = jsonFile
     //create tilemap
-    val entityRoom : Entity = createRoom(world, roomId, tileMap)
+    val entityRoom : Entity = createRoom(world, id, tileMap)
     //println(lines)
     entityRoom
   }

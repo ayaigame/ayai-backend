@@ -21,6 +21,15 @@ class RoomChangingSystem(roomHash : HashMap[], a : Aspect = Aspect.getAspectForA
 	@Mapper
 	var mapEventMapper : ComponentMapper[Transport] = _
 	override def process(e : Entity) {
-		//get room hash
+		//get information from transport class
+		val transportEvent : Transport = mapEventMapper.get(e)
+		val roomComponent : Room = roomMapper.get(e)
+
+		//make sure that room exists
+		
+
+		//take user out of their rooms
+		e.removeComponent(classOf[Transport])
+
 	}
 }

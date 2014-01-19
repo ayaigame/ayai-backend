@@ -55,8 +55,11 @@ object GameLoop {
     world.setManager(new TagManager())
     world.setSystem(new MovementSystem(roomHash))
     world.setSystem(new CollisionSystem(world))
+    world.setSystem(new RoomChangingSystem(roomHash))
     world.initialize()
     
+    //load all rooms
+
     val room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
     roomHash.put(Constants.STARTING_ROOM_ID, room)
     //create a room 
