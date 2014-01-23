@@ -5,7 +5,6 @@ import ayai.components.Position
 import ayai.components.Room
 
 class Transport(var startPosition : Position, 
-				var endPosition : Position, 
 				var toRoom : Room) extends Component {
 
 }

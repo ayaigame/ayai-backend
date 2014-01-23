@@ -85,11 +85,11 @@ object EntityFactory {
     val parsedJson = parse(lines)
     val tmap = parsedJson.extract[JTMap]
     val jtransports = (parsedJson \\ "transports").extract[List[JTransport]]
-    val transports : List[TransportInfo] = List()
+    var transports : List[TransportInfo] = Nil
     for(trans <- jtransports) {
       val startPosition = new Position(trans.start_x, trans.start_y)
       val endPosition = new Position(trans.end_x, trans.end_y)
-      transports + new TransportInfo(startPosition, endPosition, trans.toRoomfile, trans.toRoomId)
+      transports = new TransportInfo(startPosition, endPosition, trans.toRoomFile, trans.toRoomId) :: transports
     }
     val bundles = (parsedJson \\ "layers").extract[List[JTiles]]
     bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width)}
@@ -103,7 +103,7 @@ object EntityFactory {
     for(i <- 0 until (width*height)) {
         arrayTile(i/width)(i%height) = new Tile(bundles(0).data(i))
       }
-    val tileMap : TileMap = new TileMap(arrayTile)
+    val tileMap : TileMap = new TileMap(arrayTile, transports)
     tileMap.height = tmap.height
     tileMap.width = tmap.width
     tileMap.file = jsonFile
