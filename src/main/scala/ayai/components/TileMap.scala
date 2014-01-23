@@ -9,10 +9,11 @@ import scala.math._
 import ayai.components.Position
 
 //128 x 128 is only default
-class TileMap(val array : Array[Array[Tile]], val tileSize : Int = 32) extends Component {
+class TileMap(val array : Array[Array[Tile]], var listOfTransport : List[TransportInfo]) extends Component {
 	var file : String = ""
 	var width : Int = _
 	var height : Int = _
+	var tileSize : Int = 32
 	
 	//getMaximumPosition - get the maximum position value for x
 	def getMaximumWidth() : Int = {

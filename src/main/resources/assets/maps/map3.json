@@ -73,10 +73,11 @@
  "version":1,
  "width":40,
  "transports" : [{
-        start_x : 0,
-        start_y : 0,
-        end_x : 0,
-        end_y : 40,
-        toRoomId : 1
-  }]
+        "start_x" : 0,
+        "start_y" : 0,
+        "end_x" : 0,
+        "end_y" : 40,
+        "toRoomFile" : "map2.json",
+        "toRoomId" : 1
+  }],
 }

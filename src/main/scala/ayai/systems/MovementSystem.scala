@@ -14,11 +14,13 @@ import ayai.components.Position
 import ayai.components.Velocity
 import ayai.components.Health
 import ayai.components.Room
+import ayai.components.Character
 import ayai.components.TileMap
 import ayai.components.Transport
+
 import scala.collection.mutable.HashMap
 
-class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspectForAll(classOf[Position], classOf[Velocity],classOf[Movable], classOf[Room])) extends EntityProcessingSystem(a) {    
+class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspectForAll(classOf[Position], classOf[Velocity],classOf[Movable], classOf[Room], classOf[Character])) extends EntityProcessingSystem(a) {    
   @Mapper
   var positionMapper: ComponentMapper[Position] = _
   @Mapper
@@ -27,7 +29,8 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
   var movingMapper : ComponentMapper[Movable] = _
   @Mapper 
   var roomMapper : ComponentMapper[Room] = _
-  
+  @Mapper
+  var characterMapper : ComponentMapper[Character] = _
   	  //this will only move characters who have received a movement key and the current component is still set to True
       override def process(e: Entity) {
       	var movable : Movable =  movingMapper.get(e) 
@@ -43,11 +46,14 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
         //now check to see if movement has created gone past the map (if so put it at edge)
         val roomEntity : Entity = roomHash(room.id) 
         //will update position in function
-        tileMap : TileMap = roomEntity.getComponent(classOf[TileMap])
+        val tileMap : TileMap = roomEntity.getComponent(classOf[TileMap])
         tileMap.isPositionInBounds(position)
 
-        tileMap.checkIfTransport(roomEntity, position)
+        
         //get room and check if player should change rooms
+
+        //tileMap.checkIfTransport(roomEntity, position)
+        //add transport to players (roomchanging system will take over)
       }
 
                 //p.x += velocity.speed*world.delta
