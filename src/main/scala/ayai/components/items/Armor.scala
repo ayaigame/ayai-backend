@@ -2,7 +2,7 @@
 
 // import com.artemis.Component
 
-// class Armor(slot: String, protection: Int, statBonuses: List[StatBonus]) extends Component{
+// class Armor(slot: String, protection: Int, statBonuses: List[StatBonus]) extends Item{
   
 
 //   // override def toString: String = {

@@ -100,47 +100,21 @@ object GameLoop {
       val characterTags: List[String] = tagManager.getRegisteredTags.toList
 
       for (characterID <- characterTags) {
-          //need better way of figuring if something is bullet, or figuring 
-          // out what each entity has
-          val tempEntity : Entity = tagManager.getEntity(characterID)
-          if(tempEntity.getComponent(classOf[Bullet]) != null) {
-            val tempPos : Position = tempEntity.getComponent(classOf[Position])
-            aBullets += JBullet(characterID, tempPos.x, tempPos.y)
-          } else {
-            
-            //This is how we get character specific info, once we actually integrate this in.
-            val future1 = serializer ? new CharacterRadius(characterID)
-            val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
-            val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterID)
-            actorSelection ! new ConnectionWrite(result1)
-
-            // val tempPos : Position = tempEntity.getComponent(classOf[Position])
-            // val tempHealth : Health = tempEntity.getComponent(classOf[Health])
-            // val tempRoom : Room = tempEntity.getComponent(classOf[Room])
-            // aCharacters += JCharacter(characterID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
-          }
+        //need better way of figuring if something is bullet, or figuring 
+        // out what each entity has
+        val tempEntity : Entity = tagManager.getEntity(characterID)
+        if(tempEntity.getComponent(classOf[Bullet]) != null) {
+          val tempPos : Position = tempEntity.getComponent(classOf[Position])
+          aBullets += JBullet(characterID, tempPos.x, tempPos.y)
+        } else {
+          
+          //This is how we get character specific info, once we actually integrate this in.
+          val future1 = serializer ? new CharacterRadius(characterID)
+          val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
+          val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterID)
+          actorSelection ! new ConnectionWrite(result1)
+        }
       }
-
-
-      // val json = (
-      //   ("type" -> "fullsync") ~
-      //   ("maps" -> "/assets/maps/map3.json") ~
-      //   ("characters" -> aCharacters.toList.map{ p =>
-      //   (("id" -> p.id) ~
-      //    ("x" -> p.x) ~
-      //    ("y" -> p.y) ~
-      //    ("currHealth" -> p.currHealth) ~
-      //    ("maximumHealth" -> p.maximumHealth) ~
-      //    ("room" -> p.roomId))}) ~
-      //   ("bullets" -> aBullets.toList.map{ n => 
-      //   (("id" -> n.id) ~  
-      //    ("x" -> n.x) ~
-      //    ("y" -> n.y))}))
-
-        
-      //   //println(compact(render(json)))
-      //   val actorSelection = networkSystem.actorSelection("user/SockoSender*")
-      //   actorSelection ! new ConnectionWrite(compact(render(json)))
 
       Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)
     }
