@@ -18,8 +18,8 @@ object EntityFactory {
   /**
    * might have to do some networking stuff, dont know yet
    */
-   /**
-  def createCharacter(world : World, roomId: Int, x: Int, y : Int) : Entity = {
+   
+  def createCharacter(world : World, roomId: Int, x: Int, y : Int) : Character = {
     var character : Entity = world.createEntity()
     var position : Position = new Position(x,y)
     var velocity : Velocity = new Velocity(3,4)
@@ -38,7 +38,7 @@ object EntityFactory {
     GameLoop.map.addEntity(character.getId(),x,y)
     character;
   }
-
+/**
   def createItem(world : World, x : Int, y :Int, name : String) : Entity = {
     var item : Entity = world.createEntity()
     var position : Position = new Position(x, y)
