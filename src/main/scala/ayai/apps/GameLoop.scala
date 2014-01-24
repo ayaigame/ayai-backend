@@ -121,6 +121,8 @@ object GameLoop {
               val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterID)
               actorSelection1 ! new ConnectionWrite(result2)  
               tempEntity.removeComponent(classOf[MapChange])
+              world.changedEntity(tempEntity)
+              Thread.sleep(2000)
             }
             //This is how we get character specific info, once we actually integrate this in.
             val future1 = serializer ? new CharacterRadius(characterID)

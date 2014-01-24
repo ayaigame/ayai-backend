@@ -50,7 +50,7 @@ class RoomChangingSystem(roomHash : HashMap[Int, Entity], a : Aspect = Aspect.ge
 		e.removeComponent(classOf[Transport])
 
 		e.addComponent(new MapChange(transportEvent.toRoom.id))
-		world.changed(e)
+		world.changedEntity(e)
 		//send to network
 	}
 }

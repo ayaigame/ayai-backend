@@ -56,7 +56,7 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
         val transport = tileMap.checkIfTransport(position)
         if(transport != null) {
           e.addComponent(transport)
-          world.changed(e)
+          world.changedEntity(e)
 
         }
 
