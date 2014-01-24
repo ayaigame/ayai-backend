@@ -48,8 +48,9 @@ class RoomChangingSystem(roomHash : HashMap[Int, Entity], a : Aspect = Aspect.ge
 		position.y = transportEvent.startPosition.y
 		//take user out of their rooms
 		e.removeComponent(classOf[Transport])
-		check(e)
+
 		e.addComponent(new MapChange(transportEvent.toRoom.id))
+		world.changed(e)
 		//send to network
 	}
 }

@@ -56,8 +56,10 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
         val transport = tileMap.checkIfTransport(position)
         if(transport != null) {
           e.addComponent(transport)
-          world.getSystem(classOf[RoomChangingSystem]).added(e)
+          world.changed(e)
+
         }
+
         //add transport to players (roomchanging system will take over)
       }
 
