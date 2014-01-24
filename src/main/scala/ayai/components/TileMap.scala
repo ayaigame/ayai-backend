@@ -11,9 +11,10 @@ import scala.math._
 import ayai.components.Transport
 import ayai.components.Position
 import ayai.maps.TransportInfo
+import ayai.maps.Tilesets
 
 //128 x 128 is only default
-class TileMap(val array : Array[Array[Tile]], var listOfTransport : List[TransportInfo]) extends Component {
+class TileMap(val array : Array[Array[Tile]], var listOfTransport : List[TransportInfo], var tilesets : Tilesets) extends Component {
 	var file : String = ""
 	var width : Int = _
 	var height : Int = _
@@ -64,11 +65,16 @@ class TileMap(val array : Array[Array[Tile]], var listOfTransport : List[Transpo
 	**/
 	def checkIfTransport(characterPosition : Position) : Transport = {
 		val inTransport : Boolean = false
-		val transportInfo : Transport
 		for(transport <- listOfTransport) {
 			val startPosition = transport.startingPosition
 			val endPosition = transport.endingPosition
+
+			if((characterPosition.x >= (startPosition.x*tileSize) && characterPosition.y >= (startPosition.y*tileSize)) &&
+			   (characterPosition.x < (endPosition.x*tileSize) && characterPosition.y < (endPosition.y*tileSize))) {
+			   	//CHANGE STARTING POSITION
+				return new Transport(new Position(100,100), new Room(transport.toRoomId))
+			}
 		}
-		return new Transport(new Position(100,100))
+		return null
 	}
 }

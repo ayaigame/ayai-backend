@@ -12,6 +12,7 @@ import ayai.components.Character
 import ayai.components.Movable
 import ayai.components.Transport
 import ayai.components.Position
+import ayai.components.MapChange
 
 
 import scala.collection.mutable.HashMap
@@ -42,8 +43,13 @@ class RoomChangingSystem(roomHash : HashMap[Int, Entity], a : Aspect = Aspect.ge
 		e.removeComponent(roomComponent)
 		e.addComponent(new Room(transportEvent.toRoom.id))
 		world.getManager(classOf[GroupManager]).add(e, "ROOM"+transportEvent.toRoom.id)
+		val position : Position = positionMapper.get(e)
+		position.x = transportEvent.startPosition.x
+		position.y = transportEvent.startPosition.y
 		//take user out of their rooms
 		e.removeComponent(classOf[Transport])
-
+		check(e)
+		e.addComponent(new MapChange(transportEvent.toRoom.id))
+		//send to network
 	}
 }

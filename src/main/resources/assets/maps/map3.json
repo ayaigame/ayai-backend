@@ -75,7 +75,7 @@
  "transports" : [{
         "start_x" : 0,
         "start_y" : 0,
-        "end_x" : 0,
+        "end_x" : 1,
         "end_y" : 40,
         "toRoomFile" : "map2.json",
         "toRoomId" : 1

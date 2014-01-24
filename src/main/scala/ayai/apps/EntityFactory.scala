@@ -8,6 +8,7 @@ import com.artemis.World
 import ayai.components._
 import ayai.maps.Tile
 import ayai.maps.TransportInfo
+import ayai.maps.Tilesets
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
@@ -74,6 +75,7 @@ object EntityFactory {
       return "start_x: " + start_x + " toRoomFile: " + toRoomFile
     }
   }
+  case class JTilesets(image : String)
   def loadRoomFromJson(world : World, roomId : Int, jsonFile : String) : Entity = {
     implicit val formats = net.liftweb.json.DefaultFormats
     val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
@@ -84,8 +86,10 @@ object EntityFactory {
 
     val parsedJson = parse(lines)
     val tmap = parsedJson.extract[JTMap]
+    val jtilesets = (parsedJson \\ "tilesets").extract[List[JTilesets]]
     val jtransports = (parsedJson \\ "transports").extract[List[JTransport]]
     var transports : List[TransportInfo] = Nil
+
     for(trans <- jtransports) {
       val startPosition = new Position(trans.start_x, trans.start_y)
       val endPosition = new Position(trans.end_x, trans.end_y)
@@ -102,8 +106,16 @@ object EntityFactory {
     //get and transorm tiles from a list to multi-dimensional array
     for(i <- 0 until (width*height)) {
         arrayTile(i/width)(i%height) = new Tile(bundles(0).data(i))
-      }
-    val tileMap : TileMap = new TileMap(arrayTile, transports)
+    }
+    //parse the tilesets and put them in a List[String]
+    //by jarrad : THIS IS HORRID, REALLY NEED TO FIX THIS UP AND GET FEATURES WORKING FOR MAPS
+    var images : List[String] = Nil
+    for(tileset <- jtilesets) {
+      images = tileset.image :: images
+    }
+    val tilesets = new Tilesets(images)
+
+    val tileMap : TileMap = new TileMap(arrayTile, transports, tilesets)
     tileMap.height = tmap.height
     tileMap.width = tmap.width
     tileMap.file = jsonFile

@@ -17,10 +17,11 @@ import ayai.components.Room
 import ayai.components.Character
 import ayai.components.TileMap
 import ayai.components.Transport
+import ayai.systems.RoomChangingSystem
 
 import scala.collection.mutable.HashMap
 
-class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspectForAll(classOf[Position], classOf[Velocity],classOf[Movable], classOf[Room], classOf[Character])) extends EntityProcessingSystem(a) {    
+class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspectForAll(classOf[Position], classOf[Velocity],classOf[Movable], classOf[Room], classOf[Character]).exclude(classOf[Transport])) extends EntityProcessingSystem(a) {    
   @Mapper
   var positionMapper: ComponentMapper[Position] = _
   @Mapper
@@ -43,16 +44,20 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
       		var movement : MovementAction = new MovementAction(direction)
       		movement.process(e)
       	}
+        
         //now check to see if movement has created gone past the map (if so put it at edge)
         val roomEntity : Entity = roomHash(room.id) 
         //will update position in function
         val tileMap : TileMap = roomEntity.getComponent(classOf[TileMap])
-        tileMap.isPositionInBounds(position)
-
+        tileMap.isPositionInBounds(position) 
         
         //get room and check if player should change rooms
 
-        //tileMap.checkIfTransport(roomEntity, position)
+        val transport = tileMap.checkIfTransport(position)
+        if(transport != null) {
+          e.addComponent(transport)
+          world.getSystem(classOf[RoomChangingSystem]).added(e)
+        }
         //add transport to players (roomchanging system will take over)
       }
 

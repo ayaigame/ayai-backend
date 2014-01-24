@@ -50,10 +50,11 @@
  "version":1,
  "width":100,
  "transports" : [{
-        start_x : 0,
-        start_y : 0,
-        end_x : 0,
-        end_y : 100,
-        toRoomId : 1
+        "start_x" : 0,
+        "start_y" : 0,
+        "end_x" : 32,
+        "end_y" : 100,
+        "toRoomId" : 0,
+        "toRoomFile" : "map3.json",
   }]
 }
