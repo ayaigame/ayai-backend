@@ -69,7 +69,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 //        movement.process(e)
         e.removeComponent(classOf[Movable])
         e.addComponent(new Movable(start, direction))
-
+        world.changedEntity(e)
         //if(start) {
         //    //remove old movable
         //    //currently not thread safe

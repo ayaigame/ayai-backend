@@ -54,7 +54,7 @@ object ItemFactory {
   }
 
   def instantiateArmor(world: World, items: List[AllItemValues]) = {
-    println("Armor: " + items.toString())
+    // println("Armor: " + items.toString())
   }
 
   def instantiateConsumables(world: World, items: List[AllItemValues]) = {
