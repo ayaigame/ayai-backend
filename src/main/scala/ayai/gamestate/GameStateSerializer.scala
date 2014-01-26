@@ -9,7 +9,7 @@ import com.artemis.utils.{Bag, ImmutableBag}
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
 /** Ayai Imports **/
-import ayai.components.{Character, Position, Health, Room}
+import ayai.components.{Character, Position, Health, Room, TileMap}
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
@@ -19,6 +19,7 @@ sealed trait QueryResponse
 
 case class CharacterRadius(characterId: String) extends QueryType
 case class CharacterResponse(json: String)  extends QueryResponse
+case class MapRequest(room : Entity)
 case class SomeData
 
 class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
@@ -79,8 +80,23 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   // }
 
+  def sendMapInfo(room : Entity ) = {
+    var json = "{\"type\" : \"map\", \"root\" : \"assets/maps\","
+    val tilemap = room.getComponent(classOf[TileMap]) 
+    json +=  "\"tilemap\": \"" + tilemap.file + "\"," 
+    json +=  "\"tilesets\" : [" + getTileSetInfo(room) 
+    json += "]}"
+    sender ! json
+  }
+
+  def getTileSetInfo(room : Entity) : String = {
+    val tileMap : TileMap = room.getComponent(classOf[TileMap])
+    return tileMap.tilesets.toString
+  }
+
   def receive = {
     case CharacterRadius(characterId) => getCharacterRadius(characterId)
+    case MapRequest(room) => sendMapInfo(room)
     case _ => println("Error: from serializer.")
   }
 

@@ -9,8 +9,8 @@ import akka.util.Timeout
 import scala.concurrent.{ ExecutionContext, Promise }
 import java.rmi.server.UID
 
-import ayai.systems._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius}
+import ayai.systems.{MovementSystem,CollisionSystem,RoomChangingSystem}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
 import com.artemis.World
 import com.artemis.Entity
 import com.artemis.managers.{GroupManager, TagManager}
@@ -51,21 +51,28 @@ object GameLoop {
     running = true
     var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
+    val networkSystem = ActorSystem("NetworkSystem")
+
     world.setManager(new GroupManager())
     world.setManager(new TagManager())
     world.setSystem(new MovementSystem(roomHash))
+    world.setSystem(new RoomChangingSystem(roomHash))
     world.setSystem(new CollisionSystem(world))
     world.initialize()
     
-    val room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
+    //load all rooms
+
+    var room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
     roomHash.put(Constants.STARTING_ROOM_ID, room)
+    room = EntityFactory.loadRoomFromJson(world, 1, "map2.json")
+    roomHash.put(1, room)
+    
     //create a room 
     room.addToWorld
 
 
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
-    val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
@@ -107,7 +114,16 @@ object GameLoop {
             val tempPos : Position = tempEntity.getComponent(classOf[Position])
             aBullets += JBullet(characterID, tempPos.x, tempPos.y)
           } else {
-            
+            if(tempEntity.getComponent(classOf[MapChange]) != null) {
+              val map = tempEntity.getComponent(classOf[MapChange])
+              val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+              val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
+              val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterID)
+              println(result2)
+              actorSelection1 ! new ConnectionWrite(result2)  
+              tempEntity.removeComponent(classOf[MapChange])
+              world.changedEntity(tempEntity)
+            }
             //This is how we get character specific info, once we actually integrate this in.
             val future1 = serializer ? new CharacterRadius(characterID)
             val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]

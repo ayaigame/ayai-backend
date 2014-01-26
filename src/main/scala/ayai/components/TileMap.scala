@@ -1,18 +1,24 @@
 package ayai.components
 
 import com.artemis.Component
+import com.artemis.Entity
+
 import ayai.maps.Tile
 import ayai.maps.Layer
 
 import scala.math._
 
+import ayai.components.Transport
 import ayai.components.Position
+import ayai.maps.TransportInfo
+import ayai.maps.Tilesets
 
 //128 x 128 is only default
-class TileMap(val array : Array[Array[Tile]], val tileSize : Int = 32) extends Component {
+class TileMap(val array : Array[Array[Tile]], var listOfTransport : List[TransportInfo], var tilesets : Tilesets) extends Component {
 	var file : String = ""
 	var width : Int = _
 	var height : Int = _
+	var tileSize : Int = 32
 	
 	//getMaximumPosition - get the maximum position value for x
 	def getMaximumWidth() : Int = {
@@ -51,5 +57,24 @@ class TileMap(val array : Array[Array[Tile]], val tileSize : Int = 32) extends C
 		else if(min(position.y,getMaximumHeight) >= getMaximumHeight-tileSize)
 			position.y = getMaximumHeight - tileSize
 		position
+	}
+
+	/**
+	For checkIfTransport, use the characters position and see if they are in any of the transport areas
+	If inside transport area, then return the new transport
+	**/
+	def checkIfTransport(characterPosition : Position) : Transport = {
+		val inTransport : Boolean = false
+		for(transport <- listOfTransport) {
+			val startPosition = transport.startingPosition
+			val endPosition = transport.endingPosition
+
+			if((characterPosition.x >= (startPosition.x*tileSize) && characterPosition.y >= (startPosition.y*tileSize)) &&
+			   (characterPosition.x < (endPosition.x*tileSize) && characterPosition.y < (endPosition.y*tileSize))) {
+			   	//CHANGE STARTING POSITION
+				return new Transport(new Position(100,100), new Room(transport.toRoomId))
+			}
+		}
+		return null
 	}
 }
