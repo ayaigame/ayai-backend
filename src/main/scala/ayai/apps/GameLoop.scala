@@ -24,6 +24,7 @@ import java.lang.Boolean
 import ayai.components.Position
 import ayai.components._
 import ayai.data._
+import ayai.utils.IterableBag
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
@@ -59,10 +60,10 @@ object GameLoop {
     
     val room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
     roomHash.put(Constants.STARTING_ROOM_ID, room)
-    //create a room 
+    //create a room
     room.addToWorld
 
-    Instantiation.bootup(world)
+    ItemFactory.bootup(world)
 
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
@@ -95,26 +96,24 @@ object GameLoop {
 //      case class JMap(id : String, roomId : Int, array)
 
       var aCharacters: ArrayBuffer[JCharacter] = ArrayBuffer()
-      var aBullets: ArrayBuffer[JBullet] = ArrayBuffer()
 
       val tagManager = world.getManager(classOf[TagManager])
-      val characterTags: List[String] = tagManager.getRegisteredTags.toList
+      val characterEntities =  world.getManager(classOf[GroupManager]).getEntities("CHARACTER")
 
-      for (characterID <- characterTags) {
+//////////////////////////////////////////////////////////////////////////////
+      println(tagManager.getEntity("ITEMS0").toString())
+//////////////////////////////////////////////////////////////////////////////
+
+      for (characterEntity <- new IterableBag(characterEntities)) {
         //need better way of figuring if something is bullet, or figuring 
         // out what each entity has
-        val tempEntity : Entity = tagManager.getEntity(characterID)
-        if(tempEntity.getComponent(classOf[Bullet]) != null) {
-          val tempPos : Position = tempEntity.getComponent(classOf[Position])
-          aBullets += JBullet(characterID, tempPos.x, tempPos.y)
-        } else {
+        val characterId = characterEntity.getComponent(classOf[Character]).id
           
-          //This is how we get character specific info, once we actually integrate this in.
-          val future1 = serializer ? new CharacterRadius(characterID)
-          val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
-          val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterID)
-          actorSelection ! new ConnectionWrite(result1)
-        }
+        //This is how we get character specific info, once we actually integrate this in.
+        val future1 = serializer ? new CharacterRadius(characterId)
+        val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
+        val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterId)
+        actorSelection ! new ConnectionWrite(result1)
       }
 
       Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)

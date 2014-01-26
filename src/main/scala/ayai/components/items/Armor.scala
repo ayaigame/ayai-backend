@@ -1,13 +1,18 @@
-// package ayai.components
+package ayai.components
 
-// import com.artemis.Component
+import com.artemis.Component
 
-// class Armor(slot: String, protection: Int, statBonuses: List[StatBonus]) extends Item{
+class Armor(
+    name: String,
+    value: Int,
+    weight: Double,
+    slot: String,
+    protection: Int)
+  extends Item(name, itemType = "armor", value, weight) {
   
-
-//   // override def toString: String = {
-//   //   "{\"name\": " + name + "}"
-//   // }
+  // override def toString: String = {
+  //   "{\"name\": " + name + "}"
+  // }
 
   
-// }
+}

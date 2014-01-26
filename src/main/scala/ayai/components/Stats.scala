@@ -7,7 +7,7 @@ import scala.collection.mutable._
 case class Stat(attributeType: String, magnitude: Int)
 
 class Stats(stats: ArrayBuffer[Stat]) extends Component {
-  def this() = this(new ArrayBuffer())
+  def this() = this(new ArrayBuffer[Stat]())
 
   def addStat(newStat: Stat) = {
     stats += newStat
@@ -21,12 +21,5 @@ class Stats(stats: ArrayBuffer[Stat]) extends Component {
   //hopefully should only ever be 1 match
   def removeStat(statName: String) = {
     stats.remove(stats.indexWhere((stat: Stat) => stat.attributeType == statName))
-    //stats -= stats.find((stat: Stat) => stat.attributeType == statName)
-  }
-
-  // override def toString: String = {
-    // "{\"name\": " + name + "}"
-  // }
-
-  
+  }  
 }

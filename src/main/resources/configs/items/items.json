@@ -13,5 +13,6 @@
 			}],
 
 	"external_items": [
-		"src/main/resources/configs/items/swords.json"]
+		"src/main/resources/configs/items/swords.json",
+		"src/main/resources/configs/items/armor.json"]
 }
