@@ -3,18 +3,24 @@ package ayai.components
 import com.artemis.Component
 import com.artemis.Entity
 
-class FSM_AI(val states : List[State]) extends AISystem {
-	// assumes starting state is states[0]
-	val currentState = states[0]
+class FSM_AI() extends AISystem {
+	val currentState = 0
+	val target = null
 
-	def checkState() = {
-		val tempCondition = currentState.condition
-		if(tempCondition.checkCondition){
-			updateState(currentState.nextState)
+	def checkState(position : something, sight : int) = {
+		if(currentState == 0){
+			tempObjects = findObjects(position, sight)
+			if(tempObjects){
+				target = tempObjects[0]
+				updateState(1)
+			}
+		}
+		if(currentState == 1){
+			Astar(origin, target, map)
 		}
 	}
 
-	def updateState(newState : State) = {
+	def updateState(newState : int) = {
 		currentState = newState
 	}
 }
