@@ -21,7 +21,7 @@ import ayai.systems.RoomChangingSystem
 
 import scala.collection.mutable.HashMap
 
-class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspectForAll(classOf[Position], classOf[Velocity],classOf[Movable], classOf[Room], classOf[Character]).exclude(classOf[Transport])) extends EntityProcessingSystem(a) {    
+class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspectForAll(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character]).exclude(classOf[Transport])) extends EntityProcessingSystem(a) {    
   @Mapper
   var positionMapper: ComponentMapper[Position] = _
   @Mapper
@@ -34,16 +34,16 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
   var characterMapper : ComponentMapper[Character] = _
   	  //this will only move characters who have received a movement key and the current component is still set to True
       override def process(e: Entity) {
-      	var movable : Movable =  movingMapper.get(e) 
+      	var movable : Movable = movingMapper.get(e)
       	var position : Position = positionMapper.get(e)
       	var velocity : Velocity = velocityMapper.get(e)
         var room : Room = roomMapper.get(e)
       	//if moving then process for the given direction
-      	if(movable.moving) {
-      		var direction : MoveDirection = movable.direction
-      		var movement : MovementAction = new MovementAction(direction)
-      		movement.process(e)
-      	}
+        if(movable.moving) {
+          var direction : MoveDirection = movable.direction
+          var movement : MovementAction = new MovementAction(direction)
+          movement.process(e)
+        }
         
         //now check to see if movement has created gone past the map (if so put it at edge)
         val roomEntity : Entity = roomHash(room.id) 
@@ -52,6 +52,7 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
         tileMap.isPositionInBounds(position) 
         
         //get room and check if player should change rooms
+        //add transport to players (roomchanging system will take over)
 
         val transport = tileMap.checkIfTransport(position)
         if(transport != null) {
@@ -60,7 +61,6 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
 
         }
 
-        //add transport to players (roomchanging system will take over)
       }
 
                 //p.x += velocity.speed*world.delta
