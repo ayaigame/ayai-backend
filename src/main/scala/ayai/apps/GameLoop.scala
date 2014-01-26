@@ -66,14 +66,14 @@ object GameLoop {
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
     val networkSystem = ActorSystem("NetworkSystem")
-    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
-    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
-    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
+    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()))
+    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)))
+    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)))
+    val authorization = networkSystem.actorOf(Props(new AuthorizationProcessor()))
 
     val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)
 
-
-    val receptionist = new SockoServer(networkSystem, interpreter, messageQueue)
+    val receptionist = new SockoServer(networkSystem, interpreter, messageQueue, authorization)
     receptionist.run(Constants.SERVER_PORT)
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
@@ -87,7 +87,7 @@ object GameLoop {
       result.messages.foreach { message =>
         messageProcessor ! new ProcessMessage(message)
       }
-
+      
       //used to send json messages
       case class JCharacter(id: String, x: Int, y: Int, currHealth : Int, maximumHealth : Int, roomId : Int)
       case class JBullet(id: String, x: Int, y: Int)

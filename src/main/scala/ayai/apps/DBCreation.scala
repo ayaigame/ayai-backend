@@ -10,22 +10,41 @@ import ayai.persistence._
 
 /** External Imports **/
 import java.nio.file.{Files, Paths}
-import scala.slick.driver.H2Driver.simple._
+import org.squeryl.Session
+import org.squeryl.SessionFactory
+import org.squeryl.adapters.H2Adapter
+import org.squeryl.PrimitiveTypeMode._
+import org.mindrot.jbcrypt.BCrypt 
+
 
 object DBCreation {
   def main(args: Array[String]) = {
     // If DB Doesn't exist, create it
     if(!Files.exists(Paths.get("ayai.h2.db"))) {
-      Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
-        (Users.ddl ++ StoredChats.ddl).create
-        // Create Users
-        val names = Array("tim", "kurt", "rob", "ryan", "josh", "jarrad", "jared", "user")
-        for (name <- names) {
-          var newUser = NewUser(name, name)
-          Users.autoInc.insert(newUser) 
+      Class.forName("org.h2.Driver");
+      SessionFactory.concreteFactory = Some (() =>
+          Session.create(
+          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+          new H2Adapter))
+        transaction {
+          Accounts.create
+          Accounts.printDdl
+           
         }
+      } else {
+       Class.forName("org.h2.Driver");
+      SessionFactory.concreteFactory = Some (() =>
+          Session.create(
+          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+          new H2Adapter))
+      transaction {
+        val tim = Accounts.accounts.insert(new Account("tim", BCrypt.hashpw("tim", BCrypt.gensalt())))
+        val account = Accounts.getAccount("tim")
+        println(account)
+        val token = Accounts.validatePassword("tim", "tim")
+        println(token)
+        
       }
-  
     }
   }
 }

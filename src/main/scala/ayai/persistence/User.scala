@@ -1,37 +1,73 @@
 package ayai.persistence
 /**
- * ayai.persistence.User
- * Database object for storing Users
- * For information on User vs New User: http://stackoverflow.com/questions/13199198/using-auto-incrementing-fields-with-postgresql-and-slick
+ * ayai.persistence.Account
+ * Database object for storing Account
  */
 
-/** External Imports */
-import scala.slick.driver.H2Driver.simple._
+import org.squeryl.{Schema, KeyedEntity}
+import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.annotations.Column
+import org.mindrot.jbcrypt.BCrypt 
+import java.util.Date
+import java.sql.Timestamp
 
-case class User(id: Int, username: String, realname: String)
-case class NewUser(username: String, realname: String)
+object Accounts extends Schema {
+  val accounts = table[Account]
+  val chats = table[Chat]
+  val tokens = table[Token]
+  val senderToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.sender_id)
+  val receiverToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.receiver_id)
+  val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.user_id)
 
-object Users extends Table[User]("users") {
-  def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
-  def username = column[String]("username")
-  def realname = column[String]("realname")
+  def registerUser(username: String, password: String) = {accounts.insert(new Account(username, BCrypt.hashpw(password, BCrypt.gensalt())))}
 
-  def * = id ~ username ~ realname <> (User, User.unapply _)
-  def autoInc = username ~ realname <> (NewUser, NewUser.unapply _) returning id
+  def getAccount(username: String) = {accounts.where(account => account.username === username).single}
+
+  def createToken(account: Account): String = {
+    val token = java.util.UUID.randomUUID.toString
+    tokens.insert(new Token(account.id, token))
+    return token
+  }
+
+  def validatePassword(username: String, password: String): String  = {
+    val account = getAccount(username) 
+    if(BCrypt.checkpw(password, account.password)) {
+      return createToken(account)
+    } else {
+      return ""
+   }
+  }
 }
 
-object UserQuery {
-  def getByID(id: Int):Option[User] = {
-    Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
-      val query = for{u <- Users if u.id is id} yield (u.id, u.username, u.realname)
-      query.firstOption map { case(i, u, r) => User(i, u, r) }
-    }
-  }
+case class Account(
+              val username: String,
+              var password: String) 
+            extends AccountDb2Object{
+                def this() = this("", "")
+                lazy val sentChats = Accounts.senderToChat.left(this)
+                lazy val receivedChats = Accounts.receiverToChat.left(this)
+                lazy val registeredTokens = Accounts.accountToToken.left(this)
+            }
+case class Token(
+              val user_id: Long,
+              val token: String) extends AccountDb2Object { 
+                def this() = this(0, "")
+                lazy val user = Accounts.accountToToken.right(this)
+              }
 
-  def getByUsername(username: String):Option[User] = {
-    Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
-      val query = for{u <- Users if u.username is username} yield (u.id, u.username, u.realname)
-      query.firstOption map { case(i, u, r) => User(i, u, r) }
-    }
-  }
+case class Chat(
+           val message: String,
+           val sender_id: Long,
+           val receiver_id: Long,
+           var received: Boolean) 
+          extends AccountDb2Object {
+            def this() = this("", 0, 0, false)
+            lazy val sender = Accounts.senderToChat.right(this)
+            lazy val receiver = Accounts.receiverToChat.right(this)
+}
+
+
+
+class AccountDb2Object extends KeyedEntity[Long] {
+  val id: Long = 0
 }

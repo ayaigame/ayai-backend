@@ -7,13 +7,13 @@ package ayai.networking.chat
 
 /** Ayai Imports **/
 import ayai.networking.ConnectionWrite
-import ayai.persistence.{StoredChat, StoredChats, NewStoredChat}
+//import ayai.persistence.{StoredChat, StoredChats, NewStoredChat}
 
 /** Akka Imports **/
 import akka.actor.Actor
 
 /** External Imports **/
-import scala.slick.driver.H2Driver.simple.{Database,Session}
+//import scala.slick.driver.H2Driver.simple.{Database,Session}
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
@@ -31,26 +31,26 @@ class ChatReceiver extends Actor {
    }
 
   private def store(chat: Chat, received: Boolean) = {
-    var storedChat = None : Option[NewStoredChat]
-    // Create the type of stored chat based on the type of chat we receive
-    // This is since Public Chats do not have a reciever and are automatically
-    // considered "received"
-    chat match {
-      case PrivateChat(text, sender, receiver) =>
-        storedChat = Some(NewStoredChat(text, sender.id, receiver.id, received))
-      case PublicChat(text, sender) =>
-        storedChat = Some(NewStoredChat(text, sender.id, -1, true))
-    }
+    //var storedChat = None : Option[NewStoredChat]
+    //// Create the type of stored chat based on the type of chat we receive
+    //// This is since Public Chats do not have a reciever and are automatically
+    //// considered "received"
+    //chat match {
+    //  case PrivateChat(text, sender, receiver) =>
+    //    storedChat = Some(NewStoredChat(text, sender.id, receiver.id, received))
+    //  case PublicChat(text, sender) =>
+    //    storedChat = Some(NewStoredChat(text, sender.id, -1, true))
+    //}
 
-    // Insert the chat into the DB
-    storedChat match {
-      case None => 
-        println("Should not get here - this is a private method")
-      case Some(chat) =>
-        Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
-          StoredChats.autoInc.insert(chat)
-        }
-    }  
+    //// Insert the chat into the DB
+    //storedChat match {
+    //  case None => 
+    //    println("Should not get here - this is a private method")
+    //  case Some(chat) =>
+    //    Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
+    //      StoredChats.autoInc.insert(chat)
+    //    }
+    //}  
 
   }
 
