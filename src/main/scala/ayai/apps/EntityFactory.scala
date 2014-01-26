@@ -66,6 +66,10 @@ object EntityFactory {
   	entityRoom
   }
 
+  // def retrieveItem(world: World, itemId: Int) : Entity = {
+    
+  // }
+
   case class TMap(width : Int, height : Int)
   case class Tiles(data : List[Int], width : Int, height : Int)
 
