@@ -2,7 +2,7 @@ package ayai.components
 
 import com.artemis.Component
 
-class Armor(
+case class Armor(
     name: String,
     value: Int,
     weight: Double,
