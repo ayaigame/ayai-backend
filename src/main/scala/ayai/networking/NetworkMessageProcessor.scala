@@ -42,7 +42,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
   weight = 10, range = 0, damage = 5, damageType = "physical"))
 //        p.addComponent(new Room(1))
         p.addToWorld
-        // world.getManager(classOf[TagManager]).register(id, p)
+        world.getManager(classOf[TagManager]).register(id, p)
         world.getManager(classOf[GroupManager]).add(p, "CHARACTERS")
         world.getManager(classOf[GroupManager]).add(p, "ROOM"+Constants.STARTING_ROOM_ID)
       }

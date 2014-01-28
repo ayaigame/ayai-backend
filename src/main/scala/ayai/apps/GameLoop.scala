@@ -106,12 +106,22 @@ object GameLoop {
       var aCharacters: ArrayBuffer[JCharacter] = ArrayBuffer()
 
       val tagManager = world.getManager(classOf[TagManager])
-      val characterEntities =  world.getManager(classOf[GroupManager]).getEntities("CHARACTER")
+      val characterEntities =  world.getManager(classOf[GroupManager]).getEntities("CHARACTERS")
 
       for (characterEntity <- new IterableBag(characterEntities)) {
         //need better way of figuring if something is bullet, or figuring 
         // out what each entity has
-        val characterId = characterEntity.getComponent(classOf[Character]).id
+      val characterId = characterEntity.getComponent(classOf[Character]).id
+      if(characterEntity.getComponent(classOf[MapChange]) != null) {
+        val map = characterEntity.getComponent(classOf[MapChange])
+        val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+        val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
+        val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
+        println(result2)
+        actorSelection1 ! new ConnectionWrite(result2)  
+        characterEntity.removeComponent(classOf[MapChange])
+        world.changedEntity(characterEntity)
+      }
           
         //This is how we get character specific info, once we actually integrate this in.
         val future1 = serializer ? new CharacterRadius(characterId)
