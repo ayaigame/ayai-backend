@@ -106,10 +106,13 @@ object EntityFactory {
     //get and transorm tiles from a list to multi-dimensional array
     for(i <- 0 until (width*height)) {
       for(bundle <- bundles) {
-        if(bundle.name == "collision") {
-          arrayTile(i/width)(i%height).layers += new CollidableLayer(bundle.data(i))
-        } else {
-          arrayTile(i/width)(i%height).layers += new NormalLayer(bundle.data(i))        
+        if(bundle.data(i) != 0 ) {
+          if(bundle.name != "collision") 
+            arrayTile(i%width)(i/height).layers += new NormalLayer(bundle.data(i))
+          else {
+            arrayTile(i%width)(i/height).layers += new CollidableLayer(bundle.data(i))
+            println("Height: " + (i%width) + " Row: " + (i/height) + " Value: " + bundle.data(i))
+          }
         }
       }
     }

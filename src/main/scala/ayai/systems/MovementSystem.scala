@@ -38,6 +38,7 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
       	var position : Position = positionMapper.get(e)
       	var velocity : Velocity = velocityMapper.get(e)
         var room : Room = roomMapper.get(e)
+        val originalPosition = new Position(position.x, position.y)
       	//if moving then process for the given direction
         if(movable.moving) {
           var direction : MoveDirection = movable.direction
@@ -50,10 +51,17 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
         //will update position in function
         val tileMap : TileMap = roomEntity.getComponent(classOf[TileMap])
         tileMap.isPositionInBounds(position) 
-        
+        //if on tile Collision go back to original position
+        val collision = tileMap.onTileCollision(position)
         //get room and check if player should change rooms
         //add transport to players (roomchanging system will take over)
+        if(collision) {
+          println("collision")
+          position.x = originalPosition.x
+          position.y = originalPosition.y
+          println(position)
 
+        }
         val transport = tileMap.checkIfTransport(position)
         if(transport != null) {
           e.addComponent(transport)

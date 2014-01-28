@@ -10,13 +10,15 @@ import ayai.maps.Layer
 **/
 class Tile(val layers : ListBuffer[Layer]) {
 	def isCollidable() : Boolean = {
+		for(layer <- layers) {
+			println(layer)
+		}
 		for(layer <- layers) layer match {
-			case CollidableLayer(x: Int) => return true
+			case CollidableLayer(_) => return true 
+			case _ => {
+				
+			}
 		}
 		false
-	}
-
-	def add(layer : Layer) {
-		layers:+layer
 	}
 }
