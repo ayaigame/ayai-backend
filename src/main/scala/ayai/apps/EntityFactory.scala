@@ -108,9 +108,9 @@ object EntityFactory {
       for(bundle <- bundles) {
         if(bundle.data(i) != 0 ) {
           if(bundle.name != "collision") 
-            arrayTile(i%width)(i/height).layers += new NormalLayer(bundle.data(i))
+            arrayTile(i%width)(i/width).layers += new NormalLayer(bundle.data(i))
           else {
-            arrayTile(i%width)(i/height).layers += new CollidableLayer(bundle.data(i))
+            arrayTile(i%width)(i/width).layers += new CollidableLayer(bundle.data(i))
             println("Height: " + (i%width) + " Row: " + (i/height) + " Value: " + bundle.data(i))
           }
         }

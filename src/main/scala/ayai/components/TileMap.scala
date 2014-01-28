@@ -35,7 +35,7 @@ class TileMap(val array : Array[Array[Tile]], var listOfTransport : List[Transpo
 		val x : Int = position.x
 		val y : Int = position.y
 		println("Row: " + valueToTile(y) + " Height: "+ valueToTile(x))
-		return array(valueToTile(y))(valueToTile(x))
+		return array(valueToTile(x))(valueToTile(y))
 	}
 
 	// Get a tile by a x or y value from the array (example: 32 tilesize value, 65 (position) / 32) = 2 tile
