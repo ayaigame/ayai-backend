@@ -14,7 +14,6 @@ import ayai.components.Transport
 import ayai.components.Position
 import ayai.components.MapChange
 
-
 import scala.collection.mutable.HashMap
 
 /**
