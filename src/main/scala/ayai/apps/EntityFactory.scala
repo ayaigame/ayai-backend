@@ -6,13 +6,11 @@ import com.artemis.managers.{TagManager, GroupManager}
 import com.artemis.World
 
 import ayai.components._
-import ayai.maps.Tile
-import ayai.maps.TransportInfo
-import ayai.maps.Tilesets
-
+import ayai.maps._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
+import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 object EntityFactory {
@@ -70,7 +68,7 @@ object EntityFactory {
 
 
   case class JTMap(id : Int, width : Int, height : Int)
-  case class JTiles(data : List[Int], width : Int, height : Int)
+  case class JTiles(data : List[Int], width : Int, height : Int, name : String)
   case class JTransport(start_x : Int, start_y : Int, end_x: Int, end_y : Int, toRoomFile : String, toRoomId : Int) {
     override def toString() : String = {
       return "start_x: " + start_x + " toRoomFile: " + toRoomFile
@@ -98,24 +96,30 @@ object EntityFactory {
       transports = new TransportInfo(startPosition, endPosition, trans.toRoomFile, trans.toRoomId) :: transports
     }
     val bundles = (parsedJson \\ "layers").extract[List[JTiles]]
-    bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width)}
+    bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width, "name" -> bundle.name)}
 //           .foreach{j => println(compact(render(j)))}
-    val arrayTile : Array[Array[Tile]] = Array.fill[Tile](tmap.width, tmap.height)(new Tile())
+    val arrayTile : Array[Array[Tile]] = Array.fill[Tile](tmap.width, tmap.height)(new Tile(ListBuffer()))
     //get the overall size and id of maps
     val id : Int = tmap.id
     val height : Int = tmap.height
     val width : Int = tmap.width
     //get and transorm tiles from a list to multi-dimensional array
     for(i <- 0 until (width*height)) {
-        arrayTile(i/width)(i%height) = new Tile(bundles(0).data(i))
+      for(bundle <- bundles) {
+        if(bundle.name == "collision") {
+          arrayTile(i/width)(i%height).layers += new CollidableLayer(bundle.data(i))
+        } else {
+          arrayTile(i/width)(i%height).layers += new NormalLayer(bundle.data(i))        
+        }
+      }
     }
     //parse the tilesets and put them in a List[String]
     //by jarrad : THIS IS HORRID, REALLY NEED TO FIX THIS UP AND GET FEATURES WORKING FOR MAPS
-    var images : List[String] = Nil
+    val images : ListBuffer[String] = ListBuffer()
     for(tileset <- jtilesets) {
-      images = tileset.image :: images
+      images += tileset.image
     }
-    val tilesets = new Tilesets(images)
+    val tilesets = new Tilesets(images.toList)
 
     val tileMap : TileMap = new TileMap(arrayTile, transports, tilesets)
     tileMap.height = tmap.height
