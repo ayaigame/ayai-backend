@@ -117,7 +117,6 @@ object GameLoop {
         val future2 = serializer ? new MapRequest(roomHash(map.roomId))
         val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
         val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
-        println(result2)
         actorSelection1 ! new ConnectionWrite(result2)  
         characterEntity.removeComponent(classOf[MapChange])
         world.changedEntity(characterEntity)
