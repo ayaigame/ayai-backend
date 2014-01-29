@@ -61,11 +61,11 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       }
 
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
-        println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
+        //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
         val id: String = socketMap(webSocket.webSocketId)
         val e: Entity = world.getManager(classOf[TagManager]).getEntity(id)
         val movement = new MovementAction(direction)
-        println(e.toString)
+        //println(e.toString)
 //        movement.process(e)
         e.removeComponent(classOf[Movable])
         e.addComponent(new Movable(start, direction))

@@ -34,7 +34,6 @@ class TileMap(val array : Array[Array[Tile]], var listOfTransport : List[Transpo
 	def getTileByPosition(position : Position) : Tile = {
 		val x : Int = position.x
 		val y : Int = position.y
-		println("Row: " + valueToTile(y) + " Height: "+ valueToTile(x))
 		return array(valueToTile(x))(valueToTile(y))
 	}
 
