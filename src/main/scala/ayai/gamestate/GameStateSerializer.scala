@@ -64,35 +64,18 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   // }
 
-  //Returns the information about other entities within a room that a character might need to know
-  def getEntityInfo(e: Entity): String = {
-    val json = "test"
-    return json
-/*    val entityId = e.getComponent(classOf[Character])
-    val entityHealth = e.getComponent(classOf[Health])
-    val entityPosition = e.getComponent(classOf[Position])
-    var  entityInfo = "{ \"id\": " + entityId
-    entityInfo += ", \"health\": " + entityHealth.toString
-    return entityInfo + ", \"position\": " + entityPosition.toString + "}"*/
-  }
-
-
   // def getSurroundings(pos: Position) = {
 
   // }
 
   def sendMapInfo(room : Entity ) = {
-    var json = "{\"type\" : \"map\", \"root\" : \"assets/maps\","
     val tilemap = room.getComponent(classOf[TileMap]) 
-    json +=  "\"tilemap\": \"" + tilemap.file + "\"," 
-    json +=  "\"tilesets\" : [" + getTileSetInfo(room) 
-    json += "]}"
-    sender ! json
-  }
+    var json = ("type" -> "map") ~
+      ("tilemap" -> tilemap.file) ~
+      (room.getComponent(classOf[TileMap]).tilesets.asJson)
 
-  def getTileSetInfo(room : Entity) : String = {
-    val tileMap : TileMap = room.getComponent(classOf[TileMap])
-    return tileMap.tilesets.toString
+    println(compact(render(json)))
+    sender ! compact(render(json))
   }
 
   def receive = {
