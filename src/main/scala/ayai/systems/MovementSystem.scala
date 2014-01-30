@@ -56,11 +56,8 @@ class MovementSystem(roomHash : HashMap[Int, Entity], a: Aspect = Aspect.getAspe
         //get room and check if player should change rooms
         //add transport to players (roomchanging system will take over)
         if(collision) {
-          println("collision")
           position.x = originalPosition.x
           position.y = originalPosition.y
-          println(position)
-
         }
         val transport = tileMap.checkIfTransport(position)
         if(transport != null) {

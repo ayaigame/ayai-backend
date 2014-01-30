@@ -1,9 +1,19 @@
 package ayai.components
 
 import com.artemis.Component
+import net.liftweb.json._
+import net.liftweb.json.Serialization.{read, write}
+import net.liftweb.json.JsonDSL._
 
-class Position (var x : Int, var y: Int) extends Component{
- //dont know if i should add room here but should be fine
-	var roomId : Int = _
-	override def toString: String = "{\"x\": " + x + ", \"y\": " + y + "}"
+case class Position (var x : Int, var y: Int) extends Component {
+	implicit val formats = Serialization.formats(NoTypeHints)
+
+	implicit def asJson() : JObject = {
+		("position" -> 
+			("x" -> x) ~
+			("y" -> y))
+	}
+
+	override def toString : String = { write(this) }
+
 }

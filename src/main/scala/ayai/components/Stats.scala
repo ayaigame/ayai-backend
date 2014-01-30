@@ -21,5 +21,9 @@ class Stats(stats: ArrayBuffer[Stat]) extends Component {
   //hopefully should only ever be 1 match
   def removeStat(statName: String) = {
     stats.remove(stats.indexWhere((stat: Stat) => stat.attributeType == statName))
-  }  
+  }
+
+  override def toString() = {
+    "Stat: " + stats(0).attributeType + ", magnitude: " + stats(0).magnitude
+  }
 }
