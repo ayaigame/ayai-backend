@@ -25,7 +25,13 @@ import scala.collection.mutable._
 import java.rmi.server.UID
 import ayai.apps.GameLoop
 
+import net.liftweb.json.JsonDSL._
+import net.liftweb.json._
+import net.liftweb.json.Serialization.{read, write}
+
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
+  implicit val formats = Serialization.formats(NoTypeHints)
+
   def processMessage(message: NetworkMessage) {
     message match {
       case AddNewCharacter(id: String, x: Int, y: Int) => {
@@ -107,6 +113,25 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 
       case ItemMessage(id : String, itemAction : ItemAction) => {
 
+      }
+
+      case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
+          println("Open Received!")
+          val inventory = new ArrayBuffer[Item]()
+        inventory += new Weapon(name = "Orcrist", value = 100000000,
+  weight = 10, range = 1, damage = 500000, damageType = "physical")
+
+          val fakeChest = new Inventory(inventory)
+
+          val jsonLift = 
+            ("type" -> "open") ~
+            ("containerId" -> containerId) ~
+            (fakeChest.asJson)
+
+
+          println(compact(render(jsonLift)))
+
+          sender ! compact(render(jsonLift))
       }
 
       case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {

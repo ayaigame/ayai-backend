@@ -12,14 +12,14 @@ case class Armor(
     protection: Int)
   extends Item(name, itemType = "armor", value, weight) {
   
-    override def asJson : JObject = {
-	("name" -> name) ~
-  	("value" -> value) ~
-	("weight" -> weight)
-    }
-  // override def toString: String = {
-  //   "{\"name\": " + name + "}"
-  // }
+  override def asJson : JObject = {
+	   ("name" -> name) ~
+  	 ("value" -> value) ~
+	   ("weight" -> weight) ~
+     ("slot" -> slot) ~
+     ("protection" -> protection) 
+  }
+
 
   
 }

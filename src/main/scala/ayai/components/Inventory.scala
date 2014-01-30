@@ -22,4 +22,25 @@ case class Inventory (inventory : ArrayBuffer[Item]) extends Component {
 		write(this)
 	}
 
+
+	def addItem(itemToAdd: Item) = {
+		inventory += itemToAdd
+	
+	}
+
+	def removeItem(itemToRemove: Item) = {
+		inventory -= itemToRemove
+	}
+
+
+	def hasItem(itemToCheck: Item) : Boolean = {
+		inventory.contains(itemToCheck)
+	}
+
+	def totalWeight() : Double = {
+		var totalWeight = 0.0;
+		inventory.foreach(e => totalWeight = totalWeight + e.getWeight)
+		return totalWeight
+	}
+
 }

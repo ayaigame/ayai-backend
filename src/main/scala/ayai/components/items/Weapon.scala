@@ -18,7 +18,10 @@ case class Weapon(
   override def asJson : JObject = {
       ("name" -> name) ~
       ("value" -> value) ~
-      ("weight" -> weight)
+      ("weight" -> weight) ~
+      ("range" -> range) ~
+      ("damage" -> damage) ~
+      ("damageType" -> damageType)
   }
 
   override def toString: String = {
