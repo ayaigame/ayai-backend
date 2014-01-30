@@ -131,7 +131,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 
           println(compact(render(jsonLift)))
 
-          sender ! compact(render(jsonLift))
+          webSocket.writeText(compact(render(jsonLift)))
       }
 
       case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
