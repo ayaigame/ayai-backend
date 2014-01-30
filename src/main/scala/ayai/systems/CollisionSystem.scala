@@ -18,7 +18,7 @@ import com.artemis.utils.{Bag, ImmutableBag, Utils}
 import scala.math.abs
 import scala.util.control.Breaks._
 
-class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(classOf[Position], classOf[Bounds])) {
+class CollisionSystem(roomList : ListBuffer[Int], world: World) extends EntitySystem(Aspect.getAspectForAll(classOf[Position], classOf[Bounds])) {
 
 
   @Mapper
@@ -94,6 +94,8 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
     true
   }
   override def processEntities(entities: ImmutableBag[Entity]) {
+
+    quadTree : QuadTree = new QuadTree(0,0)
     val characters: ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("CHARACTERS")
     val bullets : ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("BULLETS")
     val bSize  = bullets.size
@@ -108,7 +110,7 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
     }
 
 
-    for( j <- 0 until bSize) {
+/*    for( j <- 0 until bSize) {
       breakable {
         for( i <- 0 until pSize) {
         //could also set victim here, and let other systme (but that stuffs later)
@@ -119,7 +121,7 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
           }
         }
       }
-    }
+    }*/
   }
 
 }
