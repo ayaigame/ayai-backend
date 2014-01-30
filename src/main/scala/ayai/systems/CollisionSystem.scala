@@ -19,6 +19,8 @@ import scala.math.abs
 import scala.util.control.Breaks._
 
 class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(classOf[Position], classOf[Bounds])) {
+
+
   @Mapper
   val pm: ComponentMapper[Position] = world.getMapper(classOf[Position])
   @Mapper
