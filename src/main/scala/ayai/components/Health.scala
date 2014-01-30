@@ -1,9 +1,12 @@
 package ayai.components
 
 import com.artemis.Component
+import net.liftweb.json.Serialization.{read, write}
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
-class Health(var currentHealth: Int, var maximumHealth: Int) extends Component{
-  
+case class Health(var currentHealth: Int, var maximumHealth: Int) extends Component{
+implicit val formats = Serialization.formats(NoTypeHints)
   def getCurrentHealth() : Int = {
     return this.currentHealth
   }
@@ -31,7 +34,14 @@ class Health(var currentHealth: Int, var maximumHealth: Int) extends Component{
     }
   }
 
-  override def toString: String = {
-    "{\"current\": " + currentHealth + ", \"max\": " + maximumHealth + "}"
+  override def toString : String = {
+    write(this)
   }
+
+  implicit def asJson() : JObject = {
+    ("health" -> 
+      ("currHealth" -> currentHealth) ~
+      ("maximumHealth" -> maximumHealth))
+  }
+
 }

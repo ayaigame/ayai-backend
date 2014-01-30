@@ -4,7 +4,6 @@ package ayai.gamestate
 import com.artemis.{Entity, World}
 import com.artemis.managers.{TagManager, GroupManager}
 import com.artemis.utils.{Bag, ImmutableBag}
-
 /** Akka Imports **/
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
@@ -13,6 +12,8 @@ import ayai.components.{Character, Position, Health, Room, TileMap}
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
+import net.liftweb.json.JsonDSL._
+import net.liftweb.json._
 
 sealed trait QueryType
 sealed trait QueryResponse
@@ -37,27 +38,24 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
     val otherEntities: ImmutableBag[Entity] = getRoomEntities(room.id)
 
-    var json = "{\"type\" : \"update\", \"you\": " + getEntityInfo(characterEntity) + ", \"others\": ["
-    var entityJSONs = new ArrayBuffer[String]()
+//    var json = "{\"type\" : \"update\", \"you\": " + getEntityInfo(characterEntity) + ", \"others\": ["
+    var entityJSONs = new ArrayBuffer[Entity]()
     for(i <- 0 until otherEntities.size()) {
       if(characterEntity.getId() != otherEntities.get(i).getId()) {
-        entityJSONs += getEntityInfo(otherEntities.get(i))
+        entityJSONs += otherEntities.get(i)
       }
     }
+    val jsonLift = 
+      ("type" -> "update") ~
+      ("you" -> ((characterEntity.getComponent(classOf[Character]).asJson()) ~
+        (characterEntity.getComponent(classOf[Position]).asJson) ~
+        (characterEntity.getComponent(classOf[Health]).asJson))) ~
+      ("others" -> entityJSONs.map{ e => 
+        ((e.getComponent(classOf[Character]).asJson()) ~
+        (e.getComponent(classOf[Position]).asJson) ~
+        (e.getComponent(classOf[Health]).asJson))})
 
-    //Kinda need a do-while because the first one doesn't prepend a comma
-    if(entityJSONs.size > 0 ) {
-      json = json + entityJSONs(0)
-    }
-
-    for(i <- 1 until entityJSONs.size) {
-      json = json + ", " + entityJSONs(i)
-    }
-
-    json = json + "]}"
-
-    sender ! json
-    //println(json)
+    sender ! compact(render(jsonLift))
     // sender ! new CharacterResponse(json)
   }
 
@@ -68,13 +66,16 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   //Returns the information about other entities within a room that a character might need to know
   def getEntityInfo(e: Entity): String = {
-    val entityId = e.getComponent(classOf[Character])
+    val json = "test"
+    return json
+/*    val entityId = e.getComponent(classOf[Character])
     val entityHealth = e.getComponent(classOf[Health])
     val entityPosition = e.getComponent(classOf[Position])
     var  entityInfo = "{ \"id\": " + entityId
     entityInfo += ", \"health\": " + entityHealth.toString
-    return entityInfo + ", \"position\": " + entityPosition.toString + "}"
+    return entityInfo + ", \"position\": " + entityPosition.toString + "}"*/
   }
+
 
   // def getSurroundings(pos: Position) = {
 
