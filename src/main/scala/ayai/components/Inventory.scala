@@ -12,6 +12,10 @@ import net.liftweb.json.Serialization.{read, write}
 case class Inventory (inventory : ArrayBuffer[Item]) extends Component {
 	implicit val formats = Serialization.formats(NoTypeHints)
 
+	implicit def asJson : JObject = {
+		("inventory" -> inventory.map{ i =>
+				(i.asJson)})
+	}
 
 
 	override def toString: String = {
