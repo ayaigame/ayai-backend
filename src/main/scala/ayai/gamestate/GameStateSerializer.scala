@@ -32,7 +32,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   //Returns a character's belongings and surroundings.
   def getCharacterRadius(characterId: String) = {
-    val characterEntity : Entity = world.getManager(classOf[TagManager]).getEntity(characterId)
+    val characterEntity : Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + characterId)
     val room = characterEntity.getComponent(classOf[Room])
 
     val otherEntities: ImmutableBag[Entity] = getRoomEntities(room.id)

@@ -9,7 +9,12 @@
 			"damage": 3,
 			"damageType": "physical",
 			"value": 10,
-			"weight": 10
+			"weight": 10,
+			"stats": [
+				{
+					"attributeType": "fireDamage",
+					"magnitude": 5
+					}]
 			}],
 
 	"external_items": [

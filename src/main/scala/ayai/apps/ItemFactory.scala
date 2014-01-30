@@ -26,7 +26,7 @@ object ItemFactory {
       slot: Option[String],
       protection: Option[Int],
       stackable: Option[Boolean],
-      stats: Option[Stats])
+      stats: Option[List[Stat]])
 
   def bootup(world: World) = {
     val items: List[AllItemValues] = getItemsList("src/main/resources/configs/items/items.json")
@@ -38,7 +38,7 @@ object ItemFactory {
   def instantiateWeapons(world: World, items: List[AllItemValues]) = {
     items.foreach (item => {
       var entityItem: Entity = world.createEntity()
-      var weapon: Weapon = new Weapon(
+      var weapon = new Weapon(
         item.name,
         item.value,
         item.weight,
@@ -48,6 +48,10 @@ object ItemFactory {
 
       entityItem.addComponent(weapon)
 
+      // var stats = new Stats(new ArrayBuffer().appendAll(item.stats.getOrElse(new ArrayBuffer[Stat]())))
+
+      // entityItem.addComponent(stats)
+
       entityItem.addToWorld
       world.getManager(classOf[TagManager]).register("ITEMS" + item.id, entityItem)
     })
@@ -55,6 +59,9 @@ object ItemFactory {
 
   def instantiateArmor(world: World, items: List[AllItemValues]) = {
     // println("Armor: " + items.toString())
+    items.foreach (item => {
+      println("Stats: " + item.stats.getOrElse(None).toString())
+    })
   }
 
   def instantiateConsumables(world: World, items: List[AllItemValues]) = {
