@@ -111,32 +111,16 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
       for(j <- 0 until eSize) {
         quadTree.insert(entities.get(j))
       }
-    }
-    // val bullets : ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("BULLETS")
-    // val bSize  = bullets.size
-    // val pSize = characters.size
-    //do characters first
-    // for( i <- 0 until pSize) {
-    //   for( j <- (i + 1) until pSize) {
-    //       if(i != j) {
-    //         handleCollision(characters.get(i), characters.get(j))
-    //       }
-    //   }
-    // }
 
-
-/*    for( j <- 0 until bSize) {
-      breakable {
-        for( i <- 0 until pSize) {
-        //could also set victim here, and let other systme (but that stuffs later)
-          if(bullets.get(j).getComponent(classOf[Bullet]).initiator != characters.get(i)) {
-            handleBulletCollision(characters.get(i), bullets.get(j))
-            //now break out and go to next bullet
-            break
+      for(j <- 0 until eSize) {
+        var returnObjects : ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
+        quadTree.retrieve(returnObjects, entities.get(j))
+        for(r <- returnObjects) {
+          if(r != entities.get(j)) {
+            handleCollision(entities.get(j), r)
           }
         }
       }
-    }*/
+    }
   }
-
 }
