@@ -39,7 +39,8 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Room(Constants.STARTING_ROOM_ID))
         p.addComponent(new Character(id))
         p.addComponent(new Weapon(name = "Iron Axe", value = 10,
-  weight = 10, range = 0, damage = 5, damageType = "physical"))
+                                  weight = 10, range = 0,
+                                  damage = 5, damageType = "physical"))
 //        p.addComponent(new Room(1))
         p.addToWorld
         world.getManager(classOf[TagManager]).register("CHARACTER" + id, p)

@@ -35,6 +35,12 @@ object ItemFactory {
     instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "armor"))
   }
 
+  def buildStats(item: AllItemValues): Stats = {
+    var statsArray = new ArrayBuffer[Stat]()
+    statsArray.appendAll(item.stats.get)
+    new Stats(statsArray)
+  }
+
   def instantiateWeapons(world: World, items: List[AllItemValues]) = {
     items.foreach (item => {
       var entityItem: Entity = world.createEntity()
@@ -42,15 +48,14 @@ object ItemFactory {
         item.name,
         item.value,
         item.weight,
-        item.range.getOrElse(-1),
-        item.damage.getOrElse(-1),
-        item.damageType.getOrElse(""))
+        item.range.get,
+        item.damage.get,
+        item.damageType.get)
 
       entityItem.addComponent(weapon)
 
-      // var stats = new Stats(new ArrayBuffer().appendAll(item.stats.getOrElse(new ArrayBuffer[Stat]())))
-
-      // entityItem.addComponent(stats)
+      //Construct stats component
+      entityItem.addComponent(buildStats(item))
 
       entityItem.addToWorld
       world.getManager(classOf[TagManager]).register("ITEMS" + item.id, entityItem)
@@ -58,9 +63,22 @@ object ItemFactory {
   }
 
   def instantiateArmor(world: World, items: List[AllItemValues]) = {
-    // println("Armor: " + items.toString())
     items.foreach (item => {
-      println("Stats: " + item.stats.getOrElse(None).toString())
+      var entityItem: Entity = world.createEntity()
+      var armor = new Armor(
+        item.name,
+        item.value,
+        item.weight,
+        item.slot.get,
+        item.protection.get)
+
+      entityItem.addComponent(armor)
+
+      //Construct stats component
+      entityItem.addComponent(buildStats(item))
+
+      entityItem.addToWorld
+      world.getManager(classOf[TagManager]).register("ITEMS" + item.id, entityItem)
     })
   }
 
