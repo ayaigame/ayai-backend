@@ -1,17 +1,15 @@
 package ayai.maps
 
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
+
 class Tilesets(sets : List[String]) {
+	implicit def asJson() : JObject = {
+		("tilesets" -> sets.map{ s =>
+			("image" -> s)})
+	}
+
 	override def toString : String = {
-		var json = ""
-		var first : Boolean = true
-		for(set <- sets) {
-			if(first) {
-				json += "{ \"image\" : \"" + set + "\"} " 
-				first = false
-			}
-			else 
-				json += "{ \"image\" : \"" + set + "\"} "
-		}
-		json
+		return sets.toString
 	}
 }
