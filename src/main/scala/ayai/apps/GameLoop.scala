@@ -73,6 +73,7 @@ object GameLoop {
     room.addToWorld
 
     ItemFactory.bootup(world)
+    ClassFactory.bootup(world)
 
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 

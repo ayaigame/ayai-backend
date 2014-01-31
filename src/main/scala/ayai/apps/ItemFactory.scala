@@ -104,7 +104,7 @@ object ItemFactory {
     val parsedJson = parse(lines)
 
     val rootItems = (parsedJson \\ "items").extract[List[AllItemValues]]
-    val otherPaths = (parsedJson \\ "external_items").extract[List[String]]
+    val otherPaths = (parsedJson \\ "externalItems").extract[List[String]]
 
     val listOfLists: List[List[AllItemValues]] = otherPaths.map((path: String) => getItemsList(path))
     
