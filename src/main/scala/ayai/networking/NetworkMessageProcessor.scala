@@ -50,7 +50,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Inventory(inventory))
 //        p.addComponent(new Room(1))
         p.addToWorld
-        world.getManager(classOf[TagManager]).register(id, p)
+        world.getManager(classOf[TagManager]).register("CHARACTER" + id, p)
         world.getManager(classOf[GroupManager]).add(p, "CHARACTERS")
         world.getManager(classOf[GroupManager]).add(p, "ROOM"+Constants.STARTING_ROOM_ID)
       }
@@ -58,7 +58,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       case RemoveCharacter(id: String) => {
         println("Removing character: " + id)
         var p = None : Option[Entity]
-        p = Some(world.getManager(classOf[TagManager]).getEntity(socketMap(id)))
+        p = Some(world.getManager(classOf[TagManager]).getEntity("CHARACTER" + socketMap(id)))
         p match {
           case None =>
             System.out.println(s"Can't find character attached to socket $id.")
@@ -71,7 +71,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
         //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
         val id: String = socketMap(webSocket.webSocketId)
-        val e: Entity = world.getManager(classOf[TagManager]).getEntity(id)
+        val e: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
         val movement = new MovementAction(direction)
         //println(e.toString)
 //        movement.process(e)
@@ -93,7 +93,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         println("Created Bullet")
         val id : String = socketMap(webSocket.webSocketId)
         val bulletId = (new UID()).toString
-        val initiator: Entity = world.getManager(classOf[TagManager]).getEntity(id)
+        val initiator: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
         val bullet : Entity = world.createEntity
         bullet.addComponent(new Bullet(initiator, 10))
         bullet.addComponent(new Bounds(8,8))

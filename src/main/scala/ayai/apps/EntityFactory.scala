@@ -111,7 +111,7 @@ object EntityFactory {
             arrayTile(i%width)(i/width).layers += new NormalLayer(bundle.data(i))
           else {
             arrayTile(i%width)(i/width).layers += new CollidableLayer(bundle.data(i))
-            println("Height: " + (i%width) + " Row: " + (i/height) + " Value: " + bundle.data(i))
+            // println("Height: " + (i%width) + " Row: " + (i/height) + " Value: " + bundle.data(i))
           }
         }
       }
