@@ -6,7 +6,8 @@ package ayai.systems
 
 /** Ayai Imports **/
 import ayai.actions._
-import ayai.components.{Position, Bounds, Bullet, Health}
+import ayai.components._
+import ayai.collisions._
 
 /** Artemis Imports **/
 import com.artemis.{Aspect, ComponentManager, ComponentMapper, Entity, EntitySystem, World}
@@ -14,11 +15,17 @@ import com.artemis.annotations.Mapper
 import com.artemis.managers.GroupManager
 import com.artemis.utils.{Bag, ImmutableBag, Utils}
 
+import scala.collection.mutable.ArrayBuffer
+
+import scala.collection.mutable.HashMap
+
 /** External Imports **/
 import scala.math.abs
 import scala.util.control.Breaks._
 
 class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(classOf[Position], classOf[Bounds])) {
+
+
   @Mapper
   val pm: ComponentMapper[Position] = world.getMapper(classOf[Position])
   @Mapper
@@ -92,32 +99,28 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
     true
   }
   override def processEntities(entities: ImmutableBag[Entity]) {
-    val characters: ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("CHARACTERS")
-    val bullets : ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("BULLETS")
-    val bSize  = bullets.size
-    val pSize = characters.size
-    //do characters first
-    for( i <- 0 until pSize) {
-      for( j <- (i + 1) until pSize) {
-          if(i != j) 
-            handleCollision(characters.get(i), characters.get(j))
-
+    //for each room get entities
+    val rooms : ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("ROOMS")
+    val rSize = rooms.size
+    for(i <- 0 until rSize) {
+      val e = rooms.get(i)
+      val tileMap = e.getComponent(classOf[TileMap])
+      var quadTree : QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.getMaximumWidth, tileMap.getMaximumHeight))
+      val entities : ImmutableBag[Entity] = world.getManager(classOf[GroupManager]).getEntities("ROOM"+e.getComponent(classOf[Room]).id)
+      val eSize = entities.size()
+      for(j <- 0 until eSize) {
+        quadTree.insert(entities.get(j))
       }
-    }
 
-
-    for( j <- 0 until bSize) {
-      breakable {
-        for( i <- 0 until pSize) {
-        //could also set victim here, and let other systme (but that stuffs later)
-          if(bullets.get(j).getComponent(classOf[Bullet]).initiator != characters.get(i)) {
-            handleBulletCollision(characters.get(i), bullets.get(j))
-            //now break out and go to next bullet
-            break
+      for(j <- 0 until eSize) {
+        var returnObjects : ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
+        quadTree.retrieve(returnObjects, entities.get(j))
+        for(r <- returnObjects) {
+          if(r != entities.get(j)) {
+            handleCollision(entities.get(j), r)
           }
         }
       }
     }
   }
-
 }

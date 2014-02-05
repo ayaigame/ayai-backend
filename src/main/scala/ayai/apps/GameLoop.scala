@@ -53,16 +53,10 @@ object GameLoop {
     var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
     val networkSystem = ActorSystem("NetworkSystem")
-
     world.setManager(new GroupManager())
     world.setManager(new TagManager())
-    world.setSystem(new MovementSystem(roomHash))
-    world.setSystem(new RoomChangingSystem(roomHash))
-    world.setSystem(new CollisionSystem(world))
-    world.initialize()
-    
-    //load all rooms
 
+    
     var room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
     roomHash.put(Constants.STARTING_ROOM_ID, room)
 
@@ -74,6 +68,14 @@ object GameLoop {
 
     ItemFactory.bootup(world)
     ClassFactory.bootup(world)
+
+    world.setSystem(new MovementSystem(roomHash))
+    world.setSystem(new RoomChangingSystem(roomHash))
+    world.setSystem(new CollisionSystem(world))
+    world.initialize()
+    
+    //load all rooms
+
 
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
