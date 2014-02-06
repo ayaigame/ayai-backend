@@ -42,6 +42,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Velocity(4, 4))
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
+        p.addComponent(new Mana(200,200))
         p.addComponent(new Room(Constants.STARTING_ROOM_ID))
         p.addComponent(new Character(id))
         val inventory = new ArrayBuffer[Item]()
@@ -94,6 +95,10 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         val id : String = socketMap(webSocket.webSocketId)
         val bulletId = (new UID()).toString
         val initiator: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
+        //for rob temporary
+        initiator.getComponent(classOf[Health]).currentHealth -= 10
+        initiator.getComponent(classOf[Mana]).currentMana -= 20
+
         val bullet : Entity = world.createEntity
         bullet.addComponent(new Bullet(initiator, 10))
         bullet.addComponent(new Bounds(8,8))
