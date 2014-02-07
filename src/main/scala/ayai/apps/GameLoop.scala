@@ -11,20 +11,12 @@ import java.rmi.server.UID
 
 import ayai.systems.{MovementSystem,CollisionSystem,RoomChangingSystem}
 import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
-import com.artemis.World
-import com.artemis.Entity
-import com.artemis.managers.{GroupManager, TagManager}
-import com.artemis.utils.ImmutableBag
+import crane.World
+import crane.Entity
 
-
-import ayai.components.Character
 import ayai.networking._
-import com.artemis.ComponentType
 import java.lang.Boolean
-import ayai.components.Position
 import ayai.components._
-import ayai.data._
-import ayai.utils.IterableBag
 import ayai.persistence._
 
 /** Socko Imports **/
@@ -44,6 +36,8 @@ import scala.collection.mutable.HashMap
 
 import scala.io.Source
 
+import crane.{EntityProcessingSystem}
+
 object GameLoop {
   var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
 
@@ -55,25 +49,27 @@ object GameLoop {
 
     var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
-    world.setManager(new GroupManager())
-    world.setManager(new TagManager())
 
-    
+    world.createGroup("ROOMS")    
+    world.createGroup("CHARACTERS")
     var room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
     roomHash.put(Constants.STARTING_ROOM_ID, room)
+    world.createGroup("ROOM"+Constants.STARTING_ROOM_ID)
+    world.addEntity(room)
 
     room = EntityFactory.loadRoomFromJson(world, 1, "map2.json")
     roomHash.put(1, room)
-    
+    world.createGroup("ROOM"+1)
+    world.addEntity(room)
     //create a room 
-    room.addToWorld
+    //room.addToWorld
 
     ItemFactory.bootup(world)
 
-    world.setSystem(new MovementSystem(roomHash))
-    world.setSystem(new RoomChangingSystem(roomHash))
-    world.setSystem(new CollisionSystem(world))
-    world.initialize()
+    world.addSystem(new MovementSystem(roomHash))
+    world.addSystem(new RoomChangingSystem(roomHash))
+    world.addSystem(new CollisionSystem(world))
+    //world.initialize()
     
     //load all rooms
 
@@ -93,7 +89,6 @@ object GameLoop {
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
-      world.setDelta(1)
       world.process()
 
       val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
@@ -102,31 +97,26 @@ object GameLoop {
       result.messages.foreach { message =>
         messageProcessor ! new ProcessMessage(message)
       }
-      
-      //used to send json messages
-      case class JCharacter(id: String, x: Int, y: Int, currHealth : Int, maximumHealth : Int, roomId : Int)
-      case class JBullet(id: String, x: Int, y: Int)
-//      case class JMap(id : String, roomId : Int, array)
 
-      var aCharacters: ArrayBuffer[JCharacter] = ArrayBuffer()
+      val characterEntities =  world.groups("CHARACTERS")
 
-      val tagManager = world.getManager(classOf[TagManager])
-      val characterEntities =  world.getManager(classOf[GroupManager]).getEntities("CHARACTERS")
-
-      for (characterEntity <- new IterableBag(characterEntities)) {
+      for (characterEntity <- characterEntities) {
         //need better way of figuring if something is bullet, or figuring 
         // out what each entity has
-        val characterId = characterEntity.getComponent(classOf[Character]).id
-        
-        if(characterEntity.getComponent(classOf[MapChange]) != null) {
-          val map = characterEntity.getComponent(classOf[MapChange])
-          val future2 = serializer ? new MapRequest(roomHash(map.roomId))
-          val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
-          val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
-          println(result2)
-          actorSelection1 ! new ConnectionWrite(result2)  
-          characterEntity.removeComponent(classOf[MapChange])
-          world.changedEntity(characterEntity)
+        val characterId = (characterEntity.getComponent(classOf[Character])) match {
+          case Some(c : Character) => c.id 
+        }
+        if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
+          characterEntity.getComponent(classOf[MapChange]) match {
+            case Some(map : MapChange) =>
+              val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+              val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
+              val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
+              println(result2)
+              actorSelection1 ! new ConnectionWrite(result2)  
+              characterEntity.removeComponent(classOf[MapChange])
+          }
+          
         }
 
         //This is how we get character specific info, once we actually integrate this in.

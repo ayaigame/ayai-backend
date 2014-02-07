@@ -2,9 +2,8 @@ package ayai.apps
 
 import ayai.components._
 
-import com.artemis.World
-import com.artemis.Entity
-import com.artemis.managers.TagManager
+import crane.World
+import crane.Entity
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
@@ -52,13 +51,13 @@ object ItemFactory {
         item.damage.get,
         item.damageType.get)
 
-      entityItem.addComponent(weapon)
+      entityItem.components += weapon
 
       //Construct stats component
-      entityItem.addComponent(buildStats(item))
+      entityItem.components += buildStats(item)
+      world.addEntity(entityItem)
 
-      entityItem.addToWorld
-      world.getManager(classOf[TagManager]).register("ITEMS" + item.id, entityItem)
+      entityItem.tag = "ITEMS" + item.id
     })
   }
 
@@ -72,13 +71,13 @@ object ItemFactory {
         item.slot.get,
         item.protection.get)
 
-      entityItem.addComponent(armor)
+      entityItem.components += armor
 
       //Construct stats component
-      entityItem.addComponent(buildStats(item))
+      entityItem.components += buildStats(item)
 
-      entityItem.addToWorld
-      world.getManager(classOf[TagManager]).register("ITEMS" + item.id, entityItem)
+      world.addEntity(entityItem)
+      entityItem.tag = "ITEMS" + item.id
     })
   }
 

@@ -1,6 +1,6 @@
 package ayai.components
 
-import com.artemis.Component
+import crane.Component
 import ayai.components.Position
 import ayai.components.Room
 

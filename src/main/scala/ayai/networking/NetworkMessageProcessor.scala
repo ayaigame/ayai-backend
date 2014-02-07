@@ -8,8 +8,7 @@ import ayai.networking.chat._
 //import ayai.persistence.{User, UserQuery}
 import ayai.apps.Constants
 
-import com.artemis.{Entity, World}
-import com.artemis.managers.{TagManager, GroupManager}
+import crane.{Entity, World}
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorSystem, ActorRef, Props}
@@ -36,35 +35,33 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
     message match {
       case AddNewCharacter(id: String, x: Int, y: Int) => {
         println("Adding a character: " +  id)
-        val p: Entity = world.createEntity
-        p.addComponent(new Position(x, y))
-        p.addComponent(new Bounds(32, 32))
-        p.addComponent(new Velocity(4, 4))
-        p.addComponent(new Movable(false, new MoveDirection(0,0)))
-        p.addComponent(new Health(100,100))
-        p.addComponent(new Mana(200,200))
-        p.addComponent(new Room(Constants.STARTING_ROOM_ID))
-        p.addComponent(new Character(id))
+        val p: Entity = world.createEntity(tag="CHARACTER"+id)
+        p.components += new Position(x, y)
+        p.components += new Bounds(32, 32)
+        p.components += new Velocity(4, 4)
+        p.components += new Movable(false, new MoveDirection(0,0))
+        p.components += new Health(100,100)
+        p.components += new Mana(200,200)
+        p.components += new Room(Constants.STARTING_ROOM_ID)
+        p.components += new Character(id)
         val inventory = new ArrayBuffer[Item]()
         inventory += new Weapon(name = "Iron Axe", value = 10,
   weight = 10, range = 0, damage = 5, damageType = "physical")
-        p.addComponent(new Inventory(inventory))
-//        p.addComponent(new Room(1))
-        p.addToWorld
-        world.getManager(classOf[TagManager]).register("CHARACTER" + id, p)
-        world.getManager(classOf[GroupManager]).add(p, "CHARACTERS")
-        world.getManager(classOf[GroupManager]).add(p, "ROOM"+Constants.STARTING_ROOM_ID)
+        p.components += new Inventory(inventory)
+//        p.components += (new Room(1))
+        world.addEntity(p)
+        world.groups("CHARACTERS") += p
+        world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+
       }
 
       case RemoveCharacter(id: String) => {
         println("Removing character: " + id)
-        var p = None : Option[Entity]
-        p = Some(world.getManager(classOf[TagManager]).getEntity("CHARACTER" + socketMap(id)))
-        p match {
+        (world.getEntityByTag("CHARACTER" + socketMap(id))) match {
           case None =>
             System.out.println(s"Can't find character attached to socket $id.")
-          case Some(character) =>
-            character.deleteFromWorld
+          case Some(character : Entity) =>
+            character.kill
             socketMap.remove(id)
         }
       }
@@ -72,79 +69,67 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
         //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
         val id: String = socketMap(webSocket.webSocketId)
-        val e: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
-        val movement = new MovementAction(direction)
-        //println(e.toString)
-//        movement.process(e)
-        if (!start) {
-          val oldMovement = e.getComponent(classOf[Movable])
-          e.removeComponent(classOf[Movable])
-          e.addComponent(new Movable(start, oldMovement.direction))
-          world.changedEntity(e)
-          return;
+        (world.getEntityByTag("CHARACTER"+id)) match {
+          case None => 
+            println("Cant dind character attached to id")
+          case Some(e : Entity) =>
+            if (!start) {
+              val oldMovement = (e.getComponent(classOf[Movable])) match {
+                case Some(oldMove : Movable) => oldMove
+              }
+              
+              e.removeComponent(classOf[Movable])
+              e.components += new Movable(start, oldMovement.direction)
+              return;
+            }
+            e.removeComponent(classOf[Movable])
+            e.components += new Movable(start, direction)
         }
-        e.removeComponent(classOf[Movable])
-        e.addComponent(new Movable(start, direction))
-        world.changedEntity(e)
-        //if(start) {
-        //    //remove old movable
-        //    //currently not thread safe
-        //    e.removeComponent(classOf[Movable])
-        //    e.addComponent(new Movable(start, direction))
-        //  } else {
-        //    e.removeComponent(classOf[Movable])
-        //    e.addComponent(new Movable(start, direction))
-        //  }
-      } // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
+      }
+
+       // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
       case AttackMessage(webSocket : WebSocketFrameEvent) => {
         //create a projectile
         println("Created Bullet")
         val id : String = socketMap(webSocket.webSocketId)
         val bulletId = (new UID()).toString
-        val initiator: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
+
+        (world.getEntityByTag("CHARACTER"+id)) match {
+
         //for rob temporary
         //initiator.getComponent(classOf[Health]).currentHealth -= 10
         //initiator.getComponent(classOf[Mana]).currentMana -= 20
+        case Some(initiator : Entity) =>
+          val position = initiator.getComponent(classOf[Position])
+          val movable = initiator.getComponent(classOf[Movable])
+          val character = initiator.getComponent(classOf[Character])
+          (position, movable, character) match {
+            case(Some(pos: Position), Some(m : Movable), Some(c : Character)) =>
+              val upperLeftx = pos.x
+              val upperLefty = pos.y
 
-        val upperLeftx = initiator.getComponent(classOf[Position]).x
-        val upperLefty = initiator.getComponent(classOf[Position]).y
-
-        println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
+              println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
 
 
-        val xDirection = initiator.getComponent(classOf[Movable]).direction.xDirection
-        val yDirection = initiator.getComponent(classOf[Movable]).direction.yDirection
+              val xDirection = m.direction.xDirection
+              val yDirection = m.direction.yDirection
 
-        val topLeftOfAttackx = (33 * xDirection) + upperLeftx
-        val topLeftOfAttacky = (33 * yDirection) + upperLefty
+              val topLeftOfAttackx = (33 * xDirection) + upperLeftx
+              val topLeftOfAttacky = (33 * yDirection) + upperLefty
 
-        println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
+              println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
 
-        val p: Entity = world.createEntity
+              val p: Entity = world.createEntity("ATTACK"+bulletId)
 
-        p.addComponent(new Position(topLeftOfAttackx, topLeftOfAttacky))
-        p.addComponent(new Bounds(10, 10))
-        p.addComponent(new Attack(12));
-        p.addComponent(initiator.getComponent(classOf[Character]))
-        p.addToWorld
-        world.getManager(classOf[GroupManager]).add(p, "ROOM"+Constants.STARTING_ROOM_ID)
-        /*
-        val bullet : Entity = world.createEntity
-        bullet.addComponent(new Bullet(initiator, 10))
-        bullet.addComponent(new Bounds(8,8))
-        val position : Position = initiator.getComponent(classOf[Position])
-        bullet.addComponent(new Position(position.x, position.y))
-        bullet.addComponent(new Velocity(2,2))
-        val initMovement : Movable = initiator.getComponent(classOf[Movable])
-        if(initMovement.direction.xDirection == 0 && initMovement.direction.yDirection == 0) {
-          bullet.addComponent(new Movable(true, new DownDirection()))
-        } else {
-          bullet.addComponent(new Movable(true, initiator.getComponent(classOf[Movable]).direction))
-        }
-        bullet.addToWorld
-        world.getManager(classOf[GroupManager]).add(bullet, "BULLET")
-        world.getManager(classOf[TagManager]).register(bulletId, bullet)
-        */
+              p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
+              p.components += (new Bounds(10, 10))
+              p.components += (new Attack(12));
+              p.components += (c)
+              world.addEntity(p)
+              world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+
+          }
+        } 
       }
 
       case ItemMessage(id : String, itemAction : ItemAction) => {

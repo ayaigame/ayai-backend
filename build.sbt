@@ -36,4 +36,4 @@ libraryDependencies ++= List(
   "com.h2database" % "h2" % "1.3.166"
 )
 
-unmanagedBase := baseDirectory.value / "lib/artemis"
+unmanagedBase := baseDirectory.value / "lib"
