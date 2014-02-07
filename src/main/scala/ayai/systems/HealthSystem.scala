@@ -1,16 +1,22 @@
 package ayai.systems
 
-import com.artemis.{EntityProcessingSystem, Entity, World}
+import crane.{EntityProcessingSystem, Entity, World}
 import ayai.components._
 
 class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health], classOf[Character]), exclude=List(classOf[Respawn])) {    
 
-  override def process(e : Entity) {
-  	val characterMapper = e.getComponent(classOf[Character]) match {
+  override def processEntity(e : Entity, deltaTime : Int) {
+  	val character = e.getComponent(classOf[Character]) match {
   		case(Some(c : Character)) => c
   	}
-  	val healthMapper = e.getComponent(classOf[Health]) match {
+  	val health = e.getComponent(classOf[Health]) match {
   		case(Some(h : Health)) => h
+  	}
+  	//look at the status effects of the character
+
+  	if(health.currentHealth <= 0) {
+  		//attach respawn to entity
+  		e.components += new Respawn(1500, System.currentTimeMillis())
   	}
 
   }
