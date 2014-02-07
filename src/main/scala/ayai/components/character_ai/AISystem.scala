@@ -64,13 +64,14 @@ class AISystem(world : World) {
 				}
 			}
 		}
+		// if it makes it here, there is no path to target
 	}
 
 	def findMoves(start : Position) = List[Position] {
-		
+		// Checks all adjacent positions for walkability and returns list of possible new positions
 	}
 
 	def findTarget(start : Position, range : Int) = {
-
+		// Checks if there are any possible targets in range and, if so, returns closest target. Else returns null
 	}
 }
