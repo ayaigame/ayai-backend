@@ -42,6 +42,7 @@ class CollisionSystem(world: World) extends System {
   }
 
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
+
     (entityA.getComponent(classOf[Attack]),
       entityB.getComponent(classOf[Attack]),
       entityA.getComponent(classOf[Health]),
@@ -60,9 +61,10 @@ class CollisionSystem(world: World) extends System {
           handleAttackDamage(attackComponentB, healthComponentA)
           world.removeEntity(entityB)
           true    
-        } else 
-            false
+        }
+      case _ => false
       }
+      false
   }
 
   def handleCollision(entityA: Entity, entityB: Entity) {
@@ -104,6 +106,7 @@ class CollisionSystem(world: World) extends System {
               }
             }
           }
+        case _ => return
       }
   }
 

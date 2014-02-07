@@ -64,6 +64,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
             character.kill
             socketMap.remove(id)
         }
+        println("CHARACTER KILLED")
       }
 
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
