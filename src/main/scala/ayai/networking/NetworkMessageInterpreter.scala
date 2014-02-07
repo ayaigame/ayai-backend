@@ -18,6 +18,7 @@ import net.liftweb.json.JsonDSL._
 import java.rmi.server.UID
 
 class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
+  implicit val formats = Serialization.formats(NoTypeHints)
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
     val rootJSON = parse(wsFrame.readText)
     val tempType:String = compact(render(rootJSON \ "type"))
@@ -82,6 +83,12 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         val tempSender: String = compact(render(rootJSON \ "sender"))
         val sender = tempSender.substring(1, tempSender.length - 1)
         queue ! new AddInterpretedMessage(new PublicChatMessage(message, sender))
+      
+      case "open" =>
+        
+        val containerId : String = (rootJSON \ "containerId").extract[String]
+        println(containerId)
+        queue ! new AddInterpretedMessage(new OpenMessage(wsFrame, containerId))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
     }

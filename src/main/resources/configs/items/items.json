@@ -4,14 +4,20 @@
 			"id": 0,
 			"name": "Iron Sword",
 			"equipable": true,
-			"type": "weapon",
+			"itemType": "weapon",
 			"range": 0,
 			"damage": 3,
-			"damage-type": "physical",
+			"damageType": "physical",
 			"value": 10,
-			"weight": 10
+			"weight": 10,
+			"stats": [
+				{
+					"attributeType": "fireDamage",
+					"magnitude": 5
+					}]
 			}],
 
 	"external_items": [
-		"src/main/resources/configs/items/swords.json"]
+		"src/main/resources/configs/items/swords.json",
+		"src/main/resources/configs/items/armor.json"]
 }

@@ -9,8 +9,8 @@ import akka.util.Timeout
 import scala.concurrent.{ ExecutionContext, Promise }
 import java.rmi.server.UID
 
-import ayai.systems._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius}
+import ayai.systems.{MovementSystem,CollisionSystem,RoomChangingSystem}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
 import com.artemis.World
 import com.artemis.Entity
 import com.artemis.managers.{GroupManager, TagManager}
@@ -24,6 +24,7 @@ import java.lang.Boolean
 import ayai.components.Position
 import ayai.components._
 import ayai.data._
+import ayai.utils.IterableBag
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
@@ -51,21 +52,32 @@ object GameLoop {
     running = true
     var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
+    val networkSystem = ActorSystem("NetworkSystem")
     world.setManager(new GroupManager())
     world.setManager(new TagManager())
+
+    
+    var room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
+    roomHash.put(Constants.STARTING_ROOM_ID, room)
+
+    room = EntityFactory.loadRoomFromJson(world, 1, "map2.json")
+    roomHash.put(1, room)
+    
+    //create a room 
+    room.addToWorld
+
+    ItemFactory.bootup(world)
+
     world.setSystem(new MovementSystem(roomHash))
+    world.setSystem(new RoomChangingSystem(roomHash))
     world.setSystem(new CollisionSystem(world))
     world.initialize()
     
-    val room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
-    roomHash.put(Constants.STARTING_ROOM_ID, room)
-    //create a room 
-    room.addToWorld
+    //load all rooms
 
 
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
-    val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()), name = (new UID()).toString)
     val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)), name = (new UID()).toString)
     val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)), name = (new UID()).toString)
@@ -94,53 +106,32 @@ object GameLoop {
 //      case class JMap(id : String, roomId : Int, array)
 
       var aCharacters: ArrayBuffer[JCharacter] = ArrayBuffer()
-      var aBullets: ArrayBuffer[JBullet] = ArrayBuffer()
 
       val tagManager = world.getManager(classOf[TagManager])
-      val characterTags: List[String] = tagManager.getRegisteredTags.toList
+      val characterEntities =  world.getManager(classOf[GroupManager]).getEntities("CHARACTERS")
 
-      for (characterID <- characterTags) {
-          //need better way of figuring if something is bullet, or figuring 
-          // out what each entity has
-          val tempEntity : Entity = tagManager.getEntity(characterID)
-          if(tempEntity.getComponent(classOf[Bullet]) != null) {
-            val tempPos : Position = tempEntity.getComponent(classOf[Position])
-            aBullets += JBullet(characterID, tempPos.x, tempPos.y)
-          } else {
-            
-            //This is how we get character specific info, once we actually integrate this in.
-            val future1 = serializer ? new CharacterRadius(characterID)
-            val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
-            val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterID)
-            actorSelection ! new ConnectionWrite(result1)
-
-            // val tempPos : Position = tempEntity.getComponent(classOf[Position])
-            // val tempHealth : Health = tempEntity.getComponent(classOf[Health])
-            // val tempRoom : Room = tempEntity.getComponent(classOf[Room])
-            // aCharacters += JCharacter(characterID, tempPos.x, tempPos.y, tempHealth.currentHealth, tempHealth.maximumHealth, tempRoom.id)
-          }
-      }
-
-
-      // val json = (
-      //   ("type" -> "fullsync") ~
-      //   ("maps" -> "/assets/maps/map3.json") ~
-      //   ("characters" -> aCharacters.toList.map{ p =>
-      //   (("id" -> p.id) ~
-      //    ("x" -> p.x) ~
-      //    ("y" -> p.y) ~
-      //    ("currHealth" -> p.currHealth) ~
-      //    ("maximumHealth" -> p.maximumHealth) ~
-      //    ("room" -> p.roomId))}) ~
-      //   ("bullets" -> aBullets.toList.map{ n => 
-      //   (("id" -> n.id) ~  
-      //    ("x" -> n.x) ~
-      //    ("y" -> n.y))}))
-
+      for (characterEntity <- new IterableBag(characterEntities)) {
+        //need better way of figuring if something is bullet, or figuring 
+        // out what each entity has
+        val characterId = characterEntity.getComponent(classOf[Character]).id
         
-      //   //println(compact(render(json)))
-      //   val actorSelection = networkSystem.actorSelection("user/SockoSender*")
-      //   actorSelection ! new ConnectionWrite(compact(render(json)))
+        if(characterEntity.getComponent(classOf[MapChange]) != null) {
+          val map = characterEntity.getComponent(classOf[MapChange])
+          val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+          val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
+          val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
+          println(result2)
+          actorSelection1 ! new ConnectionWrite(result2)  
+          characterEntity.removeComponent(classOf[MapChange])
+          world.changedEntity(characterEntity)
+        }
+
+        //This is how we get character specific info, once we actually integrate this in.
+        val future1 = serializer ? new CharacterRadius(characterId)
+        val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
+        val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterId)
+        actorSelection ! new ConnectionWrite(result1)
+      }
 
       Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)
     }
