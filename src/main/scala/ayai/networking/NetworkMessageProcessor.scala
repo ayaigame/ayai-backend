@@ -5,7 +5,7 @@ import ayai.gamestate.{Effect, EffectType}
 import ayai.actions._
 import ayai.components._
 import ayai.networking.chat._
-import ayai.persistence.{User, UserQuery}
+//import ayai.persistence.{User, UserQuery}
 import ayai.apps.Constants
 
 import com.artemis.{Entity, World}
@@ -145,17 +145,17 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       }
 
       case PublicChatMessage(message: String, sender: String) => {
-        // Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
-        var sUser = None: Option[User]
-        sUser = UserQuery.getByUsername(sender)
-        
-        sUser match {
-          case Some(user) =>
-            val mh = new ChatHolder(new PublicChat(message, user))
-            actorSystem.actorOf(Props(new ChatReceiver())) ! mh
-          case _ =>
-            println("Error from PublicChatMessage")
-        }
+        //// Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
+        //var sUser = None: Option[User]
+        //sUser = UserQuery.getByUsername(sender)
+        //
+        //sUser match {
+        //  case Some(user) =>
+        //    val mh = new ChatHolder(new PublicChat(message, user))
+        //    actorSystem.actorOf(Props(new ChatReceiver())) ! mh
+        //  case _ =>
+        //    println("Error from PublicChatMessage")
+        //}
       }
       case _ => println("Error from NetworkMessageProcessor.")
     } 
