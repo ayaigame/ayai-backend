@@ -80,6 +80,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
           val oldMovement = e.getComponent(classOf[Movable])
           e.removeComponent(classOf[Movable])
           e.addComponent(new Movable(start, oldMovement.direction))
+          world.changedEntity(e)
           return;
         }
         e.removeComponent(classOf[Movable])
