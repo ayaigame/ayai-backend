@@ -23,6 +23,10 @@ import scala.collection.mutable.HashMap
 import scala.math.abs
 import scala.util.control.Breaks._
 
+import net.liftweb.json._
+import net.liftweb.json.Serialization.{read, write}
+import net.liftweb.json.JsonDSL._
+
 class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(classOf[Position], classOf[Bounds])) {
 
 
@@ -33,6 +37,40 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
 
   def valueInRange(value: Int, min: Int, max: Int): Boolean = {
     return (value >= min) && (value <= max)
+  }
+
+
+  //Eventually create a damage system to calculate this based on the users
+  //equipped item
+  def handleAttackDamage(attacker: Attack, attackee: Health) {
+    val currentHealth = attackee.getCurrentHealth
+    println("Damage Detected!")
+    attackee.setCurrentHealth(currentHealth - attacker.damage)
+
+    
+  }
+
+  def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
+    var attackComponentA = entityA.getComponent(classOf[Attack])
+    var attackComponentB = entityB.getComponent(classOf[Attack])
+    var healthComponentA = entityA.getComponent(classOf[Health])
+    var healthComponentB = entityB.getComponent(classOf[Health])
+    println("Attack collision detected!")
+    implicit val formats = Serialization.formats(NoTypeHints)
+    println(write(healthComponentA))
+    println(write(attackComponentB))
+    
+    if (attackComponentA != null && healthComponentB != null) {
+      handleAttackDamage(attackComponentA, healthComponentB)
+      world.deleteEntity(entityA)
+      return true;     
+    } else if (attackComponentB != null && healthComponentA != null) {
+      handleAttackDamage(attackComponentB, healthComponentA)
+      world.deleteEntity(entityB)
+      return true;    
+    }
+
+    return false;
   }
 
   def handleCollision(entityA: Entity, entityB: Entity) {
@@ -51,6 +89,10 @@ class CollisionSystem(world: World) extends EntitySystem(Aspect.getAspectForAll(
                               valueInRange(positionB.y, positionA.y, positionA.y + boundsA.height)
 
       if(xOverlap && yOverlap) {
+        if (handleAttack(entityA, entityB)) {
+          return;
+
+        }
         if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
           if(positionA.x < positionB.x) {
             new MovementAction(new LeftDirection).process(entityA)
