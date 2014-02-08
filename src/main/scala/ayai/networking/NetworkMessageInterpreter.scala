@@ -28,8 +28,8 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
       case "init" =>
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
-        val x: Int = Random.nextInt(750) + 32
-        val y: Int = Random.nextInt(260) + 32
+        val x: Int = 100
+        val y: Int = 100
 
         val tilemap: String = "/assets/maps/map3.json"
         val tileset: String = "/assets/tiles/sd33.png"
