@@ -8,7 +8,7 @@ import com.artemis.utils.{Bag, ImmutableBag}
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
 /** Ayai Imports **/
-import ayai.components.{Character, Position, Health, Room, TileMap, Inventory, Mana}
+import ayai.components.{Character, Position, Health, Room, TileMap, Inventory, Mana, Attack}
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
@@ -42,7 +42,10 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     var entityJSONs = new ArrayBuffer[Entity]()
     for(i <- 0 until otherEntities.size()) {
       if(characterEntity.getId() != otherEntities.get(i).getId()) {
-        entityJSONs += otherEntities.get(i)
+        //HACK FIX THIS WITH NEW ENTITY SYSTEM
+        if (otherEntities.get(i).getComponent(classOf[Attack]) == null) {
+          entityJSONs += otherEntities.get(i)
+        }
       }
     }
     val jsonLift = 
@@ -52,7 +55,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
         (characterEntity.getComponent(classOf[Health]).asJson) ~
         (characterEntity.getComponent(classOf[Inventory]).asJson) ~
         (characterEntity.getComponent(classOf[Mana]).asJson))) ~
-      ("others" -> entityJSONs.map{ e => 
+       ("others" -> entityJSONs.map{ e => 
         ((e.getComponent(classOf[Character]).asJson()) ~
         (e.getComponent(classOf[Position]).asJson) ~
         (e.getComponent(classOf[Health]).asJson) ~

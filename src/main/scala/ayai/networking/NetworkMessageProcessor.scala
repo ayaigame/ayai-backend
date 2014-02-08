@@ -76,6 +76,13 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         val movement = new MovementAction(direction)
         //println(e.toString)
 //        movement.process(e)
+        if (!start) {
+          val oldMovement = e.getComponent(classOf[Movable])
+          e.removeComponent(classOf[Movable])
+          e.addComponent(new Movable(start, oldMovement.direction))
+          world.changedEntity(e)
+          return;
+        }
         e.removeComponent(classOf[Movable])
         e.addComponent(new Movable(start, direction))
         world.changedEntity(e)
@@ -96,9 +103,32 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         val bulletId = (new UID()).toString
         val initiator: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
         //for rob temporary
-        initiator.getComponent(classOf[Health]).currentHealth -= 10
-        initiator.getComponent(classOf[Mana]).currentMana -= 20
+        //initiator.getComponent(classOf[Health]).currentHealth -= 10
+        //initiator.getComponent(classOf[Mana]).currentMana -= 20
 
+        val upperLeftx = initiator.getComponent(classOf[Position]).x
+        val upperLefty = initiator.getComponent(classOf[Position]).y
+
+        println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
+
+
+        val xDirection = initiator.getComponent(classOf[Movable]).direction.xDirection
+        val yDirection = initiator.getComponent(classOf[Movable]).direction.yDirection
+
+        val topLeftOfAttackx = (33 * xDirection) + upperLeftx
+        val topLeftOfAttacky = (33 * yDirection) + upperLefty
+
+        println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
+
+        val p: Entity = world.createEntity
+
+        p.addComponent(new Position(topLeftOfAttackx, topLeftOfAttacky))
+        p.addComponent(new Bounds(10, 10))
+        p.addComponent(new Attack(12));
+        p.addComponent(initiator.getComponent(classOf[Character]))
+        p.addToWorld
+        world.getManager(classOf[GroupManager]).add(p, "ROOM"+Constants.STARTING_ROOM_ID)
+        /*
         val bullet : Entity = world.createEntity
         bullet.addComponent(new Bullet(initiator, 10))
         bullet.addComponent(new Bounds(8,8))
@@ -114,6 +144,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         bullet.addToWorld
         world.getManager(classOf[GroupManager]).add(bullet, "BULLET")
         world.getManager(classOf[TagManager]).register(bulletId, bullet)
+        */
       }
 
       case ItemMessage(id : String, itemAction : ItemAction) => {
