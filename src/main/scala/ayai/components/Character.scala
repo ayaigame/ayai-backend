@@ -1,9 +1,18 @@
 package ayai.components
 
 import com.artemis.Component
+import net.liftweb.json.Serialization.{read, write}
+import net.liftweb.json.JsonDSL._
+import net.liftweb.json._
 
-class Character(val characterId: String) extends Component{
-	  override def toString: String = {
-	  	return "\"" + characterId + "\""
-  }
+case class Character(val id: String) extends Component{
+	implicit val formats = Serialization.formats(NoTypeHints)
+
+	implicit def asJson() : JObject = {
+		("id" -> id)
+	}
+
+	override def toString: String = {
+	  	write(this)
+	}
 }

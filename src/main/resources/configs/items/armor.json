@@ -1,0 +1,19 @@
+{
+	"items": [
+		{
+			"id": 1,
+			"name": "Iron Helmet",
+			"equipable": true,
+			"itemType": "armor",
+			"value": 10,
+			"weight": 5,
+			"slot": "head",
+			"protection": 2,
+			"stats": [{
+				"attributeType": "magicResist",
+				"magnitude": 10
+				}
+			]
+			}],
+	"external_items": []
+}

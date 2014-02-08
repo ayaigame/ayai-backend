@@ -25,7 +25,13 @@ import scala.collection.mutable._
 import java.rmi.server.UID
 import ayai.apps.GameLoop
 
+import net.liftweb.json.JsonDSL._
+import net.liftweb.json._
+import net.liftweb.json.Serialization.{read, write}
+
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
+  implicit val formats = Serialization.formats(NoTypeHints)
+
   def processMessage(message: NetworkMessage) {
     message match {
       case AddNewCharacter(id: String, x: Int, y: Int) => {
@@ -36,11 +42,16 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Velocity(4, 4))
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
+        p.addComponent(new Mana(200,200))
         p.addComponent(new Room(Constants.STARTING_ROOM_ID))
         p.addComponent(new Character(id))
+        val inventory = new ArrayBuffer[Item]()
+        inventory += new Weapon(name = "Iron Axe", value = 10,
+  weight = 10, range = 0, damage = 5, damageType = "physical")
+        p.addComponent(new Inventory(inventory))
 //        p.addComponent(new Room(1))
         p.addToWorld
-        world.getManager(classOf[TagManager]).register(id, p)
+        world.getManager(classOf[TagManager]).register("CHARACTER" + id, p)
         world.getManager(classOf[GroupManager]).add(p, "CHARACTERS")
         world.getManager(classOf[GroupManager]).add(p, "ROOM"+Constants.STARTING_ROOM_ID)
       }
@@ -48,7 +59,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       case RemoveCharacter(id: String) => {
         println("Removing character: " + id)
         var p = None : Option[Entity]
-        p = Some(world.getManager(classOf[TagManager]).getEntity(socketMap(id)))
+        p = Some(world.getManager(classOf[TagManager]).getEntity("CHARACTER" + socketMap(id)))
         p match {
           case None =>
             System.out.println(s"Can't find character attached to socket $id.")
@@ -59,15 +70,15 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       }
 
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
-        println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
+        //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
         val id: String = socketMap(webSocket.webSocketId)
-        val e: Entity = world.getManager(classOf[TagManager]).getEntity(id)
+        val e: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
         val movement = new MovementAction(direction)
-        println(e.toString)
+        //println(e.toString)
 //        movement.process(e)
         e.removeComponent(classOf[Movable])
         e.addComponent(new Movable(start, direction))
-
+        world.changedEntity(e)
         //if(start) {
         //    //remove old movable
         //    //currently not thread safe
@@ -83,7 +94,11 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         println("Created Bullet")
         val id : String = socketMap(webSocket.webSocketId)
         val bulletId = (new UID()).toString
-        val initiator: Entity = world.getManager(classOf[TagManager]).getEntity(id)
+        val initiator: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
+        //for rob temporary
+        initiator.getComponent(classOf[Health]).currentHealth -= 10
+        initiator.getComponent(classOf[Mana]).currentMana -= 20
+
         val bullet : Entity = world.createEntity
         bullet.addComponent(new Bullet(initiator, 10))
         bullet.addComponent(new Bounds(8,8))
@@ -103,6 +118,25 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 
       case ItemMessage(id : String, itemAction : ItemAction) => {
 
+      }
+
+      case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
+          println("Open Received!")
+          val inventory = new ArrayBuffer[Item]()
+        inventory += new Weapon(name = "Orcrist", value = 100000000,
+  weight = 10, range = 1, damage = 500000, damageType = "physical")
+
+          val fakeChest = new Inventory(inventory)
+
+          val jsonLift = 
+            ("type" -> "open") ~
+            ("containerId" -> containerId) ~
+            (fakeChest.asJson)
+
+
+          println(compact(render(jsonLift)))
+
+          webSocket.writeText(compact(render(jsonLift)))
       }
 
       case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {

@@ -43,7 +43,7 @@ class AuthorizationProcessor() extends Actor {
           var token: String = ""
 
           transaction {
-            token = Accounts.validatePassword(username, password)
+            token = AyaiDB.validatePassword(username, password)
           }
  
           token match {
@@ -64,7 +64,7 @@ class AuthorizationProcessor() extends Actor {
       val username = content.slice(0, delimiter).replaceAll("email=", "")
       val password = content.slice(delimiter + 1, content.length).replaceAll("password=", "")
       transaction {
-        Accounts.registerUser(username, password)
+        AyaiDB.registerUser(username, password)
       }
       request.response.write(HttpResponseStatus.OK, "GOOD")
 

@@ -7,7 +7,7 @@ import java.rmi.server.UID
 
 object Constants {
   var PLAYER_CHARACTER : String = "player char"
-  var STARTING_ROOM_ID : Int = new UID().hashCode
+  var STARTING_ROOM_ID : Int = 0
 
   val source = scala.io.Source.fromFile("src/main/resources/configs/config.json")
   val lines = source.mkString

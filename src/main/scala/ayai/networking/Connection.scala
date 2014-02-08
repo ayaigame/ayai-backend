@@ -33,3 +33,4 @@ case class PublicChatMessage(message: String, sender: String) extends NetworkMes
 case class LoginPost(request: HttpRequestEvent) extends NetworkMessage
 case class RegisterPost(request: HttpRequestEvent) extends NetworkMessage
 case class RecoveryPost(request: HttpRequestEvent) extends NetworkMessage
+case class OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) extends NetworkMessage
