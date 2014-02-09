@@ -5,15 +5,15 @@ package ayai.networking.chat
  */
 
 /** Ayai Imports **/
-import ayai.persistence.User
+import ayai.persistence.Account
 
 trait Chat { 
   val text: String
-  val sender: User
+  val sender: Account
 }
 
-case class PublicChat(text: String, sender: User) extends Chat
-case class PrivateChat(text: String, sender: User, receiver: User) extends Chat
+case class PublicChat(text: String, sender: Account) extends Chat
+case class PrivateChat(text: String, sender: Account, receiver: Account) extends Chat
 case class ChatHolder(held: Chat)
 
-case class CheckIn(receiver: User)
+case class CheckIn(receiver: Account)

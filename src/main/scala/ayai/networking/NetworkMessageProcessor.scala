@@ -5,7 +5,7 @@ import ayai.gamestate.{Effect, EffectType}
 import ayai.actions._
 import ayai.components._
 import ayai.networking.chat._
-import ayai.persistence.{User, UserQuery}
+import ayai.persistence.CharacterTable
 import ayai.apps.Constants
 
 import com.artemis.{Entity, World}
@@ -31,6 +31,7 @@ import net.liftweb.json.Serialization.{read, write}
 
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
+  val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
 
   def processMessage(message: NetworkMessage) {
     message match {
@@ -42,6 +43,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Velocity(4, 4))
         p.addComponent(new Movable(false, new MoveDirection(0,0)))
         p.addComponent(new Health(100,100))
+        p.addComponent(new Mana(200,200))
         p.addComponent(new Room(Constants.STARTING_ROOM_ID))
         p.addComponent(new Character(id))
         val inventory = new ArrayBuffer[Item]()
@@ -94,6 +96,10 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         val id : String = socketMap(webSocket.webSocketId)
         val bulletId = (new UID()).toString
         val initiator: Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + id)
+        //for rob temporary
+        initiator.getComponent(classOf[Health]).currentHealth -= 10
+        initiator.getComponent(classOf[Mana]).currentMana -= 20
+
         val bullet : Entity = world.createEntity
         bullet.addComponent(new Bullet(initiator, 10))
         bullet.addComponent(new Bounds(8,8))
@@ -139,18 +145,22 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         socketMap(webSocket.webSocketId) = id
       }
 
+      case CharacterList(webSocket: WebSocketFrameEvent, accountName: String) => {
+        characterTable ! new CharacterList(webSocket, accountName)
+      }
+
       case PublicChatMessage(message: String, sender: String) => {
-        // Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
-        var sUser = None: Option[User]
-        sUser = UserQuery.getByUsername(sender)
-        
-        sUser match {
-          case Some(user) =>
-            val mh = new ChatHolder(new PublicChat(message, user))
-            actorSystem.actorOf(Props(new ChatReceiver())) ! mh
-          case _ =>
-            println("Error from PublicChatMessage")
-        }
+        //// Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
+        //var sUser = None: Option[User]
+        //sUser = UserQuery.getByUsername(sender)
+        //
+        //sUser match {
+        //  case Some(user) =>
+        //    val mh = new ChatHolder(new PublicChat(message, user))
+        //    actorSystem.actorOf(Props(new ChatReceiver())) ! mh
+        //  case _ =>
+        //    println("Error from PublicChatMessage")
+        //}
       }
       case _ => println("Error from NetworkMessageProcessor.")
     } 

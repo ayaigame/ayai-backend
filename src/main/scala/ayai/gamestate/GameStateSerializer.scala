@@ -8,7 +8,7 @@ import com.artemis.utils.{Bag, ImmutableBag}
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
 /** Ayai Imports **/
-import ayai.components.{Character, Position, Health, Room, TileMap, Inventory}
+import ayai.components.{Character, Position, Health, Room, TileMap, Inventory, Mana}
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
@@ -50,11 +50,13 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
       ("you" -> ((characterEntity.getComponent(classOf[Character]).asJson()) ~
         (characterEntity.getComponent(classOf[Position]).asJson) ~
         (characterEntity.getComponent(classOf[Health]).asJson) ~
-        (characterEntity.getComponent(classOf[Inventory]).asJson))) ~
+        (characterEntity.getComponent(classOf[Inventory]).asJson) ~
+        (characterEntity.getComponent(classOf[Mana]).asJson))) ~
       ("others" -> entityJSONs.map{ e => 
         ((e.getComponent(classOf[Character]).asJson()) ~
         (e.getComponent(classOf[Position]).asJson) ~
-        (e.getComponent(classOf[Health]).asJson))})
+        (e.getComponent(classOf[Health]).asJson) ~
+        (e.getComponent(classOf[Mana]).asJson))})
 
     sender ! compact(render(jsonLift))
     // sender ! new CharacterResponse(json)
