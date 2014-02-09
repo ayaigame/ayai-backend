@@ -103,8 +103,11 @@ object GameLoop {
       for (characterEntity <- characterEntities) {
         //need better way of figuring if something is bullet, or figuring 
         // out what each entity has
-        val characterId = (characterEntity.getComponent(classOf[Character])) match {
+        val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
           case Some(c : Character) => c.id 
+          case None =>
+            println("BLAAAA")
+            ""
         }
         if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
           characterEntity.getComponent(classOf[MapChange]) match {
