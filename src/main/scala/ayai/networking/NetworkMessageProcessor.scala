@@ -45,7 +45,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.addComponent(new Health(100,100))
         p.addComponent(new Mana(200,200))
         p.addComponent(new Room(Constants.STARTING_ROOM_ID))
-        p.addComponent(new Character(id))
+        p.addComponent(new Character(id, "tim", 0, 1))
         val inventory = new ArrayBuffer[Item]()
         inventory += new Weapon(name = "Iron Axe", value = 10,
   weight = 10, range = 0, damage = 5, damageType = "physical")

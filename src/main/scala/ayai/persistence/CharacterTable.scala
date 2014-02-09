@@ -54,6 +54,21 @@ class CharacterTable extends Actor {
     }
   }
 
+  def saveCharacter(character: String) = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    // transaction {
+    //   update(AyaiDB.characters)(dbCharacter => 
+    //     where(dbCharacter.name === character.name)
+    //     set(dbCharacter.experience := character.experience,
+    //         dbCharacter.level := character.level))
+    // }
+  }
+
    def receive = {
     case CharacterList(webSocket, accountName) => getCharacterListJson(webSocket, accountName)
     case _ => println("Error: from CharacterTable.")

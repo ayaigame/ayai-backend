@@ -5,6 +5,8 @@ package ayai.persistence
  * Creates DB
  */
 
+import ayai.apps.Constants 
+
 /** External Imports **/
 import java.nio.file.{Files, Paths}
 import org.squeryl.Session
@@ -44,8 +46,8 @@ object DBCreation {
       val account = AyaiDB.getAccount("tim").id
       println(account)
 
-      AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 1, 0, account))
-      AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 1, 0, account))        
+      AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 1, 0, account, Constants.STARTING_ROOM_ID, 30, 30))
+      AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 1, 0, account, Constants.STARTING_ROOM_ID, 30, 30))
     }
   }
 }
