@@ -1,6 +1,6 @@
 package ayai.components
 
-import com.artemis.Component
+import crane.Component
 
 class Velocity (var x : Int, var y : Int) extends Component {
 }

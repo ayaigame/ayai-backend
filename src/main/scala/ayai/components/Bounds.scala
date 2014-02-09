@@ -1,6 +1,6 @@
 package ayai.components
 
-import com.artemis.Component
+import crane.Component
 
 class Bounds (var width: Int, var height: Int) extends Component {
 

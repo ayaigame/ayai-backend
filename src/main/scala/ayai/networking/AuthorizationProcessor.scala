@@ -1,8 +1,6 @@
 package ayai.networking
 
 import ayai.persistence._
-import com.artemis.{Entity, World}
-import com.artemis.managers.{TagManager, GroupManager}
 
 /** Akka Imports **/
 import akka.actor.{Actor}

@@ -1,6 +1,6 @@
 package ayai.components
 
-import com.artemis.Component
+import crane.Component
 
 /**
  * Wondering how much we have to add to this class

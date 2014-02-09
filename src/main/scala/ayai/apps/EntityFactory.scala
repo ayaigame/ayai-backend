@@ -1,9 +1,8 @@
 package ayai.apps
 
-import com.artemis.Component
-import com.artemis.Entity
-import com.artemis.managers.{TagManager, GroupManager}
-import com.artemis.World
+import crane.Component
+import crane.Entity
+import crane.World
 
 import ayai.components._
 import ayai.maps._
@@ -23,15 +22,15 @@ object EntityFactory {
     var character : Entity = world.createEntity()
     var position : Position = new Position(x,y)
     var velocity : Velocity = new Velocity(3,4)
-    character.addComponent(position)
+    character.components += (position)
     
-    character.addComponent(velocity)
+    character.components += (velocity)
     
     
     var health : Health = new Health(200,200);
-    character.addComponent(health)
+    character.components += (health)
     
-    character.addComponent(new Character(GameState.getNextCharacterId()));
+    character.components += (new Character(GameState.getNextCharacterId()));
     GameState.addCharacter(roomId, character)
     world.getManager(classOf[GroupManager]).add(character, Constants.PLAYER_CHARACTER)
     println("Entity: " + character.getId())
@@ -42,10 +41,10 @@ object EntityFactory {
   def createItem(world : World, x : Int, y :Int, name : String) : Entity = {
     var item : Entity = world.createEntity()
     var position : Position = new Position(x, y)
-    item.addComponent(position)
+    item.components += (position)
 
     var containable : Containable = new Containable(3, name, null)
-    item.addComponent(containable)
+    item.components += (containable)
 
     world.getManager(classOf[GroupManager]).add(item,"ITEM")
     
@@ -54,13 +53,13 @@ object EntityFactory {
   }
 	**/
   def createRoom(world : World, roomId : Int, tileMap : TileMap ) : Entity = {
-  	var entityRoom : Entity = world.createEntity()
+  	var entityRoom : Entity = world.createEntity("ROOM"+roomId)
   	var room : Room = new Room(roomId)
 
-  	entityRoom.addComponent(room)
-  	entityRoom.addComponent(tileMap)
+  	entityRoom.components += room
+  	entityRoom.components += tileMap
 
-  	world.getManager(classOf[GroupManager]).add(entityRoom, "ROOMS")
+  	world.groups("ROOMS") += entityRoom
   	//world.getManager(classOf[TagManager]).register(roomId.toString,entityRoom)
 
   	entityRoom

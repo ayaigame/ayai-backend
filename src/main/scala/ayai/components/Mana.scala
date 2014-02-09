@@ -1,6 +1,7 @@
 package ayai.components
 
-import com.artemis.Component
+
+import crane.Component
 import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._

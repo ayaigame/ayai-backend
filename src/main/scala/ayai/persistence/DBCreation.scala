@@ -18,7 +18,7 @@ import org.mindrot.jbcrypt.BCrypt
 
 object DBCreation {
   def ensureDbExists() = {
-    // If DB doesn't exist, create it
+    // If DB Doesn't exist, create it
     if(!Files.exists(Paths.get("ayai.h2.db"))) {
       Class.forName("org.h2.Driver");
       SessionFactory.concreteFactory = Some (() =>
@@ -45,6 +45,9 @@ object DBCreation {
       AyaiDB.accounts.insert(tim)
       val account = AyaiDB.getAccount("tim").id
       println(account)
+
+      //   // val token = AyaiDB.validatePassword("tim", "tim")
+      //   // println(token)
 
       AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 1, 0, account, Constants.STARTING_ROOM_ID, 30, 30))
       AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 1, 0, account, Constants.STARTING_ROOM_ID, 30, 30))

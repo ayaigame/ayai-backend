@@ -2,9 +2,8 @@ package ayai.apps
 
 import ayai.components._
 
-import com.artemis.World
-import com.artemis.Entity
-import com.artemis.managers.TagManager
+/** Crane Imports **/
+import crane.{Entity, World}
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
@@ -25,20 +24,20 @@ object ClassFactory {
     val classes: List[AllClassValues] = getClassesList("src/main/resources/configs/classes/classes.json")
 
     classes.foreach (classData => {
-      var entityClass: Entity = world.createEntity()
+      var entityClass: Entity = world.createEntity(tag="CLASS"+classData.id)
       var classComponent = new Class(
         classData.id,
         classData.name,
         classData.baseHealth,
         classData.baseMana)
 
-      entityClass.addComponent(classComponent)
+      entityClass.components += classComponent
 
       //Construct stats component
-      entityClass.addComponent(buildStats(classData.baseStats))
+      entityClass.components += buildStats(classData.baseStats)
 
-      entityClass.addToWorld
-      world.getManager(classOf[TagManager]).register("CLASSES" + classData.id, entityClass)
+      world.addEntity(entityClass)
+      // world.getManager(classOf[TagManager]).register("CLASSES" + classData.id, entityClass)
     })
   }
 

@@ -1,6 +1,6 @@
 package ayai.components
 
-import com.artemis.Component
+import crane.Component
 
 
 class Class(id: Int, name: String, baseHealth: Int, baseMana: Int) extends Component{
