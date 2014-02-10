@@ -1,7 +1,6 @@
 package ayai.components
 
-import com.artemis.Component
-import com.artemis.Entity
+import crane.Component
 
 import ayai.maps.Tile
 import ayai.maps.Layer

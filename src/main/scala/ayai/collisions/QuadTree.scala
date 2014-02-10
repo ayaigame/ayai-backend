@@ -1,7 +1,7 @@
 package ayai.collisions
 
-import com.artemis.Component
-import com.artemis.Entity
+import crane.Component
+import crane.Entity
 
 import ayai.components.Position
 import ayai.components.Bounds
@@ -42,34 +42,36 @@ class QuadTree(var level : Int, var bounds : Rectangle) {
 
 	private def getIndex(e : Entity) : Int = {
 		var index : Int = -1
-		val position : Position = e.getComponent(classOf[Position])
-		val eBound : Bounds = e.getComponent(classOf[Bounds])
-		val verticalMidpoint : Double = bounds.getX() + (bounds.getWidth() / 2)
-		val horizontalMidpoint : Double = bounds.getY() + (bounds.getHeight() / 2)
+		val position = e.getComponent(classOf[Position])
+		val eBound = e.getComponent(classOf[Bounds])
+		(position, eBound) match {case(Some(p: Position), Some(bound: Bounds)) =>
+			val verticalMidpoint : Double = bounds.getX() + (bounds.getWidth() / 2)
+			val horizontalMidpoint : Double = bounds.getY() + (bounds.getHeight() / 2)
 
-		val topQuadrant : Boolean = ((position.getY() < horizontalMidpoint) && (position.getY() + eBound.getHeight() < horizontalMidpoint))
-		val bottomQuadrant : Boolean = (position.getY() > horizontalMidpoint)
+			val topQuadrant : Boolean = ((p.getY() < horizontalMidpoint) && (p.getY() + bound.getHeight() < horizontalMidpoint))
+			val bottomQuadrant : Boolean = (p.getY() > horizontalMidpoint)
 
-		   // Object can completely fit within the left quadrants
-		if ((position.getX() < verticalMidpoint) && (position.getX() +  eBound.getWidth() < verticalMidpoint)) {
-	      if (topQuadrant) {
-	        index = 1
-	      }
-	      else if (bottomQuadrant) {
-	        index = 2
-	      }
-	    }
-	    // Object can completely fit within the right quadrants
-	    else if (position.getX() > verticalMidpoint) {
-	     if (topQuadrant) {
-	       index = 0
-	     }
-	     else if (bottomQuadrant) {
-	       index = 3
-	     }
-	    }
-	 
-	   index
+			   // Object can completely fit within the left quadrants
+			if ((p.getX() < verticalMidpoint) && (p.getX() +  bound.getWidth() < verticalMidpoint)) {
+		      if (topQuadrant) {
+		        index = 1
+		      }
+		      else if (bottomQuadrant) {
+		        index = 2
+		      }
+		    }
+		    // Object can completely fit within the right quadrants
+		    else if (p.getX() > verticalMidpoint) {
+		     if (topQuadrant) {
+		       index = 0
+		     }
+		     else if (bottomQuadrant) {
+		       index = 3
+		     }
+		    }
+		 
+		   index
+		}
 	}
 
 

@@ -2,7 +2,7 @@ package ayai.actions
 
 import ayai.components.Position
 import ayai.components.Velocity
-import com.artemis.Entity
+import crane.Entity
 import ayai.actions.MoveDirection
 
 sealed trait Action { 
@@ -11,11 +11,12 @@ sealed trait Action {
 
 case class MovementAction(var direction : MoveDirection) extends Action {
 	def process(e : Entity) {
-		val position : Position = e.getComponent(classOf[Position])
-		val velocity : Velocity = e.getComponent(classOf[Velocity])
-		//add thread synchronization
-		position.x += direction.xDirection * velocity.x
-		position.y += direction.yDirection * velocity.y
+		(e.getComponent(classOf[Position]),
+			e.getComponent(classOf[Velocity])) match {
+			case(Some(position : Position), Some(velocity : Velocity)) =>
+				position.x += direction.xDirection * velocity.x
+				position.y += direction.yDirection * velocity.y
+		}
 	}
 }
 case class ItemAction(var itemAction : ItemAct) extends Action {

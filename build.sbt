@@ -20,6 +20,10 @@ libraryDependencies += "net.liftweb" %% "lift-json" % "2.5.1"
 
 libraryDependencies += "org.mashupbots.socko" %% "socko-webserver" % "0.4.0"
 
+libraryDependencies += "org.skife.com.typesafe.config" % "typesafe-config" % "0.3.0"
+
+libraryDependencies += "org.mindrot" % "jbcrypt" % "0.3m"
+
 libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "test"
@@ -27,9 +31,9 @@ libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "test"
 logLevel := Level.Warn
 
 libraryDependencies ++= List(
-  "com.typesafe.slick" %% "slick" % "1.0.1",
+  "org.squeryl" %% "squeryl" % "0.9.5-6",
   "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.h2database" % "h2" % "1.3.166"
 )
 
-unmanagedBase := baseDirectory.value / "lib/artemis"
+unmanagedBase := baseDirectory.value / "lib"
