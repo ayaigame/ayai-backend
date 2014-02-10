@@ -1,6 +1,6 @@
 package ayai.components
 
-import com.artemis.Component
+import crane.Component
 import java.util.Date
 
 /*
@@ -8,8 +8,8 @@ import java.util.Date
 ** delta : is the time that the user initially died at
 */
 class Respawn(val time : Int = 15, val delta : Date) extends Component {
-	def isReady(deltaTime : Date) {
-		if(deltaTime - delta > 15) : Boolean = {
+	def isReady(deltaTime : Date) : Boolean = {
+		if(deltaTime - delta > 15) {
 			true
 		}
 		false

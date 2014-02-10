@@ -1,17 +1,17 @@
 package ayai.systems
 
-import com.artemis.{Aspect, ComponentManager, ComponentMapper, Entity, World}
+import com.artemis.{EntityProcessingSystem, Entity, World}
 import ayai.components._
 
-class HealthSystem(a : Aspect = Aspect.getAspectForAll(classOf[Health], classOf[Character]).exclude(classOf[Respawn])) extends EntityProcessingSystem(a) {    
-
-  @Mapper
-  var characterMapper : ComponentMapper[Character] = _
-  @Mapper
-  var healthMapper : ComponentMapper[Health] = _
+class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health], classOf[Character]), exclude=List(classOf[Respawn])) {    
 
   override def process(e : Entity) {
-  	
+  	val characterMapper = e.getComponent(classOf[Character]) match {
+  		case(Some(c : Character)) => c
+  	}
+  	val healthMapper = e.getComponent(classOf[Health]) match {
+  		case(Some(h : Health)) => h
+  	}
 
   }
 }

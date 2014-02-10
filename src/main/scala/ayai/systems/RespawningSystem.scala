@@ -1,26 +1,20 @@
 package ayai.systems
 
-import com.artemis.{Aspect, ComponentManager, ComponentMapper, Entity, World}
-import com.artemis.systems.EntityProcessingSystem
+import crane.{Entity, World}
+import crane.EntityProcessingSystem
 
 import ayai.components._
 
-class RespawningSystem( a: Aspect = Aspect.getAspectForAll(classOf[Room], classOf[Character], classOf[Respawn])) extends EntityProcessingSystem(a) {    
-  @Mapper
-  var characterMapper: ComponentMapper[Character] = _
-  @Mapper
-  var roomMapper: ComponentMapper[Velocity] = _
-  @Mapper
-  var respawnMapper : ComponentMapper[Respawn] = _
-
+class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn])) { 
   override def process(e : Entity) {
-  	var respawn : Respawn = respawnMapper.get(e)
+  	var respawn = e.getComponent(classOf[Respawn]) match {
+  		case (Some(r : Respawn)) => r
+  	}
 
 
-  	if(respawn.isReady(System.currentTimeMillis))) {
-		//if ready to respawn 
-		world.deleteEntity(e)
-		world.changedEntity(e)
-	}
+ //  	if(respawn.isReady(System.currentTimeMillis))) {
+
+
+	// }
   }
 }
