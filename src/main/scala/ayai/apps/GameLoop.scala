@@ -89,6 +89,8 @@ object GameLoop {
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
+      //get the time 
+      val start = System.currentTimeMillis
       world.process()
 
       val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
@@ -128,8 +130,10 @@ object GameLoop {
         val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterId)
         actorSelection ! new ConnectionWrite(result1)
       }
-
-      Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)
+      val end = System.currentTimeMillis
+      if((end - start) < (1000/Constants.FRAMES_PER_SECOND)) {
+        Thread.sleep((1000 / Constants.FRAMES_PER_SECOND) - (end-start))
+      }
     }
   }
 }

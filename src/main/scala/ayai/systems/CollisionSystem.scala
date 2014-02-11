@@ -37,34 +37,25 @@ class CollisionSystem(world: World) extends System {
     val currentHealth = attackee.getCurrentHealth
     println("Damage Detected!")
     attackee.setCurrentHealth(currentHealth - attacker.damage)
-
-    
   }
 
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
-
     (entityA.getComponent(classOf[Attack]),
       entityB.getComponent(classOf[Attack]),
       entityA.getComponent(classOf[Health]),
       entityB.getComponent(classOf[Health])) match {
-      case(Some(attackComponentA : Attack), Some(attackComponentB : Attack), Some(healthComponentA : Health), Some(healthComponentB : Health)) =>
-        println("Attack collision detected!")
-        implicit val formats = Serialization.formats(NoTypeHints)
-        println(write(healthComponentA))
-        println(write(attackComponentB))
-        
-        if (attackComponentA != null && healthComponentB != null) {
+      case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
+          //remove the attack component of entity A
           handleAttackDamage(attackComponentA, healthComponentB)
-          world.removeEntity(entityA)
+          entityA.kill()
           true     
-        } else if (attackComponentB != null && healthComponentA != null) {
+      case (None, Some(attackComponentB : Attack), Some(healthComponentA : Health), None) =>
+          //remove the attack component of entityB
           handleAttackDamage(attackComponentB, healthComponentA)
-          world.removeEntity(entityB)
-          true    
-        }
+          entityB.kill()
+          true
       case _ => false
       }
-      false
   }
 
   def handleCollision(entityA: Entity, entityB: Entity) {
@@ -86,8 +77,8 @@ class CollisionSystem(world: World) extends System {
           if(xOverlap && yOverlap) {
             if (handleAttack(entityA, entityB)) {
               return;
-
             }
+            //check to see if they are movable
             if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
               if(positionA.x < positionB.x) {
                 new MovementAction(new LeftDirection).process(entityA)
