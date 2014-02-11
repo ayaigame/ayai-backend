@@ -2,7 +2,7 @@ package ayai.components
 
 import ayai.actions._
 
-import com.artemis.Component
+import crane.Component
 
 class Movable (var moving : Boolean, var direction : MoveDirection) extends Component {
 	

@@ -1,6 +1,6 @@
 package ayai.components
 
-import com.artemis.Component
+import crane.Component
 
 class Room(val id: Int) extends Component {
   

@@ -1,14 +1,12 @@
 package ayai.gamestate
 
 /** Artemis Imports **/
-import com.artemis.{Entity, World}
-import com.artemis.managers.{TagManager, GroupManager}
-import com.artemis.utils.{Bag, ImmutableBag}
+import crane.{Entity, World}
 /** Akka Imports **/
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
 /** Ayai Imports **/
-import ayai.components.{Character, Position, Health, Room, TileMap, Inventory, Mana}
+import ayai.components.{Character, Position, Health, Room, TileMap, Inventory, Mana, Attack}
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
@@ -27,36 +25,58 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
 
   //Returns a list of entities contained within a room.
-  def getRoomEntities(roomId: Int): ImmutableBag[Entity] = {
-    world.getManager(classOf[GroupManager]).getEntities("ROOM" + roomId)
+  def getRoomEntities(roomId: Int): ArrayBuffer[Entity] = {
+    world.groups("ROOM" + roomId)
   }
 
   //Returns a character's belongings and surroundings.
   def getCharacterRadius(characterId: String) = {
-    val characterEntity : Entity = world.getManager(classOf[TagManager]).getEntity("CHARACTER" + characterId)
-    val room = characterEntity.getComponent(classOf[Room])
+    val characterEntity : Entity = (world.getEntityByTag("CHARACTER" + characterId)) match {
+      case Some(entity : Entity) => entity
+    }
+    
+    val room = (characterEntity.getComponent(classOf[Room])) match {
+      case Some(r : Room) => r 
+    }
+    
 
-    val otherEntities: ImmutableBag[Entity] = getRoomEntities(room.id)
+    val otherEntities: ArrayBuffer[Entity] = getRoomEntities(room.id)
 
 //    var json = "{\"type\" : \"update\", \"you\": " + getEntityInfo(characterEntity) + ", \"others\": ["
-    var entityJSONs = new ArrayBuffer[Entity]()
-    for(i <- 0 until otherEntities.size()) {
-      if(characterEntity.getId() != otherEntities.get(i).getId()) {
-        entityJSONs += otherEntities.get(i)
+    var entityJSONs = ArrayBuffer.empty[Entity]
+    for(otherEntity <- otherEntities) {
+      if(characterEntity != otherEntity) {
+        //HACK FIX THIS WITH NEW ENTITY SYSTEM
+        if (otherEntity.getComponent(classOf[Attack]).isEmpty) {
+          entityJSONs += otherEntity
+        }
       }
     }
     val jsonLift = 
       ("type" -> "update") ~
-      ("you" -> ((characterEntity.getComponent(classOf[Character]).asJson()) ~
-        (characterEntity.getComponent(classOf[Position]).asJson) ~
-        (characterEntity.getComponent(classOf[Health]).asJson) ~
-        (characterEntity.getComponent(classOf[Inventory]).asJson) ~
-        (characterEntity.getComponent(classOf[Mana]).asJson))) ~
-      ("others" -> entityJSONs.map{ e => 
-        ((e.getComponent(classOf[Character]).asJson()) ~
-        (e.getComponent(classOf[Position]).asJson) ~
-        (e.getComponent(classOf[Health]).asJson) ~
-        (e.getComponent(classOf[Mana]).asJson))})
+      ("you" -> ((characterEntity.getComponent(classOf[Character]),
+        characterEntity.getComponent(classOf[Position]),
+        characterEntity.getComponent(classOf[Health]),
+        characterEntity.getComponent(classOf[Inventory]),
+        characterEntity.getComponent(classOf[Mana])) match {
+          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(inventory : Inventory), Some(mana : Mana)) =>
+            ((character.asJson()) ~
+            (position.asJson) ~
+            (health.asJson) ~
+            (inventory.asJson) ~
+            (mana.asJson))
+        })) ~
+       ("others" -> entityJSONs.map{ e => 
+        (e.getComponent(classOf[Character]),
+          e.getComponent(classOf[Position]),
+          e.getComponent(classOf[Health]),
+          e.getComponent(classOf[Mana])) match {
+          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(mana : Mana)) =>
+            ((character.asJson()) ~
+            (position.asJson) ~
+            (health.asJson) ~
+            (mana.asJson))
+        }})
 
     sender ! compact(render(jsonLift))
     // sender ! new CharacterResponse(json)
@@ -72,10 +92,12 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
   // }
 
   def sendMapInfo(room : Entity ) = {
-    val tilemap = room.getComponent(classOf[TileMap]) 
+    val tilemap = (room.getComponent(classOf[TileMap])) match {
+      case (Some(tileMap : TileMap)) => tileMap
+    } 
     var json = ("type" -> "map") ~
       ("tilemap" -> tilemap.file) ~
-      (room.getComponent(classOf[TileMap]).tilesets.asJson)
+      (tilemap.tilesets.asJson)
 
     println(compact(render(json)))
     sender ! compact(render(json))

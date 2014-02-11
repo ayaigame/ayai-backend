@@ -1,7 +1,7 @@
 package ayai.components
 
 
-import com.artemis.Component
+import crane.Component
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import scala.collection.mutable.ArrayBuffer
