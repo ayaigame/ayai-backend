@@ -8,9 +8,11 @@ import crane.Component
 */
 class Respawn(val time : Int = 15, val delta : Long) extends Component {
 	def isReady(deltaTime : Long) : Boolean = {
-		if(deltaTime - delta > 1500) {
-			true
+
+		if(deltaTime - delta > time) {
+			return true
+		} else {
+			return false
 		}
-		false
 	}
 }
