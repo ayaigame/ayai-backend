@@ -5,19 +5,12 @@ import crane.{Entity,EntityProcessingSystem}
 import java.util.Map
 
 import ayai.actions._
-import ayai.components.Movable
-import ayai.components.Position
-import ayai.components.Velocity
-import ayai.components.Health
-import ayai.components.Room
-import ayai.components.Character
-import ayai.components.TileMap
-import ayai.components.Transport
+import ayai.components._
 import ayai.systems.RoomChangingSystem
 
 import scala.collection.mutable.HashMap
 
-class MovementSystem(roomHash : HashMap[Int, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character]), exclude=List(classOf[Transport])) {    
+class MovementSystem(roomHash : HashMap[Int, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character]), exclude=List(classOf[Transport], classOf[Respawn])) {    
   	  //this will only move characters who have received a movement key and the current component is still set to True
       override def processEntity(e: Entity, delta : Int) {
       	(e.getComponent(classOf[Movable]),

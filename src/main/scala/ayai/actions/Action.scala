@@ -16,6 +16,8 @@ case class MovementAction(var direction : MoveDirection) extends Action {
 			case(Some(position : Position), Some(velocity : Velocity)) =>
 				position.x += direction.xDirection * velocity.x
 				position.y += direction.yDirection * velocity.y
+
+			case _ => return
 		}
 	}
 }

@@ -34,6 +34,10 @@ implicit val formats = Serialization.formats(NoTypeHints)
     }
   }
 
+  def refill() {
+    currentHealth = maximumHealth
+  }
+
   override def toString : String = {
     write(this)
   }
