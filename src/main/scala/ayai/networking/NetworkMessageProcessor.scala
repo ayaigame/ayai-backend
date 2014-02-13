@@ -39,7 +39,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.components += new Position(x, y)
         p.components += new Bounds(32, 32)
         p.components += new Velocity(4, 4)
-        p.components += new Movable(false, new MoveDirection(0,0))
+        p.components += new Actionable(false, new MoveDirection(0,0))
         p.components += new Health(100,100)
         p.components += new Mana(200,200)
         p.components += new Room(Constants.STARTING_ROOM_ID)
@@ -72,19 +72,18 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         val id: String = socketMap(webSocket.webSocketId)
         (world.getEntityByTag("CHARACTER"+id)) match {
           case None => 
-            println("Cant dind character attached to id")
+            println("Cant find character attached to id")
           case Some(e : Entity) =>
             if (!start) {
-              val oldMovement = (e.getComponent(classOf[Movable])) match {
-                case Some(oldMove : Movable) => oldMove
+              val oldMovement = (e.getComponent(classOf[Actionable])) match {
+                case Some(oldMove : Actionable) =>
+                oldMove.active = false
               }
               
-              e.removeComponent(classOf[Movable])
-              e.components += new Movable(start, oldMovement.direction)
-              return;
+            } else {
+              e.removeComponent(classOf[Actionable])
+              e.components += new Actionable(start, direction)
             }
-            e.removeComponent(classOf[Movable])
-            e.components += new Movable(start, direction)
         }
       }
 
@@ -102,18 +101,24 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         //initiator.getComponent(classOf[Mana]).currentMana -= 20
         case Some(initiator : Entity) =>
           val position = initiator.getComponent(classOf[Position])
-          val movable = initiator.getComponent(classOf[Movable])
+          val movable = initiator.getComponent(classOf[Actionable])
           val character = initiator.getComponent(classOf[Character])
           (position, movable, character) match {
-            case(Some(pos: Position), Some(m : Movable), Some(c : Character)) =>
+            case(Some(pos: Position), Some(a : Actionable), Some(c : Character)) =>
+              val m = a.action match {
+                case (move : MoveDirection) => move
+                case _ => println("Not match for movedirection")
+                return
+
+              }
               val upperLeftx = pos.x
               val upperLefty = pos.y
 
               println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
 
 
-              val xDirection = m.direction.xDirection
-              val yDirection = m.direction.yDirection
+              val xDirection = m.xDirection
+              val yDirection = m.yDirection
 
               val topLeftOfAttackx = (33 * xDirection) + upperLeftx
               val topLeftOfAttacky = (33 * yDirection) + upperLefty

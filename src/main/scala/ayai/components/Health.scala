@@ -48,8 +48,5 @@ implicit val formats = Serialization.formats(NoTypeHints)
       ("maximumHealth" -> maximumHealth))
   }
 
-  def refill() {
-    maximumHealth = currentHealth
-  }
 
 }

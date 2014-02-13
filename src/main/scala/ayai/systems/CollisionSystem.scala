@@ -86,19 +86,19 @@ class CollisionSystem() extends System {
             //check to see if they are movable
             if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
               if(positionA.x < positionB.x) {
-                new MovementAction(new LeftDirection).process(entityA)
-                new MovementAction(new RightDirection).process(entityB)
+                new LeftDirection().process(entityA)
+                new RightDirection().process(entityB)
               } else {
-                new MovementAction(new RightDirection).process(entityA)
-                new MovementAction(new LeftDirection).process(entityB)
+                new RightDirection().process(entityA)
+                new LeftDirection().process(entityB)
               }
             } else {
               if(positionA.y < positionB.y) {
-                new MovementAction(new UpDirection).process(entityA)
-                new MovementAction(new DownDirection).process(entityB)
+                new UpDirection().process(entityA)
+                new DownDirection().process(entityB)
               } else {
-                new MovementAction(new DownDirection).process(entityA)
-                new MovementAction(new UpDirection).process(entityB)
+                new DownDirection().process(entityA)
+                new UpDirection().process(entityB)
               }
             }
           }
