@@ -1,45 +1,44 @@
 package ayai.apps
 
-import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.pattern.ask
-import akka.util.Timeout
-import scala.concurrent.{ ExecutionContext, Promise }
-import java.rmi.server.UID
-
+/** Ayai Imports **/
 import ayai.systems._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
-import crane.World
-import crane.Entity
-
 import ayai.networking._
-import java.lang.Boolean
 import ayai.components._
 import ayai.persistence._
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
+
+/** Akka Imports **/
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.pattern.ask
+import akka.util.Timeout
+
+/** Crane Imports **/
+import crane.{Entity, World}
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
+/** External Imports **/
+import scala.concurrent.{ ExecutionContext, Promise }
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.collection.{immutable, mutable}
+import scala.collection.mutable._
+import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
+import scala.io.Source
+
+import java.rmi.server.UID
+import java.lang.Boolean
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import scala.collection.{immutable, mutable}
-import scala.collection.mutable._
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import scala.collection.JavaConversions._
-
-import scala.collection.mutable.HashMap
-
-import scala.io.Source
-
-import crane.{EntityProcessingSystem}
+import org.slf4j.{Logger, LoggerFactory}
 
 object GameLoop {
   var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
+  private val log = LoggerFactory.getLogger(getClass)
 
   var running : Boolean = _
 
@@ -109,21 +108,22 @@ object GameLoop {
         // out what each entity has
         val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
           case Some(c : Character) => c.id 
-          case None =>
-            println("BLAAAA")
-            ""
+          case _ =>
+          log.warn("8192c19: getComponent failed to return anything")
+          ""
         }
         if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
           characterEntity.getComponent(classOf[MapChange]) match {
-            case Some(map : MapChange) =>
-              val future2 = serializer ? new MapRequest(roomHash(map.roomId))
-              val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
-              val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
-              println(result2)
-              actorSelection1 ! new ConnectionWrite(result2)  
-              characterEntity.removeComponent(classOf[MapChange])
+          case Some(map : MapChange) =>
+            val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+            val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
+            val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
+            println(result2)
+            actorSelection1 ! new ConnectionWrite(result2)  
+            characterEntity.removeComponent(classOf[MapChange])
+          case _ =>
+            log.warn("990f22d: getComponent failed to return anything")
           }
-          
         }
 
         //This is how we get character specific info, once we actually integrate this in.

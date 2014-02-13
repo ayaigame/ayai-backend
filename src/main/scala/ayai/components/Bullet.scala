@@ -1,8 +1,7 @@
 package ayai.components
-
-import crane.Component
-import crane.Entity
+/** Crane Imports **/
+import crane.{Component, Entity}
 
 class Bullet(var initiator : Entity, var damage : Int) extends Component {
-	var victim : Entity = _ 
+  var victim : Entity = _ 
 }

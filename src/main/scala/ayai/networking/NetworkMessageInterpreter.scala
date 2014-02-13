@@ -14,7 +14,6 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.util.Random
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-
 import java.rmi.server.UID
 
 class NetworkMessageInterpreter(queue: ActorRef) extends Actor {

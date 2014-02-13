@@ -5,8 +5,7 @@ import ayai.gamestate.{Effect, EffectType}
 import ayai.actions._
 import ayai.components._
 import ayai.networking.chat._
-//import ayai.persistence.{User, UserQuery}
-import ayai.apps.Constants
+import ayai.apps.{Constants, GameLoop}
 
 import crane.{Entity, World}
 
@@ -22,14 +21,17 @@ import scala.collection.{immutable, mutable}
 import scala.collection.mutable._
 
 import java.rmi.server.UID
-import ayai.apps.GameLoop
 
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
 
+import org.slf4j.{Logger, LoggerFactory}
+
+
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
+  private val log = LoggerFactory.getLogger(getClass)
 
   def processMessage(message: NetworkMessage) {
     message match {
@@ -77,7 +79,10 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
             if (!start) {
               val oldMovement = (e.getComponent(classOf[Actionable])) match {
                 case Some(oldMove : Actionable) =>
-                oldMove.active = false
+                  oldMove.active = false
+                case _ =>
+                  log.warn("a07270d: getComponent failed to return anything")
+
               }
               
             } else {
@@ -133,8 +138,12 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
               p.components += (c)
               world.addEntity(p)
               world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+            case _ =>
+              log.warn("424e244: getComponent failed to return anything")
 
           }
+          case _ =>
+            log.warn("8a87265: getComponent failed to return anything")
         } 
       }
 

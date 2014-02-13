@@ -1,17 +1,20 @@
 package ayai.gamestate
 
-/** Artemis Imports **/
+/** Ayai Imports **/
+import ayai.components._
+
+/** Crane Imports **/
 import crane.{Entity, World}
+
 /** Akka Imports **/
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
-/** Ayai Imports **/
-import ayai.components._
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
+import org.slf4j.{Logger, LoggerFactory}
 
 sealed trait QueryType
 sealed trait QueryResponse
@@ -22,6 +25,7 @@ case class MapRequest(room : Entity)
 case class SomeData
 
 class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
+  private val log = LoggerFactory.getLogger(getClass)
 
 
   //Returns a list of entities contained within a room.
@@ -32,27 +36,32 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
   //Returns a character's belongings and surroundings.
   def getCharacterRadius(characterId: String) = {
     val characterEntity : Entity = (world.getEntityByTag("CHARACTER" + characterId)) match {
-      case Some(entity : Entity) => entity
+      case Some(entity : Entity) => 
+        entity
+      case _ =>
+        log.warn("11491e0: getEntityByTag failed to return anything")
+        new Entity
     }
     
-    val room = (characterEntity.getComponent(classOf[Room])) match {
-      case Some(r : Room) => r 
+    val room: Room = (characterEntity.getComponent(classOf[Room])) match {
+      case Some(r : Room) => 
+        r 
+      case _ =>
+        log.warn("b766a68: getComponent failed to return anything")
+        new Room(-1)
     }
-    
 
     val otherEntities: ArrayBuffer[Entity] = getRoomEntities(room.id)
 
-//    var json = "{\"type\" : \"update\", \"you\": " + getEntityInfo(characterEntity) + ", \"others\": ["
     var entityJSONs = ArrayBuffer.empty[Entity]
     for(otherEntity <- otherEntities) {
       if(characterEntity != otherEntity) {
-        //HACK FIX THIS WITH NEW ENTITY SYSTEM
         if (otherEntity.getComponent(classOf[Attack]).isEmpty) {
           entityJSONs += otherEntity
         }
       }
     }
-    val jsonLift = 
+    val jsonLift: JObject = 
       ("type" -> "update") ~
       ("you" -> ((characterEntity.getComponent(classOf[Character]),
         characterEntity.getComponent(classOf[Position]),
@@ -67,6 +76,9 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
             (inventory.asJson) ~
             (mana.asJson) ~
             (actionable.action.asJson))
+          case _ =>
+            log.warn("cec6af4: getComponent failed to return anything")
+            JNothing
         })) ~
        ("others" -> entityJSONs.map{ e => 
         (e.getComponent(classOf[Character]),
@@ -80,9 +92,18 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
             (health.asJson) ~
             (mana.asJson) ~
             (actionable.action.asJson))
+          case _ =>
+            log.warn("f3d3275: getComponent failed to return anything")
+            JNothing
         }})
 
-    sender ! compact(render(jsonLift))
+    try {
+      sender ! compact(render(jsonLift))
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+        sender ! ""
+    }
     // sender ! new CharacterResponse(json)
   }
 
@@ -96,15 +117,24 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
   // }
 
   def sendMapInfo(room : Entity ) = {
-    val tilemap = (room.getComponent(classOf[TileMap])) match {
-      case (Some(tileMap : TileMap)) => tileMap
+    val json = room.getComponent(classOf[TileMap]) match {
+      case (Some(tilemap : TileMap)) => 
+        ("type" -> "map") ~
+        ("tilemap" -> tilemap.file) ~
+        (tilemap.tilesets.asJson)
+      case _ =>
+        log.warn("eeec172: getComponent failed to return anything")
+        JNothing
     } 
-    var json = ("type" -> "map") ~
-      ("tilemap" -> tilemap.file) ~
-      (tilemap.tilesets.asJson)
 
-    println(compact(render(json)))
-    sender ! compact(render(json))
+    try {
+      println(compact(render(json)))
+      sender ! compact(render(json))
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+        sender ! ""
+    }
   }
 
   def receive = {
