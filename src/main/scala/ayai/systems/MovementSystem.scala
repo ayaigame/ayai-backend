@@ -13,17 +13,19 @@ import scala.collection.mutable.HashMap
 class MovementSystem(roomHash : HashMap[Int, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character]), exclude=List(classOf[Transport], classOf[Respawn])) {    
   	  //this will only move characters who have received a movement key and the current component is still set to True
       override def processEntity(e: Entity, delta : Int) {
-      	(e.getComponent(classOf[Movable]),
+      	(e.getComponent(classOf[Actionable]),
         	e.getComponent(classOf[Position]),
         	e.getComponent(classOf[Velocity]),
           e.getComponent(classOf[Room])) match {
-            case (Some(movable : Movable), Some(position : Position), Some(velocity : Velocity), Some(room : Room)) =>
+            case (Some(actionable : Actionable), Some(position : Position), Some(velocity : Velocity), Some(room : Room)) =>
               val originalPosition = new Position(position.x, position.y)
               //if moving then process for the given direction
-              if(movable.moving) {
-                var direction : MoveDirection = movable.direction
-                var movement : MovementAction = new MovementAction(direction)
-                movement.process(e)
+              if(actionable.active) {
+                // if action is a direction
+                actionable.action match {
+                  case (move : MoveDirection) => 
+                  var direction = move.process(e)
+                }
               }
               
               //now check to see if movement has created gone past the map (if so put it at edge)

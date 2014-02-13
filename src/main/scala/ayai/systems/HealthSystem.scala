@@ -12,9 +12,13 @@ class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health]
   	val health = e.getComponent(classOf[Health]) match {
   		case(Some(h : Health)) => h
   	}
-  	
-    if(health.currentHealth <= 0) {
+  	//look at the status effects of the character
+
+  	if(health.currentHealth <= 0) {
+  		//attach respawn to entity
   		e.components += new Respawn(1500, System.currentTimeMillis())
   	}
+
+
   }
 }

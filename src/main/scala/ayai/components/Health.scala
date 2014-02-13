@@ -48,4 +48,5 @@ implicit val formats = Serialization.formats(NoTypeHints)
       ("maximumHealth" -> maximumHealth))
   }
 
+
 }
