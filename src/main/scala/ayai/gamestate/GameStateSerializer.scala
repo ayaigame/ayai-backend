@@ -6,7 +6,7 @@ import crane.{Entity, World}
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
 /** Ayai Imports **/
-import ayai.components.{Character, Position, Health, Room, TileMap, Inventory, Mana, Attack}
+import ayai.components._
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
@@ -58,24 +58,28 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
         characterEntity.getComponent(classOf[Position]),
         characterEntity.getComponent(classOf[Health]),
         characterEntity.getComponent(classOf[Inventory]),
-        characterEntity.getComponent(classOf[Mana])) match {
-          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(inventory : Inventory), Some(mana : Mana)) =>
+        characterEntity.getComponent(classOf[Mana]),
+        characterEntity.getComponent(classOf[Actionable])) match {
+          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(inventory : Inventory), Some(mana : Mana), Some(actionable : Actionable)) =>
             ((character.asJson()) ~
             (position.asJson) ~
             (health.asJson) ~
             (inventory.asJson) ~
-            (mana.asJson))
+            (mana.asJson) ~
+            (actionable.action.asJson))
         })) ~
        ("others" -> entityJSONs.map{ e => 
         (e.getComponent(classOf[Character]),
           e.getComponent(classOf[Position]),
           e.getComponent(classOf[Health]),
-          e.getComponent(classOf[Mana])) match {
-          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(mana : Mana)) =>
+          e.getComponent(classOf[Mana]),
+          e.getComponent(classOf[Actionable])) match {
+          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(mana : Mana), Some(actionable : Actionable)) =>
             ((character.asJson()) ~
             (position.asJson) ~
             (health.asJson) ~
-            (mana.asJson))
+            (mana.asJson) ~
+            (actionable.action.asJson))
         }})
 
     sender ! compact(render(jsonLift))

@@ -5,7 +5,7 @@ import crane.EntityProcessingSystem
 
 import ayai.components._
 
-class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Respawn])) { 
+class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn])) { 
   override def processEntity(e : Entity, deltaTime : Int) {
   	var respawn = e.getComponent(classOf[Respawn]) match {
   		case (Some(r : Respawn)) => r

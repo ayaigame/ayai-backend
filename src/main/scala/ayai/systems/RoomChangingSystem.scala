@@ -3,19 +3,14 @@ package ayai.systems
 import crane.EntityProcessingSystem
 import crane.Entity 
 
-import ayai.components.Room
-import ayai.components.Character
-import ayai.components.Movable
-import ayai.components.Transport
-import ayai.components.Position
-import ayai.components.MapChange
+import ayai.components._
 
 import scala.collection.mutable.HashMap
 
 /**
 	This class will only be used if an entity has a Room, Character, Movable, and Transport attached to it
 **/
-class RoomChangingSystem(roomHash : HashMap[Int, Entity]) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Movable], classOf[Transport], classOf[Position])) {
+class RoomChangingSystem(roomHash : HashMap[Int, Entity]) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Actionable], classOf[Transport], classOf[Position])) {
 
 	override def processEntity(e : Entity, delta : Int) {
 		//get information from transport class
