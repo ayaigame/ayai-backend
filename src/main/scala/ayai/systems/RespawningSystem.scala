@@ -10,18 +10,21 @@ class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Roo
   	var respawn = e.getComponent(classOf[Respawn]) match {
   		case (Some(r : Respawn)) => r
   	}
+  	val health = e.getComponent(classOf[Health]) match {
+  		case(Some(h : Health)) => h
+  	}
+    val room = e.getComponent(classOf[Room]) match {
+      case Some(r : Room) => r
+    }
 
-
-  	if(respawn.isReady(System.currentTimeMillis))) {
-		//reset players health to full health
-		val health = e.getComponent(classOf[Health]) match {
-			case Some(h : Health) => h
-		}
-		
-		health.refill
-
-		e.removeComponent(classOf[Respawn])
-
-	}
+    val position = e.getComponent(classOf[Position]) match {
+      case Some(p : Position) => p 
+    }
+    
+    if(respawn.isReady(System.currentTimeMillis())) {
+			health.refill()
+      e.removeComponent(classOf[Respawn])
+      e.components += new Transport(position, room)
+    }
   }
 }
