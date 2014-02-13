@@ -22,8 +22,7 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.concurrent.{ ExecutionContext, Promise }
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.collection.{immutable, mutable}
-import scala.collection.mutable._
+import scala.collection.concurrent.{Map => ConcurrentMap}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.io.Source
@@ -46,7 +45,7 @@ object GameLoop {
     running = true
     DBCreation.ensureDbExists()
 
-    var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
+    var socketMap: ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
 
     world.createGroup("ROOMS")    

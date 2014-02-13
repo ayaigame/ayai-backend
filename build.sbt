@@ -10,6 +10,8 @@ scalaVersion := "2.10.3"
 //CHANGE THIS LINE TO RUN A DIFFERENT PROJECT
 mainClass in (Compile, run) := Some("ayai.apps.GameLoop")
 
+scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-optimize", "-feature", "-language:postfixOps", "-target:jvm-1.7")
+
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "Typesafe snapshots" at "http://repo.typesafe.com/typesafe/snapshots/" 

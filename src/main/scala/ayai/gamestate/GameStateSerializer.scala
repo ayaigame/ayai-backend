@@ -22,7 +22,7 @@ sealed trait QueryResponse
 case class CharacterRadius(characterId: String) extends QueryType
 case class CharacterResponse(json: String)  extends QueryResponse
 case class MapRequest(room : Entity)
-case class SomeData
+case object SomeData
 
 class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
   private val log = LoggerFactory.getLogger(getClass)

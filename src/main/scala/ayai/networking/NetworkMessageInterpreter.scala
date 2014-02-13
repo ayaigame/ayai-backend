@@ -59,14 +59,14 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         if(start) {
           val dir:Int = compact(render(rootJSON \ "dir")).toInt
           direction  = dir match {
-            case 0 => new UpDirection
-            case 1 => new UpRightDirection
-            case 2 => new RightDirection
-            case 3 => new DownRightDirection
-            case 4 => new DownDirection
-            case 5 => new DownLeftDirection
-            case 6 => new LeftDirection
-            case 7 => new UpLeftDirection
+            case 0 => UpDirection
+            case 1 => UpRightDirection
+            case 2 => RightDirection
+            case 3 => DownRightDirection
+            case 4 => DownDirection
+            case 5 => DownLeftDirection
+            case 6 => LeftDirection
+            case 7 => UpLeftDirection
             case _ => { 
               println("Direction not found, in Interpreter")
               new MoveDirection(0,0)

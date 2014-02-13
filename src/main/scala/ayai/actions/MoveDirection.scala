@@ -25,46 +25,46 @@ class MoveDirection(val xDirection : Int, val yDirection : Int) extends Action {
   def asJson() : JObject =  { ("action" -> "empty")}
 }
 
-case class LeftDirection extends MoveDirection(-1,0) {
+case object LeftDirection extends MoveDirection(-1,0) {
   override def asJson(): JObject =  {
     ("action" -> "walkleft")
   }
 }
-case class RightDirection extends MoveDirection(1,0) {
+case object RightDirection extends MoveDirection(1,0) {
   override def asJson(): JObject =  {
     ("action" -> "walkright")
   }
 }
 
-case class UpDirection extends MoveDirection(0,-1){
+case object UpDirection extends MoveDirection(0,-1){
   override def asJson(): JObject =  {
     ("action" -> "walkup")
   }
 }
-case class DownDirection extends MoveDirection(0,1){
+case object DownDirection extends MoveDirection(0,1){
   override def asJson() : JObject = {
     ("action" -> "walkdown")
   }
 }
-case class UpLeftDirection extends MoveDirection(-1,-1){
+case object UpLeftDirection extends MoveDirection(-1,-1){
   override def asJson(): JObject =  {
     ("action" -> "walkleft")
   }
 }
 
-case class UpRightDirection extends MoveDirection(1,-1){
+case object UpRightDirection extends MoveDirection(1,-1){
   override def asJson(): JObject =  {
     ("action" -> "walkright")
   }
 }
 
-case class DownRightDirection extends MoveDirection(1,1) {
+case object DownRightDirection extends MoveDirection(1,1) {
   override def asJson(): JObject =  {
     ("action" -> "walkright")
   }
 }
 
-case class DownLeftDirection extends MoveDirection(-1,1) {
+case object DownLeftDirection extends MoveDirection(-1,1) {
   override def asJson(): JObject =  {
     ("action" -> "walkleft")
   }

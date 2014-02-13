@@ -17,8 +17,8 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 
 /** External Imports **/
 import scala.util.Random
-import scala.collection.{immutable, mutable}
-import scala.collection.mutable._
+import scala.collection.concurrent.{Map => ConcurrentMap}
+import scala.collection.mutable.ArrayBuffer
 
 import java.rmi.server.UID
 
@@ -29,7 +29,7 @@ import net.liftweb.json.Serialization.{read, write}
 import org.slf4j.{Logger, LoggerFactory}
 
 
-class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: mutable.ConcurrentMap[String, String]) extends Actor {
+class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
   private val log = LoggerFactory.getLogger(getClass)
 

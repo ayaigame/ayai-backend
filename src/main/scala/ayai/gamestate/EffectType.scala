@@ -1,7 +1,7 @@
 package ayai.gamestate
 
 sealed class EffectType 
-case class Percentage extends EffectType
-case class Addition extends EffectType
-case class Multiplier extends EffectType
-case class TimedInterval extends EffectType
+case object Percentage extends EffectType
+case object Addition extends EffectType
+case object Multiplier extends EffectType
+case object TimedInterval extends EffectType
