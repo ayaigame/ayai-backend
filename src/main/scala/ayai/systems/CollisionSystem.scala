@@ -152,13 +152,15 @@ class CollisionSystem() extends System {
         quadTree.insert(entity)
       }
 
-      for(entity <- entities) {
-        var returnObjects = quadTree.retrieve(entity).toList 
-        returnObjects = excludeList(returnObjects, exclusion)
-        for(r <- returnObjects) {
-          if(r != entity && !hasExclusion(r,exclusion)) {
-            handleCollision(entity, r)
+      val quads = quadTree.quadrants
+      for(quad <- quads) {
+        while(quad.length > 1) {
+          for(against <- quad.tail) {
+            if(!hasExclusion(quad.head, exclusion)) {
+              handleCollision(quad.head, against)
+            }
           }
+          quad.remove(0)
         }
       }
     }
