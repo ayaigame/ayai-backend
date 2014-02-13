@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class QuadTree(var level : Int, var bounds : Rectangle) {
 	private val MAX_OBJECTS : Int = 10 
-	private val MAX_LEVELS : Int = 5
+	private val MAX_LEVELS : Int = 8
 
 	private val objects : ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
 	private var nodes : Array[QuadTree]  = new Array[QuadTree](4)
@@ -124,4 +124,19 @@ class QuadTree(var level : Int, var bounds : Rectangle) {
 		}
 		returnObjects
 	}
+
+    def quadrants: ArrayBuffer[ArrayBuffer[Entity]] = {
+      var returnObjects = new ArrayBuffer[ArrayBuffer[Entity]]
+    
+      if (objects.length > 0) 
+        returnObjects += objects
+
+        for(node <- nodes) {
+          if(node != null) {
+            returnObjects ++= node.quadrants
+          }
+        }
+      return returnObjects
+    }
+
 }
