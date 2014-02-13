@@ -1,6 +1,9 @@
 package ayai.components
 
+/** Crane Imports **/
 import crane.Component
+
+/** External Imports **/
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
