@@ -24,7 +24,7 @@ import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json.JsonDSL._
 
-class CollisionSystem(world: World) extends System {
+class CollisionSystem() extends System {
 
   def valueInRange(value: Int, min: Int, max: Int): Boolean = {
     return (value >= min) && (value <= max)
@@ -37,31 +37,29 @@ class CollisionSystem(world: World) extends System {
     val currentHealth = attackee.getCurrentHealth
     println("Damage Detected!")
     attackee.setCurrentHealth(currentHealth - attacker.damage)
-
-    
   }
 
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
+
     (entityA.getComponent(classOf[Attack]),
       entityB.getComponent(classOf[Attack]),
       entityA.getComponent(classOf[Health]),
       entityB.getComponent(classOf[Health])) match {
-      case(Some(attackComponentA : Attack), Some(attackComponentB : Attack), Some(healthComponentA : Health), Some(healthComponentB : Health)) =>
-        println("Attack collision detected!")
-        implicit val formats = Serialization.formats(NoTypeHints)
-        println(write(healthComponentA))
-        println(write(attackComponentB))
-        
-        if (attackComponentA != null && healthComponentB != null) {
+      case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
+          //remove the attack component of entity A
+          println("DOING ATTACK OF A ON B")
           handleAttackDamage(attackComponentA, healthComponentB)
-          world.removeEntity(entityA)
-          true     
-        } else if (attackComponentB != null && healthComponentA != null) {
+          entityA.kill()
+          entityA.components += new Dead()
+          true
+      case (None, Some(attackComponentB : Attack), Some(healthComponentA : Health), None) =>
+          //remove the attack component of entityB
+          println("DOING ATTACK OF B ON A")
           handleAttackDamage(attackComponentB, healthComponentA)
-          world.removeEntity(entityB)
-          true    
-        } else 
-            false
+          entityB.kill()
+          entityB.components += new Dead()
+          true
+      case _ => false
       }
   }
 
@@ -84,8 +82,8 @@ class CollisionSystem(world: World) extends System {
           if(xOverlap && yOverlap) {
             if (handleAttack(entityA, entityB)) {
               return;
-
             }
+            //check to see if they are movable
             if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
               if(positionA.x < positionB.x) {
                 new MovementAction(new LeftDirection).process(entityA)
@@ -104,6 +102,7 @@ class CollisionSystem(world: World) extends System {
               }
             }
           }
+        case _ => return
       }
   }
 
@@ -136,6 +135,7 @@ class CollisionSystem(world: World) extends System {
 
   override def process(delta : Int) {
     //for each room get entities
+    val exclusion = List(classOf[Respawn], classOf[Transport], classOf[Dead])
     val rooms : ArrayBuffer[Entity] = world.groups("ROOMS")
     for(e <- rooms) {
       val tileMap = (e.getComponent(classOf[TileMap])) match {
@@ -146,20 +146,34 @@ class CollisionSystem(world: World) extends System {
       }
       
       var quadTree : QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.getMaximumWidth, tileMap.getMaximumHeight))
-      val entities : ArrayBuffer[Entity] = world.groups("ROOM"+room.id)
+      var entities = world.groups("ROOM"+room.id).toList
+      entities = excludeList(entities, exclusion)
       for(entity <- entities) {
         quadTree.insert(entity)
       }
 
       for(entity <- entities) {
-        var returnObjects : ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
-        quadTree.retrieve(returnObjects, entity)
+        var returnObjects = quadTree.retrieve(entity).toList 
+        returnObjects = excludeList(returnObjects, exclusion)
         for(r <- returnObjects) {
-          if(r != entity) {
+          if(r != entity && !hasExclusion(r,exclusion)) {
             handleCollision(entity, r)
           }
         }
       }
     }
   }
+
+  def excludeList[T <: AnyRef](entities : List[Entity],exclusionList : List[T] ) : List[Entity] = {
+    entities.filter{ entity =>
+      val componentEntityTypes : Set[Object] = entity.components.map(c=>c.getClass).toSet 
+      (exclusionList.toSet intersect componentEntityTypes).isEmpty 
+    }.toList
+
+  }
+
+  def hasExclusion[T <: AnyRef](entity : Entity, exclusionList : List[T]) : Boolean = {
+      val componentEntityTypes : Set[Object] = entity.components.map(c=>c.getClass).toSet 
+      !(exclusionList.toSet intersect componentEntityTypes).isEmpty
+    }
 }

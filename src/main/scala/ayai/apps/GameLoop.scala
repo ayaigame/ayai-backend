@@ -9,7 +9,7 @@ import akka.util.Timeout
 import scala.concurrent.{ ExecutionContext, Promise }
 import java.rmi.server.UID
 
-import ayai.systems.{MovementSystem,CollisionSystem,RoomChangingSystem}
+import ayai.systems._
 import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
 import crane.World
 import crane.Entity
@@ -69,7 +69,9 @@ object GameLoop {
 
     world.addSystem(new MovementSystem(roomHash))
     world.addSystem(new RoomChangingSystem(roomHash))
-    world.addSystem(new CollisionSystem(world))
+    world.addSystem(new CollisionSystem())
+    world.addSystem(new HealthSystem())
+    world.addSystem(new RespawningSystem())
     //world.initialize()
     
     //load all rooms
@@ -90,6 +92,8 @@ object GameLoop {
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
+      //get the time 
+      val start = System.currentTimeMillis
       world.process()
 
       val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
@@ -104,8 +108,11 @@ object GameLoop {
       for (characterEntity <- characterEntities) {
         //need better way of figuring if something is bullet, or figuring 
         // out what each entity has
-        val characterId = (characterEntity.getComponent(classOf[Character])) match {
+        val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
           case Some(c : Character) => c.id 
+          case None =>
+            println("BLAAAA")
+            ""
         }
         if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
           characterEntity.getComponent(classOf[MapChange]) match {
@@ -126,8 +133,10 @@ object GameLoop {
         val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterId)
         actorSelection ! new ConnectionWrite(result1)
       }
-
-      Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)
+      val end = System.currentTimeMillis
+      if((end - start) < (1000/Constants.FRAMES_PER_SECOND)) {
+        Thread.sleep((1000 / Constants.FRAMES_PER_SECOND) - (end-start))
+      }
     }
   }
 }

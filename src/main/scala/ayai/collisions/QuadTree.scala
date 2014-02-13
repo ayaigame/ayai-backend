@@ -42,9 +42,8 @@ class QuadTree(var level : Int, var bounds : Rectangle) {
 
 	private def getIndex(e : Entity) : Int = {
 		var index : Int = -1
-		val position = e.getComponent(classOf[Position])
-		val eBound = e.getComponent(classOf[Bounds])
-		(position, eBound) match {case(Some(p: Position), Some(bound: Bounds)) =>
+		(e.getComponent(classOf[Position]), e.getComponent(classOf[Bounds])) match {
+		case(Some(p: Position), Some(bound: Bounds)) =>
 			val verticalMidpoint : Double = bounds.getX() + (bounds.getWidth() / 2)
 			val horizontalMidpoint : Double = bounds.getY() + (bounds.getHeight() / 2)
 
@@ -71,6 +70,7 @@ class QuadTree(var level : Int, var bounds : Rectangle) {
 		    }
 		 
 		   index
+		case _ => -1
 		}
 	}
 
@@ -112,10 +112,11 @@ class QuadTree(var level : Int, var bounds : Rectangle) {
 	/*
 	* Return all objects that could collide with the given object
 	*/
-	def retrieve(returnObjects : ArrayBuffer[Entity], e  : Entity) : ArrayBuffer[Entity] = {
+	def retrieve(e  : Entity) : ArrayBuffer[Entity] = {
+		var returnObjects : ArrayBuffer[Entity] = ArrayBuffer.empty[Entity]
 		var index : Int = getIndex(e)
 		if (index != -1 && nodes(0) != null) {
-			nodes(index).retrieve(returnObjects, e)
+			returnObjects = nodes(index).retrieve(e)
 		}
 
 		for(r <- objects) {
