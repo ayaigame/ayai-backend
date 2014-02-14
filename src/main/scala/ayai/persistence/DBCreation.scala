@@ -22,17 +22,21 @@ import org.squeryl.adapters.H2Adapter
 
 object DBCreation {
   def ensureDbExists() = {
+
     // If DB Doesn't exist, create it
-    if(!Files.exists(Paths.get("ayai.h2.db"))) {
-      Class.forName("org.h2.Driver");
-      SessionFactory.concreteFactory = Some (() =>
-          Session.create(
-          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-          new H2Adapter))
-        transaction {
-          AyaiDB.create
-          AyaiDB.printDdl
-        }
+    if(Files.exists(Paths.get("ayai.h2.db"))){
+      Files.delete(Paths.get("ayai.h2.db"))
+    }
+    
+
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+      transaction {
+        AyaiDB.create
+        // AyaiDB.printDdl
       }
 
     Class.forName("org.h2.Driver");
