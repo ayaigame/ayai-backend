@@ -67,7 +67,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
       ("you" -> ((characterEntity.getComponent(classOf[Character]),
         characterEntity.getComponent(classOf[Position]),
         characterEntity.getComponent(classOf[Health]),
-        characterEntity.getComponent(classOf[PlayerInventory]),
+        characterEntity.getComponent(classOf[Inventory]),
         characterEntity.getComponent(classOf[Mana]),
         characterEntity.getComponent(classOf[Actionable])) match {
           case (Some(character : Character), Some(position : Position), Some(health : Health), Some(inventory : Inventory), Some(mana : Mana), Some(actionable : Actionable)) =>
@@ -78,7 +78,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
             (mana.asJson) ~
             (actionable.action.asJson))
           case _ =>
-            log.warn("cec6af4: getComponent failed to return anything")
+            log.warn("cec6af4: getComponent failed to return anything BLARG")
             JNothing
         })) ~
        ("others" -> entityJSONs.map{ e => 
@@ -94,7 +94,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
             (mana.asJson) ~
             (actionable.action.asJson))
           case _ =>
-            log.warn("f3d3275: getComponent failed to return anything")
+            log.warn("f3d3275: getComponent failed to return anything BLARG2")
             JNothing
         }})
 
