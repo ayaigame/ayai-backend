@@ -91,7 +91,6 @@ object GameLoop {
     while(running) {
       //get the time 
       val start = System.currentTimeMillis
-      world.process()
 
       val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
       val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
@@ -100,6 +99,7 @@ object GameLoop {
         messageProcessor ! new ProcessMessage(message)
       }
 
+      world.process()
       val characterEntities =  world.groups("CHARACTERS")
 
       for (characterEntity <- characterEntities) {
