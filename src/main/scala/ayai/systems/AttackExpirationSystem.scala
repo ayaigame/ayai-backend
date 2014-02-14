@@ -8,7 +8,7 @@ import ayai.components.attacks._
 
 class AttackExpirationSystem extends EntityProcessingSystem(include=List(classOf[Attack])) {
 	def processEntity(e : Entity, deltaTime : Int) {
-		(e.getComponent(classOf[Attack])) match {
+		(e.getComponent(classOf[FrameAttack])) match {
 			case(Some(ta : TimedAttack)) => 
 			if(ta.isReady(System.currentTimeMillis)) {
 				world.removeEntity(e)

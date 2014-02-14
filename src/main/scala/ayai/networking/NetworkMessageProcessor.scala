@@ -135,8 +135,8 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Bounds(10, 10))
-              p.components += (new Attack(12));
-              p.components += (c)
+              p.components += (new FrameAttack(12, 10));
+              //p.components += (c)
               world.addEntity(p)
               world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
             case _ =>

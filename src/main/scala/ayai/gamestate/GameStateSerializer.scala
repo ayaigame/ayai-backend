@@ -56,8 +56,10 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     var entityJSONs = ArrayBuffer.empty[Entity]
     for(otherEntity <- otherEntities) {
       if(characterEntity != otherEntity) {
-        if (otherEntity.getComponent(classOf[Attack]).isEmpty) {
+        otherEntity.getComponent(classOf[Character]) match {
+          case(Some(a : Character)) => 
           entityJSONs += otherEntity
+          case _ => 
         }
       }
     }

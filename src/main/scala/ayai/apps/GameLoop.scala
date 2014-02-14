@@ -69,6 +69,7 @@ object GameLoop {
     world.addSystem(new CollisionSystem())
     world.addSystem(new HealthSystem())
     world.addSystem(new RespawningSystem())
+    world.addSystem(new AttackExpirationSystem())
     //world.initialize()
     
     //load all rooms
