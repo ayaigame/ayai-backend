@@ -1,7 +1,5 @@
 package ayai.gamestate
 
-import ayai.gamestate.EffectType
-import ayai.gamestate.Attribute
 /*
  * This class will define the type of effect being created 
  * Must specify the type, attribute to be effected and value

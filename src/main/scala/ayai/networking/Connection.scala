@@ -1,16 +1,17 @@
 package ayai.networking
 
-/** Akka Imports **/
-import akka.actor.Actor
-
+/** Ayai Imports **/
 import ayai.actions._
 
-import java.net.Socket
+/** Akka Imports **/
+import akka.actor.Actor
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
+/** External Imports **/
+import java.net.Socket
 
 case class ProcessMessage(message: NetworkMessage)
 case class FlushMessages()
@@ -22,7 +23,7 @@ case class ConnectionWrite(json: String)
 sealed trait NetworkMessage
 
 case class JSONMessage(message: String) extends NetworkMessage
-case class AddNewCharacter(id: String, characterName: String, x: Int, y: Int) extends NetworkMessage
+case class AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) extends NetworkMessage
 case class RemoveCharacter(id: String) extends NetworkMessage
 case class MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) extends NetworkMessage
 case class ItemMessage(id : String, itemAction : ItemAction) extends NetworkMessage

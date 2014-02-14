@@ -57,13 +57,12 @@ object DBCreation {
     }
     
     account = AyaiDB.getAccount("tim").id
-    println(account)
       //   // val token = AyaiDB.validatePassword("tim", "tim")
       //   // println(token)
 
     transaction {
-      AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 0, account, Constants.STARTING_ROOM_ID, 30, 30))
-      AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 0, account, Constants.STARTING_ROOM_ID, 30, 30))
+      AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+      AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
     }
   }
 }

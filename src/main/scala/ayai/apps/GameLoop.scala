@@ -1,47 +1,45 @@
 package ayai.apps
 
-import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.pattern.ask
-import akka.util.Timeout
-import scala.concurrent.{ ExecutionContext, Promise }
-import java.rmi.server.UID
-
+/** Ayai Imports **/
 import ayai.systems._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
-import crane.World
-import crane.Entity
-
 import ayai.networking._
-import java.lang.Boolean
 import ayai.components._
 import ayai.persistence._
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
+import ayai.factories._
+
+/** Akka Imports **/
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.pattern.ask
+import akka.util.Timeout
+
+/** Crane Imports **/
+import crane.{Entity, World}
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
+/** External Imports **/
+import scala.concurrent.{ ExecutionContext, Promise }
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.collection.concurrent.{Map => ConcurrentMap}
+import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
+import scala.io.Source
+
+import java.rmi.server.UID
+import java.lang.Boolean
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import scala.collection.{immutable, mutable}
-import scala.collection.mutable._
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import scala.collection.JavaConversions._
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.mutable.HashMap
-
-import scala.io.Source
-
-import crane.{EntityProcessingSystem}
-
-import ayai.factories._
 
 object GameLoop {
   var roomHash : HashMap[Long, Entity] = HashMap.empty[Long, Entity]
+  private val log = LoggerFactory.getLogger(getClass)
 
   var running : Boolean = _
 
@@ -49,7 +47,7 @@ object GameLoop {
     running = true
     DBCreation.ensureDbExists()
 
-    var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
+    var socketMap: ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
 
     world.createGroup("ROOMS")    
@@ -96,7 +94,6 @@ object GameLoop {
     while(running) {
       //get the time 
       val start = System.currentTimeMillis
-      world.process()
 
       val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
       val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
@@ -105,6 +102,7 @@ object GameLoop {
         messageProcessor ! new ProcessMessage(message)
       }
 
+      world.process()
       val characterEntities =  world.groups("CHARACTERS")
 
       for (characterEntity <- characterEntities) {
@@ -112,21 +110,22 @@ object GameLoop {
         // out what each entity has
         val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
           case Some(c : Character) => c.id 
-          case None =>
-            println("BLAAAA")
-            ""
+          case _ =>
+          log.warn("8192c19: getComponent failed to return anything")
+          ""
         }
         if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
           characterEntity.getComponent(classOf[MapChange]) match {
-            case Some(map : MapChange) =>
-              val future2 = serializer ? new MapRequest(roomHash(map.roomId))
-              val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
-              val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
-              println(result2)
-              actorSelection1 ! new ConnectionWrite(result2)  
-              characterEntity.removeComponent(classOf[MapChange])
+          case Some(map : MapChange) =>
+            val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+            val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
+            val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
+            println(result2)
+            actorSelection1 ! new ConnectionWrite(result2)  
+            characterEntity.removeComponent(classOf[MapChange])
+          case _ =>
+            log.warn("990f22d: getComponent failed to return anything")
           }
-          
         }
 
         //This is how we get character specific info, once we actually integrate this in.

@@ -15,7 +15,6 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.util.Random
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-
 import java.rmi.server.UID
 
 class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
@@ -29,29 +28,9 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
       case "init" =>
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
-        val x: Int = Constants.STARTING_X
-        val y: Int = Constants.STARTING_Y
 
-        val tilemap: String = "/assets/maps/map3.json"
-        val tileset: String = "/assets/tiles/sd33.png"
-
-
-           val json = (
-                ("type" -> "id") ~
-                ("id" -> id) ~
-                ("x" -> x) ~
-                ("y" -> y) ~
-                ("tilemap" -> tilemap) ~
-                ("tileset" -> tileset)
-                )
-
-
-        wsFrame.writeText(compact(render(json)))
-        println(compact(render(json)))
-
-        queue ! new AddInterpretedMessage(new AddNewCharacter(id, "Orunin", x, y))
+        queue ! new AddInterpretedMessage(new AddNewCharacter(wsFrame, id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
         queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
-        // queue ! new AddInterpretedMessage(new InitializeRoom(wsFrame, id))
       case "echo" =>
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
       case "move" =>
@@ -61,14 +40,14 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         if(start) {
           val dir:Int = compact(render(rootJSON \ "dir")).toInt
           direction  = dir match {
-            case 0 => new UpDirection
-            case 1 => new UpRightDirection
-            case 2 => new RightDirection
-            case 3 => new DownRightDirection
-            case 4 => new DownDirection
-            case 5 => new DownLeftDirection
-            case 6 => new LeftDirection
-            case 7 => new UpLeftDirection
+            case 0 => UpDirection
+            case 1 => UpRightDirection
+            case 2 => RightDirection
+            case 3 => DownRightDirection
+            case 4 => DownDirection
+            case 5 => DownLeftDirection
+            case 6 => LeftDirection
+            case 7 => UpLeftDirection
             case _ => { 
               println("Direction not found, in Interpreter")
               new MoveDirection(0,0)

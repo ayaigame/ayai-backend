@@ -9,22 +9,23 @@ import ayai.actions._
 import ayai.components._
 import ayai.collisions._
 
-/** Artemis Imports **/
+/** Crane Imports **/
 import crane.{Entity, System, World}
-
-import scala.collection.mutable.ArrayBuffer
-
-import scala.collection.mutable.HashMap
 
 /** External Imports **/
 import scala.math.abs
 import scala.util.control.Breaks._
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 
 import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json.JsonDSL._
 
+import org.slf4j.{Logger, LoggerFactory}
+
 class CollisionSystem() extends System {
+  private val log = LoggerFactory.getLogger(getClass)
 
   def valueInRange(value: Int, min: Int, max: Int): Boolean = {
     return (value >= min) && (value <= max)
@@ -86,19 +87,19 @@ class CollisionSystem() extends System {
             //check to see if they are movable
             if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
               if(positionA.x < positionB.x) {
-                new MovementAction(new LeftDirection).process(entityA)
-                new MovementAction(new RightDirection).process(entityB)
+                LeftDirection.process(entityA)
+                RightDirection.process(entityB)
               } else {
-                new MovementAction(new RightDirection).process(entityA)
-                new MovementAction(new LeftDirection).process(entityB)
+                RightDirection.process(entityA)
+                LeftDirection.process(entityB)
               }
             } else {
               if(positionA.y < positionB.y) {
-                new MovementAction(new UpDirection).process(entityA)
-                new MovementAction(new DownDirection).process(entityB)
+                UpDirection.process(entityA)
+                DownDirection.process(entityB)
               } else {
-                new MovementAction(new DownDirection).process(entityA)
-                new MovementAction(new UpDirection).process(entityB)
+                DownDirection.process(entityA)
+                UpDirection.process(entityB)
               }
             }
           }
@@ -127,9 +128,13 @@ class CollisionSystem() extends System {
               entityB.getComponent(classOf[Bullet])) match {
                 case(Some(health : Health), Some(bullet : Bullet)) => 
                   health.currentHealth -= bullet.damage
+                case _ =>
+                  log.warn("5edf1cc: getComponent failed to return anything")
               }
             world.removeEntity(entityB)
           }
+        case _ =>
+          log.warn("fae38aa: getComponent failed to return anything")
       }
   }
 
@@ -138,11 +143,16 @@ class CollisionSystem() extends System {
     val exclusion = List(classOf[Respawn], classOf[Transport], classOf[Dead])
     val rooms : ArrayBuffer[Entity] = world.groups("ROOMS")
     for(e <- rooms) {
-      val tileMap = (e.getComponent(classOf[TileMap])) match {
-        case(Some(tilemap : TileMap)) => tilemap
+      // This needs to warn us better
+      val tileMap = (e.getComponent(classOf[TileMap]): @unchecked) match {
+        case(Some(tilemap : TileMap)) => 
+          tilemap
       }
       val room = (e.getComponent(classOf[Room])) match {
         case (Some(r : Room)) => r
+        case _ =>
+          log.warn("0b38a4a: getComponent failed to return anything")
+          new Room(-1)
       }
       
       var quadTree : QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.getMaximumWidth, tileMap.getMaximumHeight))
@@ -152,13 +162,15 @@ class CollisionSystem() extends System {
         quadTree.insert(entity)
       }
 
-      for(entity <- entities) {
-        var returnObjects = quadTree.retrieve(entity).toList 
-        returnObjects = excludeList(returnObjects, exclusion)
-        for(r <- returnObjects) {
-          if(r != entity && !hasExclusion(r,exclusion)) {
-            handleCollision(entity, r)
+      val quads = quadTree.quadrants
+      for(quad <- quads) {
+        while(quad.length > 1) {
+          for(against <- quad.tail) {
+            if(!hasExclusion(quad.head, exclusion)) {
+              handleCollision(quad.head, against)
+            }
           }
+          quad.remove(0)
         }
       }
     }

@@ -1,24 +1,22 @@
 package ayai.components
 
-
+/** Crane Imports **/
 import crane.Component
-import net.liftweb.json.JsonDSL._
-import net.liftweb.json._
+
+/** External Imports **/
 import scala.collection.mutable.ArrayBuffer
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 import net.liftweb.json.Serialization.{read, write}
 
 
 
 
 class PlayerInventory(inventory : ArrayBuffer[Item], var equippedWeapon : Weapon, var equippedArmor: Armor) extends Inventory(inventory) { 
-
-	override def asJson : JObject = {
-		("inventory" -> inventory.map{ i =>
-				(i.asJson)}) ~
-		("equippedArmor" -> equippedArmor.asJson) ~
-		("equippedWeapon" -> equippedWeapon.asJson)
-	}
-
-
-
+  override def asJson : JObject = {
+    ("inventory" -> inventory.map{ i =>
+        (i.asJson)}) ~
+    ("equippedArmor" -> equippedArmor.asJson) ~
+    ("equippedWeapon" -> equippedWeapon.asJson)
+  }
 }
