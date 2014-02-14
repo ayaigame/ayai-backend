@@ -2,7 +2,7 @@ package ayai.gamestate
 
 /** Ayai Imports **/
 import ayai.components._
-
+import ayai.components.attacks._
 /** Crane Imports **/
 import crane.{Entity, World}
 
@@ -61,12 +61,13 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
         }
       }
     }
+    
     val jsonLift: JObject = 
       ("type" -> "update") ~
       ("you" -> ((characterEntity.getComponent(classOf[Character]),
         characterEntity.getComponent(classOf[Position]),
         characterEntity.getComponent(classOf[Health]),
-        characterEntity.getComponent(classOf[Inventory]),
+        characterEntity.getComponent(classOf[PlayerInventory]),
         characterEntity.getComponent(classOf[Mana]),
         characterEntity.getComponent(classOf[Actionable])) match {
           case (Some(character : Character), Some(position : Position), Some(health : Health), Some(inventory : Inventory), Some(mana : Mana), Some(actionable : Actionable)) =>

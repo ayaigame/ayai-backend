@@ -1,8 +1,7 @@
 package ayai.components
 
-
-/** Crane Imports **/
 import crane.Component
+
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
@@ -15,7 +14,7 @@ import net.liftweb.json.Serialization.{read, write}
 case class Inventory (inventory : ArrayBuffer[Item]) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  implicit def asJson : JObject = {
+  def asJson : JObject = {
     ("inventory" -> inventory.map{ i =>
         (i.asJson)})
   }

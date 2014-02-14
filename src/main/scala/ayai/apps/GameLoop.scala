@@ -100,7 +100,7 @@ object GameLoop {
       }
 
       world.process()
-      val characterEntities =  world.groups("CHARACTERS")
+      val characterEntities =  world.getEntitiesByComponents(classOf[Player])
 
       for (characterEntity <- characterEntities) {
         //need better way of figuring if something is bullet, or figuring 

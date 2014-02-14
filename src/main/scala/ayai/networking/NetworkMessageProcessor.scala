@@ -4,6 +4,7 @@ package ayai.networking
 import ayai.gamestate.{Effect, EffectType}
 import ayai.actions._
 import ayai.components._
+import ayai.components.attacks._
 import ayai.networking.chat._
 import ayai.apps.{Constants, GameLoop}
 
@@ -45,7 +46,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         p.components += new Health(100,100)
         p.components += new Mana(200,200)
         p.components += new Room(Constants.STARTING_ROOM_ID)
-        p.components += new Character(id)
+        p.components += new Player(id)
         val inventory = new ArrayBuffer[Item]()
         inventory += new Weapon(name = "Iron Axe", value = 10,
   weight = 10, range = 0, damage = 5, damageType = "physical")
