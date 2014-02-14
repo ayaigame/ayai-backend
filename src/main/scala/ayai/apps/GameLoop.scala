@@ -6,6 +6,7 @@ import ayai.networking._
 import ayai.components._
 import ayai.persistence._
 import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
+import ayai.factories._
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
@@ -35,8 +36,9 @@ import net.liftweb.json.JsonDSL._
 
 import org.slf4j.{Logger, LoggerFactory}
 
+
 object GameLoop {
-  var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
+  var roomHash : HashMap[Long, Entity] = HashMap.empty[Long, Entity]
   private val log = LoggerFactory.getLogger(getClass)
 
   var running : Boolean = _
@@ -63,6 +65,7 @@ object GameLoop {
     //room.addToWorld
 
     ItemFactory.bootup(world)
+    ClassFactory.bootup(world)
 
     world.addSystem(new MovementSystem(roomHash))
     world.addSystem(new RoomChangingSystem(roomHash))

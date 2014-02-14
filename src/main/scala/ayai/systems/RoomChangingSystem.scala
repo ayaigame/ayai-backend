@@ -13,7 +13,8 @@ import org.slf4j.{Logger, LoggerFactory}
 /**
   This class will only be used if an entity has a Room, Character, Movable, and Transport attached to it
 **/
-class RoomChangingSystem(roomHash : HashMap[Int, Entity]) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Actionable], classOf[Transport], classOf[Position])) {
+
+class RoomChangingSystem(roomHash : HashMap[Long, Entity]) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Actionable], classOf[Transport], classOf[Position])) {
   private val log = LoggerFactory.getLogger(getClass)
   override def processEntity(e : Entity, delta : Int) {
     //get information from transport class

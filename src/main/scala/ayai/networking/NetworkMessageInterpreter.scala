@@ -2,6 +2,7 @@ package ayai.networking
 
 /** Ayai Imports **/
 import ayai.actions._
+import ayai.apps.Constants
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
@@ -27,29 +28,9 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
       case "init" =>
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
-        val x: Int = 100
-        val y: Int = 100
 
-        val tilemap: String = "/assets/maps/map3.json"
-        val tileset: String = "/assets/tiles/sd33.png"
-
-
-           val json = (
-                ("type" -> "id") ~
-                ("id" -> id) ~
-                ("x" -> x) ~
-                ("y" -> y) ~
-                ("tilemap" -> tilemap) ~
-                ("tileset" -> tileset)
-                )
-
-
-        wsFrame.writeText(compact(render(json)))
-        println(compact(render(json)))
-
-        queue ! new AddInterpretedMessage(new AddNewCharacter(id, x, y))
+        queue ! new AddInterpretedMessage(new AddNewCharacter(wsFrame, id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
         queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
-        // queue ! new AddInterpretedMessage(new InitializeRoom(wsFrame, id))
       case "echo" =>
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
       case "move" =>
@@ -77,6 +58,7 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
       case "attack" =>
           println("Attack Received")
           queue ! new AddInterpretedMessage(new AttackMessage(wsFrame))
+      
       case "chat" =>
         val message = compact(render(rootJSON \ "message"))
         val tempSender: String = compact(render(rootJSON \ "sender"))
@@ -84,12 +66,17 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         queue ! new AddInterpretedMessage(new PublicChatMessage(message, sender))
       
       case "open" =>
-        
         val containerId : String = (rootJSON \ "containerId").extract[String]
-        println(containerId)
+        // println(containerId)
         queue ! new AddInterpretedMessage(new OpenMessage(wsFrame, containerId))
+      
+      case "chars" =>
+        val accountName : String = (rootJSON \ "accountName").extract[String]
+        queue ! new CharacterList(wsFrame, accountName)
+
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
+
     }
   }
 

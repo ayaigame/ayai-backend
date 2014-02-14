@@ -23,7 +23,7 @@ case class ConnectionWrite(json: String)
 sealed trait NetworkMessage
 
 case class JSONMessage(message: String) extends NetworkMessage
-case class AddNewCharacter(id: String, x: Int, y: Int) extends NetworkMessage
+case class AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) extends NetworkMessage
 case class RemoveCharacter(id: String) extends NetworkMessage
 case class MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) extends NetworkMessage
 case class ItemMessage(id : String, itemAction : ItemAction) extends NetworkMessage
@@ -35,3 +35,4 @@ case class LoginPost(request: HttpRequestEvent) extends NetworkMessage
 case class RegisterPost(request: HttpRequestEvent) extends NetworkMessage
 case class RecoveryPost(request: HttpRequestEvent) extends NetworkMessage
 case class OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) extends NetworkMessage
+case class CharacterList(webSocket: WebSocketFrameEvent, accountName: String) extends NetworkMessage
