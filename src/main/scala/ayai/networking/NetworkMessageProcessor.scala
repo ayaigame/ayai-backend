@@ -6,6 +6,8 @@ import ayai.actions._
 import ayai.components._
 import ayai.components.attacks._
 import ayai.networking.chat._
+import ayai.persistence.CharacterTable
+import ayai.factories.EntityFactory
 import ayai.apps.{Constants, GameLoop}
 
 import crane.{Entity, World}
@@ -32,30 +34,15 @@ import org.slf4j.{Logger, LoggerFactory}
 
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
+  val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
   private val log = LoggerFactory.getLogger(getClass)
 
   def processMessage(message: NetworkMessage) {
     message match {
-      case AddNewCharacter(id: String, x: Int, y: Int) => {
-        println("Adding a character: " +  id)
-        val p: Entity = world.createEntity(tag="CHARACTER"+id)
-        p.components += new Position(x, y)
-        p.components += new Bounds(32, 32)
-        p.components += new Velocity(4, 4)
-        p.components += new Actionable(false, new MoveDirection(0,0))
-        p.components += new Health(100,100)
-        p.components += new Mana(200,200)
-        p.components += new Room(Constants.STARTING_ROOM_ID)
-        p.components += new Character(id)
-        val inventory = new ArrayBuffer[Item]()
-        inventory += new Weapon(name = "Iron Axe", value = 10,
-  weight = 10, range = 0, damage = 5, damageType = "physical")
-        p.components += new Inventory(inventory)
-//        p.components += (new Room(1))
-        world.addEntity(p)
-        world.groups("CHARACTERS") += p
-        world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
-
+      //Should take characterId: Long as a parameter instead of characterName
+      //However can't do that until front end actually gives me the characterId
+      case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
+        EntityFactory.loadCharacter(world, webSocket, id, characterName, x, y) //Should use characterId instead of characterName
       }
 
       case RemoveCharacter(id: String) => {
@@ -74,8 +61,8 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
         val id: String = socketMap(webSocket.webSocketId)
         (world.getEntityByTag("CHARACTER"+id)) match {
-          case None => 
-            println("Cant find character attached to id")
+          case None =>
+            println("Can't find character attached to id: " + id)
           case Some(e : Entity) =>
             if (!start) {
               val oldMovement = (e.getComponent(classOf[Actionable])) match {
@@ -172,8 +159,11 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       }
 
       case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
-        println(webSocket)
         socketMap(webSocket.webSocketId) = id
+      }
+
+      case CharacterList(webSocket: WebSocketFrameEvent, accountName: String) => {
+        characterTable ! new CharacterList(webSocket, accountName)
       }
 
       case PublicChatMessage(message: String, sender: String) => {
