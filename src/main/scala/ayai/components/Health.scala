@@ -1,6 +1,9 @@
 package ayai.components
 
+/** Crane Imports **/
 import crane.Component
+
+/** External Imports **/
 import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
@@ -34,6 +37,10 @@ implicit val formats = Serialization.formats(NoTypeHints)
     }
   }
 
+  def refill() {
+    currentHealth = maximumHealth
+  }
+
   override def toString : String = {
     write(this)
   }
@@ -43,5 +50,6 @@ implicit val formats = Serialization.formats(NoTypeHints)
       ("currHealth" -> currentHealth) ~
       ("maximumHealth" -> maximumHealth))
   }
+
 
 }

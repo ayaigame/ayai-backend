@@ -1,14 +1,16 @@
 package ayai.apps
 
+/** Ayai Imports **/
 import ayai.components._
 
+/** Crane Imports **/
 import crane.World
 import crane.Entity
 
+/** External Imports **/
+import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-
-import scala.collection.mutable._
 
 object ItemFactory {
 

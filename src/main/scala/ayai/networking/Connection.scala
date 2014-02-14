@@ -1,16 +1,17 @@
 package ayai.networking
 
-/** Akka Imports **/
-import akka.actor.Actor
-
+/** Ayai Imports **/
 import ayai.actions._
 
-import java.net.Socket
+/** Akka Imports **/
+import akka.actor.Actor
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
+/** External Imports **/
+import java.net.Socket
 
 case class ProcessMessage(message: NetworkMessage)
 case class FlushMessages()
