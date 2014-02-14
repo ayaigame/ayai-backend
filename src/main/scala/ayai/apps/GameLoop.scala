@@ -7,6 +7,9 @@ import ayai.components._
 import ayai.persistence._
 import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
 
+// REMOVE AFTER
+import ayai.actions.MoveDirection
+
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
@@ -64,11 +67,27 @@ object GameLoop {
 
     ItemFactory.bootup(world)
 
+    world.addSystem(new AISystem())
     world.addSystem(new MovementSystem(roomHash))
     world.addSystem(new RoomChangingSystem(roomHash))
     world.addSystem(new CollisionSystem())
     world.addSystem(new HealthSystem())
     world.addSystem(new RespawningSystem())
+// TEST AI
+    val p: Entity = world.createEntity(tag="CHARACTERAI")
+    p.components += new Position(300, 300)
+    p.components += new Bounds(32, 32)
+    p.components += new Velocity(4, 4)
+    p.components += new Actionable(false, new MoveDirection(0,0))
+    p.components += new Health(100,100)
+    p.components += new Mana(200,200)
+    p.components += new Room(Constants.STARTING_ROOM_ID)
+    p.components += new Character("IAMTHEAI")
+    p.components += new AI()
+    world.addEntity(p)
+    world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+
+// END TEST AI
     //world.initialize()
     
     //load all rooms
