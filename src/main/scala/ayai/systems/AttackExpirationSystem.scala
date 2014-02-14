@@ -14,10 +14,11 @@ class AttackExpirationSystem extends EntityProcessingSystem(include=List(classOf
 				world.removeEntity(e)
 			}
 			case(Some(fa : FrameAttack)) =>
-			fa.framesCount += 1
 			if(fa.isReady()) {
 				world.removeEntity(e)
 			}
+			fa.framesCount += 1
+
 			case None => println("no attack of the types frame and timed")
 		}
 	}
