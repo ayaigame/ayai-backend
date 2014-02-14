@@ -15,7 +15,7 @@ import scala.collection.mutable.HashMap
 /**
 	This class will only be used if an entity has a Room, Character, Movable, and Transport attached to it
 **/
-class RoomChangingSystem(roomHash : HashMap[Int, Entity]) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Movable], classOf[Transport], classOf[Position])) {
+class RoomChangingSystem(roomHash : HashMap[Long, Entity]) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Movable], classOf[Transport], classOf[Position])) {
 
 	override def processEntity(e : Entity, delta : Int) {
 		//get information from transport class

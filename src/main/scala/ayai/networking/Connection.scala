@@ -22,7 +22,7 @@ case class ConnectionWrite(json: String)
 sealed trait NetworkMessage
 
 case class JSONMessage(message: String) extends NetworkMessage
-case class AddNewCharacter(id: String, x: Int, y: Int) extends NetworkMessage
+case class AddNewCharacter(id: String, characterName: String, x: Int, y: Int) extends NetworkMessage
 case class RemoveCharacter(id: String) extends NetworkMessage
 case class MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) extends NetworkMessage
 case class ItemMessage(id : String, itemAction : ItemAction) extends NetworkMessage

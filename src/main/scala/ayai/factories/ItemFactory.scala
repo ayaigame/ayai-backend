@@ -1,4 +1,4 @@
-package ayai.apps
+package ayai.factories
 
 import ayai.components._
 

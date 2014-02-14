@@ -2,6 +2,7 @@ package ayai.networking
 
 /** Ayai Imports **/
 import ayai.actions._
+import ayai.apps.Constants
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
@@ -28,8 +29,8 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
       case "init" =>
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
-        val x: Int = 100
-        val y: Int = 100
+        val x: Int = Constants.STARTING_X
+        val y: Int = Constants.STARTING_Y
 
         val tilemap: String = "/assets/maps/map3.json"
         val tileset: String = "/assets/tiles/sd33.png"
@@ -48,7 +49,7 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         wsFrame.writeText(compact(render(json)))
         println(compact(render(json)))
 
-        queue ! new AddInterpretedMessage(new AddNewCharacter(id, x, y))
+        queue ! new AddInterpretedMessage(new AddNewCharacter(id, "Orunin", x, y))
         queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
         // queue ! new AddInterpretedMessage(new InitializeRoom(wsFrame, id))
       case "echo" =>

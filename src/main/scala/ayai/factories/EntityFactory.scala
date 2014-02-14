@@ -1,43 +1,50 @@
-package ayai.apps
+package ayai.factories
 
 import crane.Component
 import crane.Entity
 import crane.World
 
 import ayai.components._
+import ayai.actions.MoveDirection
 import ayai.maps._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.io.Source
 
+import ayai.persistence.AyaiDB
+import ayai.apps.Constants
+
 object EntityFactory {
-  
-  /**
-   * might have to do some networking stuff, dont know yet
-   */
-   /**
-  def createCharacter(world : World, roomId: Int, x: Int, y : Int) : Entity = {
-    var character : Entity = world.createEntity()
-    var position : Position = new Position(x,y)
-    var velocity : Velocity = new Velocity(3,4)
-    character.components += (position)
-    
-    character.components += (velocity)
-    
-    
-    var health : Health = new Health(200,200);
-    character.components += (health)
-    
-    character.components += (new Character(GameState.getNextCharacterId()));
-    GameState.addCharacter(roomId, character)
-    world.getManager(classOf[GroupManager]).add(character, Constants.PLAYER_CHARACTER)
-    println("Entity: " + character.getId())
-    GameLoop.map.addEntity(character.getId(),x,y)
-    character;
+
+  //Should take characterId: Long as a parameter instead of characterName
+  //However can't do that until front end actually gives me the characterId
+  def loadCharacter(world : World, entityId: String, characterName: String, x: Int, y: Int) = {
+    val p: Entity = world.createEntity(tag="CHARACTER"+entityId)
+    val account = AyaiDB.getAccount("tim").id
+    val characterRow = AyaiDB.getCharacter(characterName)
+
+    p.components += new Position(characterRow.pos_x,characterRow.pos_y)
+    p.components += new Velocity(3,4)
+    p.components += new Bounds(32, 32)
+    p.components += new Velocity(4, 4)
+    p.components += new Movable(false, new MoveDirection(0,0))
+    p.components += new Health(100,100)
+    p.components += new Mana(200,200)
+    p.components += new Room(characterRow.room_id)
+    p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here
+    //Should add calculate and add stats
+    val inventory = new ArrayBuffer[Item]()
+    inventory += new Weapon(name = "Iron Axe", value = 10,
+  weight = 10, range = 0, damage = 5, damageType = "physical")
+    p.components += new Inventory(inventory)
+    world.addEntity(p)
+    world.groups("CHARACTERS") += p
+    world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
   }
 
+/**
   def createItem(world : World, x : Int, y :Int, name : String) : Entity = {
     var item : Entity = world.createEntity()
     var position : Position = new Position(x, y)

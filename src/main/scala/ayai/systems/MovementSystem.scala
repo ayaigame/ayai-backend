@@ -10,7 +10,7 @@ import ayai.systems.RoomChangingSystem
 
 import scala.collection.mutable.HashMap
 
-class MovementSystem(roomHash : HashMap[Int, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character]), exclude=List(classOf[Transport], classOf[Respawn])) {    
+class MovementSystem(roomHash : HashMap[Long, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character]), exclude=List(classOf[Transport], classOf[Respawn])) {    
   	  //this will only move characters who have received a movement key and the current component is still set to True
       override def processEntity(e: Entity, delta : Int) {
       	(e.getComponent(classOf[Movable]),

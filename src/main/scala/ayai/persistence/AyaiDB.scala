@@ -11,6 +11,11 @@ import org.mindrot.jbcrypt.BCrypt
 import java.util.Date
 import java.sql.Timestamp
 
+//It's possible we only want to do reads and writes from a table class
+import org.squeryl.Session
+import org.squeryl.SessionFactory
+import org.squeryl.adapters.H2Adapter
+
 object AyaiDB extends Schema {
   val accounts = table[Account]("ACCOUNTS")
   val chats = table[Chat]
@@ -24,13 +29,67 @@ object AyaiDB extends Schema {
     a.username is(unique)
   ))
 
-  def registerUser(username: String, password: String) = {accounts.insert(new Account(username, BCrypt.hashpw(password, BCrypt.gensalt())))}
+  def registerUser(username: String, password: String) = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
 
-  def getAccount(username: String) = {accounts.where(account => account.username === username).single}
+    transaction {
+      accounts.insert(new Account(username, BCrypt.hashpw(password, BCrypt.gensalt())))
+    }
+  }
+
+  def getAccount(username: String) = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    transaction {
+      accounts.where(account => account.username === username).single
+    }
+  }
+
+  def getCharacter(chracterName: String) = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    transaction {
+      characters.where(character => character.name === chracterName).single
+    }
+  }
+
+  def getCharacter(characterId: Long) = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    transaction {
+      characters.where(character => character.id === characterId).single
+    }
+  }
 
   def createToken(account: Account): String = {
     val token = java.util.UUID.randomUUID.toString
-    tokens.insert(new Token(account.id, token))
+
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    transaction {
+      tokens.insert(new Token(account.id, token))
+    }
+
     return token
   }
 
@@ -74,14 +133,20 @@ case class Chat(
 case class CharacterRow (
             val name: String,
             val className: String,
-            val level: Long,
             val experience: Long,
             val account_id: Long,
             val room_id: Long,
             val pos_x: Int,
             val pos_y: Int)
           extends AccountDb2Object {
-            def this() = this("", "", 1, 0, 0, 1, 0, 0)
+            def this() = this("", "", 0, 0, 1, 0, 0)
+}
+
+case class InventoryRow (
+            val playerId: Long,
+            val itemId: Long)
+          extends AccountDb2Object {
+            def this() = this(0, 0)
 }
 
 

@@ -6,8 +6,8 @@ import net.liftweb.json.JsonDSL._
 import java.rmi.server.UID
 
 object Constants {
-  var PLAYER_CHARACTER : String = "player char"
-  var STARTING_ROOM_ID : Int = 0
+  val PLAYER_CHARACTER : String = "player char"
+  val STARTING_ROOM_ID : Int = 0
 
   val source = scala.io.Source.fromFile("src/main/resources/configs/config.json")
   val lines = source.mkString
@@ -18,4 +18,6 @@ object Constants {
   val LOAD_RADIUS:Int = compact(render(configJSON \ "LOAD_RADIUS")).toInt
   val SERVER_PORT:Int = compact(render(configJSON \ "SERVER_PORT")).toInt
   val FRAMES_PER_SECOND = compact(render(configJSON \ "FRAMES_PER_SECOND")).toInt
+  val STARTING_X: Int = compact(render(configJSON \ "STARTING_X")).toInt
+  val STARTING_Y: Int = compact(render(configJSON \ "STARTING_Y")).toInt
 }

@@ -38,8 +38,10 @@ import scala.io.Source
 
 import crane.{EntityProcessingSystem}
 
+import ayai.factories._
+
 object GameLoop {
-  var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
+  var roomHash : HashMap[Long, Entity] = HashMap.empty[Long, Entity]
 
   var running : Boolean = _
 

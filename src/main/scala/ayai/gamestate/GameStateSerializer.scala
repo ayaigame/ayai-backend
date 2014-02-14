@@ -25,7 +25,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
 
   //Returns a list of entities contained within a room.
-  def getRoomEntities(roomId: Int): ArrayBuffer[Entity] = {
+  def getRoomEntities(roomId: Long): ArrayBuffer[Entity] = {
     world.groups("ROOM" + roomId)
   }
 
