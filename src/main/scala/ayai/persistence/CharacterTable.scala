@@ -1,12 +1,9 @@
 package ayai.persistence
 
-import ayai.networking.CharacterList
 import ayai.components.Character
+import ayai.apps.Constants
 
 import scala.collection.mutable.ArrayBuffer
-
-/** Akka Imports **/
-import akka.actor.Actor
 
 import crane.Entity
 
@@ -18,16 +15,13 @@ import org.squeryl.PrimitiveTypeMode._
 import org.mindrot.jbcrypt.BCrypt 
 
 /** Socko Imports **/
-import org.mashupbots.socko.events.WebSocketFrameEvent
+import org.mashupbots.socko.events.{HttpRequestEvent, HttpResponseStatus}
 
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
 
-case class RetrieveCharacter(characterId: Long)
-case class RetrievedCharacter(character: CharacterRow)
-
-class CharacterTable extends Actor {
+object CharacterTable {
 
   def createCharacter(characterName: String, className: String, accountId: Long, startingRoom: Long, startingX: Int, startingY: Int) = {
     Class.forName("org.h2.Driver");
@@ -51,47 +45,34 @@ class CharacterTable extends Actor {
     transaction {
       update(AyaiDB.characters)(dbCharacter => 
         where(dbCharacter.name === character.name)
-        set(dbCharacter.experience := character.experience.toLong,
+        set(dbCharacter.experience := character.experience,
             dbCharacter.name := character.name)) //Just did this to keep this syntax here, REMOVE THIS
     }
   }
 
-   def receive = {
-    case CharacterList(webSocket, accountName) => {
-      Class.forName("org.h2.Driver");
-      SessionFactory.concreteFactory = Some (() =>
-          Session.create(
-          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-          new H2Adapter))
+  def characterList(request: HttpRequestEvent, accountId: Long) = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
 
-      transaction {
-        val account = AyaiDB.getAccount("tim").id
+    transaction {
+      val characters =
+        from(AyaiDB.characters)(c=>
+          where(c.account_id === accountId)
+          select(c)
+        )
 
-        val characters =
-          from(AyaiDB.characters)(c=>
-            where(c.account_id === account)
-            select(c)
-          )
-
-        var characterArray = new ArrayBuffer[JObject]()
-        for(character <- characters) {
-          characterArray += 
-            ("name" -> character.name) ~
-            ("class" -> character.className)
-        }
-
-        val jsonLift = 
-          ("type" -> "charList") ~
-          ("chars" -> characterArray)
-
-        webSocket.writeText(compact(render(jsonLift)))
+      var characterArray = new ArrayBuffer[JObject]()
+      for(character <- characters) {
+        characterArray += 
+          ("name" -> character.name) ~
+          ("level" -> Constants.EXPERIENCE_ARRAY.indexWhere((exp: Int) => character.experience < exp)) ~
+          ("class" -> character.className)
       }
-    }
 
-    case RetrieveCharacter(characterId: Long) => {
-
+      request.response.write(HttpResponseStatus.OK, compact(render(characterArray)))
     }
-    
-    case _ => println("Error: from CharacterTable.")
   }
 }

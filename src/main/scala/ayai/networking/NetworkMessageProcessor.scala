@@ -33,7 +33,6 @@ import org.slf4j.{Logger, LoggerFactory}
 
 class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
-  val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
   private val log = LoggerFactory.getLogger(getClass)
 
   def processMessage(message: NetworkMessage) {
@@ -159,10 +158,6 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 
       case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
         socketMap(webSocket.webSocketId) = id
-      }
-
-      case CharacterList(webSocket: WebSocketFrameEvent, accountName: String) => {
-        characterTable ! new CharacterList(webSocket, accountName)
       }
 
       case PublicChatMessage(message: String, sender: String) => {

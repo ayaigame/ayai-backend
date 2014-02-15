@@ -133,7 +133,7 @@ case class Chat(
 case class CharacterRow (
             val name: String,
             val className: String,
-            val experience: Long,
+            val experience: Int,
             val account_id: Long,
             val room_id: Long,
             val pos_x: Int,
