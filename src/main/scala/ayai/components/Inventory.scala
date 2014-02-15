@@ -1,8 +1,7 @@
 package ayai.components
 
-
-/** Crane Imports **/
 import crane.Component
+
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
