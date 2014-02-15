@@ -1,4 +1,4 @@
-package ayai.components.attacks
+package ayai.components
 
 /** Crane Imports **/
 import crane.Component

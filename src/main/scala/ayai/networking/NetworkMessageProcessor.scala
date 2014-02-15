@@ -4,7 +4,6 @@ package ayai.networking
 import ayai.gamestate.{Effect, EffectType}
 import ayai.actions._
 import ayai.components._
-import ayai.components.attacks._
 import ayai.networking.chat._
 import ayai.persistence.CharacterTable
 import ayai.factories.EntityFactory
@@ -122,7 +121,8 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Bounds(10, 10))
-              p.components += (new FrameAttack(12, 10));
+              p.components += (new Attack(12));
+              p.components += (new Frame(10,0))
               //p.components += (c)
               world.addEntity(p)
               world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p

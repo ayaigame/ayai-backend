@@ -8,7 +8,6 @@ package ayai.systems
 import ayai.actions._
 import ayai.components._
 import ayai.collisions._
-import ayai.components.attacks._
 
 /** Crane Imports **/
 import crane.{Entity, System, World}

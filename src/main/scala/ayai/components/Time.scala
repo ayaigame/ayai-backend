@@ -1,8 +1,8 @@
-package ayai.components.attacks
+package ayai.components
 
 import crane.Component
 
-class TimedAttack(damage : Int, msActive : Int, startTime : Long ) extends Attack(damage) {
+class Time(msActive : Int, startTime : Long ) extends Component {
 	def isReady(endTime : Long) : Boolean = {
 		if(endTime - startTime >= msActive) {
 			return true

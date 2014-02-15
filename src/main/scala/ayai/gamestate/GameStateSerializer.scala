@@ -2,7 +2,6 @@ package ayai.gamestate
 
 /** Ayai Imports **/
 import ayai.components._
-import ayai.components.attacks._
 /** Crane Imports **/
 import crane.{Entity, World}
 
