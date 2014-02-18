@@ -1,45 +1,45 @@
 package ayai.apps
 
-import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.pattern.ask
-import akka.util.Timeout
-import scala.concurrent.{ ExecutionContext, Promise }
-import java.rmi.server.UID
-
-import ayai.systems.{MovementSystem,CollisionSystem,RoomChangingSystem}
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
-import crane.World
-import crane.Entity
-
+/** Ayai Imports **/
+import ayai.systems._
 import ayai.networking._
-import java.lang.Boolean
 import ayai.components._
 import ayai.persistence._
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
+import ayai.factories._
+
+/** Akka Imports **/
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.pattern.ask
+import akka.util.Timeout
+
+/** Crane Imports **/
+import crane.{Entity, World}
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
+/** External Imports **/
+import scala.concurrent.{ ExecutionContext, Promise }
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.collection.concurrent.{Map => ConcurrentMap}
+import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
+import scala.io.Source
+
+import java.rmi.server.UID
+import java.lang.Boolean
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import scala.collection.{immutable, mutable}
-import scala.collection.mutable._
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import scala.collection.JavaConversions._
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.mutable.HashMap
-
-import scala.io.Source
-
-import crane.{EntityProcessingSystem}
 
 object GameLoop {
-  var roomHash : HashMap[Int, Entity] = HashMap.empty[Int, Entity]
+  var roomHash : HashMap[Long, Entity] = HashMap.empty[Long, Entity]
+  private val log = LoggerFactory.getLogger(getClass)
 
   var running : Boolean = _
 
@@ -47,7 +47,7 @@ object GameLoop {
     running = true
     DBCreation.ensureDbExists()
 
-    var socketMap: mutable.ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
+    var socketMap: ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
 
     world.createGroup("ROOMS")    
@@ -65,10 +65,14 @@ object GameLoop {
     //room.addToWorld
 
     ItemFactory.bootup(world)
+    ClassFactory.bootup(world)
 
     world.addSystem(new MovementSystem(roomHash))
     world.addSystem(new RoomChangingSystem(roomHash))
-    world.addSystem(new CollisionSystem(world))
+    world.addSystem(new CollisionSystem())
+    world.addSystem(new HealthSystem())
+    world.addSystem(new RespawningSystem())
+    world.addSystem(new FrameExpirationSystem())
     //world.initialize()
     
     //load all rooms
@@ -84,12 +88,15 @@ object GameLoop {
 
     val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)
 
+    world.addSystem(new NetworkingSystem(networkSystem, serializer, roomHash))
+
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue, authorization)
     receptionist.run(Constants.SERVER_PORT)
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
-      world.process()
+      //get the time 
+      val start = System.currentTimeMillis
 
       val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
       val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
@@ -98,38 +105,42 @@ object GameLoop {
         messageProcessor ! new ProcessMessage(message)
       }
 
-      val characterEntities =  world.groups("CHARACTERS")
+      world.process()
+      // val characterEntities =  world.groups("CHARACTERS")
 
-      for (characterEntity <- characterEntities) {
-        //need better way of figuring if something is bullet, or figuring 
-        // out what each entity has
-        val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
-          case Some(c : Character) => c.id 
-          case None =>
-            println("BLAAAA")
-            ""
-        }
-        if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
-          characterEntity.getComponent(classOf[MapChange]) match {
-            case Some(map : MapChange) =>
-              val future2 = serializer ? new MapRequest(roomHash(map.roomId))
-              val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
-              val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
-              println(result2)
-              actorSelection1 ! new ConnectionWrite(result2)  
-              characterEntity.removeComponent(classOf[MapChange])
-          }
-          
-        }
+      // for (characterEntity <- characterEntities) {
+      //   //need better way of figuring if something is bullet, or figuring 
+      //   // out what each entity has
+      //   val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
+      //     case Some(c : Character) => c.id 
+      //     case _ =>
+      //     log.warn("8192c19: getComponent failed to return anything")
+      //     ""
+      //   }
+      //   if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
+      //     characterEntity.getComponent(classOf[MapChange]) match {
+      //     case Some(map : MapChange) =>
+      //       val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+      //       val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
+      //       val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
+      //       println(result2)
+      //       actorSelection1 ! new ConnectionWrite(result2)  
+      //       characterEntity.removeComponent(classOf[MapChange])
+      //     case _ =>
+      //       log.warn("990f22d: getComponent failed to return anything")
+      //     }
+      //   }
 
-        //This is how we get character specific info, once we actually integrate this in.
-        val future1 = serializer ? new CharacterRadius(characterId)
-        val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
-        val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterId)
-        actorSelection ! new ConnectionWrite(result1)
+      //   //This is how we get character specific info, once we actually integrate this in.
+      //   val future1 = serializer ? new CharacterRadius(characterId)
+      //   val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
+      //   val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterId)
+      //   actorSelection ! new ConnectionWrite(result1)
+      // }
+      val end = System.currentTimeMillis
+      if((end - start) < (1000/Constants.FRAMES_PER_SECOND)) {
+        Thread.sleep((1000 / Constants.FRAMES_PER_SECOND) - (end-start))
       }
-
-      Thread.sleep(1000 / Constants.FRAMES_PER_SECOND)
     }
   }
 }

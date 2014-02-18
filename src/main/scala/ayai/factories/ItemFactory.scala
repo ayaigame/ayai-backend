@@ -1,14 +1,16 @@
-package ayai.apps
+package ayai.factories
 
+/** Ayai Imports **/
 import ayai.components._
 
+/** Crane Imports **/
 import crane.World
 import crane.Entity
 
+/** External Imports **/
+import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-
-import scala.collection.mutable._
 
 object ItemFactory {
 
@@ -103,7 +105,7 @@ object ItemFactory {
     val parsedJson = parse(lines)
 
     val rootItems = (parsedJson \\ "items").extract[List[AllItemValues]]
-    val otherPaths = (parsedJson \\ "external_items").extract[List[String]]
+    val otherPaths = (parsedJson \\ "externalItems").extract[List[String]]
 
     val listOfLists: List[List[AllItemValues]] = otherPaths.map((path: String) => getItemsList(path))
     

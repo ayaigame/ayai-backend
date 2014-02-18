@@ -1,0 +1,46 @@
+{
+	"classes": [
+		{
+			"id": 0,
+			"name": "mage",
+			"baseHealth": 100,
+			"baseMana": 100,
+			"baseStats": [
+				{
+					"attributeType": "intelligence",
+					"magnitude": 18
+				},
+				{
+					"attributeType": "strength",
+					"magnitude": 13
+				},
+				{
+					"attributeType": "agility",
+					"magnitude": 15
+				}
+			],
+			"statGrowths":[
+				{
+					"attributeType": "intelligence",
+					"magnitude": 2
+				},
+				{
+					"attributeType": "strength",
+					"magnitude": 1
+				},
+				{
+					"attributeType": "agility",
+					"magnitude": 1
+				}
+			],
+			"abilities": [
+				{
+					"name": "fireball",
+					"levelRequirement": 1,
+					"fillThisIn": "later"
+				}
+			]
+		}
+	],
+	"externalClasses": []
+}

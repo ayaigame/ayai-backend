@@ -1,7 +1,9 @@
 package ayai.components
 
+/** Crane Imports **/
 import crane.Component
 
+/** External Imports **/
 import scala.collection.mutable._
 
 case class Stat(attributeType: String, magnitude: Int)
