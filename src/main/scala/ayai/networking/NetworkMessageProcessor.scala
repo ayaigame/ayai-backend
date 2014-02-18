@@ -40,7 +40,8 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       //Should take characterId: Long as a parameter instead of characterName
       //However can't do that until front end actually gives me the characterId
       case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
-        EntityFactory.loadCharacter(world, webSocket, id, characterName, x, y) //Should use characterId instead of characterName
+        val actor = actorSystem.actorSelection("user/SockoSender"+id)
+        EntityFactory.loadCharacter(world, webSocket, id, characterName, x, y, actor) //Should use characterId instead of characterName
       }
 
       case RemoveCharacter(id: String) => {
@@ -62,19 +63,14 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
           case None =>
             println("Can't find character attached to id: " + id)
           case Some(e : Entity) =>
-            if (!start) {
               val oldMovement = (e.getComponent(classOf[Actionable])) match {
                 case Some(oldMove : Actionable) =>
-                  oldMove.active = false
+                  oldMove.active = start
+                  oldMove.action = direction
                 case _ =>
                   log.warn("a07270d: getComponent failed to return anything")
 
               }
-              
-            } else {
-              e.removeComponent(classOf[Actionable])
-              e.components += new Actionable(start, direction)
-            }
         }
       }
 
@@ -121,7 +117,8 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Bounds(10, 10))
               p.components += (new Attack(12));
-              p.components += (c)
+              p.components += (new Frame(10,0))
+              //p.components += (c)
               world.addEntity(p)
               world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
             case _ =>

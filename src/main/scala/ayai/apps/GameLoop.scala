@@ -72,6 +72,7 @@ object GameLoop {
     world.addSystem(new CollisionSystem())
     world.addSystem(new HealthSystem())
     world.addSystem(new RespawningSystem())
+    world.addSystem(new FrameExpirationSystem())
     //world.initialize()
     
     //load all rooms
@@ -86,6 +87,8 @@ object GameLoop {
     val authorization = networkSystem.actorOf(Props(new AuthorizationProcessor()))
 
     val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)
+
+    world.addSystem(new NetworkingSystem(networkSystem, serializer, roomHash))
 
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue, authorization)
     receptionist.run(Constants.SERVER_PORT)
@@ -103,37 +106,37 @@ object GameLoop {
       }
 
       world.process()
-      val characterEntities =  world.groups("CHARACTERS")
+      // val characterEntities =  world.groups("CHARACTERS")
 
-      for (characterEntity <- characterEntities) {
-        //need better way of figuring if something is bullet, or figuring 
-        // out what each entity has
-        val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
-          case Some(c : Character) => c.id 
-          case _ =>
-          log.warn("8192c19: getComponent failed to return anything")
-          ""
-        }
-        if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
-          characterEntity.getComponent(classOf[MapChange]) match {
-          case Some(map : MapChange) =>
-            val future2 = serializer ? new MapRequest(roomHash(map.roomId))
-            val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
-            val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
-            println(result2)
-            actorSelection1 ! new ConnectionWrite(result2)  
-            characterEntity.removeComponent(classOf[MapChange])
-          case _ =>
-            log.warn("990f22d: getComponent failed to return anything")
-          }
-        }
+      // for (characterEntity <- characterEntities) {
+      //   //need better way of figuring if something is bullet, or figuring 
+      //   // out what each entity has
+      //   val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
+      //     case Some(c : Character) => c.id 
+      //     case _ =>
+      //     log.warn("8192c19: getComponent failed to return anything")
+      //     ""
+      //   }
+      //   if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
+      //     characterEntity.getComponent(classOf[MapChange]) match {
+      //     case Some(map : MapChange) =>
+      //       val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+      //       val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
+      //       val actorSelection1 = networkSystem.actorSelection("user/SockoSender"+characterId)
+      //       println(result2)
+      //       actorSelection1 ! new ConnectionWrite(result2)  
+      //       characterEntity.removeComponent(classOf[MapChange])
+      //     case _ =>
+      //       log.warn("990f22d: getComponent failed to return anything")
+      //     }
+      //   }
 
-        //This is how we get character specific info, once we actually integrate this in.
-        val future1 = serializer ? new CharacterRadius(characterId)
-        val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
-        val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterId)
-        actorSelection ! new ConnectionWrite(result1)
-      }
+      //   //This is how we get character specific info, once we actually integrate this in.
+      //   val future1 = serializer ? new CharacterRadius(characterId)
+      //   val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
+      //   val actorSelection = networkSystem.actorSelection("user/SockoSender"+characterId)
+      //   actorSelection ! new ConnectionWrite(result1)
+      // }
       val end = System.currentTimeMillis
       if((end - start) < (1000/Constants.FRAMES_PER_SECOND)) {
         Thread.sleep((1000 / Constants.FRAMES_PER_SECOND) - (end-start))

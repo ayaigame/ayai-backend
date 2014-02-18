@@ -2,7 +2,6 @@ package ayai.gamestate
 
 /** Ayai Imports **/
 import ayai.components._
-
 /** Crane Imports **/
 import crane.{Entity, World}
 
@@ -56,11 +55,14 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     var entityJSONs = ArrayBuffer.empty[Entity]
     for(otherEntity <- otherEntities) {
       if(characterEntity != otherEntity) {
-        if (otherEntity.getComponent(classOf[Attack]).isEmpty) {
+        otherEntity.getComponent(classOf[Character]) match {
+          case(Some(a : Character)) => 
           entityJSONs += otherEntity
+          case _ => 
         }
       }
     }
+    
     val jsonLift: JObject = 
       ("type" -> "update") ~
       ("you" -> ((characterEntity.getComponent(classOf[Character]),
@@ -77,7 +79,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
             (mana.asJson) ~
             (actionable.action.asJson))
           case _ =>
-            log.warn("cec6af4: getComponent failed to return anything")
+            log.warn("cec6af4: getComponent failed to return anything BLARG")
             JNothing
         })) ~
        ("others" -> entityJSONs.map{ e => 
@@ -93,7 +95,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
             (mana.asJson) ~
             (actionable.action.asJson))
           case _ =>
-            log.warn("f3d3275: getComponent failed to return anything")
+            log.warn("f3d3275: getComponent failed to return anything BLARG2")
             JNothing
         }})
 

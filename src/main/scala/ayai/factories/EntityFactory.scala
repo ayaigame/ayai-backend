@@ -21,11 +21,15 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.io.Source
 
+/** Akka Imports **/
+import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
+
+
 object EntityFactory {
 
   //Should take characterId: Long as a parameter instead of characterName
   //However can't do that until front end actually gives me the characterId
-  def loadCharacter(world : World, webSocket: WebSocketFrameEvent, entityId: String, characterName: String, x: Int, y: Int) = {
+  def loadCharacter(world : World, webSocket: WebSocketFrameEvent, entityId: String, characterName: String, x: Int, y: Int, actor : ActorSelection) = {
     val p: Entity = world.createEntity(tag="CHARACTER"+entityId)
     val characterRow = AyaiDB.getCharacter(characterName)
 
@@ -35,6 +39,7 @@ object EntityFactory {
     p.components += new Velocity(4, 4)
     p.components += new Actionable(false, new MoveDirection(0,0))
     p.components += new Health(100,100)
+    p.components += new NetworkingActor(actor)
     p.components += new Mana(200,200)
     p.components += new Room(characterRow.room_id)
     p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here

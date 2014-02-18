@@ -48,14 +48,12 @@ class CollisionSystem() extends System {
       entityB.getComponent(classOf[Health])) match {
       case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
           //remove the attack component of entity A
-          println("DOING ATTACK OF A ON B")
           handleAttackDamage(attackComponentA, healthComponentB)
           entityA.kill()
           entityA.components += new Dead()
           true
       case (None, Some(attackComponentB : Attack), Some(healthComponentA : Health), None) =>
           //remove the attack component of entityB
-          println("DOING ATTACK OF B ON A")
           handleAttackDamage(attackComponentB, healthComponentA)
           entityB.kill()
           entityB.components += new Dead()
@@ -107,36 +105,6 @@ class CollisionSystem() extends System {
       }
   }
 
-  def handleBulletCollision(entityA: Entity, entityB: Entity) {
-      (entityA.getComponent(classOf[Position]),
-        entityA.getComponent(classOf[Bounds]),
-        entityB.getComponent(classOf[Position]),
-        entityB.getComponent(classOf[Bounds])) match {
-        case(Some(positionA : Position), Some(boundsA : Bounds), Some(positionB : Position), Some(boundsB : Bounds)) =>
-          // Remember to end a line with an operator of some sort (., +, &&, ||) if you need 
-          // to not fall afoul of the automatic end of statement guesser
-          //are the two characters within the same x position (is A between B's leftside and width length) 
-          val xOverlap: Boolean = valueInRange(positionA.x, positionB.x, positionB.x + boundsB.width) ||
-                                  valueInRange(positionB.x, positionA.x, positionA.x + boundsA.width)
-
-          //are the two characters within the same height area.
-          val yOverlap: Boolean = valueInRange(positionA.y, positionB.y, positionB.y + boundsB.height) ||
-                                  valueInRange(positionB.y, positionA.y, positionA.y + boundsA.height)
-
-          if(xOverlap && yOverlap) {
-            (entityA.getComponent(classOf[Health]),
-              entityB.getComponent(classOf[Bullet])) match {
-                case(Some(health : Health), Some(bullet : Bullet)) => 
-                  health.currentHealth -= bullet.damage
-                case _ =>
-                  log.warn("5edf1cc: getComponent failed to return anything")
-              }
-            world.removeEntity(entityB)
-          }
-        case _ =>
-          log.warn("fae38aa: getComponent failed to return anything")
-      }
-  }
 
   override def process(delta : Int) {
     //for each room get entities
