@@ -8,6 +8,9 @@ import ayai.persistence._
 import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
 import ayai.factories._
 
+// REMOVE AFTER
+import ayai.actions.MoveDirection
+
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
@@ -67,6 +70,7 @@ object GameLoop {
     ItemFactory.bootup(world)
     ClassFactory.bootup(world)
 
+    world.addSystem(new AISystem())
     world.addSystem(new MovementSystem(roomHash))
     world.addSystem(new RoomChangingSystem(roomHash))
     world.addSystem(new CollisionSystem())
