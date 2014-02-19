@@ -12,7 +12,7 @@ import ayai.apps.{Constants, GameLoop}
 import crane.{Entity, World}
 
 /** Akka Imports **/
-import akka.actor.{Actor, ActorSystem, ActorRef, Props}
+import akka.actor.{Actor, Props}
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
@@ -31,8 +31,9 @@ import net.liftweb.json.Serialization.{read, write}
 import org.slf4j.{Logger, LoggerFactory}
 
 
-class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
+class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
+  val actorSystem = context.system
   val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
   private val log = LoggerFactory.getLogger(getClass)
 
