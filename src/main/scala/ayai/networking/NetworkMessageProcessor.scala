@@ -13,6 +13,7 @@ import crane.{Entity, World}
 
 /** Akka Imports **/
 import akka.actor.{Actor, Props}
+import akka.actor.Status.{Success, Failure}
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
@@ -44,6 +45,7 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
       case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
         val actor = actorSystem.actorSelection("user/SockoSender"+id)
         EntityFactory.loadCharacter(world, webSocket, id, characterName, x, y, actor) //Should use characterId instead of characterName
+        sender ! Success
       }
 
       case RemoveCharacter(id: String) => {
@@ -55,6 +57,7 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
             character.kill
             socketMap.remove(id)
         }
+        sender ! Success
         println("CHARACTER KILLED")
       }
 
@@ -74,6 +77,7 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
 
               }
         }
+        sender ! Success
       }
 
        // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
@@ -130,10 +134,11 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
           case _ =>
             log.warn("8a87265: getComponent failed to return anything")
         } 
+        sender ! Success
       }
 
       case ItemMessage(id : String, itemAction : ItemAction) => {
-
+        sender ! Success
       }
 
       case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
@@ -153,14 +158,17 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
           println(compact(render(jsonLift)))
 
           webSocket.writeText(compact(render(jsonLift)))
+          sender ! Success
       }
 
       case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
         socketMap(webSocket.webSocketId) = id
+        sender ! Success
       }
 
       case CharacterList(webSocket: WebSocketFrameEvent, accountName: String) => {
         characterTable ! new CharacterList(webSocket, accountName)
+        sender ! Success
       }
 
       case PublicChatMessage(message: String, sender: String) => {
@@ -177,11 +185,13 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         //}
       }
       case _ => println("Error from NetworkMessageProcessor.")
+        sender ! Failure
     } 
   }
 
   def receive = {
     case ProcessMessage(message) => processMessage(message)
     case _ => println("Error: from interpreter.")
+      sender ! Failure
   }
 }
