@@ -24,7 +24,7 @@ class NetworkMessageProcessorSupervisor(world: World, socketMap: ConcurrentMap[S
     case _: Exception => Escalate
   }
 
-  val router = context.system.actorOf(Props(new NetworkMessageProcessor(context.system, world, socketMap)).withRouter(
+  val router = context.system.actorOf(Props(new NetworkMessageProcessor(world, socketMap)).withRouter(
     RoundRobinRouter(5, supervisorStrategy = escalator)))
 
   def receive = {
