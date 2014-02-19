@@ -82,8 +82,8 @@ object GameLoop {
 
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()))
-    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreter(messageQueue)))
-    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessor(networkSystem, world, socketMap)))
+    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreterSupervisor(messageQueue)))
+    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessorSupervisor(world, socketMap)))
     val authorization = networkSystem.actorOf(Props(new AuthorizationProcessor()))
 
     val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)
