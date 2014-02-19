@@ -8,7 +8,7 @@ package ayai.networking
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, Props, OneForOneStrategy}
 import akka.actor.SupervisorStrategy.Escalate
-import akka.routing.RoundRobinRouter
+import akka.routing.FromConfig
 
 /** External Imports **/
 import scala.concurrent.duration._
@@ -20,8 +20,10 @@ class NetworkMessageInterpreterSupervisor(queue: ActorRef) extends Actor {
     case _: Exception => Escalate
   }
 
-  val router = context.system.actorOf(Props(new NetworkMessageInterpreter(queue)).withRouter(
-    RoundRobinRouter(5, supervisorStrategy = escalator)))
+  val router = context.system.actorOf(Props(
+    new NetworkMessageInterpreter(queue)).withRouter(
+      FromConfig.withSupervisorStrategy(escalator)), 
+    name="interpreterrouter")
 
   def receive = {
     case message: InterpretMessage =>
