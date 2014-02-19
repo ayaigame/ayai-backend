@@ -7,8 +7,8 @@ package ayai.networking
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, Props, OneForOneStrategy}
-import akka.routing.RoundRobinRouter
 import akka.actor.SupervisorStrategy.Escalate
+import akka.routing.FromConfig
 
 /** Crane Imports **/
 import crane.{World}
@@ -24,8 +24,10 @@ class NetworkMessageProcessorSupervisor(world: World, socketMap: ConcurrentMap[S
     case _: Exception => Escalate
   }
 
-  val router = context.system.actorOf(Props(new NetworkMessageProcessor(world, socketMap)).withRouter(
-    RoundRobinRouter(5, supervisorStrategy = escalator)))
+val router = context.system.actorOf(Props(
+  new NetworkMessageProcessor(world,socketMap)).withRouter(
+    FromConfig.withSupervisorStrategy(escalator)), 
+  name = "processorrouter")
 
   def receive = {
     case message: ProcessMessage =>
