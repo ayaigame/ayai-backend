@@ -44,7 +44,8 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
       //However can't do that until front end actually gives me the characterId
       case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
         val actor = actorSystem.actorSelection("user/SockoSender"+id)
-        EntityFactory.loadCharacter(world, webSocket, id, characterName, x, y, actor) //Should use characterId instead of characterName
+        // CHANGE THIS SECTION WHEN DOING DATABASE WORK
+        EntityFactory.loadCharacter(world, webSocket, id, "Ness", x, y, actor) //Should use characterId instead of characterName
         sender ! Success
       }
 
@@ -142,23 +143,23 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
       }
 
       case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
-          println("Open Received!")
-          val inventory = new ArrayBuffer[Item]()
-        inventory += new Weapon(name = "Orcrist", value = 100000000,
-  weight = 10, range = 1, damage = 500000, damageType = "physical")
+  //         println("Open Received!")
+  //         val inventory = new ArrayBuffer[Item]()
+  //       inventory += new Weapon(name = "Orcrist", value = 100000000,
+  // weight = 10, range = 1, damage = 500000, damageType = "physical")
 
-          val fakeChest = new Inventory(inventory)
+  //         val fakeChest = new Inventory(inventory)
 
-          val jsonLift = 
-            ("type" -> "open") ~
-            ("containerId" -> containerId) ~
-            (fakeChest.asJson)
+  //         val jsonLift = 
+  //           ("type" -> "open") ~
+  //           ("containerId" -> containerId) ~
+  //           (fakeChest.asJson)
 
 
-          println(compact(render(jsonLift)))
+  //         println(compact(render(jsonLift)))
 
-          webSocket.writeText(compact(render(jsonLift)))
-          sender ! Success
+  //         webSocket.writeText(compact(render(jsonLift)))
+           sender ! Success
       }
 
       case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
