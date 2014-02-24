@@ -34,10 +34,10 @@ class CollisionSystem() extends System {
 
   //Eventually create a damage system to calculate this based on the users
   //equipped item
-  def handleAttackDamage(attacker: Attack, attackee: Health) {
+  def handleAttackDamage(damage : Int, attackee: Health) {
     val currentHealth = attackee.getCurrentHealth
     println("Damage Detected!")
-    attackee.setCurrentHealth(currentHealth - attacker.damage)
+    attackee.setCurrentHealth(currentHealth - damage)
   }
 
   def getWeaponStat(entity : Entity) : Int = {
@@ -76,7 +76,7 @@ class CollisionSystem() extends System {
           }
         }
       case _ =>
-    }    
+    }
     return armorValue + playerBase
 
   }
@@ -88,10 +88,27 @@ class CollisionSystem() extends System {
       entityB.getComponent(classOf[Health])) match {
       case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
           //calculate the attack
-          getWeaponStat(entityA)
-
+          var damage : Int = getWeaponStat(entityA.initiator)
+          damage -= getArmorStat(entityB)
           //remove the attack component of entity A
-          handleAttackDamage(attackComponentA, healthComponentB)
+          var damageDone = handleAttackDamage(damage, healthComponentB)
+          val initiatorId = attackComponent.initiator.getComponent(classOf[Character]) match {
+            case Some(character : Character) =>
+              character.id 
+          }
+          val victim = entityB.getComponent(classOf[Character]) match {
+            case Some(character : Character) => character.id
+          }
+          
+          world.getSystem(classOf[NetworkingSystem]) match {
+            case Some(network : NetworkingSystem) =>
+              val att = ("attack" -> 
+                ("damage" -> damage) ~
+                ("initiator" -> initiatorId) ~
+                ("victim" -> victim)) 
+              networkSystem.broadcastMessage(compact(render(att)))
+          }
+          
           entityA.kill()
           entityA.components += new Dead()
           true

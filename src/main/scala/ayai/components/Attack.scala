@@ -8,7 +8,7 @@ import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
-class Attack(var damage: Int) extends Component {
+class Attack(var initiator : Entity) extends Component {
   var infinite : Boolean = false
   implicit val formats = Serialization.formats(NoTypeHints)
   
