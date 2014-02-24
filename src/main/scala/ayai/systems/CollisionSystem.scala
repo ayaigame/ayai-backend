@@ -40,40 +40,44 @@ class CollisionSystem() extends System {
     attackee.setCurrentHealth(currentHealth - attacker.damage)
   }
 
-  def getWeaponStat(entity : Entity) : Int {
-    var playerBase : Int = _
-    var weaponValue : Int = _
+  def getWeaponStat(entity : Entity) : Int = {
+    var playerBase : Int = 0
+    var weaponValue : Int = 0
     entity.getComponent(classOf[Stats]) match {
       case Some(stats : Stats) => 
-        for(stats <- stats) {
+        for(stat <- stats.stats) {
           if(stat.attributeType == "strength"){
-            playerBase += stat.attributeType
+            playerBase += stat.magnitude
           }
         }
-    } 
+      case _ =>
+    }
     entity.getComponent(classOf[Equipment]) match {
       case Some(equipment : Equipment) =>
-        if(equipment.weapon1 != _) {
+        if(equipment.weapon1 != null) {
           weaponValue += equipment.weapon1.damage
         } 
-        if(equipment.weapon2 != _ ) {
+        if(equipment.weapon2 != null) {
           weaponValue += equipment.weapon2.damage
         }
+      case _ => 
     }
-
+    return weaponValue + playerBase
   }
 
-  def getArmorStat() : Int {
-    var playerBase : Int = _
-    var armorValue : Int = _
+  def getArmorStat(entity : Entity) : Int = {
+    var playerBase : Int = 0
+    var armorValue : Int = 0
     entity.getComponent(classOf[Stats]) match {
       case Some(stats : Stats) => 
-        for(stats <- stats) {
-          if(stat.attributeType == "strength"){
-            playerBase += stat.attributeType
+        for(stat <- stats.stats) {
+          if(stat.attributeType == "defense"){
+            playerBase += stat.magnitude
           }
         }
+      case _ =>
     }    
+    return armorValue + playerBase
 
   }
 
@@ -84,7 +88,7 @@ class CollisionSystem() extends System {
       entityB.getComponent(classOf[Health])) match {
       case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
           //calculate the attack
-          getWeaponInventory(entityA, entity)
+          getWeaponStat(entityA)
 
           //remove the attack component of entity A
           handleAttackDamage(attackComponentA, healthComponentB)
@@ -92,6 +96,7 @@ class CollisionSystem() extends System {
           entityA.components += new Dead()
           true
       case (None, Some(attackComponentB : Attack), Some(healthComponentA : Health), None) =>
+          getWeaponStat(entityB)
           //remove the attack component of entityB
           handleAttackDamage(attackComponentB, healthComponentA)
           entityB.kill()
