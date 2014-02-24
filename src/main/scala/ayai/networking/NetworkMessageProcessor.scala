@@ -59,7 +59,6 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
             socketMap.remove(id)
         }
         sender ! Success
-        println("CHARACTER KILLED")
       }
 
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {

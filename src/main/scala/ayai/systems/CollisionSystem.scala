@@ -40,13 +40,52 @@ class CollisionSystem() extends System {
     attackee.setCurrentHealth(currentHealth - attacker.damage)
   }
 
-  def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
+  def getWeaponStat(entity : Entity) : Int {
+    var playerBase : Int = _
+    var weaponValue : Int = _
+    entity.getComponent(classOf[Stats]) match {
+      case Some(stats : Stats) => 
+        for(stats <- stats) {
+          if(stat.attributeType == "strength"){
+            playerBase += stat.attributeType
+          }
+        }
+    } 
+    entity.getComponent(classOf[Equipment]) match {
+      case Some(equipment : Equipment) =>
+        if(equipment.weapon1 != _) {
+          weaponValue += equipment.weapon1.damage
+        } 
+        if(equipment.weapon2 != _ ) {
+          weaponValue += equipment.weapon2.damage
+        }
+    }
 
+  }
+
+  def getArmorStat() : Int {
+    var playerBase : Int = _
+    var armorValue : Int = _
+    entity.getComponent(classOf[Stats]) match {
+      case Some(stats : Stats) => 
+        for(stats <- stats) {
+          if(stat.attributeType == "strength"){
+            playerBase += stat.attributeType
+          }
+        }
+    }    
+
+  }
+
+  def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
     (entityA.getComponent(classOf[Attack]),
       entityB.getComponent(classOf[Attack]),
       entityA.getComponent(classOf[Health]),
       entityB.getComponent(classOf[Health])) match {
       case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
+          //calculate the attack
+          getWeaponInventory(entityA, entity)
+
           //remove the attack component of entity A
           handleAttackDamage(attackComponentA, healthComponentB)
           entityA.kill()

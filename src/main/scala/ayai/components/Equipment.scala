@@ -5,8 +5,10 @@ import crane.Component
 
 
 class Equipment() extends Component {
-	var helmet : Item = _
-	var weapon1 : Item = _
-	var weapon2 : Item = _
-	var torso : Item = _
+	var helmet : Armor = _
+	var weapon1 : Weapon = _
+	var weapon2 : Weapon = _
+	var torso : Armor = _
+	var legs : Armor = _
+	var feet : Armor
 }
