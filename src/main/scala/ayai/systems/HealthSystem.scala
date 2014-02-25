@@ -6,6 +6,10 @@ import crane.{EntityProcessingSystem, Entity, World}
 /** Ayai Imports **/
 import ayai.components._
 
+object HealthSystem {
+  def apply() = new HealthSystem()
+}
+
 class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health], classOf[Character]), exclude=List(classOf[Respawn])) {
 
   override def processEntity(e : Entity, deltaTime : Int) {

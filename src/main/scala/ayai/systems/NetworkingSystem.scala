@@ -36,10 +36,12 @@ import net.liftweb.json.JsonDSL._
 
 import org.slf4j.{Logger, LoggerFactory}
 
+object NetworkingSystem {
+  def apply(networkSystem: ActorSystem) = new NetworkingSystem(networkSystem)
+}
 
-class NetworkingSystem(networkSystem : ActorSystem, serializer : ActorRef, roomHash : HashMap[Long, Entity]) 
-  extends TimedSystem(1000/30) {
-  
+
+class NetworkingSystem(networkSystem : ActorSystem) extends TimedSystem(1000/30) {
   private val log = LoggerFactory.getLogger(getClass)
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 

@@ -25,9 +25,7 @@ class NetworkMessageProcessorSupervisor(world: World, socketMap: ConcurrentMap[S
   }
 
 val router = context.system.actorOf(Props(
-  new NetworkMessageProcessor(world,socketMap)).withRouter(
-    FromConfig.withSupervisorStrategy(escalator)), 
-  name = "processorrouter")
+  new NetworkMessageProcessor(world, socketMap)).withRouter(FromConfig.withSupervisorStrategy(escalator)), name = "processorrouter")
 
   def receive = {
     case message: ProcessMessage =>

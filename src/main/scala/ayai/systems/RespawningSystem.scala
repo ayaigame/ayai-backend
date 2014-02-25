@@ -6,6 +6,9 @@ import ayai.components._
 /** Crane Imports **/
 import crane.{Entity, EntityProcessingSystem, World}
 
+object RespawningSystem {
+  def apply() = new RespawningSystem()
+}
 
 class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn])) { 
   override def processEntity(e : Entity, deltaTime : Int) {

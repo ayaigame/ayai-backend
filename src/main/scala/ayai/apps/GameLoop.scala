@@ -49,6 +49,7 @@ object GameLoop {
     DBCreation.ensureDbExists()
 
     var socketMap: ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
+    var worlds: HashMap[String, World]()
     var world: World = new World()
 
     world.createGroup("ROOMS")    
@@ -92,7 +93,7 @@ object GameLoop {
     world.addSystem(new NetworkingSystem(networkSystem, serializer, roomHash))
     world.addSystem(new CollisionSystem(networkSystem))
 
-    val receptionist = new SockoServer(networkSystem, interpreter, messageQueue, authorization)
+    val receptionist = new SockoServer(networkSystem)
     receptionist.run(Constants.SERVER_PORT)
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP

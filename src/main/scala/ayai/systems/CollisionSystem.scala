@@ -27,6 +27,9 @@ import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json.JsonDSL._
 
 import org.slf4j.{Logger, LoggerFactory}
+object CollisionSystem {
+  def apply(actorSystem: ActorSystem) = new CollisionSystem(actorSystem)
+}
 
 class CollisionSystem(actorSystem : ActorSystem) extends System {
   private val log = LoggerFactory.getLogger(getClass)

@@ -5,6 +5,9 @@ import crane.Entity
 
 import ayai.components._
 
+object TimeExpirationSystem {
+  def apply() = new TimeExpirationSystem()
+}
 
 class TimeExpirationSystem() extends EntityProcessingSystem(include=List(classOf[Time])) {
   def processEntity(e : Entity, deltaTime : Int) {

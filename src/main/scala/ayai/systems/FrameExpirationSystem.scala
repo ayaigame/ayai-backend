@@ -5,6 +5,10 @@ import crane.Entity
 
 import ayai.components._
 
+object FrameExpirationSystem {
+  def apply() = new FrameExpirationSystem()
+}
+
 class FrameExpirationSystem() extends EntityProcessingSystem(include=List(classOf[Frame])) {
   def processEntity(e : Entity, deltaTime : Int) {
     e.getComponent(classOf[Frame]) match {

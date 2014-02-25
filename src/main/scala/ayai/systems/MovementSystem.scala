@@ -12,6 +12,10 @@ import scala.collection.mutable.HashMap
 import org.slf4j.{Logger, LoggerFactory}
 import java.util.Map
 
+object MovementSystem {
+  def apply() = new MovementSystem()
+}
+
 class MovementSystem(roomHash : HashMap[Long, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character], classOf[Actionable]), exclude=List(classOf[Transport], classOf[Respawn])) {  
   private val log = LoggerFactory.getLogger(getClass)
     //this will only move characters who have received a movement key and the current component is still set to True
