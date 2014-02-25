@@ -9,14 +9,12 @@ import ayai.persistence.CharacterTable
 import ayai.factories.EntityFactory
 import ayai.apps.{Constants, GameLoop}
 
+/** Crane Imports **/
 import crane.{Entity, World}
 
 /** Akka Imports **/
 import akka.actor.{Actor, Props}
 import akka.actor.Status.{Success, Failure}
-
-/** Socko Imports **/
-import org.mashupbots.socko.events.WebSocketFrameEvent
 
 /** External Imports **/
 import scala.util.Random
@@ -31,7 +29,6 @@ import net.liftweb.json.Serialization.{read, write}
 
 import org.slf4j.{Logger, LoggerFactory}
 
-
 class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
   val actorSystem = context.system
@@ -42,10 +39,10 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
     message match {
       //Should take characterId: Long as a parameter instead of characterName
       //However can't do that until front end actually gives me the characterId
-      case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
+      case AddNewCharacter(socketId: String, id: String, characterName: String, x: Int, y: Int) => {
         val actor = actorSystem.actorSelection("user/SockoSender"+id)
         // CHANGE THIS SECTION WHEN DOING DATABASE WORK
-        EntityFactory.loadCharacter(world, webSocket, id, "Ness", x, y, actor) //Should use characterId instead of characterName
+        EntityFactory.loadCharacter(world, socketId, id, "Ness", x, y, actor) //Should use characterId instead of characterName
         sender ! Success
       }
 
@@ -61,9 +58,9 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         sender ! Success
       }
 
-      case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
+      case MoveMessage(socketId: String, start: Boolean, direction: MoveDirection) => {
         //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
-        val id: String = socketMap(webSocket.webSocketId)
+        val id: String = socketMap(socketId)
         (world.getEntityByTag("CHARACTER"+id)) match {
           case None =>
             println("Can't find character attached to id: " + id)
@@ -81,17 +78,14 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
       }
 
        // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
-      case AttackMessage(webSocket : WebSocketFrameEvent) => {
+      case AttackMessage(socketId: String) => {
         //create a projectile
         println("Created Bullet")
-        val id : String = socketMap(webSocket.webSocketId)
+        val id : String = socketMap(socketId)
         val bulletId = (new UID()).toString
 
         (world.getEntityByTag("CHARACTER"+id)) match {
 
-        //for rob temporary
-        //initiator.getComponent(classOf[Health]).currentHealth -= 10
-        //initiator.getComponent(classOf[Mana]).currentMana -= 20
         case Some(initiator : Entity) =>
           val position = initiator.getComponent(classOf[Position])
           val movable = initiator.getComponent(classOf[Actionable])
@@ -108,7 +102,6 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
               val upperLefty = pos.y
 
               println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
-
 
               val xDirection = m.xDirection
               val yDirection = m.yDirection
@@ -141,33 +134,17 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         sender ! Success
       }
 
-      case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
-  //         println("Open Received!")
-  //         val inventory = new ArrayBuffer[Item]()
-  //       inventory += new Weapon(name = "Orcrist", value = 100000000,
-  // weight = 10, range = 1, damage = 500000, damageType = "physical")
-
-  //         val fakeChest = new Inventory(inventory)
-
-  //         val jsonLift = 
-  //           ("type" -> "open") ~
-  //           ("containerId" -> containerId) ~
-  //           (fakeChest.asJson)
-
-
-  //         println(compact(render(jsonLift)))
-
-  //         webSocket.writeText(compact(render(jsonLift)))
-           sender ! Success
-      }
-
-      case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
-        socketMap(webSocket.webSocketId) = id
+      case OpenMessage(socketId: String, containerId : String) => {
         sender ! Success
       }
 
-      case CharacterList(webSocket: WebSocketFrameEvent, accountName: String) => {
-        characterTable ! new CharacterList(webSocket, accountName)
+      case SocketCharacterMap(socketId: String, id: String) => {
+        socketMap(socketId) = id
+        sender ! Success
+      }
+
+      case CharacterList(socketId: String, accountName: String) => {
+        characterTable ! new CharacterList(socketId, accountName)
         sender ! Success
       }
 
