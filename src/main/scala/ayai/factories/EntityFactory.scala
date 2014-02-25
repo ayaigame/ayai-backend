@@ -44,39 +44,44 @@ object EntityFactory {
     p.components += new Room(characterRow.room_id)
     p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here
     //Should add calculate and add stats
-    val inventory = new ArrayBuffer[Item]()
-    
-    p.components += new Inventory(inventory)
-    p.getComponent(classOf[Inventory]) match {
-      case (i : Inventory) =>
-      i.addItem(world.getEntityByTag("ITEM1") match {
+    val inventory = new Inventory()
+    inventory.addItem(world.getEntityByTag("ITEMS0") match {
         case Some(e : Entity) => e.getComponent(classOf[Item]) match {
           case Some(it : Item) => it
           case _ => null
         }
         
         case _ => null
-      })
-      i.addItem(world.getEntityByTag("ITEM0") match {
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS1") match {
         case Some(e : Entity) => e.getComponent(classOf[Item]) match {
           case Some(it : Item) => it
-          case _ => null 
+          case _ => null
         }
         
         case _ => null
-      })
-      i.addItem(world.getEntityByTag("ITEM2") match {
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS2") match {
         case Some(e : Entity) => e.getComponent(classOf[Item]) match {
           case Some(it : Item) => it
-          case _ => null 
+          case _ => null
         }
         
         case _ => null
-      })
-      case _ =>
-    }
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS1") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null
+        }
+        
+        case _ => null
+    })
+    p.components += inventory
     
-    p.components += new Equipment()
+    val equipment = new Equipment()
+    equipment.equipWeapon1(inventory.getItem(1))
+    p.components += equipment
 
     world.addEntity(p)
     world.groups("CHARACTERS") += p

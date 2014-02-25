@@ -70,7 +70,6 @@ object GameLoop {
 
     world.addSystem(new MovementSystem(roomHash))
     world.addSystem(new RoomChangingSystem(roomHash))
-    world.addSystem(new CollisionSystem())
     world.addSystem(new HealthSystem())
     world.addSystem(new RespawningSystem())
     world.addSystem(new FrameExpirationSystem())
@@ -91,6 +90,7 @@ object GameLoop {
     val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)
 
     world.addSystem(new NetworkingSystem(networkSystem, serializer, roomHash))
+    world.addSystem(new CollisionSystem(networkSystem))
 
     val receptionist = new SockoServer(networkSystem, interpreter, messageQueue, authorization)
     receptionist.run(Constants.SERVER_PORT)

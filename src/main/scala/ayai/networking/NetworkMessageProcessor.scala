@@ -59,7 +59,6 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
             socketMap.remove(id)
         }
         sender ! Success
-        println("CHARACTER KILLED")
       }
 
       case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
@@ -123,7 +122,7 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
 
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Bounds(10, 10))
-              p.components += (new Attack(12));
+              p.components += (new Attack(initiator));
               p.components += (new Frame(10,0))
               //p.components += (c)
               world.addEntity(p)
