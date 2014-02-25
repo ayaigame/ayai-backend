@@ -1,20 +1,16 @@
 package ayai.components
 
 /** Crane Imports **/
-import crane.Component
+import crane.{Component, Entity}
 
 /** External Imports **/
 import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
-class Attack(var initiator : Entity) extends Component {
-  var infinite : Boolean = false
+class Attack(var initiator: Entity) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
   
-  implicit def asJson() : JObject = {
-    ("attackDamage" -> damage)
-  }
 
   override def toString: String = {
     write(this)

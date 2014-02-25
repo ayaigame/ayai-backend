@@ -5,10 +5,25 @@ import crane.Component
 
 
 class Equipment() extends Component {
-	var helmet : Armor = null
-	var weapon1 : Weapon = null
-	var weapon2 : Weapon = null
-	var torso : Armor = null
-	var legs : Armor = null
-	var feet : Armor = null
+	var helmet : Item = null
+	var weapon1 : Item = null
+	var weapon2 : Item = null
+	var torso : Item = null
+	var legs : Item = null
+	var feet : Item = null
+
+	def equipWeapon1(weapon : Item) {
+		weapon.itemType match {
+			case weaponType : Weapon => 
+				weapon1 = weapon
+			case _ =>
+		}
+	}
+	def equipWeapon2(weapon : Item) {
+		weapon.itemType match {
+			case weaponType : Weapon => 
+				weapon2 = weapon
+			case _ =>
+		}
+	}
 }

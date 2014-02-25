@@ -4,10 +4,14 @@ package ayai.systems
  * ayai.system.CollisionSystem
  */
 
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+
 /** Ayai Imports **/
 import ayai.actions._
 import ayai.components._
 import ayai.collisions._
+import ayai.networking.ConnectionWrite
+
 
 /** Crane Imports **/
 import crane.{Entity, System, World}
@@ -24,7 +28,7 @@ import net.liftweb.json.JsonDSL._
 
 import org.slf4j.{Logger, LoggerFactory}
 
-class CollisionSystem() extends System {
+class CollisionSystem(actorSystem : ActorSystem) extends System {
   private val log = LoggerFactory.getLogger(getClass)
 
   def valueInRange(value: Int, min: Int, max: Int): Boolean = {
@@ -55,17 +59,24 @@ class CollisionSystem() extends System {
     entity.getComponent(classOf[Equipment]) match {
       case Some(equipment : Equipment) =>
         if(equipment.weapon1 != null) {
-          weaponValue += equipment.weapon1.damage
-        } 
-        if(equipment.weapon2 != null) {
-          weaponValue += equipment.weapon2.damage
+          equipment.weapon1.itemType match {
+            case weapon : Weapon => 
+            weaponValue += weapon.damage
+            case _ => 
+          }
         }
-      case _ => 
+        if(equipment.weapon2 != null) {
+          equipment.weapon2.itemType match {
+            case weapon : Weapon => 
+            weaponValue += weapon.damage
+            case _ =>
+          }
+        }
     }
     return weaponValue + playerBase
   }
 
-  def getArmorStat(entity : Entity) : Int = {
+  def getArmorStat(entity: Entity) : Int = {
     var playerBase : Int = 0
     var armorValue : Int = 0
     entity.getComponent(classOf[Stats]) match {
@@ -78,7 +89,32 @@ class CollisionSystem() extends System {
       case _ =>
     }
     return armorValue + playerBase
+  }
 
+  def getDamage(initiator: Entity, victim: Entity) {
+        //calculate the attack
+    var damage : Int = getWeaponStat(initiator)
+    damage -= getArmorStat(victim)
+    val healthComponent = victim.getComponent(classOf[Health]) match {
+      case Some(health : Health) => health
+      case _ => null
+    }
+    //remove the attack component of entity A
+    var damageDone = handleAttackDamage(damage, healthComponent)
+    val initiatorId = initiator.getComponent(classOf[Character]) match {
+      case Some(character : Character) =>
+        character.id 
+    }
+    val victimId = victim.getComponent(classOf[Character]) match {
+      case Some(character : Character) => character.id
+    }
+  
+    val att = ("attack" -> 
+      ("damage" -> damage) ~
+      ("initiator" -> initiatorId) ~
+      ("victim" -> victimId))
+    val actorSelection = actorSystem.actorSelection("user/SockoSender*")
+    actorSelection ! new ConnectionWrite(compact(render(att))) 
   }
 
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
@@ -88,34 +124,12 @@ class CollisionSystem() extends System {
       entityB.getComponent(classOf[Health])) match {
       case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
           //calculate the attack
-          var damage : Int = getWeaponStat(entityA.initiator)
-          damage -= getArmorStat(entityB)
-          //remove the attack component of entity A
-          var damageDone = handleAttackDamage(damage, healthComponentB)
-          val initiatorId = attackComponent.initiator.getComponent(classOf[Character]) match {
-            case Some(character : Character) =>
-              character.id 
-          }
-          val victim = entityB.getComponent(classOf[Character]) match {
-            case Some(character : Character) => character.id
-          }
-          
-          world.getSystem(classOf[NetworkingSystem]) match {
-            case Some(network : NetworkingSystem) =>
-              val att = ("attack" -> 
-                ("damage" -> damage) ~
-                ("initiator" -> initiatorId) ~
-                ("victim" -> victim)) 
-              networkSystem.broadcastMessage(compact(render(att)))
-          }
-          
+          getDamage(attackComponentA.initiator, entityB)
           entityA.kill()
           entityA.components += new Dead()
           true
       case (None, Some(attackComponentB : Attack), Some(healthComponentA : Health), None) =>
-          getWeaponStat(entityB)
-          //remove the attack component of entityB
-          handleAttackDamage(attackComponentB, healthComponentA)
+          getDamage(attackComponentB.initiator, entityA)
           entityB.kill()
           entityB.components += new Dead()
           true
