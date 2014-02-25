@@ -82,12 +82,12 @@ object GameLoop {
     import ExecutionContext.Implicits.global
 
     val networkSystem = ActorSystem("NetworkSystem")
-    val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()))
-    val interpreter = networkSystem.actorOf(Props(NetworkMessageInterpreterSupervisor(messageQueue)))
-    val messageProcessor = networkSystem.actorOf(Props(NetworkMessageProcessorSupervisor(world, socketMap)))
-    val authorization = networkSystem.actorOf(Props(new AuthorizationProcessor()))
+    val messageQueue = networkSystem.actorOf(Props[NetworkMessageQueue], name="NMQueue")
+    val interpreter = networkSystem.actorOf(Props[NetworkMessageInterpreterSupervisor], name="NMInterpreter")
+    val messageProcessor = networkSystem.actorOf(Props(NetworkMessageProcessorSupervisor(world, socketMap)), name="NMProcessor")
+    val authorization = networkSystem.actorOf(Props[AuthorizationProcessor], name="AProcessor")
 
-    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)
+    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)))
 
     world.addSystem(new NetworkingSystem(networkSystem, serializer, roomHash))
     world.addSystem(new CollisionSystem(networkSystem))

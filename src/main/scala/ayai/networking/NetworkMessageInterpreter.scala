@@ -17,7 +17,9 @@ import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 import java.rmi.server.UID
 
-class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
+class NetworkMessageInterpreter extends Actor {
+  val queue = networkSystem.actorSelection("user/NMQueue")
+
   implicit val formats = Serialization.formats(NoTypeHints)
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
     val rootJSON = parse(wsFrame.readText)
