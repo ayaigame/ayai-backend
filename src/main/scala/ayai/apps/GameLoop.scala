@@ -21,8 +21,7 @@ import crane.{Entity, World}
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
 /** External Imports **/
-import scala.concurrent.{ ExecutionContext, Promise }
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Promise, Future}
 import scala.concurrent.duration._
 import scala.collection.concurrent.{Map => ConcurrentMap}
 import scala.collection.JavaConversions._
@@ -84,8 +83,8 @@ object GameLoop {
 
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props(new NetworkMessageQueue()))
-    val interpreter = networkSystem.actorOf(Props(new NetworkMessageInterpreterSupervisor(messageQueue)))
-    val messageProcessor = networkSystem.actorOf(Props(new NetworkMessageProcessorSupervisor(world, socketMap)))
+    val interpreter = networkSystem.actorOf(Props(NetworkMessageInterpreterSupervisor(messageQueue)))
+    val messageProcessor = networkSystem.actorOf(Props(NetworkMessageProcessorSupervisor(world, socketMap)))
     val authorization = networkSystem.actorOf(Props(new AuthorizationProcessor()))
 
     val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)) , name = (new UID()).toString)

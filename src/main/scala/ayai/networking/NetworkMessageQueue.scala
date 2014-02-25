@@ -6,7 +6,7 @@ import akka.actor.Actor
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
 
-class NetworkMessageQueue extends Actor{
+object NetworkMessageQueue extends Actor{
   var messages : ArrayBuffer[NetworkMessage] = new ArrayBuffer[NetworkMessage]()
 
   /**
