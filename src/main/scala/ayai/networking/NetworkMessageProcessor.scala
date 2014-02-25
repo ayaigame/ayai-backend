@@ -12,7 +12,8 @@ import ayai.apps.{Constants, GameLoop}
 import crane.{Entity, World}
 
 /** Akka Imports **/
-import akka.actor.{Actor, ActorSystem, ActorRef, Props}
+import akka.actor.{Actor, Props}
+import akka.actor.Status.{Success, Failure}
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.WebSocketFrameEvent
@@ -31,8 +32,9 @@ import net.liftweb.json.Serialization.{read, write}
 import org.slf4j.{Logger, LoggerFactory}
 
 
-class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
+class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
+  val actorSystem = context.system
   val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
   private val log = LoggerFactory.getLogger(getClass)
 
@@ -42,7 +44,9 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
       //However can't do that until front end actually gives me the characterId
       case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
         val actor = actorSystem.actorSelection("user/SockoSender"+id)
-        EntityFactory.loadCharacter(world, webSocket, id, characterName, x, y, actor) //Should use characterId instead of characterName
+        // CHANGE THIS SECTION WHEN DOING DATABASE WORK
+        EntityFactory.loadCharacter(world, webSocket, id, "Ness", x, y, actor) //Should use characterId instead of characterName
+        sender ! Success
       }
 
       case RemoveCharacter(id: String) => {
@@ -54,6 +58,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
             character.kill
             socketMap.remove(id)
         }
+        sender ! Success
         println("CHARACTER KILLED")
       }
 
@@ -73,6 +78,7 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
 
               }
         }
+        sender ! Success
       }
 
        // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
@@ -129,37 +135,41 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
           case _ =>
             log.warn("8a87265: getComponent failed to return anything")
         } 
+        sender ! Success
       }
 
       case ItemMessage(id : String, itemAction : ItemAction) => {
-
+        sender ! Success
       }
 
       case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
-          println("Open Received!")
-          val inventory = new ArrayBuffer[Item]()
-        inventory += new Weapon(name = "Orcrist", value = 100000000,
-  weight = 10, range = 1, damage = 500000, damageType = "physical")
+  //         println("Open Received!")
+  //         val inventory = new ArrayBuffer[Item]()
+  //       inventory += new Weapon(name = "Orcrist", value = 100000000,
+  // weight = 10, range = 1, damage = 500000, damageType = "physical")
 
-          val fakeChest = new Inventory(inventory)
+  //         val fakeChest = new Inventory(inventory)
 
-          val jsonLift = 
-            ("type" -> "open") ~
-            ("containerId" -> containerId) ~
-            (fakeChest.asJson)
+  //         val jsonLift = 
+  //           ("type" -> "open") ~
+  //           ("containerId" -> containerId) ~
+  //           (fakeChest.asJson)
 
 
-          println(compact(render(jsonLift)))
+  //         println(compact(render(jsonLift)))
 
-          webSocket.writeText(compact(render(jsonLift)))
+  //         webSocket.writeText(compact(render(jsonLift)))
+           sender ! Success
       }
 
       case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
         socketMap(webSocket.webSocketId) = id
+        sender ! Success
       }
 
       case CharacterList(webSocket: WebSocketFrameEvent, accountName: String) => {
         characterTable ! new CharacterList(webSocket, accountName)
+        sender ! Success
       }
 
       case PublicChatMessage(message: String, sender: String) => {
@@ -176,11 +186,13 @@ class NetworkMessageProcessor(actorSystem: ActorSystem, world: World, socketMap:
         //}
       }
       case _ => println("Error from NetworkMessageProcessor.")
+        sender ! Failure
     } 
   }
 
   def receive = {
     case ProcessMessage(message) => processMessage(message)
     case _ => println("Error: from interpreter.")
+      sender ! Failure
   }
 }

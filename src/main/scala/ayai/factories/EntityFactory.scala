@@ -45,9 +45,39 @@ object EntityFactory {
     p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here
     //Should add calculate and add stats
     val inventory = new ArrayBuffer[Item]()
-    inventory += new Weapon(name = "Iron Axe", value = 10,
-  weight = 10, range = 0, damage = 5, damageType = "physical")
+    
     p.components += new Inventory(inventory)
+    p.getComponent(classOf[Inventory]) match {
+      case (i : Inventory) =>
+      i.addItem(world.getEntityByTag("ITEM1") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null
+        }
+        
+        case _ => null
+      })
+      i.addItem(world.getEntityByTag("ITEM0") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null 
+        }
+        
+        case _ => null
+      })
+      i.addItem(world.getEntityByTag("ITEM2") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null 
+        }
+        
+        case _ => null
+      })
+      case _ =>
+    }
+    
+    p.components += new Equipment()
+
     world.addEntity(p)
     world.groups("CHARACTERS") += p
     world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p

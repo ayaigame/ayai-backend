@@ -19,8 +19,9 @@ class MovementSystem(roomHash : HashMap[Long, Entity]) extends EntityProcessingS
     (e.getComponent(classOf[Actionable]),
       e.getComponent(classOf[Position]),
       e.getComponent(classOf[Velocity]),
-      e.getComponent(classOf[Room])) match {
-      case (Some(actionable : Actionable), Some(position : Position), Some(velocity : Velocity), Some(room : Room)) =>
+      e.getComponent(classOf[Room]),
+      e.getComponent(classOf[Bounds])) match {
+      case (Some(actionable : Actionable), Some(position : Position), Some(velocity : Velocity), Some(room : Room), Some(bounds : Bounds)) =>
         val originalPosition = new Position(position.x, position.y)
         //if moving then process for the given direction
         if(actionable.active) {
@@ -41,7 +42,7 @@ class MovementSystem(roomHash : HashMap[Long, Entity]) extends EntityProcessingS
         }
         tileMap.isPositionInBounds(position)
         //if on tile Collision go back to original position
-        val collision = tileMap.onTileCollision(position)
+        val collision = tileMap.onTileCollision(position, bounds)
         //get room and check if player should change rooms
         //add transport to players (roomchanging system will take over)
         if(collision) {

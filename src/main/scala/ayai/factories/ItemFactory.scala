@@ -27,13 +27,19 @@ object ItemFactory {
       slot: Option[String],
       protection: Option[Int],
       stackable: Option[Boolean],
-      stats: Option[List[Stat]])
+      stats: Option[List[Stat]],
+      image : Option[String])
 
   def bootup(world: World) = {
     val items: List[AllItemValues] = getItemsList("src/main/resources/configs/items/items.json")
 
     instantiateWeapons(world, items.filter((item: AllItemValues) => item.itemType == "weapon"))
-    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "armor"))
+    // instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "armor"))
+    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "helmet"))
+    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "braces"))
+    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "legs"))
+    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "feet"))
+
   }
 
   def buildStats(item: AllItemValues): Stats = {
@@ -45,13 +51,14 @@ object ItemFactory {
   def instantiateWeapons(world: World, items: List[AllItemValues]) = {
     items.foreach (item => {
       var entityItem: Entity = world.createEntity()
-      var weapon = new Weapon(
+      var weapon = new Item(
         item.name,
         item.value,
         item.weight,
-        item.range.get,
+        new Weapon(item.range.get,
         item.damage.get,
-        item.damageType.get)
+        item.damageType.get, item.itemType))
+      weapon.image = item.image.get
 
       entityItem.components += weapon
 
@@ -66,12 +73,13 @@ object ItemFactory {
   def instantiateArmor(world: World, items: List[AllItemValues]) = {
     items.foreach (item => {
       var entityItem: Entity = world.createEntity()
-      var armor = new Armor(
+      var armor = new Item(
         item.name,
         item.value,
         item.weight,
-        item.slot.get,
-        item.protection.get)
+        new Armor(item.slot.get,
+        item.protection.get, item.itemType))
+      armor.image = ""
 
       entityItem.components += armor
 
