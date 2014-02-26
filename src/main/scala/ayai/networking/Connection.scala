@@ -14,7 +14,7 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import java.net.Socket
 
 case class ProcessMessage(message: NetworkMessage)
-case class FlushMessages()
+case object FlushMessages
 case class QueuedMessages(messages: Array[NetworkMessage])
 case class AddInterpretedMessage(message: NetworkMessage)
 case class InterpretMessage(message: WebSocketFrameEvent)

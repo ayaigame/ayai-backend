@@ -17,7 +17,11 @@ import crane.{World}
 import scala.concurrent.duration._
 import scala.collection.concurrent.{Map => ConcurrentMap}
 
-object NetworkMessageProcessorSupervisor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
+object NetworkMessageProcessorSupervisor {
+  def apply(world: World, socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessorSupervisor(world, socketMap)
+}
+
+class NetworkMessageProcessorSupervisor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
 
   // Escalate exceptions, try up to 10 times, if one actor fails, try just that one again
   val escalator = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 5 seconds) {
@@ -25,7 +29,7 @@ object NetworkMessageProcessorSupervisor(world: World, socketMap: ConcurrentMap[
   }
 
 val router = context.system.actorOf(Props(
-  new NetworkMessageProcessor(world, socketMap)).withRouter(FromConfig.withSupervisorStrategy(escalator)), name = "processorrouter")
+  NetworkMessageProcessor(world, socketMap)).withRouter(FromConfig.withSupervisorStrategy(escalator)), name = "processorrouter")
 
   def receive = {
     case message: ProcessMessage =>

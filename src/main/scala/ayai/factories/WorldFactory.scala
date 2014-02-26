@@ -1,7 +1,16 @@
+package ayai.factories
 
-object WorldFactory(networkSystem: ActorSystem) {
-  def createWorld(roomName: String): World = {
-    var world: World = World() 
+import ayai.apps.Constants
+import ayai.systems._
+import ayai.gamestate.RoomWorld
+import akka.actor.{ActorSystem, Props}
+object WorldFactory {
+  def apply(networkSystem: ActorSystem) = new WorldFactory(networkSystem)
+}
+
+class WorldFactory(networkSystem: ActorSystem) {
+  def createWorld(name: String, file: String): RoomWorld = {
+    var world: RoomWorld = RoomWorld(name)
     world.addSystem(MovementSystem())
     world.addSystem(RoomChangingSystem())
     world.addSystem(HealthSystem())
@@ -9,7 +18,10 @@ object WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(FrameExpirationSystem())
     world.addSystem(NetworkingSystem(networkSystem))
     world.addSystem(CollisionSystem(networkSystem))
+    world.addEntity(EntityFactory.loadRoomFromJson(index, s"$file.json"))
+    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)), s"Serializer$name")
+    ItemFactory.bootup(world)
+    ClassFactory.bootup(world)
     world
   }
-
 }

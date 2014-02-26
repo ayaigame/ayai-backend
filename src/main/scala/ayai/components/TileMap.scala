@@ -30,19 +30,19 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
   def isPositionInBounds(position: Position): Position = {
     if(max(position.x, 0) <= 0)
       position.x = 0
-    else if(min(position.x,getMaximumWidth-tileSize) >= getMaximumWidth-tileSize)
-      position.x = getMaximumWidth - tileSize
+    else if(min(position.x, maximumWidth - tileSize) >= maximumWidth-tileSize)
+      position.x = maximumWidth - tileSize
     if(max(position.y, 0) <= 0) 
       position.y = 0
-    else if(min(position.y,getMaximumHeight) >= getMaximumHeight-tileSize)
-      position.y = getMaximumHeight - tileSize
+    else if(min(position.y, maximumWidth) >= maximumHeight - tileSize)
+      position.y = maximumHeight - tileSize
     position
   }
 
   def onTileCollision(position: Position, bounds: Bounds): Boolean = {
     val newPos = new Position(position.x + bounds.width, position.y+bounds.height)
     val tile = getTileByPosition(newPos)
-    if(tile.isCollidable()) 
+    if(tile.isCollidable)
       return true
     if(getTileByPosition(position).isCollidable)
       return true

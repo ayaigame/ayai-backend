@@ -39,7 +39,6 @@ object ItemFactory {
     instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "braces"))
     instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "legs"))
     instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "feet"))
-
   }
 
   def buildStats(item: AllItemValues): Stats = {

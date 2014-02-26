@@ -29,6 +29,9 @@ import net.liftweb.json.Serialization.{read, write}
 
 import org.slf4j.{Logger, LoggerFactory}
 
+object NetworkMessageProcessor {
+  def apply(world: World, socketMap: ConcurrentMap[Stirng, String]) = new NetworkMessageProcessor(world, socketMap)
+}
 class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
   val actorSystem = context.system

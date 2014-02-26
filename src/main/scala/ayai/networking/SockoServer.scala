@@ -10,14 +10,17 @@ import org.mashupbots.socko.webserver.WebServerConfig
 
 /** Akka Imports **/
 import akka.actor.ActorSystem
-import akka.actor.ActorRef
 
 
 /** SockoServer
  * Runs a server which will pass packets on to the Interpreter
  **/
 
-class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef, queue: ActorRef, authorization: ActorRef) extends Logger {
+object SockoServer {
+  def apply(actorSystem: ActorSystem) = new SockoServer(actorSystem)
+}
+
+class SockoServer(actorSystem: ActorSystem) extends Logger {
   val routes = Routes({
     case HttpRequest(httpRequest) => httpRequest match {
       case POST(Path("/login")) => {
