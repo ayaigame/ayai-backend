@@ -184,6 +184,8 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         //    println("Error from PublicChatMessage")
         //}
       }
+      case EquipMessage(wsFrame: WebSocketFrameEvent, slot: String, equipmentType: String) =>
+      
       case _ => println("Error from NetworkMessageProcessor.")
         sender ! Failure
     } 

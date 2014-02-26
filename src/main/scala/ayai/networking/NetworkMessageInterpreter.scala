@@ -73,7 +73,10 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
       case "chars" =>
         val accountName : String = (rootJSON \ "accountName").extract[String]
         queue ! new CharacterList(wsFrame, accountName)
-
+      case "equip" => 
+        val slot : String = (rootJSON \ "slot").extract[String]
+        val equipmentType : String = (rootJSON \ "equipmentType").extract[String]
+        queue ! new AddInterpretedMessage(new EquipMessage(wsFrame, slot, equipmentType))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
 
