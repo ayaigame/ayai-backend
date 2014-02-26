@@ -1,117 +1,61 @@
 [0m[[0minfo[0m] [0mLoading global plugins from /Users/tim/.sbt/0.13/plugins[0m
 [0m[[0minfo[0m] [0mLoading project definition from /Users/tim/code/ayai/ayai-backend/project[0m
 [0m[[0minfo[0m] [0mSet current project to ayai-backend (in build file:/Users/tim/code/ayai/ayai-backend/)[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessorSupervisor.scala:18: object HashMap is not a member of package scala.collection.concurrent[0m
-[0m[[31merror[0m] [0mimport scala.collection.concurrent.{Map => ConcurrentMap, HashMap}[0m
-[0m[[31merror[0m] [0m       ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessorSupervisor.scala:24: not found: type HashMap[0m
-[0m[[31merror[0m] [0mclass NetworkMessageProcessorSupervisor(worlds: HashMap[String, RoomWorld], socketMap: ConcurrentMap[String, String]) extends Actor {[0m
-[0m[[31merror[0m] [0m                                                ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessorSupervisor.scala:21: not found: type World[0m
-[0m[[31merror[0m] [0m  def apply(worlds: World, socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessorSupervisor(worlds, socketMap)[0m
-[0m[[31merror[0m] [0m                    ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/apps/GameLoop.scala:71: value process is not a member of (String, ayai.gamestate.RoomWorld)[0m
-[0m[[31merror[0m] [0m        world.process()[0m
-[0m[[31merror[0m] [0m              ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/factories/EntityFactory.scala:41: not found: value actor[0m
-[0m[[31merror[0m] [0m    p.components += new NetworkingActor(actor)[0m
-[0m[[31merror[0m] [0m                                        ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/factories/EntityFactory.scala:102: not found: value networkSystem[0m
-[0m[[31merror[0m] [0m    val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/factories/EntityFactory.scala:103: not found: type ConnectionWrite[0m
+[0m[[31merror[0m] [0m    actorSelection ! new ConnectionWrite(compact(render(json)))[0m
 [0m[[31merror[0m] [0m                         ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/factories/EntityFactory.scala:189: type mismatch;[0m
-[0m[[31merror[0m] [0m found   : Unit[0m
-[0m[[31merror[0m] [0m required: crane.Entity[0m
-[0m[[31merror[0m] [0m    tileMap.file = jsonFile[0m
-[0m[[31merror[0m] [0m                 ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/factories/WorldFactory.scala:21: not found: value index[0m
-[0m[[31merror[0m] [0m    world.addEntity(EntityFactory.loadRoomFromJson(index, s"$file.json"))[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/factories/WorldFactory.scala:21: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : String[0m
+[0m[[31merror[0m] [0m required: Int[0m
+[0m[[31merror[0m] [0m    world.addEntity(EntityFactory.loadRoomFromJson(name, s"$file.json"))[0m
 [0m[[31merror[0m] [0m                                                   ^[0m
 [0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/factories/WorldFactory.scala:22: not found: type GameStateSerializer[0m
 [0m[[31merror[0m] [0m    val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)), s"Serializer$name")[0m
 [0m[[31merror[0m] [0m                                                     ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageInterpreter.scala:21: not found: value networkSystem[0m
-[0m[[31merror[0m] [0m  val queue = networkSystem.actorSelection("user/NMQueue")[0m
-[0m[[31merror[0m] [0m              ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:37: not found: type World[0m
-[0m[[31merror[0m] [0mclass NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {[0m
-[0m[[31merror[0m] [0m                                     ^[0m
-[0m[[33mwarn[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:47: fruitless type test: a value of type org.mashupbots.socko.events.WebSocketFrameEvent cannot also be a String[0m
-[0m[[33mwarn[0m] [0m      case AddNewCharacter(socketId: String, id: String, characterName: String, x: Int, y: Int) => {[0m
-[0m[[33mwarn[0m] [0m                                     ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:47: pattern type is incompatible with expected type;[0m
-[0m[[31merror[0m] [0m found   : String[0m
-[0m[[31merror[0m] [0m required: org.mashupbots.socko.events.WebSocketFrameEvent[0m
-[0m[[31merror[0m] [0m      case AddNewCharacter(socketId: String, id: String, characterName: String, x: Int, y: Int) => {[0m
-[0m[[31merror[0m] [0m                                     ^[0m
-[0m[[33mwarn[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:66: fruitless type test: a value of type org.mashupbots.socko.events.WebSocketFrameEvent cannot also be a String[0m
-[0m[[33mwarn[0m] [0m      case MoveMessage(socketId: String, start: Boolean, direction: MoveDirection) => {[0m
-[0m[[33mwarn[0m] [0m                                 ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:66: pattern type is incompatible with expected type;[0m
-[0m[[31merror[0m] [0m found   : String[0m
-[0m[[31merror[0m] [0m required: org.mashupbots.socko.events.WebSocketFrameEvent[0m
-[0m[[31merror[0m] [0m      case MoveMessage(socketId: String, start: Boolean, direction: MoveDirection) => {[0m
-[0m[[31merror[0m] [0m                                 ^[0m
-[0m[[33mwarn[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:86: fruitless type test: a value of type org.mashupbots.socko.events.WebSocketFrameEvent cannot also be a String[0m
-[0m[[33mwarn[0m] [0m      case AttackMessage(socketId: String) => {[0m
-[0m[[33mwarn[0m] [0m                                   ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:86: pattern type is incompatible with expected type;[0m
-[0m[[31merror[0m] [0m found   : String[0m
-[0m[[31merror[0m] [0m required: org.mashupbots.socko.events.WebSocketFrameEvent[0m
-[0m[[31merror[0m] [0m      case AttackMessage(socketId: String) => {[0m
-[0m[[31merror[0m] [0m                                   ^[0m
-[0m[[33mwarn[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:142: fruitless type test: a value of type org.mashupbots.socko.events.WebSocketFrameEvent cannot also be a String[0m
-[0m[[33mwarn[0m] [0m      case OpenMessage(socketId: String, containerId : String) => {[0m
-[0m[[33mwarn[0m] [0m                                 ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:142: pattern type is incompatible with expected type;[0m
-[0m[[31merror[0m] [0m found   : String[0m
-[0m[[31merror[0m] [0m required: org.mashupbots.socko.events.WebSocketFrameEvent[0m
-[0m[[31merror[0m] [0m      case OpenMessage(socketId: String, containerId : String) => {[0m
-[0m[[31merror[0m] [0m                                 ^[0m
-[0m[[33mwarn[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:146: fruitless type test: a value of type org.mashupbots.socko.events.WebSocketFrameEvent cannot also be a String[0m
-[0m[[33mwarn[0m] [0m      case SocketCharacterMap(socketId: String, id: String) => {[0m
-[0m[[33mwarn[0m] [0m                                        ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:146: pattern type is incompatible with expected type;[0m
-[0m[[31merror[0m] [0m found   : String[0m
-[0m[[31merror[0m] [0m required: org.mashupbots.socko.events.WebSocketFrameEvent[0m
-[0m[[31merror[0m] [0m      case SocketCharacterMap(socketId: String, id: String) => {[0m
-[0m[[31merror[0m] [0m                                        ^[0m
-[0m[[33mwarn[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:151: fruitless type test: a value of type org.mashupbots.socko.events.WebSocketFrameEvent cannot also be a String[0m
-[0m[[33mwarn[0m] [0m      case CharacterList(socketId: String, accountName: String) => {[0m
-[0m[[33mwarn[0m] [0m                                   ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:151: pattern type is incompatible with expected type;[0m
-[0m[[31merror[0m] [0m found   : String[0m
-[0m[[31merror[0m] [0m required: org.mashupbots.socko.events.WebSocketFrameEvent[0m
-[0m[[31merror[0m] [0m      case CharacterList(socketId: String, accountName: String) => {[0m
-[0m[[31merror[0m] [0m                                   ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageQueue.scala:26: object FlushMessages is not a case class constructor, nor does it have an unapply/unapplySeq method[0m
-[0m[[31merror[0m] [0m    case FlushMessages() => flushMessages[0m
-[0m[[31merror[0m] [0m         ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/SockoServer.scala:30: not found: value authorization[0m
-[0m[[31merror[0m] [0m        authorization ! new LoginPost(httpRequest)[0m
-[0m[[31merror[0m] [0m        ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/SockoServer.scala:66: not found: value queue[0m
-[0m[[31merror[0m] [0m    queue ! new AddInterpretedMessage(new RemoveCharacter(webSocketId))[0m
-[0m[[31merror[0m] [0m    ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/systems/CollisionSystem.scala:195: value getMaximumWidth is not a member of ayai.components.TileMap[0m
-[0m[[31merror[0m] [0m      var quadTree: QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.getMaximumWidth, tileMap.getMaximumHeight))[0m
-[0m[[31merror[0m] [0m                                                                         ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/systems/CollisionSystem.scala:195: value getMaximumHeight is not a member of ayai.components.TileMap[0m
-[0m[[31merror[0m] [0m      var quadTree: QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.getMaximumWidth, tileMap.getMaximumHeight))[0m
-[0m[[31merror[0m] [0m                                                                                                  ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/systems/FrameExpirationSystem.scala:16: Boolean does not take parameters[0m
-[0m[[31merror[0m] [0m      if(frame.isReady()) {[0m
-[0m[[31merror[0m] [0m                      ^[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageInterpreter.scala:34: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : org.mashupbots.socko.events.WebSocketFrameEvent[0m
+[0m[[31merror[0m] [0m required: String[0m
+[0m[[31merror[0m] [0m        queue ! new AddInterpretedMessage(new AddNewCharacter(wsFrame, id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))[0m
+[0m[[31merror[0m] [0m                                                              ^[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageInterpreter.scala:35: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : org.mashupbots.socko.events.WebSocketFrameEvent[0m
+[0m[[31merror[0m] [0m required: String[0m
+[0m[[31merror[0m] [0m        queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))[0m
+[0m[[31merror[0m] [0m                                                                 ^[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageInterpreter.scala:59: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : org.mashupbots.socko.events.WebSocketFrameEvent[0m
+[0m[[31merror[0m] [0m required: String[0m
+[0m[[31merror[0m] [0m        queue ! new AddInterpretedMessage(new MoveMessage(wsFrame, start, direction))[0m
+[0m[[31merror[0m] [0m                                                          ^[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageInterpreter.scala:62: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : org.mashupbots.socko.events.WebSocketFrameEvent[0m
+[0m[[31merror[0m] [0m required: String[0m
+[0m[[31merror[0m] [0m          queue ! new AddInterpretedMessage(new AttackMessage(wsFrame))[0m
+[0m[[31merror[0m] [0m                                                              ^[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageInterpreter.scala:72: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : org.mashupbots.socko.events.WebSocketFrameEvent[0m
+[0m[[31merror[0m] [0m required: String[0m
+[0m[[31merror[0m] [0m        queue ! new AddInterpretedMessage(new OpenMessage(wsFrame, containerId))[0m
+[0m[[31merror[0m] [0m                                                          ^[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageInterpreter.scala:76: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : org.mashupbots.socko.events.WebSocketFrameEvent[0m
+[0m[[31merror[0m] [0m required: String[0m
+[0m[[31merror[0m] [0m        queue ! new CharacterList(wsFrame, accountName)[0m
+[0m[[31merror[0m] [0m                                  ^[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/networking/NetworkMessageProcessor.scala:34: type mismatch;[0m
+[0m[[31merror[0m] [0m found   : scala.collection.mutable.HashMap[String,ayai.gamestate.RoomWorld][0m
+[0m[[31merror[0m] [0m required: ayai.gamestate.RoomWorld[0m
+[0m[[31merror[0m] [0m  def apply(world: HashMap[String, RoomWorld], socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessor(world, socketMap)[0m
+[0m[[31merror[0m] [0m                                                                                                                       ^[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/persistence/CharacterTable.scala:86: value writeText is not a member of String[0m
+[0m[[31merror[0m] [0m        webSocket.writeText(compact(render(jsonLift)))[0m
+[0m[[31merror[0m] [0m                  ^[0m
 [0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/systems/MovementSystem.scala:45: not found: value roomEntity[0m
 [0m[[31merror[0m] [0m        val tileMap: TileMap = (roomEntity.getComponent(classOf[TileMap]): @unchecked) match {[0m
 [0m[[31merror[0m] [0m                                ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/systems/NetworkingSystem.scala:61: not found: value serializer[0m
+[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/systems/NetworkingSystem.scala:62: not found: value roomHash[0m
 [0m[[31merror[0m] [0m            val future2 = serializer ? new MapRequest(roomHash(map.roomId))[0m
-[0m[[31merror[0m] [0m                          ^[0m
-[0m[[31merror[0m] [0m/Users/tim/code/ayai/ayai-backend/src/main/scala/ayai/systems/NetworkingSystem.scala:77: not found: value serializer[0m
-[0m[[31merror[0m] [0m      val future1 = serializer ? new CharacterRadius(characterId)[0m
-[0m[[31merror[0m] [0m                    ^[0m
-[0m[[33mwarn[0m] [0m6 warnings found[0m
-[0m[[31merror[0m] [0m26 errors found[0m
+[0m[[31merror[0m] [0m                                                      ^[0m
+[0m[[31merror[0m] [0m13 errors found[0m
 [0m[[31merror[0m] [0m(compile:[31mcompile[0m) Compilation failed[0m
-[0m[[31merror[0m] [0mTotal time: 17 s, completed Feb 25, 2014 10:24:00 PM[0m
+[0m[[31merror[0m] [0mTotal time: 17 s, completed Feb 25, 2014 10:45:21 PM[0m

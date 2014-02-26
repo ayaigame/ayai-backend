@@ -15,10 +15,11 @@ import akka.routing.FromConfig
 
 /** External Imports **/
 import scala.concurrent.duration._
-import scala.collection.concurrent.{Map => ConcurrentMap, HashMap}
+import scala.collection.concurrent.{Map => ConcurrentMap}
+import scala.collection.mutable.HashMap
 
 object NetworkMessageProcessorSupervisor {
-  def apply(worlds: World, socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessorSupervisor(worlds, socketMap)
+  def apply(worlds: HashMap[String, RoomWorld], socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessorSupervisor(worlds, socketMap)
 }
 
 class NetworkMessageProcessorSupervisor(worlds: HashMap[String, RoomWorld], socketMap: ConcurrentMap[String, String]) extends Actor {

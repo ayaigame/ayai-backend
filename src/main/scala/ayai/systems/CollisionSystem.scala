@@ -192,7 +192,7 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
           new Room(-1)
       }
       
-      var quadTree: QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.getMaximumWidth, tileMap.getMaximumHeight))
+      var quadTree: QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.maximumWidth, tileMap.maximumHeight))
       var entities = world.groups("ROOM"+room.id).toList
       entities = excludeList(entities, exclusion)
       for(entity <- entities) {

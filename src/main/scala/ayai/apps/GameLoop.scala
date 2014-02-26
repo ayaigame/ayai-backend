@@ -35,6 +35,7 @@ object GameLoop {
     DBCreation.ensureDbExists()
 
     var worlds = HashMap[String, RoomWorld]()
+    var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
 
     val networkSystem = ActorSystem("NetworkSystem")
     val messageQueue = networkSystem.actorOf(Props[NetworkMessageQueue], name="NMQueue")
@@ -42,7 +43,6 @@ object GameLoop {
     val messageProcessor = networkSystem.actorOf(Props(NetworkMessageProcessorSupervisor(worlds, socketMap)), name="NMProcessor")
     val authorization = networkSystem.actorOf(Props[AuthorizationProcessor], name="AProcessor")
 
-    var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
 
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
@@ -67,7 +67,7 @@ object GameLoop {
       
       Await.result(Future.sequence(processedMessages), 1 seconds)
 
-      for(world <- worlds)
+      for((name, world) <- worlds)
         world.process()
 
       val end = System.currentTimeMillis

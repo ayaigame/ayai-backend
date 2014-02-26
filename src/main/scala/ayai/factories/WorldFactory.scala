@@ -2,7 +2,7 @@ package ayai.factories
 
 import ayai.apps.Constants
 import ayai.systems._
-import ayai.gamestate.RoomWorld
+import ayai.gamestate.{RoomWorld, GameStateSerializer}
 import akka.actor.{ActorSystem, Props}
 object WorldFactory {
   def apply(networkSystem: ActorSystem) = new WorldFactory(networkSystem)
@@ -18,7 +18,7 @@ class WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(FrameExpirationSystem())
     world.addSystem(NetworkingSystem(networkSystem))
     world.addSystem(CollisionSystem(networkSystem))
-    world.addEntity(EntityFactory.loadRoomFromJson(index, s"$file.json"))
+    world.addEntity(EntityFactory.loadRoomFromJson(name.toInt, s"$file.json"))
     val serializer = networkSystem.actorOf(Props(new GameStateSerializer(world, Constants.LOAD_RADIUS)), s"Serializer$name")
     ItemFactory.bootup(world)
     ClassFactory.bootup(world)

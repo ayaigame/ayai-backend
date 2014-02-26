@@ -6,4 +6,4 @@ object RoomWorld {
   def apply(name: String) = new RoomWorld(name)
 }
 
-class RoomWorld(val name: String) extends World
+class RoomWorld(val name: String) extends World 

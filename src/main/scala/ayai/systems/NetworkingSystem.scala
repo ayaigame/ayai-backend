@@ -43,6 +43,7 @@ object NetworkingSystem {
 class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) {
   private val log = LoggerFactory.getLogger(getClass)
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
+  val serializer = networkSystem.actorSelection("Serializer")
 
   override def processTime(delta: Int) {
 
@@ -50,18 +51,18 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
 
     for(characterEntity <- entities) {
       val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
-        case Some(c : Character) => c.id 
+        case Some(c: Character) => c.id 
         case _ =>
           log.warn("8192c19: getComponent failed to return anything")
           ""
       }
       if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
         characterEntity.getComponent(classOf[MapChange]) match {
-          case Some(map : MapChange) =>
-            val future2 = serializer ? new MapRequest(roomHash(map.roomId))
+          case Some(map: MapChange) =>
+            val future2 = serializer ? new MapRequest(new Entity)
             val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
             val actorSelection1 = characterEntity.getComponent(classOf[NetworkingActor]) match {
-              case Some(na : NetworkingActor) => na
+              case Some(na: NetworkingActor) => na
               case _ => null
             }
             

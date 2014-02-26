@@ -18,7 +18,7 @@ import net.liftweb.json.JsonDSL._
 import java.rmi.server.UID
 
 class NetworkMessageInterpreter extends Actor {
-  val queue = networkSystem.actorSelection("user/NMQueue")
+  val queue = context.system.actorSelection("user/NMQueue")
 
   implicit val formats = Serialization.formats(NoTypeHints)
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
@@ -31,8 +31,8 @@ class NetworkMessageInterpreter extends Actor {
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
 
-        queue ! new AddInterpretedMessage(new AddNewCharacter(wsFrame, id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
-        queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
+        queue ! new AddInterpretedMessage(new AddNewCharacter(wsFrame.webSocketId, id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
+        queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame.webSocketId, id))
       case "echo" =>
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
       case "move" =>
@@ -56,10 +56,10 @@ class NetworkMessageInterpreter extends Actor {
             }
           }
         } 
-        queue ! new AddInterpretedMessage(new MoveMessage(wsFrame, start, direction))
+        queue ! new AddInterpretedMessage(new MoveMessage(wsFrame.webSocketId, start, direction))
       case "attack" =>
           println("Attack Received")
-          queue ! new AddInterpretedMessage(new AttackMessage(wsFrame))
+          queue ! new AddInterpretedMessage(new AttackMessage(wsFrame.webSocketId))
       
       case "chat" =>
         val message = compact(render(rootJSON \ "message"))
@@ -69,11 +69,11 @@ class NetworkMessageInterpreter extends Actor {
       
       case "open" =>
         val containerId: String = (rootJSON \ "containerId").extract[String]
-        queue ! new AddInterpretedMessage(new OpenMessage(wsFrame, containerId))
+        queue ! new AddInterpretedMessage(new OpenMessage(wsFrame.webSocketId, containerId))
       
       case "chars" =>
         val accountName: String = (rootJSON \ "accountName").extract[String]
-        queue ! new CharacterList(wsFrame, accountName)
+        queue ! new CharacterList(wsFrame.webSocketId, accountName)
 
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)

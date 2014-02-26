@@ -56,7 +56,7 @@ class CharacterTable extends Actor {
   }
 
    def receive = {
-    case CharacterList(webSocket, accountName) => {
+    case CharacterList(id, accountName) => {
       Class.forName("org.h2.Driver");
       SessionFactory.concreteFactory = Some (() =>
           Session.create(
@@ -83,7 +83,8 @@ class CharacterTable extends Actor {
           ("type" -> "charList") ~
           ("chars" -> characterArray)
 
-        webSocket.writeText(compact(render(jsonLift)))
+        // TODO: Replace with selection
+        // webSocket.writeText(compact(render(jsonLift)))
       }
     }
 

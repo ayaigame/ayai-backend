@@ -3,6 +3,7 @@ package ayai.factories
 /** Ayai Imports **/
 import ayai.components._
 import ayai.maps._
+import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
 import ayai.persistence.AyaiDB
 import ayai.apps.Constants
@@ -17,18 +18,17 @@ import crane.World
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.io.Source
 
 /** Akka Imports **/
-import akka.actor.{Actor, ActorSystem, ActorRef, Props}
+import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
 
 
 object EntityFactory {
   //Should take characterId: Long as a parameter instead of characterName
   //However can't do that until front end actually gives me the characterId
-  def loadCharacter(world: World, socketId: WebSocketFrameEvent, entityId: String, characterName: String, x: Int, y: Int) = {
+  def loadCharacter(world: World, socketId: String, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
     val p: Entity = world.createEntity(tag=entityId)
     val characterRow = AyaiDB.getCharacter(characterName)
 
@@ -187,6 +187,7 @@ object EntityFactory {
     tileMap.height = tmap.height
     tileMap.width = tmap.width
     tileMap.file = jsonFile
+    new Entity
     //val entityRoom: Entity = createRoom(world, id, tileMap)
     //entityRoom
   }

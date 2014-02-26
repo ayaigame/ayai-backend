@@ -41,6 +41,7 @@ class MovementSystem() extends EntityProcessingSystem(include=List(classOf[Posit
         //now check to see if movement has created gone past the map (if so put it at edge)
         //TODO: Replace with room entity
         //val roomEntity: Entity = roomHash(room.id) 
+        val roomEntity: Entity = new Entity
         //will update position in function
         val tileMap: TileMap = (roomEntity.getComponent(classOf[TileMap]): @unchecked) match {
           case(Some(tileMap: TileMap)) => tileMap

@@ -21,12 +21,15 @@ object SockoServer {
 }
 
 class SockoServer(actorSystem: ActorSystem) extends Logger {
+  val authorization = actorSystem.actorSelection("AProcessor")
+  val interpreter = actorSystem.actorSelection("NMInterpreter")
+  val queue = actorSystem.actorSelection("NMQueue")
+
   val routes = Routes({
     case HttpRequest(httpRequest) => httpRequest match {
       case POST(Path("/login")) => {
         if (httpRequest.request.is100ContinueExpected)
           httpRequest.response.write100Continue
-
         authorization ! new LoginPost(httpRequest)
       }
       case POST(Path("/register")) => {

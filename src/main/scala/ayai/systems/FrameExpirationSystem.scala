@@ -13,7 +13,7 @@ class FrameExpirationSystem() extends EntityProcessingSystem(include=List(classO
   def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[Frame]) match {
       case (Some(frame: Frame)) =>
-      if(frame.isReady()) {
+      if(frame.isReady) {
         e.kill()
       } 
       frame.frameCounts += 1

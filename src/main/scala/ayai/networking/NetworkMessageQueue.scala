@@ -23,7 +23,7 @@ class NetworkMessageQueue extends Actor{
   }
 
   def receive = {
-    case FlushMessages() => flushMessages
+    case FlushMessages => flushMessages
     case AddInterpretedMessage(message) => addInterpretedMessage(message)
     case _ => println("Error: from queue.")
   }
