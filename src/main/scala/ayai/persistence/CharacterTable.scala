@@ -31,11 +31,10 @@ class CharacterTable extends Actor {
 
   def createCharacter(characterName: String, className: String, accountId: Long, startingRoom: Long, startingX: Int, startingY: Int) = {
     Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
+    SessionFactory.concreteFactory = Some(() =>
         Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
-
+          java.sql.DriverManager.getConnection("jdbc:h2:ayai"), 
+          new H2Adapter))
     transaction {
       AyaiDB.characters.insert(new CharacterRow(characterName, characterName, 0, accountId, startingRoom, startingX, startingY))
     }
@@ -45,8 +44,8 @@ class CharacterTable extends Actor {
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
+          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+          new H2Adapter))
 
     transaction {
       update(AyaiDB.characters)(dbCharacter => 
@@ -68,7 +67,7 @@ class CharacterTable extends Actor {
         val account = AyaiDB.getAccount("tim").id
 
         val characters =
-          from(AyaiDB.characters)(c=>
+          from(AyaiDB.characters)( c =>
             where(c.account_id === account)
             select(c)
           )

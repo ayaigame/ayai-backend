@@ -9,7 +9,6 @@ import scala.collection.mutable._
 case class Stat(attributeType: String, magnitude: Int)
 
 class Stats(val stats: ArrayBuffer[Stat]) extends Component {
-  def this() = this(new ArrayBuffer[Stat]())
 
   def addStat(newStat: Stat) = {
     stats += newStat

@@ -10,11 +10,11 @@ import crane.Entity
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
-class MoveDirection(val xDirection : Int, val yDirection : Int) extends Action {
-  override def process(e : Entity) {
+class MoveDirection(val xDirection: Int, val yDirection: Int) extends Action {
+  override def process(e: Entity) {
     (e.getComponent(classOf[Position]),
       e.getComponent(classOf[Velocity])) match {
-      case(Some(position : Position), Some(velocity : Velocity)) =>
+      case(Some(position: Position), Some(velocity: Velocity)) =>
         position.x += xDirection * velocity.x
         position.y += yDirection * velocity.y
 
@@ -22,7 +22,7 @@ class MoveDirection(val xDirection : Int, val yDirection : Int) extends Action {
     }
   }
 
-  def asJson() : JObject =  { ("action" -> "empty")}
+  def asJson(): JObject =  { ("action" -> "empty")}
 }
 
 case object LeftDirection extends MoveDirection(-1,0) {

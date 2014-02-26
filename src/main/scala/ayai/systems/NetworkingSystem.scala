@@ -20,8 +20,7 @@ import crane.{Entity, World, TimedSystem}
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
 /** External Imports **/
-import scala.concurrent.{ ExecutionContext, Promise }
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext, Promise}
 import scala.concurrent.duration._
 import scala.collection.concurrent.{Map => ConcurrentMap}
 import scala.collection.JavaConversions._
@@ -41,11 +40,11 @@ object NetworkingSystem {
 }
 
 
-class NetworkingSystem(networkSystem : ActorSystem) extends TimedSystem(1000/30) {
+class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) {
   private val log = LoggerFactory.getLogger(getClass)
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
-  override def processTime(delta : Int) {
+  override def processTime(delta: Int) {
 
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[NetworkingActor])
 
@@ -53,8 +52,8 @@ class NetworkingSystem(networkSystem : ActorSystem) extends TimedSystem(1000/30)
       val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
         case Some(c : Character) => c.id 
         case _ =>
-        log.warn("8192c19: getComponent failed to return anything")
-        ""
+          log.warn("8192c19: getComponent failed to return anything")
+          ""
       }
       if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
         characterEntity.getComponent(classOf[MapChange]) match {

@@ -17,14 +17,15 @@ import org.slf4j.{Logger, LoggerFactory}
 object RoomChangingSystem {
   def apply() = new RoomChangingSystem()
 }
+
 class RoomChangingSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Actionable], classOf[Transport], classOf[Position])) {
   private val log = LoggerFactory.getLogger(getClass)
-  override def processEntity(e : Entity, delta : Int) {
+  override def processEntity(e: Entity, delta: Int) {
     //get information from transport class
     (e.getComponent(classOf[Transport]),
       e.getComponent(classOf[Room]),
       e.getComponent(classOf[Position])) match {
-      case(Some(transportEvent : Transport), Some(roomComponent : Room), Some(position : Position)) =>
+      case(Some(transportEvent: Transport), Some(roomComponent: Room), Some(position: Position)) =>
         //make sure that room exists
         //take user out of room
         world.groups("ROOM"+roomComponent.id) -= e

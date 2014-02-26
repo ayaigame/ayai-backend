@@ -10,15 +10,14 @@ object FrameExpirationSystem {
 }
 
 class FrameExpirationSystem() extends EntityProcessingSystem(include=List(classOf[Frame])) {
-  def processEntity(e : Entity, deltaTime : Int) {
+  def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[Frame]) match {
-      case (Some(frame : Frame)) =>
+      case (Some(frame: Frame)) =>
       if(frame.isReady()) {
         e.kill()
       } 
       frame.frameCounts += 1
       case _ =>
     }
-    
   }
 }

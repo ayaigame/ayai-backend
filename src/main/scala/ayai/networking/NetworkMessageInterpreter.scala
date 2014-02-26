@@ -23,8 +23,8 @@ class NetworkMessageInterpreter extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
     val rootJSON = parse(wsFrame.readText)
-    val tempType:String = compact(render(rootJSON \ "type"))
-    val msgType:String = tempType.substring(1, tempType.length - 1)
+    val tempType: String = compact(render(rootJSON \ "type"))
+    val msgType: String = tempType.substring(1, tempType.length - 1)
 
     msgType match {
       case "init" =>
@@ -37,10 +37,10 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
       case "move" =>
         //TODO: Add exceptions and maybe parse shit a bit more intelligently
-        val start:Boolean = compact(render(rootJSON \ "start")).toBoolean
-        var direction : MoveDirection = new MoveDirection(0,0)
+        val start: Boolean = compact(render(rootJSON \ "start")).toBoolean
+        var direction: MoveDirection = new MoveDirection(0,0)
         if(start) {
-          val dir:Int = compact(render(rootJSON \ "dir")).toInt
+          val dir: Int = compact(render(rootJSON \ "dir")).toInt
           direction  = dir match {
             case 0 => UpDirection
             case 1 => UpRightDirection
@@ -68,12 +68,11 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(new PublicChatMessage(message, sender))
       
       case "open" =>
-        val containerId : String = (rootJSON \ "containerId").extract[String]
-        // println(containerId)
+        val containerId: String = (rootJSON \ "containerId").extract[String]
         queue ! new AddInterpretedMessage(new OpenMessage(wsFrame, containerId))
       
       case "chars" =>
-        val accountName : String = (rootJSON \ "accountName").extract[String]
+        val accountName: String = (rootJSON \ "accountName").extract[String]
         queue ! new CharacterList(wsFrame, accountName)
 
       case _ =>

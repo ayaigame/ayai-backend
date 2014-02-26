@@ -64,7 +64,7 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         (world.getEntityByTag("CHARACTER"+id)) match {
           case None =>
             println("Can't find character attached to id: " + id)
-          case Some(e : Entity) =>
+          case Some(e: Entity) =>
               val oldMovement = (e.getComponent(classOf[Actionable])) match {
                 case Some(oldMove : Actionable) =>
                   oldMove.active = start
@@ -81,19 +81,19 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
       case AttackMessage(socketId: String) => {
         //create a projectile
         println("Created Bullet")
-        val id : String = socketMap(socketId)
+        val id: String = socketMap(socketId)
         val bulletId = (new UID()).toString
 
         (world.getEntityByTag("CHARACTER"+id)) match {
 
-        case Some(initiator : Entity) =>
+        case Some(initiator: Entity) =>
           val position = initiator.getComponent(classOf[Position])
           val movable = initiator.getComponent(classOf[Actionable])
           val character = initiator.getComponent(classOf[Character])
           (position, movable, character) match {
-            case(Some(pos: Position), Some(a : Actionable), Some(c : Character)) =>
+            case(Some(pos: Position), Some(a: Actionable), Some(c: Character)) =>
               val m = a.action match {
-                case (move : MoveDirection) => move
+                case (move: MoveDirection) => move
                 case _ => println("Not match for movedirection")
                 return
 
@@ -130,7 +130,7 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         sender ! Success
       }
 
-      case ItemMessage(id : String, itemAction : ItemAction) => {
+      case ItemMessage(id: String, itemAction: ItemAction) => {
         sender ! Success
       }
 

@@ -28,7 +28,7 @@ object ItemFactory {
       protection: Option[Int],
       stackable: Option[Boolean],
       stats: Option[List[Stat]],
-      image : Option[String])
+      image: Option[String])
 
   def bootup(world: World) = {
     val items: List[AllItemValues] = getItemsList("src/main/resources/configs/items/items.json")

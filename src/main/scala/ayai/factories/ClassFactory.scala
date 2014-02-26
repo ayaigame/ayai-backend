@@ -23,7 +23,7 @@ object ClassFactory {
   def bootup(world: World) = {
     val classes: List[AllClassValues] = getClassesList("src/main/resources/configs/classes/classes.json")
 
-    classes.foreach (classData => {
+    classes.foreach(classData => {
       var entityClass: Entity = world.createEntity(tag="CLASS"+classData.id)
       var classComponent = new Class(
         classData.id,

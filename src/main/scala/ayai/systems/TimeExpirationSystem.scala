@@ -10,9 +10,9 @@ object TimeExpirationSystem {
 }
 
 class TimeExpirationSystem() extends EntityProcessingSystem(include=List(classOf[Time])) {
-  def processEntity(e : Entity, deltaTime : Int) {
+  def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[Time]) match {
-      case Some(time :Time) => 
+      case Some(time: Time) => 
       if(time.isReady(System.currentTimeMillis)) {
         e.kill()
       }

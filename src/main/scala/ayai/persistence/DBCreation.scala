@@ -32,8 +32,8 @@ object DBCreation {
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
+          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+          new H2Adapter))
       transaction {
         AyaiDB.create
         // AyaiDB.printDdl
@@ -42,8 +42,8 @@ object DBCreation {
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
+          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+          new H2Adapter))
 
     var account: Long = 0
 
@@ -54,15 +54,13 @@ object DBCreation {
         (1 === 1))
     }
 
-      val tim = new Account("tim", BCrypt.hashpw("tim", BCrypt.gensalt()))
+    val tim = new Account("tim", BCrypt.hashpw("tim", BCrypt.gensalt()))
 
     transaction {
       AyaiDB.accounts.insert(tim)
     }
     
     account = AyaiDB.getAccount("tim").id
-      //   // val token = AyaiDB.validatePassword("tim", "tim")
-      //   // println(token)
 
     transaction {
       AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))

@@ -16,7 +16,7 @@ object MovementSystem {
   def apply() = new MovementSystem()
 }
 
-class MovementSystem(roomHash : HashMap[Long, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character], classOf[Actionable]), exclude=List(classOf[Transport], classOf[Respawn])) {  
+class MovementSystem(roomHash: HashMap[Long, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character], classOf[Actionable]), exclude=List(classOf[Transport], classOf[Respawn])) {  
   private val log = LoggerFactory.getLogger(getClass)
     //this will only move characters who have received a movement key and the current component is still set to True
     override def processEntity(e: Entity, delta : Int) {
@@ -25,24 +25,24 @@ class MovementSystem(roomHash : HashMap[Long, Entity]) extends EntityProcessingS
       e.getComponent(classOf[Velocity]),
       e.getComponent(classOf[Room]),
       e.getComponent(classOf[Bounds])) match {
-      case (Some(actionable : Actionable), Some(position : Position), Some(velocity : Velocity), Some(room : Room), Some(bounds : Bounds)) =>
+      case (Some(actionable: Actionable), Some(position: Position), Some(velocity: Velocity), Some(room: Room), Some(bounds: Bounds)) =>
         val originalPosition = new Position(position.x, position.y)
         //if moving then process for the given direction
         if(actionable.active) {
           // if action is a direction
           actionable.action match {
-            case (move : MoveDirection) => 
-            var direction = move.process(e)
+            case (move: MoveDirection) => 
+              var direction = move.process(e)
             case _ =>
-            log.warn("f9def84: MoveDirection doesn't match anything")
+              log.warn("f9def84: MoveDirection doesn't match anything")
           }
         }
         
         //now check to see if movement has created gone past the map (if so put it at edge)
-        val roomEntity : Entity = roomHash(room.id) 
+        val roomEntity: Entity = roomHash(room.id) 
         //will update position in function
-        val tileMap : TileMap = (roomEntity.getComponent(classOf[TileMap]): @unchecked) match {
-          case(Some(tileMap : TileMap)) => tileMap
+        val tileMap: TileMap = (roomEntity.getComponent(classOf[TileMap]): @unchecked) match {
+          case(Some(tileMap: TileMap)) => tileMap
         }
         tileMap.isPositionInBounds(position)
         //if on tile Collision go back to original position

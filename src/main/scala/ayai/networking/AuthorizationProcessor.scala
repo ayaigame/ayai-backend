@@ -15,7 +15,7 @@ import org.squeryl.adapters.H2Adapter
 import org.squeryl.PrimitiveTypeMode._
 import com.typesafe.config.ConfigFactory
 
-class AuthorizationProcessor() extends Actor {
+class AuthorizationProcessor extends Actor {
 
   Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
@@ -56,7 +56,7 @@ class AuthorizationProcessor() extends Actor {
     }
 
   case RegisterPost(request: HttpRequestEvent) =>
-    val content:String = request.request.content.toString
+    val content: String = request.request.content.toString
     val delimiter = content.indexOfSlice("&")
 
     val username = content.slice(0, delimiter).replaceAll("email=", "")

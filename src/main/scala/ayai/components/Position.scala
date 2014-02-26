@@ -19,14 +19,4 @@ case class Position (var x : Int, var y: Int) extends Component {
 
   override def toString : String = { write(this) }
 
-  
-  def getX() : Int = {
-    x
-  }
-
-  def getY() : Int = {
-    y
-  }
-
-
 }

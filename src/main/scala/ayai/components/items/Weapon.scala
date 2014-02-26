@@ -12,10 +12,10 @@ case class Weapon(
     range: Int,
     damage: Int,
     damageType: String,
-    itemtype : String)
+    itemtype: String)
   extends ItemType {
 
-  override def asJson() : JObject = {
+  override def asJson(): JObject = {
       ("range" -> range) ~
       ("damage" -> damage) ~
       ("damageType" -> damageType) ~

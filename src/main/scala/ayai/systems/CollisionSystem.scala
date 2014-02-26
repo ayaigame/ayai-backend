@@ -12,7 +12,6 @@ import ayai.components._
 import ayai.collisions._
 import ayai.networking.ConnectionWrite
 
-
 /** Crane Imports **/
 import crane.{Entity, System, World}
 
@@ -31,27 +30,20 @@ object CollisionSystem {
   def apply(actorSystem: ActorSystem) = new CollisionSystem(actorSystem)
 }
 
-class CollisionSystem(actorSystem : ActorSystem) extends System {
+class CollisionSystem(actorSystem: ActorSystem) extends System {
   private val log = LoggerFactory.getLogger(getClass)
 
-  def valueInRange(value: Int, min: Int, max: Int): Boolean = {
-    return (value >= min) && (value <= max)
-  }
-
+  def valueInRange(value: Int, min: Int, max: Int): Boolean = (value >= min) && (value <= max)
 
   //Eventually create a damage system to calculate this based on the users
   //equipped item
-  def handleAttackDamage(damage : Int, attackee: Health) {
-    val currentHealth = attackee.getCurrentHealth
-    println("Damage Detected!")
-    attackee.setCurrentHealth(currentHealth - damage)
-  }
+  def handleAttackDamage(damage: Int, attackee: Health) = attackee.currentHealth -= damage
 
-  def getWeaponStat(entity : Entity) : Int = {
-    var playerBase : Int = 0
-    var weaponValue : Int = 0
+  def getWeaponStat(entity: Entity): Int = {
+    var playerBase: Int = 0
+    var weaponValue: Int = 0
     entity.getComponent(classOf[Stats]) match {
-      case Some(stats : Stats) => 
+      case Some(stats: Stats) => 
         for(stat <- stats.stats) {
           if(stat.attributeType == "strength"){
             playerBase += stat.magnitude
@@ -60,23 +52,23 @@ class CollisionSystem(actorSystem : ActorSystem) extends System {
       case _ =>
     }
     entity.getComponent(classOf[Equipment]) match {
-      case Some(equipment : Equipment) =>
+      case Some(equipment: Equipment) =>
         if(equipment.weapon1 != null) {
           equipment.weapon1.itemType match {
-            case weapon : Weapon => 
+            case weapon: Weapon => 
             weaponValue += weapon.damage
             case _ => 
           }
         }
         if(equipment.weapon2 != null) {
           equipment.weapon2.itemType match {
-            case weapon : Weapon => 
+            case weapon: Weapon => 
             weaponValue += weapon.damage
             case _ =>
           }
         }
     }
-    return weaponValue + playerBase
+    weaponValue + playerBase
   }
 
   def getArmorStat(entity: Entity) : Int = {
@@ -91,7 +83,7 @@ class CollisionSystem(actorSystem : ActorSystem) extends System {
         }
       case _ =>
     }
-    return armorValue + playerBase
+   armorValue + playerBase
   }
 
   def getDamage(initiator: Entity, victim: Entity) {
@@ -116,7 +108,7 @@ class CollisionSystem(actorSystem : ActorSystem) extends System {
       ("damage" -> damage) ~
       ("initiator" -> initiatorId) ~
       ("victim" -> victimId))
-    val actorSelection = actorSystem.actorSelection("user/SockoSender*")
+    val actorSelection = actorSystem.actorSelection("user/EQueue")
     actorSelection ! new ConnectionWrite(compact(render(att))) 
   }
 
@@ -145,7 +137,7 @@ class CollisionSystem(actorSystem : ActorSystem) extends System {
         entityA.getComponent(classOf[Bounds]),
         entityB.getComponent(classOf[Position]),
         entityB.getComponent(classOf[Bounds])) match {
-        case(Some(positionA : Position), Some(boundsA : Bounds), Some(positionB : Position), Some(boundsB : Bounds)) =>
+        case(Some(positionA: Position), Some(boundsA: Bounds), Some(positionB: Position), Some(boundsB: Bounds)) =>
           // Remember to end a line with an operator of some sort (., +, &&, ||) if you need 
           // to not fall afoul of the automatic end of statement guesser
           //are the two characters within the same x position (is A between B's leftside and width length) 
@@ -158,7 +150,7 @@ class CollisionSystem(actorSystem : ActorSystem) extends System {
 
           if(xOverlap && yOverlap) {
             if (handleAttack(entityA, entityB)) {
-              return;
+              return // EXPLICIT RETURN TO ESCAPE handleCollision
             }
             //check to see if they are movable
             if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
@@ -185,23 +177,22 @@ class CollisionSystem(actorSystem : ActorSystem) extends System {
 
 
   override def process(delta : Int) {
-    //for each room get entities
     val exclusion = List(classOf[Respawn], classOf[Transport], classOf[Dead])
-    val rooms : ArrayBuffer[Entity] = world.groups("ROOMS")
+    val rooms: ArrayBuffer[Entity] = world.groups("ROOMS")
     for(e <- rooms) {
       // This needs to warn us better
       val tileMap = (e.getComponent(classOf[TileMap]): @unchecked) match {
-        case(Some(tilemap : TileMap)) => 
+        case(Some(tilemap: TileMap)) => 
           tilemap
       }
       val room = (e.getComponent(classOf[Room])) match {
-        case (Some(r : Room)) => r
+        case (Some(r: Room)) => r
         case _ =>
           log.warn("0b38a4a: getComponent failed to return anything")
           new Room(-1)
       }
       
-      var quadTree : QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.getMaximumWidth, tileMap.getMaximumHeight))
+      var quadTree: QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.getMaximumWidth, tileMap.getMaximumHeight))
       var entities = world.groups("ROOM"+room.id).toList
       entities = excludeList(entities, exclusion)
       for(entity <- entities) {
@@ -222,16 +213,16 @@ class CollisionSystem(actorSystem : ActorSystem) extends System {
     }
   }
 
-  def excludeList[T <: AnyRef](entities : List[Entity],exclusionList : List[T] ) : List[Entity] = {
+  def excludeList[T <: AnyRef](entities: List[Entity], exclusionList: List[T] ): List[Entity] = {
     entities.filter{ entity =>
-      val componentEntityTypes : Set[Object] = entity.components.map(c=>c.getClass).toSet 
+      val componentEntityTypes: Set[Object] = entity.components.map(c=>c.getClass).toSet 
       (exclusionList.toSet intersect componentEntityTypes).isEmpty 
     }.toList
 
   }
 
-  def hasExclusion[T <: AnyRef](entity : Entity, exclusionList : List[T]) : Boolean = {
-      val componentEntityTypes : Set[Object] = entity.components.map(c=>c.getClass).toSet 
+  def hasExclusion[T <: AnyRef](entity: Entity, exclusionList: List[T]): Boolean = {
+      val componentEntityTypes: Set[Object] = entity.components.map(c=>c.getClass).toSet 
       !(exclusionList.toSet intersect componentEntityTypes).isEmpty
     }
 }

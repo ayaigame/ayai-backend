@@ -16,17 +16,17 @@ trait Action {
  def asJson(): JObject 
 }
 
-case class ItemAction(var itemAction : ItemAct) extends Action {
-  def process(e : Entity) {
+case class ItemAction(var itemAction: ItemAct) extends Action {
+  def process(e: Entity) {
     //get the inventory of the character and base it off what action of the command given
   }
-  def asJson() : JObject =  { ("action" -> "empty")}
+  def asJson(): JObject =  { ("action" -> "empty")}
 
 }
-case class AttackAction(var action : AttackAct) extends Action {
-  def process(e : Entity) {
+case class AttackAction(var action: AttackAct) extends Action {
+  def process(e: Entity) {
     //print somethign
   }
-  def asJson() : JObject =  { ("action" -> "empty")}
+  def asJson(): JObject =  { ("action" -> "empty")}
 
 }

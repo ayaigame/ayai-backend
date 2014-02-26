@@ -11,19 +11,19 @@ object RespawningSystem {
 }
 
 class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn])) { 
-  override def processEntity(e : Entity, deltaTime : Int) {
+  override def processEntity(e: Entity, delta: Int) {
     var respawn = (e.getComponent(classOf[Respawn]): @unchecked) match {
-      case (Some(r : Respawn)) => r
+      case (Some(r: Respawn)) => r
     }
     val health = (e.getComponent(classOf[Health]): @unchecked) match {
-      case(Some(h : Health)) => h
+      case(Some(h: Health)) => h
     }
     val room = (e.getComponent(classOf[Room]): @unchecked) match {
-      case Some(r : Room) => r
+      case Some(r: Room) => r
     }
 
     val position = (e.getComponent(classOf[Position]): @unchecked) match {
-      case Some(p : Position) => p 
+      case Some(p: Position) => p 
     }
     
     if(respawn.isReady(System.currentTimeMillis())) {

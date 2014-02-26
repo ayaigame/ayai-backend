@@ -2,6 +2,7 @@ package ayai.gamestate
 
 /** Ayai Imports **/
 import ayai.components._
+
 /** Crane Imports **/
 import crane.{Entity, World}
 
@@ -20,7 +21,7 @@ sealed trait QueryResponse
 
 case class CharacterRadius(characterId: String) extends QueryType
 case class CharacterResponse(json: String)  extends QueryResponse
-case class MapRequest(room : Entity)
+case class MapRequest(room: Entity)
 case object SomeData
 
 class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
@@ -34,8 +35,8 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   //Returns a character's belongings and surroundings.
   def getCharacterRadius(characterId: String) = {
-    val characterEntity : Entity = (world.getEntityByTag("CHARACTER" + characterId)) match {
-      case Some(entity : Entity) => 
+    val characterEntity: Entity = (world.getEntityByTag("CHARACTER" + characterId)) match {
+      case Some(entity: Entity) => 
         entity
       case _ =>
         log.warn("11491e0: getEntityByTag failed to return anything")
@@ -43,7 +44,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     }
     
     val room: Room = (characterEntity.getComponent(classOf[Room])) match {
-      case Some(r : Room) => 
+      case Some(r: Room) => 
         r 
       case _ =>
         log.warn("b766a68: getComponent failed to return anything")
@@ -56,7 +57,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     for(otherEntity <- otherEntities) {
       if(characterEntity != otherEntity) {
         otherEntity.getComponent(classOf[Character]) match {
-          case(Some(a : Character)) => 
+          case(Some(a: Character)) => 
           entityJSONs += otherEntity
           case _ => 
         }
@@ -71,7 +72,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
         characterEntity.getComponent(classOf[Inventory]),
         characterEntity.getComponent(classOf[Mana]),
         characterEntity.getComponent(classOf[Actionable])) match {
-          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(inventory : Inventory), Some(mana : Mana), Some(actionable : Actionable)) =>
+          case (Some(character: Character), Some(position: Position), Some(health: Health), Some(inventory: Inventory), Some(mana: Mana), Some(actionable: Actionable)) =>
             ((character.asJson()) ~
             (position.asJson) ~
             (health.asJson) ~
@@ -88,7 +89,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
           e.getComponent(classOf[Health]),
           e.getComponent(classOf[Mana]),
           e.getComponent(classOf[Actionable])) match {
-          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(mana : Mana), Some(actionable : Actionable)) =>
+          case (Some(character: Character), Some(position: Position), Some(health: Health), Some(mana: Mana), Some(actionable: Actionable)) =>
             ((character.asJson()) ~
             (position.asJson) ~
             (health.asJson) ~
@@ -118,9 +119,9 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   // }
 
-  def sendMapInfo(room : Entity ) = {
+  def sendMapInfo(room: Entity ) = {
     val json = room.getComponent(classOf[TileMap]) match {
-      case (Some(tilemap : TileMap)) => 
+      case (Some(tilemap: TileMap)) => 
         ("type" -> "map") ~
         ("tilemap" -> tilemap.file) ~
         (tilemap.tilesets.asJson)
@@ -144,13 +145,4 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     case MapRequest(room) => sendMapInfo(room)
     case _ => println("Error: from serializer.")
   }
-
-   // { "map" : {
-   //    "root" : "assets/maps"
-   //    "tilemap" : "map3.json",
-   //    "tilesets" : [
-   //       {"image" : "sd33.png" },
-   //       {"image" : "blah_blah.png" }
-   //    ]
-   //  }}
 }

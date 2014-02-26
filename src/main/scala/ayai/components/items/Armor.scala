@@ -10,7 +10,7 @@ case class Armor(
   itemtype: String)
   extends ItemType {
 
-    def asJson() : JObject = {
+    def asJson(): JObject = {
       ("slot" -> slot) ~
       ("protection" -> protection) ~
       ("type" -> itemtype)

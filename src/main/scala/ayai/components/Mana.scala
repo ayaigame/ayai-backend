@@ -10,28 +10,11 @@ import net.liftweb.json.JsonDSL._
 
 case class Mana(var currentMana: Int, var maximumMana: Int) extends Component{
 implicit val formats = Serialization.formats(NoTypeHints)
-  def getCurrentMana() : Int = {
-    return this.currentMana
-  }
   
-  def setCurrentMana(characterMana : Int){
-    this.currentMana = characterMana
-  }
-  
-  def getMaximumMana() : Int = {
-    return this.maximumMana
-  }
-  
-  def setMaximumMana(maximumMana : Int) {
-    this.maximumMana = maximumMana
-  }
-  
-  def isAlive : Boolean = {
-    return currentMana > 0
-  }
+  def isAlive: Boolean = currentMana > 0
   
   def addDamage(damage:Float) {
-    currentMana.-(damage) 
+    currentMana -= damage
     if(currentMana < 0) {
       currentMana = 0
     }

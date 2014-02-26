@@ -11,7 +11,7 @@ import net.liftweb.json._
 case class Character(val id: String, val name: String, val experience: Int, val level: Int) extends Component{
 	implicit val formats = Serialization.formats(NoTypeHints)
 
-  implicit def asJson() : JObject = {
+  implicit def asJson(): JObject = {
     ("id" -> id) ~
     ("name" -> name) ~
     ("experience" -> experience) ~

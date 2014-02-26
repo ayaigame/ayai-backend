@@ -38,13 +38,12 @@ import org.slf4j.{Logger, LoggerFactory}
 
 
 object GameLoop {
-  var roomHash : HashMap[Long, Entity] = HashMap.empty[Long, Entity]
+  var roomHash: HashMap[Long, Entity] = HashMap.empty[Long, Entity]
   private val log = LoggerFactory.getLogger(getClass)
 
-  var running : Boolean = _
+  var running: Boolean = true
 
   def main(args: Array[String]) {
-    running = true
     DBCreation.ensureDbExists()
 
     var socketMap: ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
@@ -53,7 +52,7 @@ object GameLoop {
 
     world.createGroup("ROOMS")    
     world.createGroup("CHARACTERS")
-    var room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
+    var room: Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
     roomHash.put(Constants.STARTING_ROOM_ID, room)
     world.createGroup("ROOM"+Constants.STARTING_ROOM_ID)
     world.addEntity(room)
@@ -62,17 +61,15 @@ object GameLoop {
     roomHash.put(1, room)
     world.createGroup("ROOM"+1)
     world.addEntity(room)
-    //create a room 
-    //room.addToWorld
 
     ItemFactory.bootup(world)
     ClassFactory.bootup(world)
 
-    world.addSystem(new MovementSystem(roomHash))
-    world.addSystem(new RoomChangingSystem(roomHash))
-    world.addSystem(new HealthSystem())
-    world.addSystem(new RespawningSystem())
-    world.addSystem(new FrameExpirationSystem())
+    //world.addSystem(MovementSystem(roomHash))
+    //world.addSystem(RoomChangingSystem(roomHash))
+    //world.addSystem(HealthSystem())
+    //world.addSystem(RespawningSystem())
+    //world.addSystem(FrameExpirationSystem())
     //world.initialize()
     
     //load all rooms
