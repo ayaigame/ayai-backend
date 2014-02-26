@@ -31,10 +31,10 @@ import net.liftweb.json.Serialization.{read, write}
 import org.slf4j.{Logger, LoggerFactory}
 
 object NetworkMessageProcessor {
-  def apply(worlds: HashMap[String, RoomWorld], socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessor(worlds, socketMap)
+  def apply(world: RoomWorld, socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessor(world, socketMap)
 }
 
-class NetworkMessageProcessor(worlds: HashMap[String, RoomWorld], socketMap: ConcurrentMap[String, String]) extends Actor {
+class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
   val actorSystem = context.system
   val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
@@ -47,13 +47,13 @@ class NetworkMessageProcessor(worlds: HashMap[String, RoomWorld], socketMap: Con
       case AddNewCharacter(socketId: String, id: String, characterName: String, x: Int, y: Int) => {
         val actor = actorSystem.actorSelection("user/SockoSender"+id)
         // CHANGE THIS SECTION WHEN DOING DATABASE WORK
-        EntityFactory.loadCharacter(worlds(""), socketId, id, "Ness", x, y, actor, actorSystem) //Should use characterId instead of characterName
+        EntityFactory.loadCharacter(world, socketId, id, "Ness", x, y, actor, actorSystem) //Should use characterId instead of characterName
         sender ! Success
       }
 
       case RemoveCharacter(id: String) => {
         println("Removing character: " + id)
-        (worlds("").getEntityByTag("CHARACTER" + socketMap(id))) match {
+        (world.getEntityByTag("CHARACTER" + socketMap(id))) match {
           case None =>
             System.out.println(s"Can't find character attached to socket $id.")
           case Some(character : Entity) =>
@@ -66,7 +66,7 @@ class NetworkMessageProcessor(worlds: HashMap[String, RoomWorld], socketMap: Con
       case MoveMessage(socketId: String, start: Boolean, direction: MoveDirection) => {
         //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
         val id: String = socketMap(socketId)
-        (worlds("").getEntityByTag("CHARACTER"+id)) match {
+        (world.getEntityByTag("CHARACTER"+id)) match {
           case None =>
             println("Can't find character attached to id: " + id)
           case Some(e: Entity) =>
@@ -89,7 +89,7 @@ class NetworkMessageProcessor(worlds: HashMap[String, RoomWorld], socketMap: Con
         val id: String = socketMap(socketId)
         val bulletId = (new UID()).toString
 
-        (worlds("").getEntityByTag("CHARACTER"+id)) match {
+        (world.getEntityByTag("CHARACTER"+id)) match {
 
         case Some(initiator: Entity) =>
           val position = initiator.getComponent(classOf[Position])
@@ -116,15 +116,15 @@ class NetworkMessageProcessor(worlds: HashMap[String, RoomWorld], socketMap: Con
 
               println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
 
-              val p: Entity = worlds("").createEntity("ATTACK"+bulletId)
+              val p: Entity = world.createEntity("ATTACK"+bulletId)
 
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Bounds(10, 10))
               p.components += (new Attack(initiator));
               p.components += (new Frame(10,0))
               //p.components += (c)
-              worlds("").addEntity(p)
-              worlds("").groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+              world.addEntity(p)
+              world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
             case _ =>
               log.warn("424e244: getComponent failed to return anything")
 

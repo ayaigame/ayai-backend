@@ -36,13 +36,12 @@ object GameLoop {
 
     var worlds = HashMap[String, RoomWorld]()
     var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
+    val userRoomMap: ConcurrentMap[String, RoomWorld] = TrieMap[String, World]()
 
     val networkSystem = ActorSystem("NetworkSystem")
-    val messageQueue = networkSystem.actorOf(Props[NetworkMessageQueue], name="NMQueue")
-    val interpreter = networkSystem.actorOf(Props[NetworkMessageInterpreterSupervisor], name="NMInterpreter")
-    val messageProcessor = networkSystem.actorOf(Props(NetworkMessageProcessorSupervisor(worlds, socketMap)), name="NMProcessor")
-    val authorization = networkSystem.actorOf(Props[AuthorizationProcessor], name="AProcessor")
-
+    val nmQueue = networkSystem.actorOf(Props[NetworkMessageQueue], name="NMQueue")
+    val nmInterpreter = networkSystem.actorOf(Props[NetworkMessageInterpreterSupervisor], name="NMInterpreter")
+    val aProcessor = networkSystem.actorOf(Props[AuthorizationProcessor], name="AProcessor")
 
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
@@ -57,12 +56,12 @@ object GameLoop {
     while(running) {
       val start = System.currentTimeMillis
 
-      val future = messageQueue ? FlushMessages
+      val future = nmQueue ? FlushMessages
       val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
 
       val processedMessages = new ArrayBuffer[Future[Any]]
       result.messages.foreach { message =>
-        processedMessages += messageProcessor ? new ProcessMessage(message)
+        processedMessages += nmProcessor ? new ProcessMessage(message)
       }
       
       Await.result(Future.sequence(processedMessages), 1 seconds)
