@@ -1,7 +1,7 @@
 package ayai.networking
 
 /** Ayai Imports **/
-import ayai.gamestate.{Effect, EffectType}
+import ayai.gamestate.{Effect, EffectType, RoomWorld}
 import ayai.actions._
 import ayai.components._
 import ayai.networking.chat._
@@ -10,7 +10,7 @@ import ayai.factories.EntityFactory
 import ayai.apps.{Constants, GameLoop}
 
 /** Crane Imports **/
-import crane.{Entity, World}
+import crane.{Entity}
 
 /** Akka Imports **/
 import akka.actor.{Actor, Props}
@@ -19,6 +19,7 @@ import akka.actor.Status.{Success, Failure}
 /** External Imports **/
 import scala.util.Random
 import scala.collection.concurrent.{Map => ConcurrentMap}
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 
 import java.rmi.server.UID
@@ -30,8 +31,9 @@ import net.liftweb.json.Serialization.{read, write}
 import org.slf4j.{Logger, LoggerFactory}
 
 object NetworkMessageProcessor {
-  def apply(world: World, socketMap: ConcurrentMap[Stirng, String]) = new NetworkMessageProcessor(world, socketMap)
+  def apply(world: HashMap[String, RoomWorld], socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessor(world, socketMap)
 }
+
 class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
   val actorSystem = context.system

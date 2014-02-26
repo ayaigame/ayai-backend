@@ -13,8 +13,8 @@ implicit val formats = Serialization.formats(NoTypeHints)
   
   def isAlive: Boolean = currentMana > 0
   
-  def addDamage(damage:Float) {
-    currentMana -= damage
+  def addDamage(damage: Float) {
+    currentMana -= damage.toInt
     if(currentMana < 0) {
       currentMana = 0
     }

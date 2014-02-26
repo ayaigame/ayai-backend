@@ -22,13 +22,13 @@ import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.io.Source
 
 /** Akka Imports **/
-import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
+import akka.actor.{Actor, ActorSystem, ActorRef, Props}
 
 
 object EntityFactory {
   //Should take characterId: Long as a parameter instead of characterName
   //However can't do that until front end actually gives me the characterId
-  def loadCharacter(world: World, socketId: WebSocketFrameEvent, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection) = {
+  def loadCharacter(world: World, socketId: WebSocketFrameEvent, entityId: String, characterName: String, x: Int, y: Int) = {
     val p: Entity = world.createEntity(tag=entityId)
     val characterRow = AyaiDB.getCharacter(characterName)
 
@@ -99,8 +99,8 @@ object EntityFactory {
       ("tileset" -> tileset)
     )
 
-    // TODO: Switch to selection
-    webSocket.writeText(compact(render(json)))
+    val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
+    actorSelection ! new ConnectionWrite(compact(render(json)))
   }
 
 /**
@@ -137,9 +137,9 @@ object EntityFactory {
   case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomFile: String, toRoomId: Int) {
     override def toString() : String = "start_x: " + start_x + " toRoomFile: " + toRoomFile
   }
-  case class JTilesets(image : String)
+  case class JTilesets(image: String)
   
-  def loadRoomFromJson(world : World, roomId : Int, jsonFile : String) : Entity = {
+  def loadRoomFromJson(roomId: Int, jsonFile: String): Entity = {
     implicit val formats = net.liftweb.json.DefaultFormats
     val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
     val lines = file.mkString
@@ -187,7 +187,7 @@ object EntityFactory {
     tileMap.height = tmap.height
     tileMap.width = tmap.width
     tileMap.file = jsonFile
-    val entityRoom: Entity = createRoom(world, id, tileMap)
-    entityRoom
+    //val entityRoom: Entity = createRoom(world, id, tileMap)
+    //entityRoom
   }
 }

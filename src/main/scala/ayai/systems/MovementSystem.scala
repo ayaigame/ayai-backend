@@ -16,7 +16,7 @@ object MovementSystem {
   def apply() = new MovementSystem()
 }
 
-class MovementSystem(roomHash: HashMap[Long, Entity]) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character], classOf[Actionable]), exclude=List(classOf[Transport], classOf[Respawn])) {  
+class MovementSystem() extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character], classOf[Actionable]), exclude=List(classOf[Transport], classOf[Respawn])) {  
   private val log = LoggerFactory.getLogger(getClass)
     //this will only move characters who have received a movement key and the current component is still set to True
     override def processEntity(e: Entity, delta : Int) {
@@ -39,7 +39,8 @@ class MovementSystem(roomHash: HashMap[Long, Entity]) extends EntityProcessingSy
         }
         
         //now check to see if movement has created gone past the map (if so put it at edge)
-        val roomEntity: Entity = roomHash(room.id) 
+        //TODO: Replace with room entity
+        //val roomEntity: Entity = roomHash(room.id) 
         //will update position in function
         val tileMap: TileMap = (roomEntity.getComponent(classOf[TileMap]): @unchecked) match {
           case(Some(tileMap: TileMap)) => tileMap

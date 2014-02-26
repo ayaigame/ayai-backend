@@ -57,7 +57,7 @@ object GameLoop {
     while(running) {
       val start = System.currentTimeMillis
 
-      val future = messageQueue ? FlushMessages()
+      val future = messageQueue ? FlushMessages
       val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
 
       val processedMessages = new ArrayBuffer[Future[Any]]
