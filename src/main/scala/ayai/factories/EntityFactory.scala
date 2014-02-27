@@ -38,6 +38,7 @@ object EntityFactory {
     p.components += new Bounds(32, 32)
     p.components += new Velocity(4, 4)
     p.components += new Actionable(false, DownDirection)
+    p.components += new QuestBag()
     p.components += new Health(100,100)
     p.components += new NetworkingActor(actor)
     p.components += new Mana(200,200)

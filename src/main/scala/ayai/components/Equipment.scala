@@ -7,12 +7,16 @@ import net.liftweb.json._
 
 
 class Equipment() extends Component {
-	var helmet: Item = null
-	var weapon1: Item = null
-	var weapon2: Item = null
-	var torso: Item = null
-	var legs: Item = null
-	var feet: Item = null
+	object EmptySlot extends Item("",0,0,EmptyType) {}
+	object EmptyType extends ItemType {
+		override def asJson(): JObject = ("empty" -> "")
+	}
+	var helmet: Item = EmptySlot
+	var weapon1: Item = EmptySlot
+	var weapon2: Item = EmptySlot
+	var torso: Item = EmptySlot
+	var legs: Item = EmptySlot
+	var feet: Item = EmptySlot
 
 	def equipWeapon1(weapon: Item) {
 		weapon.itemType match {

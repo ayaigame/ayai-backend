@@ -1,0 +1,15 @@
+{
+	"quests": [
+		{
+			"id": 1,
+			"title": "Kill 8 Wild Boars",
+			"description": "Wild Boars are fucking up my lawn and old sallie had an aneurism. Kill those mudda fuckas for me",
+			"recommendLevel": 1,
+			"objective": [ {
+				"name": "Kill Boars",
+				"totalCompleted": 0,
+				"totalNeeded": 8
+			}]
+
+		}]
+}
