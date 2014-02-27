@@ -30,6 +30,7 @@ case class ItemMessage(id : String, itemAction : ItemAction) extends NetworkMess
 case class AttackMessage(webSocket: WebSocketFrameEvent) extends NetworkMessage
 case class SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) extends NetworkMessage
 case class PublicChatMessage(message: String, sender: String) extends NetworkMessage
+case class EquipMessage(webSocket: WebSocketFrameEvent, slot: String, equipmentType: String) extends NetworkMessage
 
 case class LoginPost(request: HttpRequestEvent) extends NetworkMessage
 case class RegisterPost(request: HttpRequestEvent) extends NetworkMessage

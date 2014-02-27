@@ -3,7 +3,7 @@ package ayai.factories
 /** Ayai Imports **/
 import ayai.components._
 import ayai.maps._
-import ayai.actions.MoveDirection
+import ayai.actions._
 import ayai.persistence.AyaiDB
 import ayai.apps.Constants
 
@@ -37,7 +37,7 @@ object EntityFactory {
     p.components += new Velocity(3,4)
     p.components += new Bounds(32, 32)
     p.components += new Velocity(4, 4)
-    p.components += new Actionable(false, new MoveDirection(0,0))
+    p.components += new Actionable(false, DownDirection)
     p.components += new Health(100,100)
     p.components += new NetworkingActor(actor)
     p.components += new Mana(200,200)

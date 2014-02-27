@@ -108,7 +108,7 @@ object GameLoop {
         processedMessages += messageProcessor ? new ProcessMessage(message)
       }
       
-      Await.result(Future.sequence(processedMessages), 1 seconds)
+      Await.result(Future.sequence(processedMessages), 3 seconds)
 
       world.process()
 

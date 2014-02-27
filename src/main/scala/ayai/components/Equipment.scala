@@ -2,6 +2,8 @@ package ayai.components
 
 import ayai.components._
 import crane.Component
+import net.liftweb.json.JsonDSL._
+import net.liftweb.json._
 
 
 class Equipment() extends Component {
