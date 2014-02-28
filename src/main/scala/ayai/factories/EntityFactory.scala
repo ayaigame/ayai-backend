@@ -3,6 +3,7 @@ package ayai.factories
 /** Ayai Imports **/
 import ayai.components._
 import ayai.maps._
+import ayai.gamestate._
 import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
 import ayai.persistence.AyaiDB

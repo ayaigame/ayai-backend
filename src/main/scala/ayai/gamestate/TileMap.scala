@@ -1,16 +1,14 @@
-package ayai.components
+package ayai.gamestate
 
 /** Ayai Imports **/
+import ayai.components._
 import ayai.maps.{Tile, Layer, TransportInfo, Tilesets}
-
-/** Crane Imports **/
-import crane.Component
 
 /** External Imports **/
 import scala.math._
 
 //128 x 128 is only default
-class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[TransportInfo], var tilesets: Tilesets) extends Component {
+class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[TransportInfo], var tilesets: Tilesets) {
   var file: String = ""
   var width: Int = 128
   var height: Int = 128

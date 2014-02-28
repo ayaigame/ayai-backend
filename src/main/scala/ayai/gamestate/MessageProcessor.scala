@@ -52,7 +52,7 @@ class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String,
 
       case RemoveCharacter(userId: String) => {
         println(s"Removing character: $userId")
-        (world.getEntityByTag(s"CHARACTER$userId") match {
+        world.getEntityByTag(s"CHARACTER$userId") match {
           case None =>
             System.out.println(s"Can't find character attached to socket $id.")
           case Some(character : Entity) =>

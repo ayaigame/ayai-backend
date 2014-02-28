@@ -4,7 +4,7 @@ package ayai.apps
 import ayai.networking._
 import ayai.components._
 import ayai.persistence._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest, RoomWorld}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest, RoomWorld, MessageQueue, MessageProcessor}
 import ayai.factories._
 
 /** Akka Imports **/
@@ -38,7 +38,7 @@ object GameLoop {
     var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
 
     val networkSystem = ActorSystem("NetworkSystem")
-    val nmQueue = networkSystem.actorOf(Props[NetworkMessageQueue], name="NMQueue")
+    val mQueue = networkSystem.actorOf(Props[MessageQueue], name="MQueue")
     val nmInterpreter = networkSystem.actorOf(Props[NetworkMessageInterpreterSupervisor], name="NMInterpreter")
     val aProcessor = networkSystem.actorOf(Props[AuthorizationProcessor], name="AProcessor")
 
@@ -54,8 +54,7 @@ object GameLoop {
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
       val start = System.currentTimeMillis
-
-      val future = nmQueue ? FlushMessages
+      val future = mQueue ? FlushMessages
       val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
 
       val processedMessages = new ArrayBuffer[Future[Any]]
