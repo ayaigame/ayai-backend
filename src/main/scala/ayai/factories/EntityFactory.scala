@@ -47,14 +47,14 @@ object EntityFactory {
     val questbag = new QuestBag()
     questbag.addQuest(world.getEntityByTag("QUEST1") match {
       case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
-        case Some(quest: Quest) => quest 
+        case Some(quest: Quest) => quest
         case _ => null
       }
       case _ => null
     })
     questbag.addQuest(world.getEntityByTag("QUEST2") match {
       case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
-        case Some(quest: Quest) => quest 
+        case Some(quest: Quest) => quest
         case _ => null
       }
       case _ => null

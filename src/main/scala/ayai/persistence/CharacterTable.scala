@@ -23,7 +23,11 @@ import net.liftweb.json.Serialization.{read, write}
 
 object CharacterTable {
 
-  def createCharacter(characterName: String, className: String, accountId: Long, startingRoom: Long, startingX: Int, startingY: Int) = {
+  def createCharacter(characterName: String, className: String, accountId: Long) {
+    this.createCharacter(characterName, className, accountId, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y)
+  }
+
+  def createCharacter(characterName: String, className: String, accountId: Long, startingRoom: Long, startingX: Int, startingY: Int) {
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
         Session.create(

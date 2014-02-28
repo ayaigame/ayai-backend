@@ -44,6 +44,12 @@ class SockoServer(actorSystem: ActorSystem, interpreter: ActorRef, queue: ActorR
 
         authorization ! new CharactersPost(httpRequest)
       }
+      case POST(Path("/create")) => {
+        if (httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+        authorization ! new CreateCharacterPost(httpRequest)
+      }
 
       case _ => {
         if (httpRequest.request.is100ContinueExpected)

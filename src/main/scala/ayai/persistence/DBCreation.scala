@@ -5,7 +5,7 @@ package ayai.persistence
  * Creates DB
  */
 
-import ayai.apps.Constants 
+import ayai.apps.Constants
 
 /** External Imports **/
 import java.nio.file.{Files, Paths}
@@ -13,7 +13,7 @@ import org.squeryl.Session
 import org.squeryl.SessionFactory
 import org.squeryl.adapters.H2Adapter
 import org.squeryl.PrimitiveTypeMode._
-import org.mindrot.jbcrypt.BCrypt 
+import org.mindrot.jbcrypt.BCrypt
 
 //Temporary for as long as initial inserts happen here.
 import org.squeryl.Session
@@ -27,7 +27,7 @@ object DBCreation {
     if(Files.exists(Paths.get("ayai.h2.db"))){
       Files.delete(Paths.get("ayai.h2.db"))
     }
-    
+
 
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
@@ -59,7 +59,7 @@ object DBCreation {
     transaction {
       AyaiDB.accounts.insert(tim)
     }
-    
+
     account = AyaiDB.getAccount("tim").id
       //   // val token = AyaiDB.validatePassword("tim", "tim")
       //   // println(token)

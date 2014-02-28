@@ -39,3 +39,4 @@ case class LoginPost(request: HttpRequestEvent) extends NetworkMessage
 case class RegisterPost(request: HttpRequestEvent) extends NetworkMessage
 case class RecoveryPost(request: HttpRequestEvent) extends NetworkMessage
 case class CharactersPost(request: HttpRequestEvent) extends NetworkMessage
+case class CreateCharacterPost(request: HttpRequestEvent) extends NetworkMessage
