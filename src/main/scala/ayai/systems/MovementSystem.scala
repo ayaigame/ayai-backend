@@ -3,6 +3,7 @@ package ayai.systems
 /** Ayai Imports **/
 import ayai.actions._
 import ayai.components._
+import ayai.gamestate.{RoomWorld, TileMap}
 
 /** Crane Imports **/
 import crane.{Entity,EntityProcessingSystem}

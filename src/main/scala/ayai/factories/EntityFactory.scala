@@ -29,7 +29,7 @@ import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
 object EntityFactory {
   //Should take characterId: Long as a parameter instead of characterName
   //However can't do that until front end actually gives me the characterId
-  def loadCharacter(world: World, socketId: String, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
+  def loadCharacter(world: World, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
     val p: Entity = world.createEntity(tag=entityId)
     val characterRow = AyaiDB.getCharacter(characterName)
 
@@ -119,18 +119,18 @@ object EntityFactory {
   item
   }
   **/
-  def createRoom(world: World, roomId: Int, tileMap: TileMap ): Entity = {
-    var entityRoom: Entity = world.createEntity("ROOM"+roomId)
-    var room: Room = new Room(roomId)
+  //def createRoom(world: World, roomId: Int, tileMap: TileMap ): Entity = {
+  //  var entityRoom: Entity = world.createEntity("ROOM"+roomId)
+  //  var room: Room = new Room(roomId)
 
-    entityRoom.components += room
-    entityRoom.components += tileMap
+  //  entityRoom.components += room
+  //  entityRoom.components += tileMap
 
-    world.groups("ROOMS") += entityRoom
-    //world.getManager(classOf[TagManager]).register(roomId.toString,entityRoom)
+  //  world.groups("ROOMS") += entityRoom
+  //  //world.getManager(classOf[TagManager]).register(roomId.toString,entityRoom)
 
-    entityRoom
-  }
+  //  entityRoom
+  //}
 
 
   case class JTMap(id: Int, width: Int, height: Int)
@@ -140,7 +140,7 @@ object EntityFactory {
   }
   case class JTilesets(image: String)
 
-  def loadRoomFromJson(roomId: Int, jsonFile: String): Entity = {
+  def loadRoomFromJson(jsonFile: String): TileMap = {
     implicit val formats = net.liftweb.json.DefaultFormats
     val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
     val lines = file.mkString
@@ -188,7 +188,8 @@ object EntityFactory {
     tileMap.height = tmap.height
     tileMap.width = tmap.width
     tileMap.file = jsonFile
-    new Entity
+    tileMap
+    //new Entity
     //val entityRoom: Entity = createRoom(world, id, tileMap)
     //entityRoom
   }

@@ -21,9 +21,13 @@ sealed trait QueryResponse
 
 case class CharacterRadius(characterId: String) extends QueryType
 case class CharacterResponse(json: String)  extends QueryResponse
-case class GetRoomJson
 case class MapRequest(room: Entity)
+case object GetRoomJson
 case object SomeData
+
+object GameStateSerializer {
+  def apply(world: World) = new GameStateSerializer(world)
+}
 
 class GameStateSerializer(world: World) extends Actor {
   private val log = LoggerFactory.getLogger(getClass)
@@ -35,12 +39,12 @@ class GameStateSerializer(world: World) extends Actor {
 
   //Returns a character's belongings and surroundings.
   def getRoom = {
-    var entityJSON = world.getEntityByComponents(classOf[Character], classOf[Position],
+    var entities = world.getEntitiesByComponents(classOf[Character], classOf[Position],
                                                  classOf[Health], classOf[Mana],
                                                  classOf[Actionable])
     val jsonLift: JObject =
       ("type" -> "update") ~
-       ("players" -> entityJSON.map{ e =>
+       ("players" -> entities.map{ e =>
         (e.getComponent(classOf[Character]),
           e.getComponent(classOf[Position]),
           e.getComponent(classOf[Health]),
@@ -94,7 +98,7 @@ class GameStateSerializer(world: World) extends Actor {
   }
 
   def receive = {
-    case GetRoomJson=> getRoom
+    case GetRoomJson => getRoom
     case MapRequest(room) => sendMapInfo(room)
     case _ => println("Error: from serializer.")
   }

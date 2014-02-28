@@ -54,12 +54,16 @@ object GameLoop {
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
       val start = System.currentTimeMillis
-      val future = mQueue ? FlushMessages
-      val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
 
       val processedMessages = new ArrayBuffer[Future[Any]]
-      result.messages.foreach { message =>
-        processedMessages += world.nmProcessor ? new ProcessMessage(message)
+      for((name, world) <- worlds) {
+        val future = mQueue ? FlushMessages(name)
+        val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
+        val mProcessor = networkSystem.actorSelection(s"MProcessor$name")
+
+        result.messages.foreach { message =>
+          processedMessages += mProcessor ? new ProcessMessage(message)
+        }
       }
 
       Await.result(Future.sequence(processedMessages), 1 seconds)

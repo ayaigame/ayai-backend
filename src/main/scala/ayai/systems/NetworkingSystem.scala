@@ -5,7 +5,7 @@ import ayai.apps.Constants
 import ayai.networking._
 import ayai.components._
 import ayai.persistence._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, MapRequest, RoomWorld, GetRoomJson}
 import ayai.factories._
 
 /** Akka Imports **/
@@ -43,7 +43,8 @@ object NetworkingSystem {
 class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) {
   private val log = LoggerFactory.getLogger(getClass)
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
-  val serializer = networkSystem.actorSelection("Serializer")
+  val name = world.asInstanceOf[RoomWorld].name
+  val serializer = networkSystem.actorSelection(s"Serializer$name")
 
   override def processTime(delta: Int) {
 
@@ -65,7 +66,7 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
               case Some(na: NetworkingActor) => na
               case _ => null
             }
-            
+
             println(result2)
             actorSelection1.actor ! new ConnectionWrite(result2)  
             characterEntity.removeComponent(classOf[MapChange])
@@ -75,7 +76,7 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
       }
 
       //This is how we get character specific info, once we actually integrate this in.
-      val future1 = serializer ? new CharacterRadius(characterId)
+      val future1 = serializer ? GetRoomJson
       val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
       val actorSelection = characterEntity.getComponent(classOf[NetworkingActor]) match {
             case Some(na : NetworkingActor) => na

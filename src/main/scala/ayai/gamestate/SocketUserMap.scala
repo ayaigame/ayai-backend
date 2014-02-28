@@ -2,6 +2,10 @@ package ayai.gamestate
 
 import crane.Entity
 
+import akka.actor.Actor
+
+import scala.collection.mutable.HashMap
+
 case class AddSocketUser(socketId: String, userId: String)
 case class RemoveSocketUser(socketId: String)
 case class GetUserId(socketId: String)

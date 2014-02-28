@@ -13,19 +13,20 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 /** External Imports **/
 import java.net.Socket
 
+sealed trait Message
 sealed trait ProcessorMessage extends Message
 sealed trait EventMessage extends Message
 sealed trait NetworkMessage extends Message
 
-case class ProcessMessage(message: ProcessorMessage)
-case object FlushMessages
-case class QueuedMessages(messages: Array[ProcessorMessage])
-case class AddInterpretedMessage(message: Message)
+case class ProcessMessage(message: Message)
+case class FlushMessages(world: String)
+case class QueuedMessages(messages: Array[Message])
+case class AddInterpretedMessage(world: String, message: Message)
 case class InterpretMessage(message: WebSocketFrameEvent)
 case class ConnectionWrite(json: String)
 
 case class JSONMessage(message: String) extends ProcessorMessage
-case class AddNewCharacter(socketId: String, id: String, characterName: String, x: Int, y: Int) extends ProcessorMessage
+case class AddNewCharacter(userId: String, characterName: String, x: Int, y: Int) extends ProcessorMessage
 case class RemoveCharacter(id: String) extends ProcessorMessage
 case class MoveMessage(socketId: String, start: Boolean, direction: MoveDirection) extends ProcessorMessage
 case class ItemMessage(id : String, itemAction : ItemAction) extends ProcessorMessage

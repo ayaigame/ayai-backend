@@ -10,6 +10,7 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import ayai.actions._
 import ayai.components._
 import ayai.collisions._
+import ayai.gamestate.{RoomWorld, TileMap}
 import ayai.networking.ConnectionWrite
 
 /** Crane Imports **/

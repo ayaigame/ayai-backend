@@ -1,11 +1,14 @@
 package ayai.networking
 
 /** Ayai Imports **/
+import ayai.gamestate._
 import ayai.actions._
 import ayai.apps.Constants
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.pattern.ask
+import akka.util.Timeout
 
 /** Socko Imports **/
 import org.mashupbots.socko.routes._
@@ -22,14 +25,20 @@ import java.rmi.server.UID
 
 class NetworkMessageInterpreter extends Actor {
   implicit val timeout = Timeout(2 seconds)
-  val queue = context.system.actorSelection("user/NMQueue")
+  val queue = context.system.actorSelection("user/MQueue")
   val socketUserMap = context.system.actorSelection("user/SocketUserMap")
+  val userRoomMap = context.system.actorSelection("user/UserRoomMap")
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
   def lookUpUserBySocketId(socketId: String): String = {
-    val future = socketUserMap ? GetSocketId()
-    Await.result.result(future, timeout.duration).asInstanceOf[String]
+    val future = socketUserMap ? GetUserId(socketId)
+    Await.result(future, timeout.duration).asInstanceOf[String]
+  }
+
+  def lookUpWorldByUserId(userId: String): String ={
+    val future = userRoomMap ? GetWorld(userId)
+    Await.result(future, timeout.duration).asInstanceOf[String]
   }
 
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
@@ -41,16 +50,20 @@ class NetworkMessageInterpreter extends Actor {
       case "init" => ""
       case _ => lookUpUserBySocketId(wsFrame.webSocketId)
     }
+    val world = msgType match {
+      case "init" => ""
+      case _ => lookUpWorldByUserId(userId)
+    }
 
     msgType match {
       case "init" =>
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
 
-        queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame.webSocketId, id))
-        queue ! new AddInterpretedMessage(new AddNewCharacter(id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
+        queue ! new AddInterpretedMessage(world, new SocketCharacterMap(wsFrame.webSocketId, id))
+        queue ! new AddInterpretedMessage(world, new AddNewCharacter(id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
       case "echo" =>
-        queue ! new AddInterpretedMessage(new JSONMessage("echo"))
+        queue ! new AddInterpretedMessage(world, new JSONMessage("echo"))
       case "move" =>
         //TODO: Add exceptions and maybe parse shit a bit more intelligently
         val start: Boolean = compact(render(rootJSON \ "start")).toBoolean
@@ -72,19 +85,19 @@ class NetworkMessageInterpreter extends Actor {
             }
           }
         }
-        queue ! new AddInterpretedMessage(new MoveMessage(userId, start, direction))
+        queue ! new AddInterpretedMessage(world, new MoveMessage(userId, start, direction))
       case "attack" =>
-          println("Attack Received")
-          queue ! new AddInterpretedMessage(new AttackMessage(userId))
+        println("Attack Received")
+        queue ! new AddInterpretedMessage(world, new AttackMessage(userId))
       case "chat" =>
         val message = compact(render(rootJSON \ "message"))
         val tempSender: String = compact(render(rootJSON \ "sender"))
         val sender = tempSender.substring(1, tempSender.length - 1)
-        queue ! new AddInterpretedMessage(new PublicChatMessage(message, sender))
+        queue ! new AddInterpretedMessage(world, new PublicChatMessage(message, sender))
 
       case "open" =>
         val containerId: String = (rootJSON \ "containerId").extract[String]
-        queue ! new AddInterpretedMessage(new OpenMessage(userId, containerId))
+        queue ! new AddInterpretedMessage(world, new OpenMessage(userId, containerId))
 
       case "chars" =>
         val accountName: String = (rootJSON \ "accountName").extract[String]

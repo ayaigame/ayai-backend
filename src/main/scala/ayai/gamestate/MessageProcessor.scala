@@ -3,6 +3,7 @@ package ayai.gamestate
 /** Ayai Imports **/
 import ayai.actions._
 import ayai.components._
+import ayai.networking._
 import ayai.networking.chat._
 import ayai.persistence.CharacterTable
 import ayai.factories.EntityFactory
@@ -14,12 +15,17 @@ import crane.{Entity}
 /** Akka Imports **/
 import akka.actor.{Actor, Props}
 import akka.actor.Status.{Success, Failure}
+import akka.pattern.ask
+import akka.util.Timeout
 
 /** External Imports **/
 import scala.util.Random
 import scala.collection.concurrent.{Map => ConcurrentMap}
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Promise, Future}
+
 
 import java.rmi.server.UID
 
@@ -29,17 +35,22 @@ import net.liftweb.json.Serialization.{read, write}
 
 import org.slf4j.{Logger, LoggerFactory}
 
-object NetworkMessageProcessor {
-  def apply(world: RoomWorld, socketMap: ConcurrentMap[String, String]) = new NetworkMessageProcessor(world, socketMap)
+object MessageProcessor {
+  implicit val timeout = Timeout(2 seconds)
+  import ExecutionContext.Implicits.global
+
+
+  def apply(world: RoomWorld) = new MessageProcessor(world)
 }
 
-class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String, String]) extends Actor {
+class MessageProcessor(world: RoomWorld) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
+  implicit val timeout = Timeout(2 seconds)
   val actorSystem = context.system
   val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
   private val log = LoggerFactory.getLogger(getClass)
 
-  def processMessage(message: NetworkMessage) {
+  def processMessage(message: Message) {
     message match {
       //Should take characterId: Long as a parameter instead of characterName
       //However can't do that until front end actually gives me the characterId
@@ -50,14 +61,16 @@ class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String,
         sender ! Success
       }
 
-      case RemoveCharacter(userId: String) => {
+      case RemoveCharacter(socketId: String) => {
+        val future = context.system.actorSelection("user/SocketUserMap") ? GetUserId(socketId)
+        val userId = Await.result(future, timeout.duration).asInstanceOf[String]
         println(s"Removing character: $userId")
         world.getEntityByTag(s"CHARACTER$userId") match {
           case None =>
-            System.out.println(s"Can't find character attached to socket $id.")
+            System.out.println(s"Can't find character attached to socket $socketId.")
           case Some(character : Entity) =>
             character.kill
-            socketMap.remove(id)
+            context.system.actorSelection("user/SocketUserMap") ! RemoveSocketUser(socketId)
         }
         sender ! Success
       }
@@ -159,7 +172,7 @@ class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String,
         //    println("Error from PublicChatMessage")
         //}
       }
-      case _ => println("Error from NetworkMessageProcessor.")
+      case _ => println("Error from MessageProcessor.")
         sender ! Failure
     } 
   }
