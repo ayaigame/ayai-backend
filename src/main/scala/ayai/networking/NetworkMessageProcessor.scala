@@ -68,10 +68,12 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
           case None =>
             println("Can't find character attached to id: " + id)
           case Some(e : Entity) =>
-              val oldMovement = (e.getComponent(classOf[Actionable])) match {
+            (e.getComponent(classOf[Actionable])) match {
                 case Some(oldMove : Actionable) =>
                   oldMove.active = start
-                  oldMove.action = direction
+                  if(direction.xDirection != 0 || direction.yDirection != 0) {
+                    oldMove.action = direction
+                  }
                 case _ =>
                   log.warn("a07270d: getComponent failed to return anything")
 
@@ -104,24 +106,32 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
                 return
 
               }
+              //get the range of the characters weapon
+              val weaponRange = initiator.getComponent(classOf[Equipment]) match {
+                case Some(e: Equipment) => e.weapon1.itemType match {
+                  case weapon : Weapon => weapon.range
+                  case _ => 5 
+                }
+                case _ => 5
+              }
+              
               val upperLeftx = pos.x
               val upperLefty = pos.y
 
               println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
-
-
+              
               val xDirection = m.xDirection
               val yDirection = m.yDirection
 
-              val topLeftOfAttackx = (33 * xDirection) + upperLeftx
-              val topLeftOfAttacky = (33 * yDirection) + upperLefty
-
+              val topLeftOfAttackx = ((weaponRange+1) * xDirection) + upperLeftx
+              val topLeftOfAttacky = ((weaponRange+1) * yDirection) + upperLefty
+              println("XDirection: " + xDirection + " YDirection: " + yDirection)
               println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
 
               val p: Entity = world.createEntity("ATTACK"+bulletId)
 
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
-              p.components += (new Bounds(10, 10))
+              p.components += (new Bounds(weaponRange, weaponRange))
               p.components += (new Attack(initiator));
               p.components += (new Frame(10,0))
               //p.components += (c)
@@ -184,6 +194,8 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         //    println("Error from PublicChatMessage")
         //}
       }
+      case EquipMessage(wsFrame: WebSocketFrameEvent, slot: String, equipmentType: String) =>
+
       case _ => println("Error from NetworkMessageProcessor.")
         sender ! Failure
     } 
