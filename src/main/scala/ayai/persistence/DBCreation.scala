@@ -65,8 +65,10 @@ object DBCreation {
       //   // println(token)
 
     transaction {
-      AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 1000, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
-      AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 999, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+      AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+      AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+      AyaiDB.characters.insert(new CharacterRow("Ness", "Warrior", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+      AyaiDB.characters.insert(new CharacterRow("Ezio", "Thief", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
     }
   }
 }

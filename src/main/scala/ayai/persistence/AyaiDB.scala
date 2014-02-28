@@ -23,7 +23,7 @@ object AyaiDB extends Schema {
   val characters = table[CharacterRow]("CHARACTERS")
   val senderToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.sender_id)
   val receiverToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.receiver_id)
-  val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.user_id)
+  val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.account_id)
 
   on(accounts)(a => declare(
     a.username is(unique)
@@ -113,7 +113,7 @@ case class Account(
                 lazy val registeredTokens = AyaiDB.accountToToken.left(this)
             }
 case class Token(
-              val user_id: Long,
+              val account_id: Long,
               val token: String) extends AccountDb2Object { 
                 def this() = this(0, "")
                 lazy val user = AyaiDB.accountToToken.right(this)
@@ -143,7 +143,7 @@ case class CharacterRow (
 }
 
 case class InventoryRow (
-            val playerId: Long,
+            val character_id: Long,
             val itemId: Long)
           extends AccountDb2Object {
             def this() = this(0, 0)

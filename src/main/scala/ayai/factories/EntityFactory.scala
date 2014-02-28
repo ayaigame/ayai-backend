@@ -44,10 +44,45 @@ object EntityFactory {
     p.components += new Room(characterRow.room_id)
     p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here
     //Should add calculate and add stats
-    val inventory = new ArrayBuffer[Item]()
-    inventory += new Weapon(name = "Iron Axe", value = 10,
-  weight = 10, range = 0, damage = 5, damageType = "physical")
-    p.components += new Inventory(inventory)
+    val inventory = new Inventory()
+    inventory.addItem(world.getEntityByTag("ITEMS0") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null
+        }
+
+        case _ => null
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS1") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null
+        }
+
+        case _ => null
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS2") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null
+        }
+
+        case _ => null
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS1") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null
+        }
+
+        case _ => null
+    })
+    p.components += inventory
+
+    val equipment = new Equipment()
+    equipment.equipWeapon1(inventory.getItem(1))
+    p.components += equipment
+
     world.addEntity(p)
     world.groups("CHARACTERS") += p
     world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
@@ -78,7 +113,7 @@ object EntityFactory {
   item.components += (containable)
 
   world.getManager(classOf[GroupManager]).add(item,"ITEM")
-  
+
   GameLoop.map.addEntity(item.getId(),x,y)
   item
   }
@@ -105,7 +140,7 @@ object EntityFactory {
     }
   }
   case class JTilesets(image : String)
-  
+
   def loadRoomFromJson(world : World, roomId : Int, jsonFile : String) : Entity = {
   implicit val formats = net.liftweb.json.DefaultFormats
   val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
@@ -137,7 +172,7 @@ object EntityFactory {
   for(i <- 0 until (width*height)) {
     for(bundle <- bundles) {
     if(bundle.data(i) != 0 ) {
-      if(bundle.name != "collision") 
+      if(bundle.name != "collision")
       arrayTile(i%width)(i/width).layers += new NormalLayer(bundle.data(i))
       else {
       arrayTile(i%width)(i/width).layers += new CollidableLayer(bundle.data(i))

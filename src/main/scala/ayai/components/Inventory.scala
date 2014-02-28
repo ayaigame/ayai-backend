@@ -11,7 +11,7 @@ import net.liftweb.json.Serialization.{read, write}
 
 
 
-case class Inventory (inventory : ArrayBuffer[Item]) extends Component {
+case class Inventory (inventory : ArrayBuffer[Item] = new ArrayBuffer[Item]()) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
 
   implicit def asJson : JObject = {
@@ -26,7 +26,9 @@ case class Inventory (inventory : ArrayBuffer[Item]) extends Component {
 
 
   def addItem(itemToAdd: Item) = {
-    inventory += itemToAdd
+    if(itemToAdd != null) {
+      inventory += itemToAdd
+    }
   
   }
 
@@ -37,6 +39,10 @@ case class Inventory (inventory : ArrayBuffer[Item]) extends Component {
 
   def hasItem(itemToCheck: Item) : Boolean = {
     inventory.contains(itemToCheck)
+  }
+
+  def getItem(itemLocation : Int) : Item = {
+    return inventory(itemLocation)
   }
 
   def totalWeight() : Double = {

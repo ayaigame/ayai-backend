@@ -69,6 +69,8 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         val containerId : String = (rootJSON \ "containerId").extract[String]
         // println(containerId)
         queue ! new AddInterpretedMessage(new OpenMessage(wsFrame, containerId))
+      // case "logout" =>
+      //   queue ! new LogoutMessage(message)
 
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)

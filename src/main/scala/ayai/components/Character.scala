@@ -12,7 +12,10 @@ case class Character(val id: String, val name: String, val experience: Int, val 
 	implicit val formats = Serialization.formats(NoTypeHints)
 
   implicit def asJson() : JObject = {
-    ("id" -> id)
+    ("id" -> id) ~
+    ("name" -> name) ~
+    ("experience" -> experience) ~
+    ("level" -> level)
   }
 
   override def toString: String = {

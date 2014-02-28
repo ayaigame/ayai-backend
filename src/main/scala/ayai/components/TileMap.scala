@@ -54,10 +54,19 @@ class TileMap(val array : Array[Array[Tile]], var listOfTransport : List[Transpo
     position
   }
 
-  def onTileCollision(position: Position) : Boolean = {
+  def onTileCollision(position: Position, bounds : Bounds) : Boolean = {
+    val newPos = new Position(position.x + bounds.width, position.y+bounds.height)
+    val tile = getTileByPosition(newPos)
+    if(tile.isCollidable()) 
+      return true
+    if(getTileByPosition(position).isCollidable)
+      return true
+    if(getTileByPosition(new Position(position.x, position.y+bounds.height)).isCollidable)
+      return true
+    if(getTileByPosition(new Position(position.x+bounds.width, position.y)).isCollidable)
+      return true
+    return false
 
-    val tile = getTileByPosition(position)
-    tile.isCollidable()
   }
 
   /**
