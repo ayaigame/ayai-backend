@@ -5,7 +5,7 @@ import ayai.apps.Constants
 import ayai.networking._
 import ayai.components._
 import ayai.persistence._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, MapRequest, RoomWorld, GetRoomJson}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, MapRequest, RoomWorld, GetRoomJson, Refresh}
 import ayai.factories._
 
 /** Akka Imports **/
@@ -85,6 +85,7 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
       println(result1)
       actorSelection.actor ! new ConnectionWrite(result1)
     }
+    serializer ! Refresh
   }
 
   def broadcastMessage(message : String) {
