@@ -49,7 +49,7 @@ object EntityFactory {
           case Some(it: Item) => it
           case _ => null
         }
-        
+
         case _ => null
     })
     inventory.addItem(world.getEntityByTag("ITEMS1") match {
@@ -57,7 +57,7 @@ object EntityFactory {
           case Some(it: Item) => it
           case _ => null
         }
-        
+
         case _ => null
     })
     inventory.addItem(world.getEntityByTag("ITEMS2") match {
@@ -65,7 +65,7 @@ object EntityFactory {
           case Some(it: Item) => it
           case _ => null
         }
-        
+
         case _ => null
     })
     inventory.addItem(world.getEntityByTag("ITEMS1") match {
@@ -73,11 +73,11 @@ object EntityFactory {
           case Some(it: Item) => it
           case _ => null
         }
-        
+
         case _ => null
     })
     p.components += inventory
-    
+
     val equipment = new Equipment()
     equipment.equipWeapon1(inventory.getItem(1))
     p.components += equipment
@@ -113,7 +113,7 @@ object EntityFactory {
   item.components += (containable)
 
   world.getManager(classOf[GroupManager]).add(item,"ITEM")
-  
+
   GameLoop.map.addEntity(item.getId(),x,y)
   item
   }
@@ -138,7 +138,7 @@ object EntityFactory {
     override def toString() : String = "start_x: " + start_x + " toRoomFile: " + toRoomFile
   }
   case class JTilesets(image: String)
-  
+
   def loadRoomFromJson(roomId: Int, jsonFile: String): Entity = {
     implicit val formats = net.liftweb.json.DefaultFormats
     val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
@@ -167,7 +167,7 @@ object EntityFactory {
     for(i <- 0 until (width*height)) {
       for(bundle <- bundles) {
         if(bundle.data(i) != 0 ) {
-          if(bundle.name != "collision") 
+          if(bundle.name != "collision")
             arrayTile(i % width)(i / width).layers += new NormalLayer(bundle.data(i))
           else {
             arrayTile(i % width)(i / width).layers += new CollidableLayer(bundle.data(i))

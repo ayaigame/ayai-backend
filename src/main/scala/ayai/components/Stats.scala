@@ -24,7 +24,7 @@ class Stats(val stats: ArrayBuffer[Stat]) extends Component {
     stats.remove(stats.indexWhere((stat: Stat) => stat.attributeType == statName))
   }
 
-  override def toString() = {
+  override def toString = {
     "Stat: " + stats(0).attributeType + ", magnitude: " + stats(0).magnitude
   }
 }

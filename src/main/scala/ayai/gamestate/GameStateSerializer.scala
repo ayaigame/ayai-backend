@@ -24,9 +24,8 @@ case class CharacterResponse(json: String)  extends QueryResponse
 case class MapRequest(room: Entity)
 case object SomeData
 
-class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
+class GameStateSerializer(world: World) extends Actor {
   private val log = LoggerFactory.getLogger(getClass)
-
 
   //Returns a list of entities contained within a room.
   def getRoomEntities(roomId: Long): ArrayBuffer[Entity] = {
@@ -36,16 +35,16 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
   //Returns a character's belongings and surroundings.
   def getCharacterRadius(characterId: String) = {
     val characterEntity: Entity = (world.getEntityByTag("CHARACTER" + characterId)) match {
-      case Some(entity: Entity) => 
+      case Some(entity: Entity) =>
         entity
       case _ =>
         log.warn("11491e0: getEntityByTag failed to return anything")
         new Entity
     }
-    
+
     val room: Room = (characterEntity.getComponent(classOf[Room])) match {
-      case Some(r: Room) => 
-        r 
+      case Some(r: Room) =>
+        r
       case _ =>
         log.warn("b766a68: getComponent failed to return anything")
         new Room(-1)
@@ -57,14 +56,14 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
     for(otherEntity <- otherEntities) {
       if(characterEntity != otherEntity) {
         otherEntity.getComponent(classOf[Character]) match {
-          case(Some(a: Character)) => 
+          case(Some(a: Character)) =>
           entityJSONs += otherEntity
-          case _ => 
+          case _ =>
         }
       }
     }
-    
-    val jsonLift: JObject = 
+
+    val jsonLift: JObject =
       ("type" -> "update") ~
       ("you" -> ((characterEntity.getComponent(classOf[Character]),
         characterEntity.getComponent(classOf[Position]),
@@ -73,7 +72,7 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
         characterEntity.getComponent(classOf[Mana]),
         characterEntity.getComponent(classOf[Actionable])) match {
           case (Some(character: Character), Some(position: Position), Some(health: Health), Some(inventory: Inventory), Some(mana: Mana), Some(actionable: Actionable)) =>
-            ((character.asJson()) ~
+            ((character.asJson) ~
             (position.asJson) ~
             (health.asJson) ~
             (inventory.asJson) ~
@@ -83,14 +82,14 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
             log.warn("cec6af4: getComponent failed to return anything BLARG")
             JNothing
         })) ~
-       ("others" -> entityJSONs.map{ e => 
+       ("others" -> entityJSONs.map{ e =>
         (e.getComponent(classOf[Character]),
           e.getComponent(classOf[Position]),
           e.getComponent(classOf[Health]),
           e.getComponent(classOf[Mana]),
           e.getComponent(classOf[Actionable])) match {
           case (Some(character: Character), Some(position: Position), Some(health: Health), Some(mana: Mana), Some(actionable: Actionable)) =>
-            ((character.asJson()) ~
+            ((character.asJson) ~
             (position.asJson) ~
             (health.asJson) ~
             (mana.asJson) ~
@@ -121,14 +120,14 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
 
   def sendMapInfo(room: Entity ) = {
     val json = room.getComponent(classOf[TileMap]) match {
-      case (Some(tilemap: TileMap)) => 
+      case (Some(tilemap: TileMap)) =>
         ("type" -> "map") ~
         ("tilemap" -> tilemap.file) ~
         (tilemap.tilesets.asJson)
       case _ =>
         log.warn("eeec172: getComponent failed to return anything")
         JNothing
-    } 
+    }
 
     try {
       println(compact(render(json)))

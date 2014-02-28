@@ -41,7 +41,7 @@ class AuthorizationProcessor extends Actor {
       var token: String = ""
 
       transaction {
-      token = AyaiDB.validatePassword(username, password)
+        token = AyaiDB.validatePassword(username, password)
       }
  
       token match {

@@ -8,11 +8,11 @@ import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-case class Mana(var currentMana: Int, var maximumMana: Int) extends Component{
+case class Mana(var currentMana: Int, var maximumMana: Int) extends Component {
 implicit val formats = Serialization.formats(NoTypeHints)
-  
+
   def isAlive: Boolean = currentMana > 0
-  
+
   def addDamage(damage: Float) {
     currentMana -= damage.toInt
     if(currentMana < 0) {
@@ -25,7 +25,7 @@ implicit val formats = Serialization.formats(NoTypeHints)
   }
 
   implicit def asJson() : JObject = {
-    ("Mana" -> 
+    ("Mana" ->
       ("currMana" -> currentMana) ~
       ("maximumMana" -> maximumMana))
   }

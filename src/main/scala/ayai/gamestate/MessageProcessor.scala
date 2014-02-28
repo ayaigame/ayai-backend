@@ -1,7 +1,6 @@
-package ayai.networking
+package ayai.gamestate
 
 /** Ayai Imports **/
-import ayai.gamestate.{Effect, EffectType, RoomWorld}
 import ayai.actions._
 import ayai.components._
 import ayai.networking.chat._
@@ -44,16 +43,16 @@ class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String,
     message match {
       //Should take characterId: Long as a parameter instead of characterName
       //However can't do that until front end actually gives me the characterId
-      case AddNewCharacter(socketId: String, id: String, characterName: String, x: Int, y: Int) => {
-        val actor = actorSystem.actorSelection("user/SockoSender"+id)
+      case AddNewCharacter(userId: String, characterName: String, x: Int, y: Int) => {
+        val actor = actorSystem.actorSelection(s"user/SockoSender$userId")
         // CHANGE THIS SECTION WHEN DOING DATABASE WORK
-        EntityFactory.loadCharacter(world, socketId, id, "Ness", x, y, actor, actorSystem) //Should use characterId instead of characterName
+        EntityFactory.loadCharacter(world, userId, "Ness", x, y, actor, actorSystem) //Should use characterId instead of characterName
         sender ! Success
       }
 
-      case RemoveCharacter(id: String) => {
-        println("Removing character: " + id)
-        (world.getEntityByTag("CHARACTER" + socketMap(id))) match {
+      case RemoveCharacter(userId: String) => {
+        println(s"Removing character: $userId")
+        (world.getEntityByTag(s"CHARACTER$userId") match {
           case None =>
             System.out.println(s"Can't find character attached to socket $id.")
           case Some(character : Entity) =>
@@ -63,12 +62,10 @@ class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String,
         sender ! Success
       }
 
-      case MoveMessage(socketId: String, start: Boolean, direction: MoveDirection) => {
-        //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
-        val id: String = socketMap(socketId)
-        (world.getEntityByTag("CHARACTER"+id)) match {
+      case MoveMessage(userId: String, start: Boolean, direction: MoveDirection) => {
+        (world.getEntityByTag(s"CHARACTER$userId")) match {
           case None =>
-            println("Can't find character attached to id: " + id)
+            println(s"Can't find character attached to id: $userId")
           case Some(e: Entity) =>
               val oldMovement = (e.getComponent(classOf[Actionable])) match {
                 case Some(oldMove : Actionable) =>
@@ -76,20 +73,18 @@ class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String,
                   oldMove.action = direction
                 case _ =>
                   log.warn("a07270d: getComponent failed to return anything")
-
               }
         }
         sender ! Success
       }
 
        // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
-      case AttackMessage(socketId: String) => {
+      case AttackMessage(userId: String) => {
         //create a projectile
         println("Created Bullet")
-        val id: String = socketMap(socketId)
         val bulletId = (new UID()).toString
 
-        (world.getEntityByTag("CHARACTER"+id)) match {
+        (world.getEntityByTag(s"CHARACTER$userId")) match {
 
         case Some(initiator: Entity) =>
           val position = initiator.getComponent(classOf[Position])
@@ -122,29 +117,27 @@ class NetworkMessageProcessor(world: RoomWorld, socketMap: ConcurrentMap[String,
               p.components += (new Bounds(10, 10))
               p.components += (new Attack(initiator));
               p.components += (new Frame(10,0))
-              //p.components += (c)
               world.addEntity(p)
-              world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+              //world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
             case _ =>
               log.warn("424e244: getComponent failed to return anything")
-
           }
           case _ =>
             log.warn("8a87265: getComponent failed to return anything")
-        } 
+        }
         sender ! Success
       }
 
-      case ItemMessage(id: String, itemAction: ItemAction) => {
+      case ItemMessage(userId: String, itemAction: ItemAction) => {
         sender ! Success
       }
 
-      case OpenMessage(socketId: String, containerId : String) => {
+      case OpenMessage(userId: String, containerId : String) => {
         sender ! Success
       }
 
-      case SocketCharacterMap(socketId: String, id: String) => {
-        socketMap(socketId) = id
+      case SocketCharacterMap(socketId: String, userId: String) => {
+        context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(socketId, userId)
         sender ! Success
       }
 

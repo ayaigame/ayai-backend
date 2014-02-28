@@ -36,7 +36,6 @@ object GameLoop {
 
     var worlds = HashMap[String, RoomWorld]()
     var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
-    val userRoomMap: ConcurrentMap[String, RoomWorld] = TrieMap[String, World]()
 
     val networkSystem = ActorSystem("NetworkSystem")
     val nmQueue = networkSystem.actorOf(Props[NetworkMessageQueue], name="NMQueue")
@@ -46,9 +45,9 @@ object GameLoop {
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
 
-    for((file, index) <- rooms.zipWithIndex) 
+    for((file, index) <- rooms.zipWithIndex)
       worlds.add(s"$index", worldFactory.createWorld(s"room$index", s"$file"))
-    
+
     val receptionist = SockoServer(networkSystem)
     receptionist.run(Constants.SERVER_PORT)
 
@@ -61,9 +60,9 @@ object GameLoop {
 
       val processedMessages = new ArrayBuffer[Future[Any]]
       result.messages.foreach { message =>
-        processedMessages += nmProcessor ? new ProcessMessage(message)
+        processedMessages += world.nmProcessor ? new ProcessMessage(message)
       }
-      
+
       Await.result(Future.sequence(processedMessages), 1 seconds)
 
       for((name, world) <- worlds)

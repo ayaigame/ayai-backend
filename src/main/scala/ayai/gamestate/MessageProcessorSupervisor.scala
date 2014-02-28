@@ -1,12 +1,9 @@
-package ayai.networking
+package ayai.gamestate
 
 /**
- * ayai.networking.NetworkMessageProcessorSupervisor
- * Supervising actor for the NetworkMessageProcessor
+ * ayai.gamestate.MessageProcessorSupervisor
+ * Supervising actor for the MessageProcessor
  */
-
-/** Ayai Imports **/
-import ayai.gamestate.RoomWorld
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, Props, OneForOneStrategy}

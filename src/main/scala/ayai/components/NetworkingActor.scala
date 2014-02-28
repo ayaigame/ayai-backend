@@ -8,6 +8,5 @@ import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
 
-class NetworkingActor(val actor: ActorSelection) extends Component {
+class NetworkingActor(val actor: ActorSelection) extends Component
 
-}

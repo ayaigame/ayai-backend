@@ -37,7 +37,7 @@ class MovementSystem() extends EntityProcessingSystem(include=List(classOf[Posit
               log.warn("f9def84: MoveDirection doesn't match anything")
           }
         }
-        
+
         //now check to see if movement has created gone past the map (if so put it at edge)
         //TODO: Replace with room entity
         //val roomEntity: Entity = roomHash(room.id) 

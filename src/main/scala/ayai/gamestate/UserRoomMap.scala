@@ -1,18 +1,18 @@
+package ayai.gamestate
 
 import crane.Entity
 
-case class AddAssociation(id: String, world: World)
-case class RemoveAssociation(id: String)
+case class AddAssociation(id: String, world: RoomWorld)
+case class RemoveUserRoom(id: String)
 case class GetWorld(id: String)
-case class SwapWorld(id: String, to: World)
+case class SwapWorld(id: String, to: RoomWorld)
 
 class UserRoomMap extends Actor {
-  val userRoomMap: HashMap[String, RoomWorld] = HashMap[String, World]()
-
+  val userRoomMap: HashMap[String, RoomWorld] = HashMap[String, RoomWorld]()
 
   def receive = {
     case AddAssociation(id: String, world: RoomWorld) => userRoomMap(id) = world
-    case RemoveAssociation(id: String) => userRoomMap -= id
+    case RemoveUserRoom(id: String) => userRoomMap -= id
     case GetWorld(id: String) => sender ! userRoomMap(id)
     case SwapWorld(id: String, to: RoomWorld) =>
       userRoomMap(id).getEntityByTag(id) match {

@@ -8,6 +8,6 @@ import crane.Component
 * @param delta : is the time that the user initially died at
 */
 
-class Respawn(val time : Int = 1500, val delta : Long) extends Component {
-  def isReady(deltaTime : Long) : Boolean = deltaTime - delta > time
+class Respawn(val time: Int = 1500, val delta: Long) extends Component {
+  def isReady(deltaTime: Long): Boolean = deltaTime - delta > time
 }

@@ -13,24 +13,26 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 /** External Imports **/
 import java.net.Socket
 
-case class ProcessMessage(message: NetworkMessage)
+sealed trait ProcessorMessage extends Message
+sealed trait EventMessage extends Message
+sealed trait NetworkMessage extends Message
+
+case class ProcessMessage(message: ProcessorMessage)
 case object FlushMessages
-case class QueuedMessages(messages: Array[NetworkMessage])
-case class AddInterpretedMessage(message: NetworkMessage)
+case class QueuedMessages(messages: Array[ProcessorMessage])
+case class AddInterpretedMessage(message: Message)
 case class InterpretMessage(message: WebSocketFrameEvent)
 case class ConnectionWrite(json: String)
 
-sealed trait NetworkMessage
+case class JSONMessage(message: String) extends ProcessorMessage
+case class AddNewCharacter(socketId: String, id: String, characterName: String, x: Int, y: Int) extends ProcessorMessage
+case class RemoveCharacter(id: String) extends ProcessorMessage
+case class MoveMessage(socketId: String, start: Boolean, direction: MoveDirection) extends ProcessorMessage
+case class ItemMessage(id : String, itemAction : ItemAction) extends ProcessorMessage
+case class AttackMessage(socketId: String) extends ProcessorMessage
+case class SocketCharacterMap(socketId: String, id: String) extends ProcessorMessage
 
-case class JSONMessage(message: String) extends NetworkMessage
-case class AddNewCharacter(socketId: String, id: String, characterName: String, x: Int, y: Int) extends NetworkMessage
-case class RemoveCharacter(id: String) extends NetworkMessage
-case class MoveMessage(socketId: String, start: Boolean, direction: MoveDirection) extends NetworkMessage
-case class ItemMessage(id : String, itemAction : ItemAction) extends NetworkMessage
-case class AttackMessage(socketId: String) extends NetworkMessage
-case class SocketCharacterMap(socketId: String, id: String) extends NetworkMessage
 case class PublicChatMessage(message: String, sender: String) extends NetworkMessage
-
 case class LoginPost(request: HttpRequestEvent) extends NetworkMessage
 case class RegisterPost(request: HttpRequestEvent) extends NetworkMessage
 case class RecoveryPost(request: HttpRequestEvent) extends NetworkMessage

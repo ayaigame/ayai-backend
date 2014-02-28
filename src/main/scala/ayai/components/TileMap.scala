@@ -12,16 +12,16 @@ import scala.math._
 //128 x 128 is only default
 class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[TransportInfo], var tilesets: Tilesets) extends Component {
   var file: String = ""
-  var width: Int = _
-  var height: Int = _
+  var width: Int = 128
+  var height: Int = 128
   var tileSize: Int = 32
-  
+
   //getMaximumPosition - get the maximum position value for x
   def maximumWidth: Int = array.length * tileSize
 
   //getMaximumHeight - get the maximum position value for y
   def maximumHeight: Int = array(0).length * tileSize
-  
+
   def getTileByPosition(position: Position): Tile = array(valueToTile(position.x))(valueToTile(position.y))
 
   // Get a tile by a x or y value from the array (example: 32 tilesize value, 65 (position) / 32) = 2 tile
@@ -32,7 +32,7 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
       position.x = 0
     else if(min(position.x, maximumWidth - tileSize) >= maximumWidth-tileSize)
       position.x = maximumWidth - tileSize
-    if(max(position.y, 0) <= 0) 
+    if(max(position.y, 0) <= 0)
       position.y = 0
     else if(min(position.y, maximumWidth) >= maximumHeight - tileSize)
       position.y = maximumHeight - tileSize
@@ -46,9 +46,9 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
       return true
     if(getTileByPosition(position).isCollidable)
       return true
-    if(getTileByPosition(new Position(position.x, position.y+bounds.height)).isCollidable)
+    if(getTileByPosition(new Position(position.x, position.y + bounds.height)).isCollidable)
       return true
-    if(getTileByPosition(new Position(position.x+bounds.width, position.y)).isCollidable)
+    if(getTileByPosition(new Position(position.x + bounds.width, position.y)).isCollidable)
       return true
     return false
   }

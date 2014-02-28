@@ -1,4 +1,4 @@
-package ayai.networking
+package ayai.gamestate
 
 /** Akka Imports **/
 import akka.actor.Actor
@@ -7,7 +7,7 @@ import akka.actor.Actor
 import scala.collection.mutable.ArrayBuffer
 
 class NetworkMessageQueue extends Actor{
-  var messages : ArrayBuffer[NetworkMessage] = new ArrayBuffer[NetworkMessage]()
+  var messages: ArrayBuffer[NetworkMessage] = new ArrayBuffer[NetworkMessage]()
 
   /**
   * Returns all the messages in the queue to the sender and clears out the queue.
