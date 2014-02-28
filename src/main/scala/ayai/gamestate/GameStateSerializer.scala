@@ -70,14 +70,20 @@ class GameStateSerializer(world: World, loadRadius: Int) extends Actor {
         characterEntity.getComponent(classOf[Health]),
         characterEntity.getComponent(classOf[Inventory]),
         characterEntity.getComponent(classOf[Mana]),
-        characterEntity.getComponent(classOf[Actionable])) match {
-          case (Some(character : Character), Some(position : Position), Some(health : Health), Some(inventory : Inventory), Some(mana : Mana), Some(actionable : Actionable)) =>
+        characterEntity.getComponent(classOf[Actionable]),
+        characterEntity.getComponent(classOf[QuestBag]),
+        characterEntity.getComponent(classOf[Equipment])) match {
+          case (Some(character : Character), Some(position : Position), Some(health : Health),
+           Some(inventory : Inventory), Some(mana : Mana), Some(actionable : Actionable),
+           Some(questbag: QuestBag), Some(equipment: Equipment)) =>
             ((character.asJson()) ~
             (position.asJson) ~
             (health.asJson) ~
             (inventory.asJson) ~
             (mana.asJson) ~
-            (actionable.action.asJson))
+            (actionable.action.asJson) ~
+            (questbag.asJson) ~
+            (equipment.asJson))
           case _ =>
             log.warn("cec6af4: getComponent failed to return anything BLARG")
             JNothing

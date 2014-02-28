@@ -8,8 +8,8 @@ import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
 
-class Item(name: String,value: Int, weight: Double, itemType: ItemType) extends Component{
-  var image : String = _
+class Item(name: String,value: Int, weight: Double, val itemType: ItemType) extends Component{
+  var image : String = ""
   def asJson : JObject = {
   	("name" -> name) ~
     ("value" -> value) ~

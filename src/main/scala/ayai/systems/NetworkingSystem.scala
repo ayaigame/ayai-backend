@@ -82,4 +82,9 @@ class NetworkingSystem(networkSystem : ActorSystem, serializer : ActorRef, roomH
       actorSelection.actor ! new ConnectionWrite(result1)
     }
   }
+
+  def broadcastMessage(message : String) {
+    val actorSelection = networkSystem.actorSelection("user/SockoSender*")
+    actorSelection ! new ConnectionWrite(message)
+  }
 }

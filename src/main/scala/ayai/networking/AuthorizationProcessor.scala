@@ -16,7 +16,6 @@ import org.squeryl.PrimitiveTypeMode._
 import com.typesafe.config.ConfigFactory
 
 class AuthorizationProcessor() extends Actor {
-
   Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
       Session.create(
@@ -41,9 +40,9 @@ class AuthorizationProcessor() extends Actor {
       var token: String = ""
 
       transaction {
-      token = AyaiDB.validatePassword(username, password)
+        token = AyaiDB.validatePassword(username, password)
       }
- 
+
       token match {
       case "" =>
         request.response.write(HttpResponseStatus.UNAUTHORIZED)
@@ -65,6 +64,14 @@ class AuthorizationProcessor() extends Actor {
       AyaiDB.registerUser(username, password)
     }
     request.response.write(HttpResponseStatus.OK, "GOOD")
+
+  case CharactersPost(request: HttpRequestEvent) =>
+    val content:String = request.request.content.toString
+    var accountId: Long = -1
+    transaction {
+      accountId = AyaiDB.tokens.where(token => token.token === content).single.account_id
+    }
+    CharacterTable.characterList(request, accountId)
 
   case RecoveryPost(request: HttpRequestEvent) =>
     println("RECOVERY")

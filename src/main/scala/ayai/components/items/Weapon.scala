@@ -21,6 +21,4 @@ case class Weapon(
       ("damageType" -> damageType) ~
       ("type" -> itemtype)
   }
-
-  
 }

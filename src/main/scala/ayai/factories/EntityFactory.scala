@@ -3,7 +3,7 @@ package ayai.factories
 /** Ayai Imports **/
 import ayai.components._
 import ayai.maps._
-import ayai.actions.MoveDirection
+import ayai.actions._
 import ayai.persistence.AyaiDB
 import ayai.apps.Constants
 
@@ -37,62 +37,96 @@ object EntityFactory {
     p.components += new Velocity(3,4)
     p.components += new Bounds(32, 32)
     p.components += new Velocity(4, 4)
-    p.components += new Actionable(false, new MoveDirection(0,0))
+    p.components += new Actionable(false, DownDirection)
     p.components += new Health(100,100)
     p.components += new NetworkingActor(actor)
     p.components += new Mana(200,200)
     p.components += new Room(characterRow.room_id)
     p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here
+
+    val questbag = new QuestBag()
+    questbag.addQuest(world.getEntityByTag("QUEST1") match {
+      case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
+        case Some(quest: Quest) => quest 
+        case _ => null
+      }
+      case _ => null
+    })
+    questbag.addQuest(world.getEntityByTag("QUEST2") match {
+      case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
+        case Some(quest: Quest) => quest 
+        case _ => null
+      }
+      case _ => null
+    })
+
+    p.components += questbag
+
     //Should add calculate and add stats
-    val inventory = new ArrayBuffer[Item]()
-    
-    p.components += new Inventory(inventory)
-    p.getComponent(classOf[Inventory]) match {
-      case (i : Inventory) =>
-      i.addItem(world.getEntityByTag("ITEM1") match {
+    val inventory = new Inventory()
+    inventory.addItem(world.getEntityByTag("ITEMS0") match {
         case Some(e : Entity) => e.getComponent(classOf[Item]) match {
           case Some(it : Item) => it
           case _ => null
         }
-        
+
         case _ => null
-      })
-      i.addItem(world.getEntityByTag("ITEM0") match {
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS1") match {
         case Some(e : Entity) => e.getComponent(classOf[Item]) match {
           case Some(it : Item) => it
-          case _ => null 
+          case _ => null
         }
-        
+
         case _ => null
-      })
-      i.addItem(world.getEntityByTag("ITEM2") match {
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS2") match {
         case Some(e : Entity) => e.getComponent(classOf[Item]) match {
           case Some(it : Item) => it
-          case _ => null 
+          case _ => null
         }
-        
+
         case _ => null
-      })
-      case _ =>
-    }
-    
-    p.components += new Equipment()
+    })
+    inventory.addItem(world.getEntityByTag("ITEMS1") match {
+        case Some(e : Entity) => e.getComponent(classOf[Item]) match {
+          case Some(it : Item) => it
+          case _ => null
+        }
+
+        case _ => null
+    })
+    p.components += inventory
+
+    val equipment = new Equipment()
+    equipment.equipWeapon1(inventory.getItem(1))
+    p.components += equipment
 
     world.addEntity(p)
     world.groups("CHARACTERS") += p
-    world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+    world.groups("ROOM"+characterRow.room_id) += p
 
     //I think that there should probably be a lookup based on the character's room here.
-    val tilemap: String = "/assets/maps/map3.json"
-    val tileset: String = "/assets/tiles/sd33.png"
+    val roomInfo = world.getEntityByTag("ROOM"+characterRow.room_id) match {
+      case Some(e: Entity) =>
+        e
+      case _ => //load default here (too bored to implement now) 
+        null
+    }
 
+    val tilemap = roomInfo.getComponent(classOf[TileMap]) match {
+      case Some(tileMap: TileMap) => tileMap
+      case _ => null 
+    }
+    
+    
     val json = (
       ("type" -> "id") ~
       ("id" -> entityId) ~
       ("x" -> x) ~
       ("y" -> y) ~
-      ("tilemap" -> tilemap) ~
-      ("tileset" -> tileset)
+      ("tilemap" -> tilemap.file) ~
+      (tilemap.tilesets.asJson)
     )
 
     webSocket.writeText(compact(render(json)))
@@ -108,7 +142,7 @@ object EntityFactory {
   item.components += (containable)
 
   world.getManager(classOf[GroupManager]).add(item,"ITEM")
-  
+
   GameLoop.map.addEntity(item.getId(),x,y)
   item
   }
@@ -135,7 +169,7 @@ object EntityFactory {
     }
   }
   case class JTilesets(image : String)
-  
+
   def loadRoomFromJson(world : World, roomId : Int, jsonFile : String) : Entity = {
   implicit val formats = net.liftweb.json.DefaultFormats
   val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
@@ -167,7 +201,7 @@ object EntityFactory {
   for(i <- 0 until (width*height)) {
     for(bundle <- bundles) {
     if(bundle.data(i) != 0 ) {
-      if(bundle.name != "collision") 
+      if(bundle.name != "collision")
       arrayTile(i%width)(i/width).layers += new NormalLayer(bundle.data(i))
       else {
       arrayTile(i%width)(i/width).layers += new CollidableLayer(bundle.data(i))

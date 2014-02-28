@@ -23,7 +23,7 @@
 			"equipable": true,
 			"itemType": "weapon",
 			"range": 3,
-			"damage": 3,
+			"damage": 20,
 			"damageType": "physical",
 			"value": 10,
 			"weight": 20,
