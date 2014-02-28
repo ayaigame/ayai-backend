@@ -29,15 +29,15 @@ class RoomChangingSystem() extends EntityProcessingSystem(include=List(classOf[R
         // TODO: Change Rooms
         //make sure that room exists
         //take user out of room
-        world.groups("ROOM"+roomComponent.id) -= e
-        e.removeComponent(classOf[Room])
-        e.components += new Room(transportEvent.toRoom.id)
-        world.groups("ROOM"+transportEvent.toRoom.id) += e
-        position.x = transportEvent.startPosition.x
-        position.y = transportEvent.startPosition.y
-        //take user out of their rooms
-        e.removeComponent(classOf[Transport])
-        e.components += new MapChange(transportEvent.toRoom.id)
+    //    world.groups("ROOM"+roomComponent.id) -= e
+    //    e.removeComponent(classOf[Room])
+    //    e.components += new Room(transportEvent.toRoom.id)
+    //    world.groups("ROOM"+transportEvent.toRoom.id) += e
+    //    position.x = transportEvent.startPosition.x
+    //    position.y = transportEvent.startPosition.y
+    //    //take user out of their rooms
+    //    e.removeComponent(classOf[Transport])
+    //    e.components += new MapChange(transportEvent.toRoom.id)
       case _ =>
         log.warn("052ef02: getComponent failed to return anything")
     }

@@ -60,9 +60,7 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
     }
 
     case WebSocketFrame(wsFrame) => {
-        println("HIHI")
         interpreter ! new InterpretMessage(wsFrame)
-        println("BYEBYE")
     }
   })
 

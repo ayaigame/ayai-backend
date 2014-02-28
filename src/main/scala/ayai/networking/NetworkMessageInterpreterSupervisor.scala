@@ -26,7 +26,6 @@ class NetworkMessageInterpreterSupervisor extends Actor {
 
   def receive = {
     case message: InterpretMessage =>
-      println("WHATS UP")
       router forward message
     case _ =>
       println("Error: in interpreter supervisor")

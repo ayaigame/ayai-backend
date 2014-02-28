@@ -79,8 +79,6 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new JSONMessage("echo"))
       case "move" =>
         //TODO: Add exceptions and maybe parse shit a bit more intelligently
-        println("MOVEMOVEMOVE")
-        println(world)
         val start: Boolean = compact(render(rootJSON \ "start")).toBoolean
         var direction: MoveDirection = new MoveDirection(0,0)
         if(start) {
