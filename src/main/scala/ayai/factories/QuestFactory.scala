@@ -29,7 +29,7 @@ object QuestFactory {
         questData.title,
         questData.description,
         questData.recommendLevel,
-        questData.objective)
+        questData.objectives)
 
       entityQuest.components += questComponent
 
