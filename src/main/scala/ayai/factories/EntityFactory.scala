@@ -84,8 +84,8 @@ object EntityFactory {
     p.components += equipment
 
     world.addEntity(p)
-    world.groups("CHARACTERS") += p
-    world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+    //world.groups("CHARACTERS") += p
+    //world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
 
     //I think that there should probably be a lookup based on the character's room here.
     val tilemap: String = "/assets/maps/map3.json"

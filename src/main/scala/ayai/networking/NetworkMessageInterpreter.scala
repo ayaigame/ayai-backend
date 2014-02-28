@@ -57,12 +57,12 @@ class NetworkMessageInterpreter extends Actor {
 
     val userId = msgType match {
       case "init" => ""
-      case _ => 
+      case _ =>
         lookUpUserBySocketId(wsFrame.webSocketId)
     }
     val world = msgType match {
-      case "init" => ""
-      case _ => 
+      case "init" => "room0"
+      case _ =>
         lookUpWorldByUserId(userId)
     }
 
@@ -79,6 +79,8 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new JSONMessage("echo"))
       case "move" =>
         //TODO: Add exceptions and maybe parse shit a bit more intelligently
+        println("MOVEMOVEMOVE")
+        println(world)
         val start: Boolean = compact(render(rootJSON \ "start")).toBoolean
         var direction: MoveDirection = new MoveDirection(0,0)
         if(start) {

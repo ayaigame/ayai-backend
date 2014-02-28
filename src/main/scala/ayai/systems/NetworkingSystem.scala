@@ -48,7 +48,6 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
     val name = world.asInstanceOf[RoomWorld].name
     val serializer = networkSystem.actorSelection(s"user/Serializer$name")
 
-
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[NetworkingActor])
 
     for(characterEntity <- entities) {
@@ -83,6 +82,7 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
             case Some(na : NetworkingActor) => na
             case _ => null
       }
+      println(result1)
       actorSelection.actor ! new ConnectionWrite(result1)
     }
   }

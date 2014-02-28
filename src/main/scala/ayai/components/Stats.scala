@@ -25,6 +25,7 @@ class Stats(val stats: ArrayBuffer[Stat]) extends Component {
   }
 
   override def toString = {
-    "Stat: " + stats(0).attributeType + ", magnitude: " + stats(0).magnitude
+      "STAT"
+//    "Stat: " + stats(0).attributeType + ", magnitude: " + stats(0).magnitude
   }
 }

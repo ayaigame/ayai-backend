@@ -17,12 +17,14 @@ class MessageQueue extends Actor{
   * Returns all the messages in the queue to the sender and clears out the queue.
   **/
   def flushMessages(world: String) = {
+    println(messages)
     var currentMessages: Array[Message] = messages(world).toArray
     messages(world) = new ArrayBuffer[Message]()
     sender ! new QueuedMessages(currentMessages)
   }
 
   def addInterpretedMessage(world: String, message: Message) = {
+    println("Adding messages")
     messages(world) += message
   }
 

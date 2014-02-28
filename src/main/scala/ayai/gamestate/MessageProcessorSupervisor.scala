@@ -34,10 +34,10 @@ class MessageProcessorSupervisor(world: RoomWorld) extends Actor {
                 name = s"processorrouter$name")
 
   def receive = {
-    case message: Message =>
+    case message: ProcessMessage =>
       router forward message 
     case _ =>
-      println("Error: in interpreter supervisor")
+      println("Error: in procesor supervisor")
   }
 
 }

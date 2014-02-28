@@ -55,6 +55,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       //Should take characterId: Long as a parameter instead of characterName
       //However can't do that until front end actually gives me the characterId
       case AddNewCharacter(userId: String, characterName: String, x: Int, y: Int) => {
+        println("CREATING CHARACTER")
         val actor = actorSystem.actorSelection(s"user/SockoSender$userId")
         // CHANGE THIS SECTION WHEN DOING DATABASE WORK
         EntityFactory.loadCharacter(world, userId, "Ness", x, y, actor, actorSystem) //Should use characterId instead of characterName
@@ -66,7 +67,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         val future = context.system.actorSelection("user/SocketUserMap") ? GetUserId(socketId)
         val userId = Await.result(future, timeout.duration).asInstanceOf[String]
         println(s"Removing character: $userId")
-        world.getEntityByTag(s"CHARACTER$userId") match {
+        world.getEntityByTag(s"$userId") match {
           case None =>
             System.out.println(s"Can't find character attached to socket $socketId.")
           case Some(character : Entity) =>
@@ -77,7 +78,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       }
 
       case MoveMessage(userId: String, start: Boolean, direction: MoveDirection) => {
-        (world.getEntityByTag(s"CHARACTER$userId")) match {
+        (world.getEntityByTag(s"$userId")) match {
           case None =>
             println(s"Can't find character attached to id: $userId")
           case Some(e: Entity) =>
@@ -98,7 +99,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         println("Created Bullet")
         val bulletId = (new UID()).toString
 
-        (world.getEntityByTag(s"CHARACTER$userId")) match {
+        (world.getEntityByTag(s"$userId")) match {
 
         case Some(initiator: Entity) =>
           val position = initiator.getComponent(classOf[Position])
@@ -176,11 +177,13 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       }
       case _ => println("Error from MessageProcessor.")
         sender ! Failure
-    } 
+    }
   }
 
   def receive = {
-    case ProcessMessage(message) => processMessage(message)
+    case ProcessMessage(message) => 
+      println(message)
+      processMessage(message)
     case _ => println("Error: from interpreter.")
       sender ! Failure
   }

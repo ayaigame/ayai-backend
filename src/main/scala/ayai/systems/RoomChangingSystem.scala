@@ -26,6 +26,7 @@ class RoomChangingSystem() extends EntityProcessingSystem(include=List(classOf[R
       e.getComponent(classOf[Room]),
       e.getComponent(classOf[Position])) match {
       case(Some(transportEvent: Transport), Some(roomComponent: Room), Some(position: Position)) =>
+        // TODO: Change Rooms
         //make sure that room exists
         //take user out of room
         world.groups("ROOM"+roomComponent.id) -= e
