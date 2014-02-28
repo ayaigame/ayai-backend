@@ -93,8 +93,9 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         val position = initiator.getComponent(classOf[Position])
         val movable = initiator.getComponent(classOf[Actionable])
         val character = initiator.getComponent(classOf[Character])
-        (position, movable, character) match {
-          case(Some(pos: Position), Some(a : Actionable), Some(c : Character)) =>
+        val room = initiator.getComponent(classOf[Room])
+        (position, movable, character, room) match {
+          case(Some(pos: Position), Some(a : Actionable), Some(c : Character), Some(r : Room)) =>
             val m = a.action match {
               case (move : MoveDirection) => move
               case _ =>
@@ -133,7 +134,7 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
             p.components += (new Frame(10,0))
             //p.components += (c)
             world.addEntity(p)
-            world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
+            world.groups("ROOM"+r.id) += p
           case _ =>
             log.warn("424e244: getComponent failed to return anything")
 
