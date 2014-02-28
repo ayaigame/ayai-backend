@@ -20,7 +20,7 @@ class WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(NetworkingSystem(networkSystem))
     world.addSystem(CollisionSystem(networkSystem))
     val serializer = networkSystem.actorOf(Props(GameStateSerializer(world)), s"Serializer$name")
-    val nmProcessor = networkSystem.actorOf(Props(MessageProcessorSupervisor(world)), name="MProcessor$name")
+    val nmProcessor = networkSystem.actorOf(Props(MessageProcessorSupervisor(world)), name=s"MProcessor$name")
 
     ItemFactory.bootup(world)
     ClassFactory.bootup(world)

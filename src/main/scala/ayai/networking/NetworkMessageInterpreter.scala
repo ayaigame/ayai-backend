@@ -28,6 +28,8 @@ class NetworkMessageInterpreter extends Actor {
   val queue = context.system.actorSelection("user/MQueue")
   val socketUserMap = context.system.actorSelection("user/SocketUserMap")
   val userRoomMap = context.system.actorSelection("user/UserRoomMap")
+  // TODO: We need a room lookup that is better than this 
+  val roomList = context.system.actorSelection("user/RoomList")
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
@@ -36,9 +38,16 @@ class NetworkMessageInterpreter extends Actor {
     Await.result(future, timeout.duration).asInstanceOf[String]
   }
 
-  def lookUpWorldByUserId(userId: String): String ={
+  def lookUpWorldByUserId(userId: String): String = {
     val future = userRoomMap ? GetWorld(userId)
-    Await.result(future, timeout.duration).asInstanceOf[String]
+    Await.result(future, timeout.duration).asInstanceOf[RoomWorld].name
+  }
+
+  def lookUpWorldByName(name: String): RoomWorld = {
+    val future = roomList ? GetWorldByName(name)
+    Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]] match {
+      case Some(room: RoomWorld) => room
+    }
   }
 
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
@@ -48,11 +57,13 @@ class NetworkMessageInterpreter extends Actor {
 
     val userId = msgType match {
       case "init" => ""
-      case _ => lookUpUserBySocketId(wsFrame.webSocketId)
+      case _ => 
+        lookUpUserBySocketId(wsFrame.webSocketId)
     }
     val world = msgType match {
       case "init" => ""
-      case _ => lookUpWorldByUserId(userId)
+      case _ => 
+        lookUpWorldByUserId(userId)
     }
 
     msgType match {
@@ -60,7 +71,9 @@ class NetworkMessageInterpreter extends Actor {
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
 
-        queue ! new AddInterpretedMessage(world, new SocketCharacterMap(wsFrame.webSocketId, id))
+        context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(wsFrame.webSocketId, id)
+        context.system.actorSelection("user/UserRoomMap") ! AddAssociation(id, lookUpWorldByName("room0"))
+
         queue ! new AddInterpretedMessage(world, new AddNewCharacter(id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
       case "echo" =>
         queue ! new AddInterpretedMessage(world, new JSONMessage("echo"))

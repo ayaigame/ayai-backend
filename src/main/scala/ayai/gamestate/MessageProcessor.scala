@@ -62,6 +62,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       }
 
       case RemoveCharacter(socketId: String) => {
+        println("trying a get?")
         val future = context.system.actorSelection("user/SocketUserMap") ? GetUserId(socketId)
         val userId = Await.result(future, timeout.duration).asInstanceOf[String]
         println(s"Removing character: $userId")
@@ -150,7 +151,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       }
 
       case SocketCharacterMap(socketId: String, userId: String) => {
-        context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(socketId, userId)
+        println("ADD1")
+        //context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(socketId, userId)
         sender ! Success
       }
 

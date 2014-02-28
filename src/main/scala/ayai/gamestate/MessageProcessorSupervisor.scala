@@ -10,7 +10,7 @@ import ayai.networking._
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, Props, OneForOneStrategy}
 import akka.actor.SupervisorStrategy.Escalate
-import akka.routing.FromConfig
+import akka.routing.{FromConfig, RoundRobinRouter}
 
 /** External Imports **/
 import scala.concurrent.duration._
@@ -28,8 +28,10 @@ class MessageProcessorSupervisor(world: RoomWorld) extends Actor {
     case _: Exception => Escalate
   }
 
-val router = context.system.actorOf(Props(
-  MessageProcessor(world)).withRouter(FromConfig.withSupervisorStrategy(escalator)), name = "processorrouter")
+  val name = world.name
+  val router = context.system.actorOf(Props(
+                MessageProcessor(world)).withRouter(RoundRobinRouter(nrOfInstances = 3)),
+                name = s"processorrouter$name")
 
   def receive = {
     case message: Message =>

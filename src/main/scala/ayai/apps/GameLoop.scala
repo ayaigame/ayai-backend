@@ -4,7 +4,8 @@ package ayai.apps
 import ayai.networking._
 import ayai.components._
 import ayai.persistence._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest, RoomWorld, MessageQueue, MessageProcessor}
+import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest, RoomWorld, MessageQueue, MessageProcessor,
+SocketUserMap, UserRoomMap, RoomList, AddWorld}
 import ayai.factories._
 
 /** Akka Imports **/
@@ -41,12 +42,18 @@ object GameLoop {
     val mQueue = networkSystem.actorOf(Props[MessageQueue], name="MQueue")
     val nmInterpreter = networkSystem.actorOf(Props[NetworkMessageInterpreterSupervisor], name="NMInterpreter")
     val aProcessor = networkSystem.actorOf(Props[AuthorizationProcessor], name="AProcessor")
+    val socketUserMap = networkSystem.actorOf(Props[SocketUserMap], name="SocketUserMap")
+    val userRoomMap = networkSystem.actorOf(Props[UserRoomMap], name="UserRoomMap")
+    val roomList = networkSystem.actorOf(Props[RoomList], name="RoomList")
 
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
 
     for((file, index) <- rooms.zipWithIndex)
-      worlds.add(s"$index", worldFactory.createWorld(s"room$index", s"$file"))
+      worlds(s"$index") = worldFactory.createWorld(s"room$index", s"$file")
+
+    for((name, world) <- worlds)
+      roomList ! AddWorld(world)
 
     val receptionist = SockoServer(networkSystem)
     receptionist.run(Constants.SERVER_PORT)
@@ -59,7 +66,7 @@ object GameLoop {
       for((name, world) <- worlds) {
         val future = mQueue ? FlushMessages(name)
         val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
-        val mProcessor = networkSystem.actorSelection(s"MProcessor$name")
+        val mProcessor = networkSystem.actorSelection(s"user/MProcessor$name")
 
         result.messages.foreach { message =>
           processedMessages += mProcessor ? new ProcessMessage(message)

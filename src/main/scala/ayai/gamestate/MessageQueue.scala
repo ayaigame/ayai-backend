@@ -7,10 +7,11 @@ import ayai.networking._
 import akka.actor.Actor
 
 /** External Imports **/
-import scala.collection.mutable.{ArrayBuffer, HashMap}
+import scala.collection.mutable.{ArrayBuffer, HashMap, Map=>MMap}
 
 class MessageQueue extends Actor{
-  var messages: HashMap[String, ArrayBuffer[Message]] = new HashMap[String, ArrayBuffer[Message]]()
+  var messages: MMap[String, ArrayBuffer[Message]] = new HashMap[String,
+  ArrayBuffer[Message]]().withDefaultValue(new ArrayBuffer[Message]())
 
   /**
   * Returns all the messages in the queue to the sender and clears out the queue.

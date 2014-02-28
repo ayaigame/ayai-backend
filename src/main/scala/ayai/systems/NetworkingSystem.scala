@@ -43,10 +43,11 @@ object NetworkingSystem {
 class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) {
   private val log = LoggerFactory.getLogger(getClass)
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
-  val name = world.asInstanceOf[RoomWorld].name
-  val serializer = networkSystem.actorSelection(s"Serializer$name")
 
   override def processTime(delta: Int) {
+    val name = world.asInstanceOf[RoomWorld].name
+    val serializer = networkSystem.actorSelection(s"user/Serializer$name")
+
 
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[NetworkingActor])
 

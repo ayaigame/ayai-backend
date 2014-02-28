@@ -21,9 +21,9 @@ object SockoServer {
 }
 
 class SockoServer(actorSystem: ActorSystem) extends Logger {
-  val authorization = actorSystem.actorSelection("AProcessor")
-  val interpreter = actorSystem.actorSelection("NMInterpreter")
-  val queue = actorSystem.actorSelection("NMQueue")
+  val authorization = actorSystem.actorSelection("user/AProcessor")
+  val interpreter = actorSystem.actorSelection("user/NMInterpreter")
+  val queue = actorSystem.actorSelection("user/Queue")
 
   val routes = Routes({
     case HttpRequest(httpRequest) => httpRequest match {
@@ -60,7 +60,9 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
     }
 
     case WebSocketFrame(wsFrame) => {
+        println("HIHI")
         interpreter ! new InterpretMessage(wsFrame)
+        println("BYEBYE")
     }
   })
 

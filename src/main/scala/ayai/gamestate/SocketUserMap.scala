@@ -14,9 +14,11 @@ class SocketUserMap extends Actor {
   val socketUserMap: HashMap[String, String] = HashMap[String, String]()
 
   def receive = {
-    case AddSocketUser(socketId: String, userId: String) => socketUserMap(socketId) = userId
+    case AddSocketUser(socketId: String, userId: String) =>
+      socketUserMap(socketId) = userId
     case RemoveSocketUser(socketId: String) => socketUserMap -= socketId
-    case GetUserId(socketId: String) => sender ! socketUserMap(socketId)
+    case GetUserId(socketId: String) =>
+      sender ! socketUserMap(socketId)
   }
 
 }

@@ -21,12 +21,13 @@ class NetworkMessageInterpreterSupervisor extends Actor {
   }
 
   val router = context.system.actorOf(Props[NetworkMessageInterpreter].withRouter(
-      FromConfig.withSupervisorStrategy(escalator)), 
+      FromConfig.withSupervisorStrategy(escalator)),
     name="interpreterrouter")
 
   def receive = {
     case message: InterpretMessage =>
-      router forward message 
+      println("WHATS UP")
+      router forward message
     case _ =>
       println("Error: in interpreter supervisor")
   }
