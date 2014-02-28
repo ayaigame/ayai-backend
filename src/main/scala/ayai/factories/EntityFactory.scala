@@ -107,16 +107,26 @@ object EntityFactory {
     world.groups("ROOM"+characterRow.room_id) += p
 
     //I think that there should probably be a lookup based on the character's room here.
-    val tilemap: String = "/assets/maps/map3.json"
-    val tileset: String = "/assets/tiles/sd33.png"
+    val roomInfo = world.getEntityByTag("ROOM"+characterRow.room_id) match {
+      case Some(e: Entity) =>
+        e
+      case _ => //load default here (too bored to implement now) 
+        null
+    }
 
+    val tilemap = roomInfo.getComponent(classOf[TileMap]) match {
+      case Some(tileMap: TileMap) => tileMap
+      case _ => null 
+    }
+    
+    
     val json = (
       ("type" -> "id") ~
       ("id" -> entityId) ~
       ("x" -> x) ~
       ("y" -> y) ~
-      ("tilemap" -> tilemap) ~
-      ("tileset" -> tileset)
+      ("tilemap" -> tilemap.file) ~
+      (tilemap.tilesets.asJson)
     )
 
     webSocket.writeText(compact(render(json)))
