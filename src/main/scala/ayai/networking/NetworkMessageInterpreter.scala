@@ -31,8 +31,10 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
 
         queue ! new AddInterpretedMessage(new AddNewCharacter(wsFrame, id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
         queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
+
       case "echo" =>
         queue ! new AddInterpretedMessage(new JSONMessage("echo"))
+
       case "move" =>
         //TODO: Add exceptions and maybe parse shit a bit more intelligently
         val start:Boolean = compact(render(rootJSON \ "start")).toBoolean
@@ -55,6 +57,7 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
           }
         }
         queue ! new AddInterpretedMessage(new MoveMessage(wsFrame, start, direction))
+
       case "attack" =>
           println("Attack Received")
           queue ! new AddInterpretedMessage(new AttackMessage(wsFrame))
@@ -68,10 +71,13 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
       case "open" =>
         val containerId : String = (rootJSON \ "containerId").extract[String]
         // println(containerId)
-        queue ! new AddInterpretedMessage(new OpenMessage(wsFrame, containerId))case "equip" => 
+        queue ! new AddInterpretedMessage(new OpenMessage(wsFrame, containerId))
+
+      case "equip" =>
         val slot : String = (rootJSON \ "slot").extract[String]
         val equipmentType : String = (rootJSON \ "equipmentType").extract[String]
         queue ! new AddInterpretedMessage(new EquipMessage(wsFrame, slot, equipmentType))
+
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
 
