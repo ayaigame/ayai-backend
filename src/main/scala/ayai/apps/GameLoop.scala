@@ -51,7 +51,7 @@ object GameLoop {
     var socketMap: ConcurrentMap[String, String] = new java.util.concurrent.ConcurrentHashMap[String, String]
     var world: World = new World()
 
-    world.createGroup("ROOMS")    
+    world.createGroup("ROOMS")
     world.createGroup("CHARACTERS")
     var room : Entity = EntityFactory.loadRoomFromJson(world, Constants.STARTING_ROOM_ID, "map3.json")
     roomHash.put(Constants.STARTING_ROOM_ID, room)
@@ -62,7 +62,7 @@ object GameLoop {
     roomHash.put(1, room)
     world.createGroup("ROOM"+1)
     world.addEntity(room)
-    //create a room 
+    //create a room
     //room.addToWorld
 
     ItemFactory.bootup(world)
@@ -75,7 +75,7 @@ object GameLoop {
     world.addSystem(new RespawningSystem())
     world.addSystem(new FrameExpirationSystem())
     //world.initialize()
-    
+
     //load all rooms
 
 
@@ -98,7 +98,7 @@ object GameLoop {
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
-      //get the time 
+      //get the time
       val start = System.currentTimeMillis
 
       val future = messageQueue ? new FlushMessages() // enabled by the “ask” import
@@ -106,9 +106,9 @@ object GameLoop {
 
       val processedMessages = new ArrayBuffer[Future[Any]]
       result.messages.foreach { message =>
-        processedMessages += messageProcessor ? new ProcessMessage(message)
+        processedMessages += messageProcessor ? message
       }
-      
+
       Await.result(Future.sequence(processedMessages), 3 seconds)
 
       world.process()

@@ -26,14 +26,14 @@ class NetworkMessageProcessorSupervisor(world: World, socketMap: ConcurrentMap[S
 
 val router = context.system.actorOf(Props(
   new NetworkMessageProcessor(world,socketMap)).withRouter(
-    FromConfig.withSupervisorStrategy(escalator)), 
+    FromConfig.withSupervisorStrategy(escalator)),
   name = "processorrouter")
 
   def receive = {
-    case message: ProcessMessage =>
-      router forward message 
+    case message: NetworkMessage =>
+      router forward message
     case _ =>
-      println("Error: in interpreter supervisor")
+      println("Error: in processor supervisor")
   }
 
 }

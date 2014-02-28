@@ -35,175 +35,156 @@ import org.slf4j.{Logger, LoggerFactory}
 class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, String]) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
   val actorSystem = context.system
-  val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
   private val log = LoggerFactory.getLogger(getClass)
 
-  def processMessage(message: NetworkMessage) {
-    message match {
-      //Should take characterId: Long as a parameter instead of characterName
-      //However can't do that until front end actually gives me the characterId
-      case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
-        val actor = actorSystem.actorSelection("user/SockoSender"+id)
-        // CHANGE THIS SECTION WHEN DOING DATABASE WORK
-        EntityFactory.loadCharacter(world, webSocket, id, "Ness", x, y, actor) //Should use characterId instead of characterName
-        sender ! Success
+  def receive = {
+    case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
+      val actor = actorSystem.actorSelection("user/SockoSender"+id)
+      // CHANGE THIS SECTION WHEN DOING DATABASE WORK
+      EntityFactory.loadCharacter(world, webSocket, id, "Ness", x, y, actor) //Should use characterId instead of characterName
+      sender ! Success
+    }
+
+    case RemoveCharacter(id: String) => {
+      println("Removing character: " + id)
+      (world.getEntityByTag("CHARACTER" + socketMap(id))) match {
+        case None =>
+          System.out.println(s"Can't find character attached to socket $id.")
+        case Some(character : Entity) =>
+          CharacterTable.saveCharacter(character)
+          character.kill
+          socketMap.remove(id)
       }
+      sender ! Success
+    }
 
-      case RemoveCharacter(id: String) => {
-        println("Removing character: " + id)
-        (world.getEntityByTag("CHARACTER" + socketMap(id))) match {
-          case None =>
-            System.out.println(s"Can't find character attached to socket $id.")
-          case Some(character : Entity) =>
-            character.kill
-            socketMap.remove(id)
-        }
-        sender ! Success
+    case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
+      //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
+      val id: String = socketMap(webSocket.webSocketId)
+      (world.getEntityByTag("CHARACTER"+id)) match {
+        case None =>
+          println("Can't find character attached to id: " + id)
+        case Some(e : Entity) =>
+            val oldMovement = (e.getComponent(classOf[Actionable])) match {
+              case Some(oldMove : Actionable) =>
+                oldMove.active = start
+                oldMove.action = direction
+              case _ =>
+                log.warn("a07270d: getComponent failed to return anything")
+
+            }
       }
+      sender ! Success
+    }
 
-      case MoveMessage(webSocket: WebSocketFrameEvent, start: Boolean, direction: MoveDirection) => {
-        //println("Direction: " + direction.xDirection.toString + ", " + direction.yDirection.toString)
-        val id: String = socketMap(webSocket.webSocketId)
-        (world.getEntityByTag("CHARACTER"+id)) match {
-          case None =>
-            println("Can't find character attached to id: " + id)
-          case Some(e : Entity) =>
-            (e.getComponent(classOf[Actionable])) match {
-                case Some(oldMove : Actionable) =>
-                  oldMove.active = start
-                  if(direction.xDirection != 0 || direction.yDirection != 0) {
-                    oldMove.action = direction
-                  }
-                case _ =>
-                  log.warn("a07270d: getComponent failed to return anything")
+     // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
+    case AttackMessage(webSocket : WebSocketFrameEvent) => {
+      //create a projectile
+      println("Created Bullet")
+      val id : String = socketMap(webSocket.webSocketId)
+      val bulletId = (new UID()).toString
 
-              }
-        }
-        sender ! Success
-      }
+      (world.getEntityByTag("CHARACTER"+id)) match {
 
-       // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
-      case AttackMessage(webSocket : WebSocketFrameEvent) => {
-        //create a projectile
-        println("Created Bullet")
-        val id : String = socketMap(webSocket.webSocketId)
-        val bulletId = (new UID()).toString
+      //for rob temporary
+      //initiator.getComponent(classOf[Health]).currentHealth -= 10
+      //initiator.getComponent(classOf[Mana]).currentMana -= 20
+      case Some(initiator : Entity) =>
+        val position = initiator.getComponent(classOf[Position])
+        val movable = initiator.getComponent(classOf[Actionable])
+        val character = initiator.getComponent(classOf[Character])
+        (position, movable, character) match {
+          case(Some(pos: Position), Some(a : Actionable), Some(c : Character)) =>
+            val m = a.action match {
+              case (move : MoveDirection) => move
+              case _ =>
+                println("Not match for movedirection")
+                new MoveDirection(0, 0)
+                //SHOULD WE THROW?
+            }
 
-        (world.getEntityByTag("CHARACTER"+id)) match {
-
-        //for rob temporary
-        //initiator.getComponent(classOf[Health]).currentHealth -= 10
-        //initiator.getComponent(classOf[Mana]).currentMana -= 20
-        case Some(initiator : Entity) =>
-          val position = initiator.getComponent(classOf[Position])
-          val movable = initiator.getComponent(classOf[Actionable])
-          val character = initiator.getComponent(classOf[Character])
-          (position, movable, character) match {
-            case(Some(pos: Position), Some(a : Actionable), Some(c : Character)) =>
-              val m = a.action match {
-                case (move : MoveDirection) => move
-                case _ => println("Not match for movedirection")
-                return
-
-              }
-              //get the range of the characters weapon
-              val weaponRange = initiator.getComponent(classOf[Equipment]) match {
-                case Some(e: Equipment) => e.weapon1.itemType match {
-                  case weapon : Weapon => weapon.range
-                  case _ => 5 
-                }
+            //get the range of the characters weapon
+            val weaponRange = initiator.getComponent(classOf[Equipment]) match {
+              case Some(e: Equipment) => e.weapon1.itemType match {
+                case weapon : Weapon => weapon.range
                 case _ => 5
               }
-              
-              val upperLeftx = pos.x
-              val upperLefty = pos.y
+              case _ => 5
+            }
 
-              println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
-              
-              val xDirection = m.xDirection
-              val yDirection = m.yDirection
+            val upperLeftx = pos.x
+            val upperLefty = pos.y
 
-              val topLeftOfAttackx = ((weaponRange+1) * xDirection) + upperLeftx
-              val topLeftOfAttacky = ((weaponRange+1) * yDirection) + upperLefty
-              println("XDirection: " + xDirection + " YDirection: " + yDirection)
-              println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
+            println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
 
-              val p: Entity = world.createEntity("ATTACK"+bulletId)
+            val xDirection = m.xDirection
+            val yDirection = m.yDirection
 
-              p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
-              p.components += (new Bounds(weaponRange, weaponRange))
-              p.components += (new Attack(initiator));
-              p.components += (new Frame(10,0))
-              //p.components += (c)
-              world.addEntity(p)
-              world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
-            case _ =>
-              log.warn("424e244: getComponent failed to return anything")
+            val topLeftOfAttackx = ((weaponRange+1) * xDirection) + upperLeftx
+            val topLeftOfAttacky = ((weaponRange+1) * yDirection) + upperLefty
+            println("XDirection: " + xDirection + " YDirection: " + yDirection)
+            println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
 
-          }
+            val p: Entity = world.createEntity("ATTACK"+bulletId)
+
+            p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
+            p.components += (new Bounds(weaponRange, weaponRange))
+            p.components += (new Attack(initiator));
+            p.components += (new Frame(10,0))
+            //p.components += (c)
+            world.addEntity(p)
+            world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
           case _ =>
-            log.warn("8a87265: getComponent failed to return anything")
-        } 
-        sender ! Success
-      }
+            log.warn("424e244: getComponent failed to return anything")
 
-      case ItemMessage(id : String, itemAction : ItemAction) => {
-        sender ! Success
+        }
+        case _ =>
+          log.warn("8a87265: getComponent failed to return anything")
       }
+      sender ! Success
+    }
 
-      case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
-  //         println("Open Received!")
-  //         val inventory = new ArrayBuffer[Item]()
-  //       inventory += new Weapon(name = "Orcrist", value = 100000000,
+  //   case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
+  //     println("Open Received!")
+  //     val inventory = new ArrayBuffer[Item]()
+  //     inventory += new Weapon(name = "Orcrist", value = 100000000,
   // weight = 10, range = 1, damage = 500000, damageType = "physical")
+  //     val fakeChest = new Inventory(inventory)
 
-  //         val fakeChest = new Inventory(inventory)
-
-  //         val jsonLift = 
-  //           ("type" -> "open") ~
-  //           ("containerId" -> containerId) ~
-  //           (fakeChest.asJson)
+  //     val jsonLift =
+  //       ("type" -> "open") ~
+  //       ("containerId" -> containerId) ~
+  //       (fakeChest.asJson)
 
 
-  //         println(compact(render(jsonLift)))
+  //     println(compact(render(jsonLift)))
 
-  //         webSocket.writeText(compact(render(jsonLift)))
-           sender ! Success
-      }
+  //     webSocket.writeText(compact(render(jsonLift)))
+  //      sender ! Success
+  //   }
 
-      case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
-        socketMap(webSocket.webSocketId) = id
-        sender ! Success
-      }
+    case SocketCharacterMap(webSocket: WebSocketFrameEvent, id: String) => {
+      socketMap(webSocket.webSocketId) = id
+      sender ! Success
+    }
 
-      case CharacterList(webSocket: WebSocketFrameEvent, accountName: String) => {
-        characterTable ! new CharacterList(webSocket, accountName)
-        sender ! Success
-      }
+    case PublicChatMessage(message: String, sender: String) => {
+      //// Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
+      //var sUser = None: Option[User]
+      //sUser = UserQuery.getByUsername(sender)
+      //
+      //sUser match {
+      //  case Some(user) =>
+      //    val mh = new ChatHolder(new PublicChat(message, user))
+      //    actorSystem.actorOf(Props(new ChatReceiver())) ! mh
+      //  case _ =>
+      //    println("Error from PublicChatMessage")
+      //}
+    }
+    case EquipMessage(wsFrame: WebSocketFrameEvent, slot: String, equipmentType: String) =>
 
-      case PublicChatMessage(message: String, sender: String) => {
-        //// Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
-        //var sUser = None: Option[User]
-        //sUser = UserQuery.getByUsername(sender)
-        //
-        //sUser match {
-        //  case Some(user) =>
-        //    val mh = new ChatHolder(new PublicChat(message, user))
-        //    actorSystem.actorOf(Props(new ChatReceiver())) ! mh
-        //  case _ =>
-        //    println("Error from PublicChatMessage")
-        //}
-      }
-      case EquipMessage(wsFrame: WebSocketFrameEvent, slot: String, equipmentType: String) =>
-
-      case _ => println("Error from NetworkMessageProcessor.")
-        sender ! Failure
-    } 
-  }
-
-  def receive = {
-    case ProcessMessage(message) => processMessage(message)
-    case _ => println("Error: from interpreter.")
+    case _ =>
+      println("Error from NetworkMessageProcessor.")
       sender ! Failure
   }
 }
