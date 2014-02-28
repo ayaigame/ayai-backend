@@ -67,6 +67,7 @@ object GameLoop {
 
     ItemFactory.bootup(world)
     ClassFactory.bootup(world)
+    QuestFactory.bootup(world)
 
     world.addSystem(new MovementSystem(roomHash))
     world.addSystem(new RoomChangingSystem(roomHash))
@@ -108,7 +109,7 @@ object GameLoop {
         processedMessages += messageProcessor ? message
       }
 
-      Await.result(Future.sequence(processedMessages), 1 seconds)
+      Await.result(Future.sequence(processedMessages), 3 seconds)
 
       world.process()
 

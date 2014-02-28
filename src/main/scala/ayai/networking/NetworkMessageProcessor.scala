@@ -95,32 +95,40 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         val character = initiator.getComponent(classOf[Character])
         (position, movable, character) match {
           case(Some(pos: Position), Some(a : Actionable), Some(c : Character)) =>
-            val m: MoveDirection = a.action match {
+            val m = a.action match {
               case (move : MoveDirection) => move
               case _ =>
                 println("Not match for movedirection")
                 new MoveDirection(0, 0)
                 //SHOULD WE THROW?
-
             }
+
+            //get the range of the characters weapon
+            val weaponRange = initiator.getComponent(classOf[Equipment]) match {
+              case Some(e: Equipment) => e.weapon1.itemType match {
+                case weapon : Weapon => weapon.range
+                case _ => 5
+              }
+              case _ => 5
+            }
+
             val upperLeftx = pos.x
             val upperLefty = pos.y
 
             println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
 
-
             val xDirection = m.xDirection
             val yDirection = m.yDirection
 
-            val topLeftOfAttackx = (33 * xDirection) + upperLeftx
-            val topLeftOfAttacky = (33 * yDirection) + upperLefty
-
+            val topLeftOfAttackx = ((weaponRange+1) * xDirection) + upperLeftx
+            val topLeftOfAttacky = ((weaponRange+1) * yDirection) + upperLefty
+            println("XDirection: " + xDirection + " YDirection: " + yDirection)
             println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
 
             val p: Entity = world.createEntity("ATTACK"+bulletId)
 
             p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
-            p.components += (new Bounds(10, 10))
+            p.components += (new Bounds(weaponRange, weaponRange))
             p.components += (new Attack(initiator));
             p.components += (new Frame(10,0))
             //p.components += (c)
@@ -136,16 +144,11 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
       sender ! Success
     }
 
-    case ItemMessage(id : String, itemAction : ItemAction) => {
-      sender ! Success
-    }
-
   //   case OpenMessage(webSocket: WebSocketFrameEvent, containerId : String) => {
   //     println("Open Received!")
   //     val inventory = new ArrayBuffer[Item]()
   //     inventory += new Weapon(name = "Orcrist", value = 100000000,
   // weight = 10, range = 1, damage = 500000, damageType = "physical")
-
   //     val fakeChest = new Inventory(inventory)
 
   //     val jsonLift =
@@ -178,7 +181,10 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
       //    println("Error from PublicChatMessage")
       //}
     }
-    case _ => println("Error from NetworkMessageProcessor.")
+    case EquipMessage(wsFrame: WebSocketFrameEvent, slot: String, equipmentType: String) =>
+
+    case _ =>
+      println("Error from NetworkMessageProcessor.")
       sender ! Failure
   }
 }
