@@ -38,12 +38,30 @@ object EntityFactory {
     p.components += new Bounds(32, 32)
     p.components += new Velocity(4, 4)
     p.components += new Actionable(false, DownDirection)
-    p.components += new QuestBag()
     p.components += new Health(100,100)
     p.components += new NetworkingActor(actor)
     p.components += new Mana(200,200)
     p.components += new Room(characterRow.room_id)
     p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here
+
+    val questbag = new QuestBag()
+    questbag.addQuest(world.getEntityByTag("QUEST1") match {
+      case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
+        case Some(quest: Quest) => quest 
+        case _ => null
+      }
+      case _ => null
+    })
+    questbag.addQuest(world.getEntityByTag("QUEST2") match {
+      case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
+        case Some(quest: Quest) => quest 
+        case _ => null
+      }
+      case _ => null
+    })
+
+    p.components += questbag
+
     //Should add calculate and add stats
     val inventory = new Inventory()
     inventory.addItem(world.getEntityByTag("ITEMS0") match {

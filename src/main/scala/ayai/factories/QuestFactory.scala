@@ -11,7 +11,7 @@ import net.liftweb.json.JsonDSL._
 import scala.collection.mutable._
 
 
-class QuestFactory {
+object QuestFactory {
 	case class AllQuestValues(
       id: Int,
       title: String,
@@ -20,7 +20,7 @@ class QuestFactory {
       objective: Objective)
 
   def bootup(world: World) = {
-    val quests: List[Quest] = getQuestList("src/main/resources/configs/classes/Quests.json")
+    val quests: List[Quest] = getQuestList("src/main/resources/configs/quests/Quests.json")
 
     quests.foreach (questData => {
       var entityQuest: Entity = world.createEntity(tag="QUEST"+questData.id)

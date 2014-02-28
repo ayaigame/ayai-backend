@@ -2,14 +2,26 @@
 	"quests": [
 		{
 			"id": 1,
-			"title": "Kill 8 Wild Boars",
+			"title": "The Wild Hunt",
 			"description": "Wild Boars are fucking up my lawn and old sallie had an aneurism. Kill those mudda fuckas for me",
 			"recommendLevel": 1,
-			"objective": [ {
-				"name": "Kill Boars",
+			"objective": {
+				"name": "Kill 8 Boars",
 				"totalCompleted": 0,
 				"totalNeeded": 8
-			}]
+			}
+
+		}, 
+		{
+			"id": 2,
+			"title": "Some Ain't Been Paying",
+			"description": "Kurt hasn't been bottom bitching too well this week, go and show him whats what.  That mother fucker likes to hang out at fellacio peak.",
+			"recommendLevel": 2,
+			"objective": {
+				"name": "Kill Kurt 8 Times",
+				"totalCompleted": 0,
+				"totalNeeded": 8
+			}
 
 		}]
 }

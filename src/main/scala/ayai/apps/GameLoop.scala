@@ -67,6 +67,7 @@ object GameLoop {
 
     ItemFactory.bootup(world)
     ClassFactory.bootup(world)
+    QuestFactory.bootup(world)
 
     world.addSystem(new MovementSystem(roomHash))
     world.addSystem(new RoomChangingSystem(roomHash))
