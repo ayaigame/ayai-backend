@@ -7,7 +7,7 @@ package ayai.persistence
 import org.squeryl.{Schema, KeyedEntity}
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.annotations.Column
-import org.mindrot.jbcrypt.BCrypt 
+import org.mindrot.jbcrypt.BCrypt
 import java.util.Date
 import java.sql.Timestamp
 
@@ -94,7 +94,7 @@ object AyaiDB extends Schema {
   }
 
   def validatePassword(username: String, password: String): String  = {
-    val account = getAccount(username) 
+    val account = getAccount(username)
     if(BCrypt.checkpw(password, account.password)) {
       return createToken(account)
     } else {
@@ -105,7 +105,7 @@ object AyaiDB extends Schema {
 
 case class Account(
               val username: String,
-              var password: String) 
+              var password: String)
             extends AccountDb2Object{
                 def this() = this("", "")
                 lazy val sentChats = AyaiDB.senderToChat.left(this)
@@ -114,7 +114,7 @@ case class Account(
             }
 case class Token(
               val account_id: Long,
-              val token: String) extends AccountDb2Object { 
+              val token: String) extends AccountDb2Object {
                 def this() = this(0, "")
                 lazy val user = AyaiDB.accountToToken.right(this)
               }
@@ -123,7 +123,7 @@ case class Chat(
              val message: String,
              val sender_id: Long,
              val receiver_id: Long,
-             var received: Boolean) 
+             var received: Boolean)
            extends AccountDb2Object {
              def this() = this("", 0, 0, false)
              lazy val sender = AyaiDB.senderToChat.right(this)
