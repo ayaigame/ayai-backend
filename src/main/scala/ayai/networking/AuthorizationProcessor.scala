@@ -42,7 +42,7 @@ class AuthorizationProcessor() extends Actor {
       transaction {
         token = AyaiDB.validatePassword(username, password)
       }
- 
+
       token match {
       case "" =>
         request.response.write(HttpResponseStatus.UNAUTHORIZED)

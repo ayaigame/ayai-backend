@@ -12,7 +12,7 @@ class SockoSender(ws: WebSocketFrameEvent) extends Actor {
   def receive = {
     case ConnectionWrite(message) => {
       ws.writeText(message)
-    }    
+    }
 
     case newFrame: WebSocketFrameEvent => webSocket = newFrame
     case _ => println("Error from SockoSender")

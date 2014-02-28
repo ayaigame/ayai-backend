@@ -51,6 +51,7 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
         case None =>
           System.out.println(s"Can't find character attached to socket $id.")
         case Some(character : Entity) =>
+          CharacterTable.saveCharacter(character)
           character.kill
           socketMap.remove(id)
       }
