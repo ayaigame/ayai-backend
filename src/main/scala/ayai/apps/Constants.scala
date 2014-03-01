@@ -9,8 +9,8 @@ import java.rmi.server.UID
 object Constants {
   implicit val formats = net.liftweb.json.DefaultFormats
 
-  val PLAYER_CHARACTER : String = "player char"
-  val STARTING_ROOM_ID : Int = 0
+  val PLAYER_CHARACTER: String = "player char"
+  val STARTING_ROOM_ID: Int = 0
 
   val source = scala.io.Source.fromFile("src/main/resources/configs/config.json")
   val lines = source.mkString

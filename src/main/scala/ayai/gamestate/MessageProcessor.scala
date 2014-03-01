@@ -47,29 +47,27 @@ class MessageProcessor(world: RoomWorld) extends Actor {
   implicit val formats = Serialization.formats(NoTypeHints)
   implicit val timeout = Timeout(2 seconds)
   val actorSystem = context.system
-  val characterTable = actorSystem.actorOf(Props(new CharacterTable()))
   private val log = LoggerFactory.getLogger(getClass)
 
   def processMessage(message: Message) {
     message match {
       //Should take characterId: Long as a parameter instead of characterName
       //However can't do that until front end actually gives me the characterId
-      case AddNewCharacter(userId: String, characterName: String, x: Int, y: Int) => {
-        println("CREATING CHARACTER")
-        val actor = actorSystem.actorSelection(s"user/SockoSender$userId")
-        // CHANGE THIS SECTION WHEN DOING DATABASE WORK
-        EntityFactory.loadCharacter(world, userId, "Ness", x, y, actor, actorSystem) //Should use characterId instead of characterName
+      case AddNewCharacter(id: String, characterName: String, x: Int, y: Int) => {
+        val actor = actorSystem.actorSelection(s"user/SockoSender$id")
+
+        EntityFactory.loadCharacter(world, id, characterName, x, y, actor, actorSystem)
         sender ! Success
       }
 
       case RemoveCharacter(socketId: String) => {
         val future = context.system.actorSelection("user/SocketUserMap") ? GetUserId(socketId)
         val userId = Await.result(future, timeout.duration).asInstanceOf[String]
-        println(s"Removing character: $userId")
         world.getEntityByTag(s"$userId") match {
           case None =>
             System.out.println(s"Can't find character attached to socket $socketId.")
           case Some(character : Entity) =>
+            CharacterTable.saveCharacter(character)
             character.kill
             context.system.actorSelection("user/SocketUserMap") ! RemoveSocketUser(socketId)
         }
@@ -126,15 +124,11 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val upperLeftx = pos.x
               val upperLefty = pos.y
 
-              println("Player position: " + upperLeftx.toString + ", " + upperLefty.toString)
-
               val xDirection = m.xDirection
               val yDirection = m.yDirection
 
               val topLeftOfAttackx = ((weaponRange+1) * xDirection) + upperLeftx
               val topLeftOfAttacky = ((weaponRange+1) * yDirection) + upperLefty
-              println("XDirection: " + xDirection + " YDirection: " + yDirection)
-              println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
 
               val p: Entity = world.createEntity("ATTACK"+bulletId)
 
@@ -161,17 +155,6 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         sender ! Success
       }
 
-      case SocketCharacterMap(socketId: String, userId: String) => {
-        println("ADD1")
-        //context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(socketId, userId)
-        sender ! Success
-      }
-
-      case CharacterList(socketId: String, accountName: String) => {
-        characterTable ! new CharacterList(socketId, accountName)
-        sender ! Success
-      }
-
       case PublicChatMessage(message: String, sender: String) => {
         //// Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
         //var sUser = None: Option[User]
@@ -191,8 +174,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
   }
 
   def receive = {
-    case ProcessMessage(message) => 
-      println(message)
+    case ProcessMessage(message) =>
       processMessage(message)
     case _ => println("Error: from interpreter.")
       sender ! Failure
