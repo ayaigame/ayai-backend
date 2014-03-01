@@ -3,7 +3,7 @@ package ayai.gamestate
 import crane.Entity
 
 import akka.actor.Actor
-
+import akka.actor.Status.{Success, Failure}
 import scala.collection.mutable.HashMap
 
 case class AddAssociation(id: String, world: RoomWorld)
@@ -23,9 +23,11 @@ class UserRoomMap extends Actor {
         case Some(e: Entity) =>
           to.addEntity(e.copy())
           userRoomMap(id).removeEntity(e)
-          userRoomMap(id) = to
+          userRoomMap(id) = to 
+          sender ! Success
         case _ =>
           println("Error in UserMap Room")
+          sender ! Failure
       }
   }
 

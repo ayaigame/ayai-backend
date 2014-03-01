@@ -57,31 +57,16 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
           log.warn("8192c19: getComponent failed to return anything")
           ""
       }
-      if(!characterEntity.getComponent(classOf[MapChange]).isEmpty) {
-        characterEntity.getComponent(classOf[MapChange]) match {
-          case Some(map: MapChange) =>
-            val future2 = serializer ? new MapRequest(new Entity)
-            val result2 = Await.result(future2, timeout.duration).asInstanceOf[String]
-            val actorSelection1 = characterEntity.getComponent(classOf[NetworkingActor]) match {
-              case Some(na: NetworkingActor) => na
-              case _ => null
-            }
-
-            actorSelection1.actor ! new ConnectionWrite(result2)  
-            characterEntity.removeComponent(classOf[MapChange])
-          case _ =>
-            log.warn("990f22d: getComponent failed to return anything")
-        }
-      }
 
       //This is how we get character specific info, once we actually integrate this in.
-      val future1 = serializer ? GetRoomJson
-      val result1 = Await.result(future1, timeout.duration).asInstanceOf[String]
+      val future = serializer ? GetRoomJson(characterEntity)
+      val result = Await.result(future, timeout.duration).asInstanceOf[String]
       val actorSelection = characterEntity.getComponent(classOf[NetworkingActor]) match {
             case Some(na : NetworkingActor) => na
             case _ => null
       }
-      actorSelection.actor ! new ConnectionWrite(result1)
+      println(result)
+      actorSelection.actor ! new ConnectionWrite(result)
     }
     serializer ! Refresh
   }

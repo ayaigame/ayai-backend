@@ -22,7 +22,7 @@ sealed trait QueryResponse
 case class CharacterRadius(characterId: String) extends QueryType
 case class CharacterResponse(json: String)  extends QueryResponse
 case class MapRequest(room: Entity)
-case object GetRoomJson
+case class GetRoomJson(e:Entity)
 case object Refresh
 case object SomeData
 
@@ -32,7 +32,7 @@ object GameStateSerializer {
 
 class GameStateSerializer(world: World) extends Actor {
   private val log = LoggerFactory.getLogger(getClass)
-  private var roomJSON: String = ""
+  private var roomJSON: JObject = null
   private var valid: Boolean = false
 
   //Returns a list of entities contained within a room.
@@ -41,54 +41,55 @@ class GameStateSerializer(world: World) extends Actor {
   }
 
   //Returns a character's belongings and surroundings.
-  def getRoom = {
+  def getRoom(e: Entity) = {
     if(!valid) {
       var entities = world.getEntitiesByComponents(classOf[Character], classOf[Position],
-                                                      classOf[Health], classOf[Mana],
-                                                      classOf[Actionable], classOf[QuestBag],
-                                                      classOf[Inventory], classOf[Equipment])
+                                                      classOf[Health], classOf[Mana])
          val jsonLift: JObject =
-           ("type" -> "update") ~
             ("players" -> entities.map{ e =>
              (e.getComponent(classOf[Character]),
                e.getComponent(classOf[Position]),
                e.getComponent(classOf[Health]),
                e.getComponent(classOf[Mana]),
-               e.getComponent(classOf[Actionable]),
-               e.getComponent(classOf[Inventory]),
-               e.getComponent(classOf[Equipment]),
-               e.getComponent(classOf[QuestBag])) match {
+               e.getComponent(classOf[Actionable])) match {
                  case (Some(character: Character), Some(position: Position), Some(health: Health),
-                       Some(mana: Mana), Some(actionable: Actionable), Some(inventory: Inventory),
-                       Some(quest: Equipment), Some(equipment: QuestBag)) =>
+                       Some(mana: Mana), Some(actionable: Actionable)) =>
                    ((character.asJson) ~
                    (position.asJson) ~
                    (health.asJson) ~
                    (mana.asJson) ~
-                   (actionable.action.asJson) ~
-                   (quest.asJson) ~
-                   (inventory.asJson) ~
-                   (equipment.asJson))
+                   (actionable.action.asJson))
                  case _ =>
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
              }})
 
          try {
-           roomJSON = compact(render(jsonLift))
+           roomJSON = jsonLift
            valid = true
-           sender ! roomJSON
          } catch {
            case e: Exception =>
              e.printStackTrace()
              sender ! ""
          }
 
-    } else {
-      sender ! roomJSON
     }
+
+    sender ! compact(render(("type" -> "update")~(roomJSON)~(getCharacterAssets(e))))
   }
 
+  def getCharacterAssets(entity: Entity): JObject = {
+    val jsonLift = (entity.getComponent(classOf[Inventory]),
+      entity.getComponent(classOf[Equipment]),
+      entity.getComponent(classOf[QuestBag])) match {
+        case (Some(inventory: Inventory), Some(equipment: Equipment), Some(quests: QuestBag)) => 
+          (inventory.asJson) ~
+          (equipment.asJson) ~
+          (quests.asJson)
+        case _ => JNothing
+      }
+    ("models" -> jsonLift)
+  }
   //Once characters actually have belonging we'll want to implement this and use it in getCharacterRadius
   // def getCharacterBelongings(characterId: String) = {
 
@@ -114,7 +115,7 @@ class GameStateSerializer(world: World) extends Actor {
   }
 
   def receive = {
-    case GetRoomJson => getRoom
+    case GetRoomJson(e:Entity) => getRoom(e)
     case MapRequest(room) => sendMapInfo(room)
     case Refresh => valid = false
     case _ => println("Error: from serializer.")
