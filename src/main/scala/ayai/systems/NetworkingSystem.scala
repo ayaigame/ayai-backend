@@ -67,7 +67,7 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
               case _ => null
             }
 
-            println(result2)
+//            println(result2)
             actorSelection1.actor ! new ConnectionWrite(result2)  
             characterEntity.removeComponent(classOf[MapChange])
           case _ =>
@@ -82,7 +82,7 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
             case Some(na : NetworkingActor) => na
             case _ => null
       }
-      println(result1)
+//      println(result1)
       actorSelection.actor ! new ConnectionWrite(result1)
     }
     serializer ! Refresh

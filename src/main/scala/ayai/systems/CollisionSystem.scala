@@ -41,8 +41,8 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
   def handleAttackDamage(damage: Int, attackee: Health) = attackee.currentHealth -= damage
 
   def getWeaponStat(entity: Entity): Int = {
-    var playerBase: Int = 0
-    var weaponValue: Int = 0
+    var playerBase: Int = 5
+    var weaponValue: Int = 5
     entity.getComponent(classOf[Stats]) match {
       case Some(stats: Stats) =>
         for(stat <- stats.stats) {
@@ -54,19 +54,15 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
     }
     entity.getComponent(classOf[Equipment]) match {
       case Some(equipment: Equipment) =>
-        if(equipment.weapon1 != null) {
           equipment.weapon1.itemType match {
             case weapon: Weapon =>
             weaponValue += weapon.damage
             case _ =>
-          }
         }
-        if(equipment.weapon2 != null) {
           equipment.weapon2.itemType match {
             case weapon: Weapon =>
             weaponValue += weapon.damage
             case _ =>
-          }
         }
     }
     weaponValue + playerBase
@@ -97,6 +93,7 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
     }
     // remove the attack component of entity A
     var damageDone = handleAttackDamage(damage, healthComponent)
+    println("DID DAMAGE: " + damage)
     val initiatorId = initiator.getComponent(classOf[Character]) match {
       case Some(character : Character) =>
         character.id
@@ -109,8 +106,8 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
       ("damage" -> damage) ~
       ("initiator" -> initiatorId) ~
       ("victim" -> victimId)
-    val actorSelection = actorSystem.actorSelection("user/EQueue")
-    actorSelection ! new ConnectionWrite(compact(render(att)))
+    // val actorSelection = actorSystem.actorSelection("user/EQueue")
+    // actorSelection ! new ConnectionWrite(compact(render(att)))
   }
 
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
@@ -178,7 +175,7 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
 
 
   override def process(delta: Int) {
-    var entities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds], classOf[Attack], classOf[Health]),
+    var entities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds]),
                                                    exclude=List(classOf[Respawn], classOf[Transport], classOf[Dead]))
     var tileMap = world.asInstanceOf[RoomWorld].tileMap
     var quadTree: QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.maximumWidth, tileMap.maximumHeight))

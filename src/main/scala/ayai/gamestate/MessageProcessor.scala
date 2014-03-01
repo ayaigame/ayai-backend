@@ -95,7 +95,6 @@ class MessageProcessor(world: RoomWorld) extends Actor {
        // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
       case AttackMessage(userId: String) => {
         //create a projectile
-        println("Created Bullet")
         val bulletId = (new UID()).toString
 
         (world.getEntityByTag(s"$userId")) match {
@@ -142,7 +141,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Bounds(weaponRange, weaponRange))
               p.components += (new Attack(initiator));
-              p.components += (new Frame(10,0))
+              p.components += (new Frame(30,0))
               //p.components += (c)
               world.addEntity(p)
             case _ =>
