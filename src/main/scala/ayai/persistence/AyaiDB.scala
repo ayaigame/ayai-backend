@@ -98,7 +98,11 @@ object AyaiDB extends Schema {
         new H2Adapter))
 
     transaction {
-      characters.where(character => character.id === characterId).single
+      val characterQuery = characters.where(character => character.id === characterId)
+      if(characterQuery.size == 1)
+        Some(characterQuery.single)
+      else
+        None
     }
   }
 
