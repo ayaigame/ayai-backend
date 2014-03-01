@@ -105,10 +105,10 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
       case Some(character : Character) => character.id
     }
 
-    val att = ("attack" ->
+    val att = ("type" -> "attack") ~
       ("damage" -> damage) ~
       ("initiator" -> initiatorId) ~
-      ("victim" -> victimId))
+      ("victim" -> victimId)
     val actorSelection = actorSystem.actorSelection("user/EQueue")
     actorSelection ! new ConnectionWrite(compact(render(att)))
   }
