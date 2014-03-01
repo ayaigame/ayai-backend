@@ -9,7 +9,7 @@ import ayai.apps.Constants //Only necessary to create a character for each accou
 import org.squeryl.{Schema, KeyedEntity}
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.annotations.Column
-import org.mindrot.jbcrypt.BCrypt 
+import org.mindrot.jbcrypt.BCrypt
 import java.util.Date
 import java.sql.Timestamp
 
@@ -32,19 +32,33 @@ object AyaiDB extends Schema {
   ))
 
   def registerUser(username: String, password: String) = {
-    Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
-        Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
+    getAccount(username) match {
+      //If an account is found then the username is taken.
+      case Some(account: Account) =>
+        false
+      case _ =>
+        Class.forName("org.h2.Driver");
+        SessionFactory.concreteFactory = Some (() =>
+            Session.create(
+            java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+            new H2Adapter))
 
-    transaction {
-      accounts.insert(new Account(username, BCrypt.hashpw(password, BCrypt.gensalt())))
+        transaction {
+          accounts.insert(new Account(username, BCrypt.hashpw(password, BCrypt.gensalt())))
+        }
+        getAccount(username) match {
+          case Some(account: Account) =>
+            transaction {
+              characters.insert(new CharacterRow(username, "Warrior", 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+            }
+            true
+          case _ =>
+            throw(new Exception("Account creation failed!"))
+        }
     }
-    characters.insert(new CharacterRow(username, "Warrior", 0, getAccount(username).id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
   }
 
-  def getAccount(username: String) = {
+  def getAccount(username: String): Option[Account] = {
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
@@ -52,7 +66,11 @@ object AyaiDB extends Schema {
         new H2Adapter))
 
     transaction {
-      accounts.where(account => account.username === username).single
+      val accountQuery = accounts.where(account => account.username === username)
+      if(accountQuery.size == 1)
+        Some(accountQuery.single)
+      else
+        None
     }
   }
 
@@ -101,18 +119,22 @@ object AyaiDB extends Schema {
   }
 
   def validatePassword(username: String, password: String): String  = {
-    val account = getAccount(username) 
-    if(BCrypt.checkpw(password, account.password)) {
-      return createToken(account)
-    } else {
-      return ""
-   }
+    getAccount(username) match {
+      case Some(account: Account) =>
+        if(BCrypt.checkpw(password, account.password)) {
+          return createToken(account)
+        } else {
+          return ""
+        }
+      case _ =>
+        return ""
+    }
   }
 }
 
 case class Account(
               val username: String,
-              var password: String) 
+              var password: String)
             extends AccountDb2Object{
                 def this() = this("", "")
                 lazy val sentChats = AyaiDB.senderToChat.left(this)
@@ -121,7 +143,7 @@ case class Account(
             }
 case class Token(
               val account_id: Long,
-              val token: String) extends AccountDb2Object { 
+              val token: String) extends AccountDb2Object {
                 def this() = this(0, "")
                 lazy val user = AyaiDB.accountToToken.right(this)
               }
@@ -130,7 +152,7 @@ case class Chat(
              val message: String,
              val sender_id: Long,
              val receiver_id: Long,
-             var received: Boolean) 
+             var received: Boolean)
            extends AccountDb2Object {
              def this() = this("", 0, 0, false)
              lazy val sender = AyaiDB.senderToChat.right(this)
