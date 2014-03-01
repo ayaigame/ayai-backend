@@ -4,6 +4,8 @@ package ayai.persistence
  * Database object for storing Account
  */
 
+import ayai.apps.Constants //Only necessary to create a character for each account.
+
 import org.squeryl.{Schema, KeyedEntity}
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.annotations.Column
@@ -39,6 +41,7 @@ object AyaiDB extends Schema {
     transaction {
       accounts.insert(new Account(username, BCrypt.hashpw(password, BCrypt.gensalt())))
     }
+    characters.insert(new CharacterRow(username, "Warrior", 0, getAccount(username).id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
   }
 
   def getAccount(username: String) = {

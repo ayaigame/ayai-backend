@@ -42,7 +42,7 @@ object EntityFactory {
     p.components += new NetworkingActor(actor)
     p.components += new Mana(200,200)
     p.components += new Room(characterRow.room_id)
-    p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here
+    p.components += new Character(entityId, characterRow.name, characterRow.experience)
 
     val questbag = new QuestBag()
     questbag.addQuest(world.getEntityByTag("QUEST1") match {
