@@ -7,6 +7,8 @@ import net.liftweb.json.JsonDSL._
 import java.rmi.server.UID
 
 object Constants {
+  implicit val formats = Serialization.formats(NoTypeHints)
+  
   val PLAYER_CHARACTER: String = "player char"
   val STARTING_ROOM_ID: Int = 0
 
@@ -21,4 +23,10 @@ object Constants {
   val FRAMES_PER_SECOND = compact(render(configJSON \ "FRAMES_PER_SECOND")).toInt
   val STARTING_X: Int = compact(render(configJSON \ "STARTING_X")).toInt
   val STARTING_Y: Int = compact(render(configJSON \ "STARTING_Y")).toInt
+
+  val experienceSource = scala.io.Source.fromFile("src/main/resources/configs/classes/experience.json")
+  val experienceLines = experienceSource.mkString
+  experienceSource.close()
+
+  val EXPERIENCE_ARRAY = parse(experienceLines).extract[List[Int]]
 }

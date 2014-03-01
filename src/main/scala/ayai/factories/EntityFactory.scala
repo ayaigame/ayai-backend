@@ -43,25 +43,26 @@ object EntityFactory {
     p.components += new NetworkingActor(actor)
     p.components += new Mana(200,200)
     p.components += new Room(characterRow.room_id)
-    p.components += new Character(entityId, characterRow.name, 0, 1) //Should calculate level here
+    p.components += new Character(entityId, characterRow.name, characterRow.experience)
 
     val questbag = new QuestBag()
-    // questbag.addQuest(world.getEntityByTag("QUEST1") match {
-    //   case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
-    //     case Some(quest: Quest) => quest 
-    //     case _ => null
-    //   }
-    //   case _ => null
-    // })
-    // questbag.addQuest(world.getEntityByTag("QUEST2") match {
-    //   case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
-    //     case Some(quest: Quest) => quest 
-    //     case _ => null
-    //   }
-    //   case _ => null
-    // })
+    questbag.addQuest(world.getEntityByTag("QUEST1") match {
+      case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
+        case Some(quest: Quest) => quest
+        case _ => null
+      }
+      case _ => null
+    })
+    questbag.addQuest(world.getEntityByTag("QUEST2") match {
+      case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
+        case Some(quest: Quest) => quest
+        case _ => null
+      }
+      case _ => null
+    })
 
-    p.components += questbag    //Should add calculate and add stats
+    p.components += questbag
+
     val inventory = new Inventory()
     // inventory.addItem(world.getEntityByTag("ITEMS0") match {
     //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
@@ -107,13 +108,13 @@ object EntityFactory {
     val roomInfo = world.getEntityByTag("ROOM"+characterRow.room_id) match {
       case Some(e: Entity) =>
         e
-      case _ => //load default here (too bored to implement now) 
+      case _ => //load default here (too bored to implement now)
         null
     }
 
     val tileMap = world.asInstanceOf[RoomWorld].tileMap
-    
-    
+
+
     val json = (
       ("type" -> "id") ~
       ("id" -> entityId) ~

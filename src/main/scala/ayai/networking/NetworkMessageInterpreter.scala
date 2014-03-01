@@ -28,7 +28,7 @@ class NetworkMessageInterpreter extends Actor {
   val queue = context.system.actorSelection("user/MQueue")
   val socketUserMap = context.system.actorSelection("user/SocketUserMap")
   val userRoomMap = context.system.actorSelection("user/UserRoomMap")
-  // TODO: We need a room lookup that is better than this 
+  // TODO: We need a room lookup that is better than this
   val roomList = context.system.actorSelection("user/RoomList")
 
   implicit val formats = Serialization.formats(NoTypeHints)
@@ -70,13 +70,12 @@ class NetworkMessageInterpreter extends Actor {
       case "init" =>
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
-
         context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(wsFrame.webSocketId, id)
         context.system.actorSelection("user/UserRoomMap") ! AddAssociation(id, lookUpWorldByName("room0"))
 
-        queue ! new AddInterpretedMessage(world, new AddNewCharacter(id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
-      case "echo" =>
-        queue ! new AddInterpretedMessage(world, new JSONMessage("echo"))
+        val characterName:String = compact(render(rootJSON \ "name")).substring(1, tempType.length - 1)
+        queue ! new AddInterpretedMessage(world, new AddNewCharacter(id, characterName, Constants.STARTING_X, Constants.STARTING_Y))
+
       case "move" =>
         //TODO: Add exceptions and maybe parse shit a bit more intelligently
         val start: Boolean = compact(render(rootJSON \ "start")).toBoolean
@@ -99,9 +98,11 @@ class NetworkMessageInterpreter extends Actor {
           }
         }
         queue ! new AddInterpretedMessage(world, new MoveMessage(userId, start, direction))
+
       case "attack" =>
         println("Attack Received")
         queue ! new AddInterpretedMessage(world, new AttackMessage(userId))
+
       case "chat" =>
         val message = compact(render(rootJSON \ "message"))
         val tempSender: String = compact(render(rootJSON \ "sender"))
