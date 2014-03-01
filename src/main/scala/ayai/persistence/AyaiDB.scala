@@ -4,6 +4,8 @@ package ayai.persistence
  * Database object for storing Account
  */
 
+import ayai.apps.Constants //Only necessary to create a character for each account.
+
 import org.squeryl.{Schema, KeyedEntity}
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.annotations.Column
@@ -23,7 +25,7 @@ object AyaiDB extends Schema {
   val characters = table[CharacterRow]("CHARACTERS")
   val senderToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.sender_id)
   val receiverToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.receiver_id)
-  val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.user_id)
+  val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.account_id)
 
   on(accounts)(a => declare(
     a.username is(unique)
@@ -39,6 +41,7 @@ object AyaiDB extends Schema {
     transaction {
       accounts.insert(new Account(username, BCrypt.hashpw(password, BCrypt.gensalt())))
     }
+    characters.insert(new CharacterRow(username, "Warrior", 0, getAccount(username).id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
   }
 
   def getAccount(username: String) = {
@@ -53,7 +56,7 @@ object AyaiDB extends Schema {
     }
   }
 
-  def getCharacter(chracterName: String) = {
+  def getCharacter(characterName: String) = {
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
@@ -61,7 +64,7 @@ object AyaiDB extends Schema {
         new H2Adapter))
 
     transaction {
-      characters.where(character => character.name === chracterName).single
+      characters.where(character => character.name === characterName).single
     }
   }
 
@@ -113,7 +116,7 @@ case class Account(
                 lazy val registeredTokens = AyaiDB.accountToToken.left(this)
             }
 case class Token(
-              val user_id: Long,
+              val account_id: Long,
               val token: String) extends AccountDb2Object { 
                 def this() = this(0, "")
                 lazy val user = AyaiDB.accountToToken.right(this)

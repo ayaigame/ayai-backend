@@ -106,7 +106,6 @@ class GameStateSerializer(world: World) extends Actor {
                 (tileMap.tilesets.asJson)
 
     try {
-      println(compact(render(json)))
       sender ! compact(render(json))
     } catch {
       case e: Exception =>

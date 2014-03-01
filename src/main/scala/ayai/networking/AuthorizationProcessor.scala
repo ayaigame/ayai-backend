@@ -66,6 +66,30 @@ class AuthorizationProcessor extends Actor {
     }
     request.response.write(HttpResponseStatus.OK, "GOOD")
 
+  case CharactersPost(request: HttpRequestEvent) =>
+    val content:String = request.request.content.toString
+    var accountId: Long = -1
+
+    transaction {
+      accountId = AyaiDB.tokens.where(token => token.token === content).single.account_id
+    }
+    CharacterTable.characterList(request, accountId)
+
+  case CreateCharacterPost(request: HttpRequestEvent) =>
+    val content:String = request.request.content.toString
+    var accountId: Long = -1
+    val delimiter = content.indexOfSlice("&")
+    val delimiter2 = content.lastIndexOfSlice("&")
+
+    val userToken = content.slice(0, delimiter).replaceAll("token=", "")
+    val characterName = content.slice(delimiter + 1, delimiter2).replaceAll("name=", "")
+    val className = content.slice(delimiter2 + 1, content.length).replaceAll("class=", "")
+    transaction {
+      accountId = AyaiDB.tokens.where(token => token.token === userToken).single.account_id
+    }
+    CharacterTable.createCharacter(characterName, className, accountId)
+    request.response.write(HttpResponseStatus.OK, "GOOD")
+
   case RecoveryPost(request: HttpRequestEvent) =>
     println("RECOVERY")
 
