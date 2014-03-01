@@ -49,7 +49,7 @@ object CharacterTable {
           Session.create(
           java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
           new H2Adapter))
-      println("Saving character " + character.name + "at position " + position.x + ", " + position.y)
+
       transaction {
         update(AyaiDB.characters)(dbCharacter =>
           where(dbCharacter.name === character.name)

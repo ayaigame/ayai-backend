@@ -68,6 +68,7 @@ class AuthorizationProcessor() extends Actor {
   case CharactersPost(request: HttpRequestEvent) =>
     val content:String = request.request.content.toString
     var accountId: Long = -1
+
     transaction {
       accountId = AyaiDB.tokens.where(token => token.token === content).single.account_id
     }

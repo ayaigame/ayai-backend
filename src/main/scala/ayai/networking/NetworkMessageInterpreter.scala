@@ -29,7 +29,8 @@ class NetworkMessageInterpreter(queue: ActorRef) extends Actor {
         val id = (new UID()).toString
         context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
 
-        queue ! new AddInterpretedMessage(new AddNewCharacter(wsFrame, id, "Orunin", Constants.STARTING_X, Constants.STARTING_Y))
+        val characterName:String = compact(render(rootJSON \ "name")).substring(1, tempType.length - 1)
+        queue ! new AddInterpretedMessage(new AddNewCharacter(wsFrame, id, characterName, Constants.STARTING_X, Constants.STARTING_Y))
         queue ! new AddInterpretedMessage(new SocketCharacterMap(wsFrame, id))
 
       case "echo" =>

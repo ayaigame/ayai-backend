@@ -40,13 +40,12 @@ class NetworkMessageProcessor(world: World, socketMap: ConcurrentMap[String, Str
   def receive = {
     case AddNewCharacter(webSocket: WebSocketFrameEvent, id: String, characterName: String, x: Int, y: Int) => {
       val actor = actorSystem.actorSelection("user/SockoSender"+id)
-      // CHANGE THIS SECTION WHEN DOING DATABASE WORK
-      EntityFactory.loadCharacter(world, webSocket, id, "Ness", x, y, actor) //Should use characterId instead of characterName
+
+      EntityFactory.loadCharacter(world, webSocket, id, characterName, x, y, actor) //Should use characterId instead of characterName
       sender ! Success
     }
 
     case RemoveCharacter(id: String) => {
-      println("Removing character: " + id)
       (world.getEntityByTag("CHARACTER" + socketMap(id))) match {
         case None =>
           System.out.println(s"Can't find character attached to socket $id.")
