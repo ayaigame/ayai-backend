@@ -43,21 +43,23 @@ object CharacterTable {
   (entity.getComponent(classOf[Position]),
     entity.getComponent(classOf[Character]),
     entity.getComponent(classOf[Room])) match {
-    case(Some(position : Position), Some(character : Character), Some(room : Room)) =>
-      Class.forName("org.h2.Driver");
-      SessionFactory.concreteFactory = Some (() =>
-          Session.create(
-          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-          new H2Adapter))
+      case(Some(position : Position), Some(character : Character), Some(room : Room)) =>
+        Class.forName("org.h2.Driver");
+        SessionFactory.concreteFactory = Some (() =>
+            Session.create(
+            java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+            new H2Adapter))
 
-      transaction {
-        update(AyaiDB.characters)(dbCharacter =>
-          where(dbCharacter.name === character.name)
-          set(dbCharacter.experience := character.experience,
-              dbCharacter.pos_x := position.x,
-              dbCharacter.pos_y := position.y,
-              dbCharacter.room_id := room.id))
-      }
+        transaction {
+          update(AyaiDB.characters)(dbCharacter =>
+            where(dbCharacter.name === character.name)
+            set(dbCharacter.experience := character.experience,
+                dbCharacter.pos_x := position.x,
+                dbCharacter.pos_y := position.y,
+                dbCharacter.room_id := room.id))
+        }
+      case _ =>
+        println("Can't get entites for some reason.")
     }
   }
 
@@ -70,9 +72,9 @@ object CharacterTable {
 
     transaction {
       val characters =
-        from(AyaiDB.characters)(c=>
-          where(c.account_id === accountId)
-          select(c)
+        from(AyaiDB.characters)(character =>
+          where(character.account_id === accountId)
+          select(character)
         )
 
       var characterArray = new ArrayBuffer[JObject]()

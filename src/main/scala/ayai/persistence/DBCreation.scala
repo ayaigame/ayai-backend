@@ -60,13 +60,16 @@ object DBCreation {
       AyaiDB.accounts.insert(tim)
     }
 
-    account = AyaiDB.getAccount("tim").id
-
-    transaction {
-      AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
-      AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
-      AyaiDB.characters.insert(new CharacterRow("Ness", "Warrior", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
-      AyaiDB.characters.insert(new CharacterRow("Ezio", "Thief", 0, account, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+    AyaiDB.getAccount("tim") match {
+      case Some(account: Account) =>
+        transaction {
+          AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+          AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+          AyaiDB.characters.insert(new CharacterRow("Ness", "Warrior", 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+          AyaiDB.characters.insert(new CharacterRow("Ezio", "Thief", 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+        }
+      case _ =>
+        throw(new Exception("Account creation failed!"))
     }
   }
 }
