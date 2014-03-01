@@ -2,9 +2,13 @@ package ayai.systems
 
 /** Ayai Imports **/
 import ayai.components._
+import ayai.gamestate._
 
 /** Crane Imports **/
 import crane.{Entity, EntityProcessingSystem}
+
+/** Akka Imports **/
+import akka.actor.ActorSystem
 
 /** External Imports **/
 import scala.collection.mutable.HashMap
@@ -15,29 +19,22 @@ import org.slf4j.{Logger, LoggerFactory}
 **/
 
 object RoomChangingSystem {
-  def apply() = new RoomChangingSystem()
+  def apply(networkSystem: ActorSystem) = new RoomChangingSystem(networkSystem)
 }
 
-class RoomChangingSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Actionable], classOf[Transport], classOf[Position])) {
+class RoomChangingSystem(networkSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Actionable], classOf[Transport], classOf[Position])) {
   private val log = LoggerFactory.getLogger(getClass)
+  val userRoomMap = networkSystem.actorSelection("user/UserRoomMap")
   override def processEntity(e: Entity, delta: Int) {
     //get information from transport class
     (e.getComponent(classOf[Transport]),
       e.getComponent(classOf[Room]),
       e.getComponent(classOf[Position])) match {
-      case(Some(transportEvent: Transport), Some(roomComponent: Room), Some(position: Position)) =>
+      case(Some(transport: Transport), Some(room: Room),
+        Some(position: Position)) =>
         // TODO: Change Rooms
-        //make sure that room exists
-        //take user out of room
-    //    world.groups("ROOM"+roomComponent.id) -= e
-    //    e.removeComponent(classOf[Room])
-    //    e.components += new Room(transportEvent.toRoom.id)
-    //    world.groups("ROOM"+transportEvent.toRoom.id) += e
-    //    position.x = transportEvent.startPosition.x
-    //    position.y = transportEvent.startPosition.y
-    //    //take user out of their rooms
-    //    e.removeComponent(classOf[Transport])
-    //    e.components += new MapChange(transportEvent.toRoom.id)
+        userRoomMap ! SwapWorld(e.tag, transport.toRoom)
+        e.removeComponent(classOf[Transport])
       case _ =>
         log.warn("052ef02: getComponent failed to return anything")
     }

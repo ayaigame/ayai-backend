@@ -10,7 +10,7 @@ object RespawningSystem {
   def apply() = new RespawningSystem()
 }
 
-class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn])) { 
+class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn])) {
   override def processEntity(e: Entity, delta: Int) {
     var respawn = (e.getComponent(classOf[Respawn]): @unchecked) match {
       case (Some(r: Respawn)) => r
@@ -23,13 +23,13 @@ class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Roo
     }
 
     val position = (e.getComponent(classOf[Position]): @unchecked) match {
-      case Some(p: Position) => p 
+      case Some(p: Position) => p
     }
-    
+
     if(respawn.isReady(System.currentTimeMillis())) {
-        health.refill()
+      health.refill()
       e.removeComponent(classOf[Respawn])
-      e.components += new Transport(position, room)
+      //e.components += new Transport(position, room)
     }
   }
 }
