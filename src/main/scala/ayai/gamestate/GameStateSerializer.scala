@@ -45,7 +45,8 @@ class GameStateSerializer(world: World) extends Actor {
     if(!valid) {
       var entities = world.getEntitiesByComponents(classOf[Character], classOf[Position],
                                                       classOf[Health], classOf[Mana],
-                                                      classOf[Actionable])
+                                                      classOf[Actionable], classOf[QuestBag],
+                                                      classOf[Inventory], classOf[Equipment])
          val jsonLift: JObject =
            ("type" -> "update") ~
             ("players" -> entities.map{ e =>
@@ -53,14 +54,21 @@ class GameStateSerializer(world: World) extends Actor {
                e.getComponent(classOf[Position]),
                e.getComponent(classOf[Health]),
                e.getComponent(classOf[Mana]),
-               e.getComponent(classOf[Actionable])) match {
+               e.getComponent(classOf[Actionable]),
+               e.getComponent(classOf[Inventory]),
+               e.getComponent(classOf[Equipment]),
+               e.getComponent(classOf[QuestBag])) match {
                  case (Some(character: Character), Some(position: Position), Some(health: Health),
-                       Some(mana: Mana), Some(actionable: Actionable)) =>
+                       Some(mana: Mana), Some(actionable: Actionable), Some(inventory: Inventory),
+                       Some(quest: Equipment), Some(equipment: QuestBag)) =>
                    ((character.asJson) ~
                    (position.asJson) ~
                    (health.asJson) ~
                    (mana.asJson) ~
-                   (actionable.action.asJson))
+                   (actionable.action.asJson) ~
+                   (quest.asJson) ~
+                   (inventory.asJson) ~
+                   (equipment.asJson))
                  case _ =>
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing

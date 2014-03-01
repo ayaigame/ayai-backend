@@ -100,18 +100,30 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
         (world.getEntityByTag(s"$userId")) match {
 
-        case Some(initiator: Entity) =>
+        case Some(initiator : Entity) =>
           val position = initiator.getComponent(classOf[Position])
           val movable = initiator.getComponent(classOf[Actionable])
           val character = initiator.getComponent(classOf[Character])
-          (position, movable, character) match {
-            case(Some(pos: Position), Some(a: Actionable), Some(c: Character)) =>
+          val room = initiator.getComponent(classOf[Room])
+          (position, movable, character, room) match {
+            case(Some(pos: Position), Some(a : Actionable), Some(c : Character), Some(r : Room)) =>
               val m = a.action match {
-                case (move: MoveDirection) => move
-                case _ => println("Not match for movedirection")
-                return
-
+                case (move : MoveDirection) => move
+                case _ =>
+                  println("Not match for movedirection")
+                  new MoveDirection(0, 0)
+                  //SHOULD WE THROW?
               }
+
+              //get the range of the characters weapon
+              val weaponRange = initiator.getComponent(classOf[Equipment]) match {
+                case Some(e: Equipment) => e.weapon1.itemType match {
+                  case weapon : Weapon => weapon.range
+                  case _ => 5
+                }
+                case _ => 5
+              }
+
               val upperLeftx = pos.x
               val upperLefty = pos.y
 
@@ -120,27 +132,27 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val xDirection = m.xDirection
               val yDirection = m.yDirection
 
-              val topLeftOfAttackx = (33 * xDirection) + upperLeftx
-              val topLeftOfAttacky = (33 * yDirection) + upperLefty
-
+              val topLeftOfAttackx = ((weaponRange+1) * xDirection) + upperLeftx
+              val topLeftOfAttacky = ((weaponRange+1) * yDirection) + upperLefty
+              println("XDirection: " + xDirection + " YDirection: " + yDirection)
               println("Attack box position: " + topLeftOfAttackx.toString + ", " + topLeftOfAttacky.toString)
 
               val p: Entity = world.createEntity("ATTACK"+bulletId)
 
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
-              p.components += (new Bounds(10, 10))
+              p.components += (new Bounds(weaponRange, weaponRange))
               p.components += (new Attack(initiator));
               p.components += (new Frame(10,0))
+              //p.components += (c)
               world.addEntity(p)
-              //world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
             case _ =>
               log.warn("424e244: getComponent failed to return anything")
           }
           case _ =>
             log.warn("8a87265: getComponent failed to return anything")
-        }
-        sender ! Success
       }
+      sender ! Success      
+    }
 
       case ItemMessage(userId: String, itemAction: ItemAction) => {
         sender ! Success
