@@ -102,20 +102,26 @@ object EntityFactory {
     p.components += equipment
 
     world.addEntity(p)
-    //world.groups("CHARACTERS") += p
-    //world.groups("ROOM"+Constants.STARTING_ROOM_ID) += p
 
     //I think that there should probably be a lookup based on the character's room here.
-    val tilemap: String = "/assets/maps/map3.json"
-    val tileset: String = "/assets/tiles/sd33.png"
+    val roomInfo = world.getEntityByTag("ROOM"+characterRow.room_id) match {
+      case Some(e: Entity) =>
+        e
+      case _ => //load default here (too bored to implement now) 
+        null
+    }
 
+    val tileMap = world.asInstanceOf[RoomWorld].tileMap
+    
+    
     val json = (
       ("type" -> "id") ~
       ("id" -> entityId) ~
       ("x" -> x) ~
       ("y" -> y) ~
-      ("tilemap" -> tilemap) ~
-      ("tileset" -> tileset)
+      ("tilemap" -> tileMap.file) ~
+      (tileMap.tilesets.asJson)
+
     )
 
     val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
