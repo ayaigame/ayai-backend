@@ -9,7 +9,7 @@ import net.liftweb.json._
 
 
 class Item(name: String, value: Int, var weight: Double, val itemType: ItemType) extends Component{
-  var image: String = _
+  var image: String = ""
   def asJson: JObject = {
   	("name" -> name) ~
     ("value" -> value) ~

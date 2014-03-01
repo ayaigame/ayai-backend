@@ -73,7 +73,8 @@ class NetworkMessageInterpreter extends Actor {
         context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(wsFrame.webSocketId, id)
         context.system.actorSelection("user/UserRoomMap") ! AddAssociation(id, lookUpWorldByName("room0"))
 
-        val characterName:String = compact(render(rootJSON \ "name")).substring(1, tempType.length - 1)
+        val tempName: String = compact(render(rootJSON \ "name"))
+        val characterName:String = compact(render(rootJSON \ "name")).substring(1, tempName.length - 1)
         queue ! new AddInterpretedMessage(world, new AddNewCharacter(id, characterName, Constants.STARTING_X, Constants.STARTING_Y))
 
       case "move" =>

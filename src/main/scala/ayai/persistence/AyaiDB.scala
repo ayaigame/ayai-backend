@@ -56,7 +56,7 @@ object AyaiDB extends Schema {
     }
   }
 
-  def getCharacter(chracterName: String) = {
+  def getCharacter(characterName: String) = {
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
@@ -64,7 +64,7 @@ object AyaiDB extends Schema {
         new H2Adapter))
 
     transaction {
-      characters.where(character => character.name === chracterName).single
+      characters.where(character => character.name === characterName).single
     }
   }
 

@@ -11,6 +11,12 @@ import org.mashupbots.socko.webserver.WebServerConfig
 /** Akka Imports **/
 import akka.actor.ActorSystem
 
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+import akka.pattern.ask
+import akka.util.Timeout
+
+import ayai.gamestate._
 
 /** SockoServer
  * Runs a server which will pass packets on to the Interpreter
@@ -23,7 +29,8 @@ object SockoServer {
 class SockoServer(actorSystem: ActorSystem) extends Logger {
   val authorization = actorSystem.actorSelection("user/AProcessor")
   val interpreter = actorSystem.actorSelection("user/NMInterpreter")
-  val queue = actorSystem.actorSelection("user/Queue")
+  val queue = actorSystem.actorSelection("user/MQueue")
+  implicit val timeout = Timeout(2 seconds)
 
   val routes = Routes({
     case HttpRequest(httpRequest) => httpRequest match {
@@ -80,9 +87,14 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
     }
   })
 
-  def testOnCloseCallback(webSocketId: String) {
-    System.out.println(s"Web Socket $webSocketId closed")
-    queue ! new AddInterpretedMessage("", new RemoveCharacter(webSocketId))
+  def testOnCloseCallback(socketId: String) {
+    System.out.println(s"Web Socket $socketId closed")
+    val future = actorSystem.actorSelection("user/SocketUserMap") ? GetUserId(socketId)
+    val userId = Await.result(future, timeout.duration).asInstanceOf[String]
+    val worldFuture = actorSystem.actorSelection("user/UserRoomMap") ? GetWorld(userId)
+    val world = Await.result(worldFuture, timeout.duration).asInstanceOf[RoomWorld].name
+    println(world)
+    queue ! new AddInterpretedMessage(world, new RemoveCharacter(socketId))
   }
 
   def run(port: Int) {
