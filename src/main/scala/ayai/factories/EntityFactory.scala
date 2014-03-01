@@ -7,7 +7,7 @@ import ayai.actions._
 import ayai.gamestate._
 import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
-import ayai.persistence.AyaiDB
+import ayai.persistence.{AyaiDB, CharacterRow}
 import ayai.apps.Constants
 
 /** Crane Imports **/
@@ -31,102 +31,108 @@ object EntityFactory {
   //Should take characterId: Long as a parameter instead of characterName
   //However can't do that until front end actually gives me the characterId
   def loadCharacter(world: World, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
-    val p: Entity = world.createEntity(tag=entityId)
-    val characterRow = AyaiDB.getCharacter(characterName)
+    AyaiDB.getCharacter(characterName) match {
+      case Some(characterRow: CharacterRow) =>
+        val p: Entity = world.createEntity(tag=entityId)
+        p.components += new Position(characterRow.pos_x,characterRow.pos_y)
+        p.components += new Velocity(3,4)
+        p.components += new Bounds(32, 32)
+        p.components += new Velocity(4, 4)
+        p.components += new Actionable(false, DownDirection)
+        p.components += new Health(100,100)
+        p.components += new NetworkingActor(actor)
+        p.components += new Mana(200,200)
+        p.components += new Room(characterRow.room_id)
+        p.components += new Character(entityId, characterRow.name, characterRow.experience)
 
-    p.components += new Position(characterRow.pos_x,characterRow.pos_y)
-    p.components += new Velocity(3,4)
-    p.components += new Bounds(32, 32)
-    p.components += new Velocity(4, 4)
-    p.components += new Actionable(false, DownDirection)
-    p.components += new Health(100,100)
-    p.components += new NetworkingActor(actor)
-    p.components += new Mana(200,200)
-    p.components += new Room(characterRow.room_id)
-    p.components += new Character(entityId, characterRow.name, characterRow.experience)
+        val questbag = new QuestBag()
+        questbag.addQuest(world.getEntityByTag("QUEST1") match {
+          case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
+            case Some(quest: Quest) => quest
+            case _ => null
+          }
+          case _ => null
+        })
+        questbag.addQuest(world.getEntityByTag("QUEST2") match {
+          case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
+            case Some(quest: Quest) => quest
+            case _ => null
+          }
+          case _ => null
+        })
 
-    val questbag = new QuestBag()
-    questbag.addQuest(world.getEntityByTag("QUEST1") match {
-      case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
-        case Some(quest: Quest) => quest
-        case _ => null
-      }
-      case _ => null
-    })
-    questbag.addQuest(world.getEntityByTag("QUEST2") match {
-      case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
-        case Some(quest: Quest) => quest
-        case _ => null
-      }
-      case _ => null
-    })
+        p.components += questbag
 
-    p.components += questbag
+        val inventory = new Inventory()
+        // inventory.addItem(world.getEntityByTag("ITEMS0") match {
+        //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
+        //       case Some(it: Item) => it
+        //       case _ => null
+        //     }
 
-    val inventory = new Inventory()
-    // inventory.addItem(world.getEntityByTag("ITEMS0") match {
-    //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
-    //       case Some(it: Item) => it
-    //       case _ => null
-    //     }
+        //     case _ => null
+        // })
+        // inventory.addItem(world.getEntityByTag("ITEMS1") match {
+        //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
+        //       case Some(it: Item) => it
+        //       case _ => null
+        //     }
 
-    //     case _ => null
-    // })
-    // inventory.addItem(world.getEntityByTag("ITEMS1") match {
-    //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
-    //       case Some(it: Item) => it
-    //       case _ => null
-    //     }
+        //     case _ => null
+        // })
+        // inventory.addItem(world.getEntityByTag("ITEMS2") match {
+        //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
+        //       case Some(it: Item) => it
+        //       case _ => null
+        //     }
 
-    //     case _ => null
-    // })
-    // inventory.addItem(world.getEntityByTag("ITEMS2") match {
-    //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
-    //       case Some(it: Item) => it
-    //       case _ => null
-    //     }
+        //     case _ => null
+        // })
+        // inventory.addItem(world.getEntityByTag("ITEMS1") match {
+        //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
+        //       case Some(it: Item) => it
+        //       case _ => null
+        //     }
 
-    //     case _ => null
-    // })
-    // inventory.addItem(world.getEntityByTag("ITEMS1") match {
-    //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
-    //       case Some(it: Item) => it
-    //       case _ => null
-    //     }
+        //     case _ => null
+        // })
+        p.components += inventory
 
-    //     case _ => null
-    // })
-    p.components += inventory
+        val equipment = new Equipment()
+        // equipment.equipWeapon1(inventory.getItem(1))
+        p.components += equipment
 
-    val equipment = new Equipment()
-    // equipment.equipWeapon1(inventory.getItem(1))
-    p.components += equipment
+        world.addEntity(p)
 
-    world.addEntity(p)
+        //I think that there should probably be a lookup based on the character's room here.
+        val roomInfo = world.getEntityByTag("ROOM"+characterRow.room_id) match {
+          case Some(e: Entity) =>
+            e
+          case _ => //load default here (too bored to implement now)
+            null
+        }
 
-    //I think that there should probably be a lookup based on the character's room here.
-    val roomInfo = world.getEntityByTag("ROOM"+characterRow.room_id) match {
-      case Some(e: Entity) =>
-        e
-      case _ => //load default here (too bored to implement now)
-        null
+        val tileMap = world.asInstanceOf[RoomWorld].tileMap
+
+
+        val json = (
+          ("type" -> "id") ~
+          ("id" -> entityId) ~
+          ("x" -> x) ~
+          ("y" -> y) ~
+          ("tilemap" -> tileMap.file) ~
+          (tileMap.tilesets.asJson)
+
+        )
+
+        val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
+        actorSelection ! new ConnectionWrite(compact(render(json)))
+
+      case _ =>
+        println("CHARACTER NOT FOUND!!!!!!!!!!")
+        val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
+        actorSelection ! new ConnectionWrite(":(")
     }
-
-    val tileMap = world.asInstanceOf[RoomWorld].tileMap
-
-
-    val json = (
-      ("type" -> "id") ~
-      ("id" -> entityId) ~
-      ("x" -> x) ~
-      ("y" -> y) ~
-      ("tilemap" -> tileMap.file) ~
-      (tileMap.tilesets.asJson)
-
-    )
-
-    val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
-    actorSelection ! new ConnectionWrite(compact(render(json)))
   }
 
 /**

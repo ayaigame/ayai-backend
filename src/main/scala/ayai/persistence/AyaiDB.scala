@@ -56,7 +56,7 @@ object AyaiDB extends Schema {
     }
   }
 
-  def getCharacter(characterName: String) = {
+  def getCharacter(characterName: String): Option[CharacterRow] = {
     Class.forName("org.h2.Driver");
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
@@ -64,7 +64,11 @@ object AyaiDB extends Schema {
         new H2Adapter))
 
     transaction {
-      characters.where(character => character.name === characterName).single
+      val characterQuery = characters.where(character => character.name === characterName)
+      if(characterQuery.size == 1)
+        Some(characterQuery.single)
+      else
+        None
     }
   }
 
