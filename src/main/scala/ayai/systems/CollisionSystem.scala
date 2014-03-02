@@ -106,8 +106,8 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
       ("damage" -> damage) ~
       ("initiator" -> initiatorId) ~
       ("victim" -> victimId)
-    // val actorSelection = actorSystem.actorSelection("user/EQueue")
-    // actorSelection ! new ConnectionWrite(compact(render(att)))
+    val actorSelection = actorSystem.actorSelection("user/SockoSender*")
+    actorSelection ! new ConnectionWrite(compact(render(att)))
   }
 
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
