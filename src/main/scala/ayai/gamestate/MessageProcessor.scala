@@ -168,6 +168,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //    println("Error from PublicChatMessage")
         //}
       }
+      case EquipMessage() => 
       case _ => println("Error from MessageProcessor.")
         sender ! Failure
     }

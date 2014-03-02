@@ -4,8 +4,7 @@ package ayai.apps
 import ayai.networking._
 import ayai.components._
 import ayai.persistence._
-import ayai.gamestate.{Effect, EffectType, GameStateSerializer, CharacterRadius, MapRequest, RoomWorld, MessageQueue, MessageProcessor,
-SocketUserMap, UserRoomMap, RoomList, AddWorld}
+import ayai.gamestate._
 import ayai.factories._
 
 /** Akka Imports **/
@@ -20,6 +19,7 @@ import scala.concurrent.duration._
 import scala.collection.concurrent.{Map => ConcurrentMap, TrieMap}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
+
 
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -45,9 +45,14 @@ object GameLoop {
     val socketUserMap = networkSystem.actorOf(Props[SocketUserMap], name="SocketUserMap")
     val userRoomMap = networkSystem.actorOf(Props[UserRoomMap], name="UserRoomMap")
     val roomList = networkSystem.actorOf(Props[RoomList], name="RoomList")
+    val itemMap = networkSystem.actorOf(Props[ItemMap], name="ItemMap")
+    val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
 
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
+
+    val itemFactory = ItemFactory.bootup(networkSystem)    
+    val questFactory = QuestFactory.bootup(networkSystem)
 
     for((file, index) <- rooms.zipWithIndex)
       worlds(s"room$index") = worldFactory.createWorld(s"room$index", s"$file")
