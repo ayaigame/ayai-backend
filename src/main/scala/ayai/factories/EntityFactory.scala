@@ -20,14 +20,20 @@ import crane.World
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
+import scala.concurrent.{Await, ExecutionContext, Promise}
+import scala.concurrent.duration._
 import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.io.Source
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
+import akka.pattern.ask
+import akka.util.Timeout
 
 
 object EntityFactory {
+  implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
+
   //Should take characterId: Long as a parameter instead of characterName
   //However can't do that until front end actually gives me the characterId
   def loadCharacter(world: World, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
@@ -46,60 +52,31 @@ object EntityFactory {
         p.components += new Character(entityId, characterRow.name, characterRow.experience)
 
         val questbag = new QuestBag()
-        questbag.addQuest(world.getEntityByTag("QUEST1") match {
-          case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
-            case Some(quest: Quest) => quest
-            case _ => null
-          }
-          case _ => null
-        })
-        questbag.addQuest(world.getEntityByTag("QUEST2") match {
-          case Some(e: Entity) => e.getComponent(classOf[Quest]) match {
-            case Some(quest: Quest) => quest
-            case _ => null
-          }
-          case _ => null
-        })
+        val questSelection = networkSystem.actorSelection("user/QuestMap")
+        var future = questSelection ? GetQuest("QUEST1")
+        questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
+        future = questSelection ? GetQuest("QUEST2")
+        questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
 
         p.components += questbag
 
         val inventory = new Inventory()
-        // inventory.addItem(world.getEntityByTag("ITEMS0") match {
-        //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
-        //       case Some(it: Item) => it
-        //       case _ => null
-        //     }
 
-        //     case _ => null
-        // })
-        // inventory.addItem(world.getEntityByTag("ITEMS1") match {
-        //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
-        //       case Some(it: Item) => it
-        //       case _ => null
-        //     }
+        val itemSelection = networkSystem.actorSelection("user/ItemMap")
+        future = itemSelection ? GetItem("ITEM1")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
-        //     case _ => null
-        // })
-        // inventory.addItem(world.getEntityByTag("ITEMS2") match {
-        //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
-        //       case Some(it: Item) => it
-        //       case _ => null
-        //     }
+        future = itemSelection ? GetItem("ITEM2")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        future = itemSelection ? GetItem("ITEM1")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        future = itemSelection ? GetItem("ITEM0")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
-        //     case _ => null
-        // })
-        // inventory.addItem(world.getEntityByTag("ITEMS1") match {
-        //     case Some(e: Entity) => e.getComponent(classOf[Item]) match {
-        //       case Some(it: Item) => it
-        //       case _ => null
-        //     }
-
-        //     case _ => null
-        // })
         p.components += inventory
 
         val equipment = new Equipment()
-        // equipment.equipWeapon1(inventory.getItem(1))
+        equipment.equipWeapon1(inventory.getItem(1))
         p.components += equipment
 
         world.addEntity(p)

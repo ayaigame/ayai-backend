@@ -2,6 +2,7 @@ package ayai.factories
 
 /** Ayai Imports **/
 import ayai.components._
+import ayai.gamestate._
 
 /** Crane Imports **/
 import crane.World
@@ -11,6 +12,8 @@ import crane.Entity
 import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.Status.{Success, Failure}
 
 object ItemFactory {
 
@@ -30,15 +33,15 @@ object ItemFactory {
       stats: Option[List[Stat]],
       image: Option[String])
 
-  def bootup(world: World) = {
+  def bootup(networkSystem: ActorSystem) = {
     val items: List[AllItemValues] = getItemsList("src/main/resources/configs/items/items.json")
 
-    instantiateWeapons(world, items.filter((item: AllItemValues) => item.itemType == "weapon"))
+    instantiateWeapons(networkSystem, items.filter((item: AllItemValues) => item.itemType == "weapon"))
     // instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "armor"))
-    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "helmet"))
-    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "braces"))
-    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "legs"))
-    instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "feet"))
+    instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "helmet"))
+    instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "braces"))
+    instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "legs"))
+    instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "feet"))
   }
 
   def buildStats(item: AllItemValues): Stats = {
@@ -47,9 +50,8 @@ object ItemFactory {
     new Stats(statsArray)
   }
 
-  def instantiateWeapons(world: World, items: List[AllItemValues]) = {
+  def instantiateWeapons(networkSystem: ActorSystem, items: List[AllItemValues]) = {
     items.foreach (item => {
-      var entityItem: Entity = world.createEntity()
       var weapon = new Item(
         item.name,
         item.value,
@@ -59,19 +61,12 @@ object ItemFactory {
         item.damageType.get, item.itemType))
       weapon.image = item.image.get
 
-      entityItem.components += weapon
-
-      //Construct stats component
-      entityItem.components += buildStats(item)
-      world.addEntity(entityItem)
-
-      entityItem.tag = "ITEMS" + item.id
+      networkSystem.actorSelection("user/ItemMap") ! AddItem("ITEM"+item.id, weapon)
     })
   }
 
-  def instantiateArmor(world: World, items: List[AllItemValues]) = {
+  def instantiateArmor(networkSystem: ActorSystem, items: List[AllItemValues]) = {
     items.foreach (item => {
-      var entityItem: Entity = world.createEntity()
       var armor = new Item(
         item.name,
         item.value,
@@ -80,21 +75,15 @@ object ItemFactory {
         item.protection.get, item.itemType))
       armor.image = ""
 
-      entityItem.components += armor
-
-      //Construct stats component
-      entityItem.components += buildStats(item)
-
-      world.addEntity(entityItem)
-      entityItem.tag = "ITEMS" + item.id
+      networkSystem.actorSelection("user/ItemMap") ! AddItem("ITEM"+item.id, armor)
     })
   }
 
-  def instantiateConsumables(world: World, items: List[AllItemValues]) = {
+  def instantiateConsumables(networkSystem: ActorSystem, items: List[AllItemValues]) = {
 
   }
 
-  def instantiateBaseItems(world: World, items: List[AllItemValues]) = {
+  def instantiateBaseItems(networkSystem: ActorSystem,  items: List[AllItemValues]) = {
 
   }
 

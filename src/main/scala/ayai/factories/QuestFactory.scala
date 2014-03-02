@@ -1,6 +1,7 @@
 package ayai.factories
 
 import ayai.components._
+import ayai.gamestate._
 import ayai.quests._
 /** Crane Imports **/
 import crane.{Entity, World}
@@ -10,6 +11,8 @@ import net.liftweb.json.JsonDSL._
 
 import scala.collection.mutable._
 
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.Status.{Success, Failure}
 
 object QuestFactory {
 	case class AllQuestValues(
@@ -19,11 +22,10 @@ object QuestFactory {
       recommendLevel: String,
       objective: Objective)
 
-  def bootup(world: World) = {
-    val quests: List[Quest] = getQuestList("src/main/resources/configs/quests/Quests.json")
+  def bootup(networkSystem: ActorSystem) = {
+    val quests: List[Quest] = getQuestList("src/main/resources/quests/quests.json")
 
     quests.foreach (questData => {
-      var entityQuest: Entity = world.createEntity(tag="QUEST"+questData.id)
       var questComponent = new Quest(
         questData.id,
         questData.title,
@@ -31,10 +33,7 @@ object QuestFactory {
         questData.recommendLevel,
         questData.objectives)
 
-      entityQuest.components += questComponent
-
-      world.addEntity(entityQuest)
-      // world.getManager(classOf[TagManager]).register("CLASSES" + classData.id, entityClass)
+      networkSystem.actorSelection("user/QuestMap") ! AddQuest("QUEST"+questData.id, questComponent)
     })
   }
 
