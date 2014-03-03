@@ -168,7 +168,28 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //    println("Error from PublicChatMessage")
         //}
       }
-      case EquipMessage() => 
+      case EquipMessage(userId: String, slot: Int, equipmentType: String) => 
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) =>
+            (e.getComponent(classOf[Inventory]),
+              e.getComponent(classOf[Equipment])) match {
+                case (Some(inventory: Inventory), Some(equipment: Equipment)) => 
+                  // get item to equip
+                  //check to see if there is an item already equipped
+                  // unequip that item
+                  // then store that item in inventory
+                  // then equip the new item
+                  val item = inventory.inventory(slot).copy()
+                  equipment match {
+                    case "helmet" => equp 
+                  }
+                  
+                  
+                case _ =>
+              }
+               
+        }
+        
       case _ => println("Error from MessageProcessor.")
         sender ! Failure
     }

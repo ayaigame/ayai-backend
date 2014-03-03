@@ -42,4 +42,4 @@ case class CreateCharacterPost(request: HttpRequestEvent) extends NetworkMessage
 case class PublicChatMessage(message: String, sender: String) extends NetworkMessage
 case class OpenMessage(socketId: String, containerId: String) extends NetworkMessage
 case class CharacterList(socketId: String, accountName: String) extends NetworkMessage
-case class EquipMessage() extends NetworkMessage
+case class EquipMessage(userId: String, slot: Int, equipment: String) extends NetworkMessage
