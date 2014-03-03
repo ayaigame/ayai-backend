@@ -4,42 +4,68 @@ import ayai.components._
 import crane.Component
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
+import scala.collection.mutable.HashMap
 
-
-class Equipment() extends Component {
-  object EmptySlot extends Item("",0,0,EmptyType) {}
-  object EmptyType extends ItemType {
+case class EmptySlot extends Item("",0,0,EmptyType) {}
+object EmptyType extends ItemType {
     override def asJson(): JObject = ("empty" -> "")
+    override def copy(): ItemType = EmptyType
   }
-  var helmet: Item = EmptySlot
-  var weapon1: Item = EmptySlot
-  var weapon2: Item = EmptySlot
-  var torso: Item = EmptySlot
-  var legs: Item = EmptySlot
-  var feet: Item = EmptySlot
+class Equipment() extends Component {
+  val equipmentMap: HashMap[String,Item] = new HashMap[String, Item]()
+  equipmentMap += ("helmet" -> new EmptySlot())
+  equipmentMap += ("weapon1" -> new EmptySlot())
+  equipmentMap += ("weapon2" -> new EmptySlot())
+  equipmentMap += ("torso" -> new EmptySlot())
+  equipmentMap += ("feet" -> new EmptySlot())
+  equipmentMap += ("legs" -> new EmptySlot())
+  //if true then it is right weapon type and is equipped
+  // and put old item back in
+  //and take old back
+  // return to sender a success
+  def equipItem(item: Item): Boolean = {
+    item.itemType match {
+      case weapon: Weapon =>
+        weapon.itemType match {
+          case "weapon1" => 
+            equipmentMap(weapon.itemType) = item
+            return true
+          case "weapon2" => 
+            equipmentMap(weapon.itemType) = item
+            return true
+          case _ =>
+            return false
+        }
+      case armor: Armor =>
+        armor.itemType match {
+          case "helmet" => 
+            equipmentMap(armor.itemType) = item
+            return true
+          case "feet" =>
+            equipmentMap(armor.itemType) = item
+            return true
+          case "torso" =>
+            equipmentMap(armor.itemType) = item
+            return true
+          case "legs" =>
+            equipmentMap(armor.itemType) = item
+            return true
+          case _ =>
+            return false
+        }
+      case _ => 
+        return false
+    }
+  }
 
-  def equipWeapon1(weapon: Item) {
-    weapon.itemType match {
-      case weaponType: Weapon => 
-        weapon1 = weapon
-      case _ =>
-    }
-  }
-  def equipWeapon2(weapon: Item) {
-    weapon.itemType match {
-      case weaponType: Weapon => 
-        weapon2 = weapon
-      case _ =>
-    }
-  }
 
   def asJson(): JObject = {
     ("equipment" ->
-      ("helmet" -> helmet.asJson) ~
-      ("weapon1" -> weapon1.asJson) ~
-      ("weapon2" -> weapon2.asJson) ~
-      ("torso" -> torso.asJson) ~
-      ("legs" -> legs.asJson) ~
-      ("feet" -> feet.asJson))
+      ("helmet" -> equipmentMap("helmet").asJson) ~
+      ("weapon1" -> equipmentMap("weapon1").asJson) ~
+      ("weapon2" -> equipmentMap("weapon2").asJson) ~
+      ("torso" -> equipmentMap("torso").asJson) ~
+      ("legs" -> equipmentMap("legs").asJson) ~
+      ("feet" -> equipmentMap("feet").asJson))
   }
 }

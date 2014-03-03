@@ -65,6 +65,7 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
             case Some(na : NetworkingActor) => na
             case _ => null
       }
+      // println(result)
       actorSelection.actor ! new ConnectionWrite(result)
     }
     serializer ! Refresh

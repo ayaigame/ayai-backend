@@ -54,12 +54,12 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
     }
     entity.getComponent(classOf[Equipment]) match {
       case Some(equipment: Equipment) =>
-          equipment.weapon1.itemType match {
+          equipment.equipmentMap("weapon1").itemType match {
             case weapon: Weapon =>
             weaponValue += weapon.damage
             case _ =>
         }
-          equipment.weapon2.itemType match {
+          equipment.equipmentMap("weapon2").itemType match {
             case weapon: Weapon =>
             weaponValue += weapon.damage
             case _ =>

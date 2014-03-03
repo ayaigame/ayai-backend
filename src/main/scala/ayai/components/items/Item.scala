@@ -17,4 +17,8 @@ class Item(name: String, value: Int, var weight: Double, val itemType: ItemType)
     ("image" -> image) ~
     ("itemType" -> itemType.asJson)
   }
+
+  def copy(): Item = {
+  	new Item(name, value, weight, itemType.copy)
+  }
 }

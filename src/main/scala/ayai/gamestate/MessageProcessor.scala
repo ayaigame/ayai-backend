@@ -114,7 +114,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
               //get the range of the characters weapon
               val weaponRange = initiator.getComponent(classOf[Equipment]) match {
-                case Some(e: Equipment) => e.weapon1.itemType match {
+                case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
                   case weapon : Weapon => weapon.range
                   case _ => 5
                 }
@@ -168,10 +168,33 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //    println("Error from PublicChatMessage")
         //}
       }
-      case EquipMessage() => 
+      case EquipMessage(userId: String, slot: Int, equipmentType: String) => 
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) =>
+            (e.getComponent(classOf[Inventory]),
+              e.getComponent(classOf[Equipment])) match {
+                case (Some(inventory: Inventory), Some(equipment: Equipment)) => 
+                  val item = inventory.inventory(slot)
+                  val equipItem = equipment.equipmentMap(equipmentType)
+                  if(equipment.equipItem(item)) {
+                    inventory.inventory -= item
+                    if(!isEmptySlot(equipItem)) {
+                      inventory.inventory += equipItem
+                    }
+                    // sender ! Success
+                  } 
+                  else {
+                  }
+              }
+        }
+        
       case _ => println("Error from MessageProcessor.")
-        sender ! Failure
     }
+    sender ! Success
+  }
+
+  def isEmptySlot(item: Item): Boolean = {
+    item.isInstanceOf[EmptySlot]
   }
 
   def receive = {
