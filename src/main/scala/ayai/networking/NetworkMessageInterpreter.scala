@@ -101,7 +101,6 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new MoveMessage(userId, start, direction))
 
       case "attack" =>
-        println("Attack Received")
         queue ! new AddInterpretedMessage(world, new AttackMessage(userId))
 
       case "chat" =>

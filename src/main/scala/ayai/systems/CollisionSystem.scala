@@ -93,7 +93,6 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
     }
     // remove the attack component of entity A
     var damageDone = handleAttackDamage(damage, healthComponent)
-    println("DID DAMAGE: " + damage)
     val initiatorId = initiator.getComponent(classOf[Character]) match {
       case Some(character : Character) =>
         character.id
