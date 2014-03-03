@@ -42,9 +42,7 @@ case class Inventory (inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()) ex
   }
 
   def totalWeight() : Double = {
-    var totalWeight = 0.0;
-    inventory.foreach(e => totalWeight = totalWeight + e.weight)
-    return totalWeight
+    inventory map (_.weight) reduceLeft (_+_)
   }
 
 }
