@@ -181,18 +181,16 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                     if(!isEmptySlot(equipItem)) {
                       inventory.inventory += equipItem
                     }
-                    sender ! Success
+                    // sender ! Success
                   } 
                   else {
-                    sender ! Failure
                   }
               }
-               sender ! Failure
         }
         
       case _ => println("Error from MessageProcessor.")
-        sender ! Failure
     }
+    sender ! Success
   }
 
   def isEmptySlot(item: Item): Boolean = {

@@ -101,7 +101,6 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new MoveMessage(userId, start, direction))
 
       case "attack" =>
-        println("Attack Received")
         queue ! new AddInterpretedMessage(world, new AttackMessage(userId))
 
       case "chat" =>
@@ -118,7 +117,6 @@ class NetworkMessageInterpreter extends Actor {
         val accountName: String = (rootJSON \ "accountName").extract[String]
         queue ! new CharacterList(userId, accountName)
       case "equip" => 
-        println("Interpreter")
         val slot: Int = (rootJSON \ "slot").extract[Int]
         val equipmentType: String = (rootJSON \ "equipmentType").extract[String]
         queue ! new AddInterpretedMessage(world, new EquipMessage(userId, slot, equipmentType))    
