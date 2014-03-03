@@ -41,7 +41,7 @@ case class Inventory (inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()) ex
     inventory(itemLocation)
   }
 
-  def totalWeight() : Double = {
+  def totalWeight : Double = {
     inventory map (_.weight) reduceLeft (_+_)
   }
 
