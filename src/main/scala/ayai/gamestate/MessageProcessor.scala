@@ -114,7 +114,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
               //get the range of the characters weapon
               val weaponRange = initiator.getComponent(classOf[Equipment]) match {
-                case Some(e: Equipment) => e.weapon1.itemType match {
+                case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
                   case weapon : Weapon => weapon.range
                   case _ => 5
                 }
@@ -176,51 +176,17 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) => 
                   val item = inventory.inventory(slot)
-                  equipmentType match {
-                    case "helmet" => 
-                      println("RECEIVED HELMET")
-                      val equipItem = equipment.helmet.copy()
-                      if(equipment.equipHelmet(item)) {
-                        inventory.inventory -= item
-                        if(!isEmptySlot(equipItem)) {
-                          inventory.inventory += equipItem
-                        }
-                        sender ! Success
-                      } else {
-                        sender ! Failure
-                      }
-                    case "weapon1" => 
-                      if(equipment.equipWeapon1(item)) {
-                        sender ! Success
-                      } else {
-                        sender ! Failure
-                      }
-                    case "feet" => 
-                      if(equipment.equipFeet(item)) {
-                        sender ! Success
-                      } else {
-                        sender ! Failure
-                      }
-                    case "legs" => 
-                      if(equipment.equipLegs(item)) {
-                        sender ! Success
-                      } else {
-                        sender ! Failure
-                      }
-                    case "weapon2" => 
-                      if(equipment.equipWeapon2(item)) {
-                        sender ! Success
-                      } else {
-                        sender ! Failure
-                      }
-                    case "torso" => 
-                      if(equipment.equipTorso(item)) {
-                        sender ! Success
-                      } else {
-                        sender ! Failure
-                      }
-                  }                  
-                case _ => sender ! Failure
+                  val equipItem = equipment.equipmentMap(equipmentType)
+                  if(equipment.equipItem(item)) {
+                    inventory.inventory -= item
+                    if(!isEmptySlot(equipItem)) {
+                      inventory.inventory += equipItem
+                    }
+                    sender ! Success
+                  } 
+                  else {
+                    sender ! Failure
+                  }
               }
                sender ! Failure
         }
