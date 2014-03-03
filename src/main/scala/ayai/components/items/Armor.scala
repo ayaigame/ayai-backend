@@ -15,5 +15,8 @@ case class Armor(
       ("protection" -> protection) ~
       ("type" -> itemtype)
     }
-  
+	override def copy(): ItemType = {
+    	new Armor(slot, protection, itemtype)
+  	}
+
 }

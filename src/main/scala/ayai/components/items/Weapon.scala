@@ -21,4 +21,7 @@ case class Weapon(
       ("damageType" -> damageType) ~
       ("type" -> itemtype)
   }
+  override def copy(): ItemType = {
+    new Weapon(range, damage, damageType, itemtype)
+  }
 }

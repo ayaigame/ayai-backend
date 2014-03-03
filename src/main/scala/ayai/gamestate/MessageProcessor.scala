@@ -169,30 +169,69 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //}
       }
       case EquipMessage(userId: String, slot: Int, equipmentType: String) => 
+        println("INSIDE EQUIP MESSAGE")
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) => 
-                  // get item to equip
-                  //check to see if there is an item already equipped
-                  // unequip that item
-                  // then store that item in inventory
-                  // then equip the new item
-                  val item = inventory.inventory(slot).copy()
-                  equipment match {
-                    case "helmet" => equp 
-                  }
-                  
-                  
-                case _ =>
+                  val item = inventory.inventory(slot)
+                  equipmentType match {
+                    case "helmet" => 
+                      println("RECEIVED HELMET")
+                      val equipItem = equipment.helmet.copy()
+                      if(equipment.equipHelmet(item)) {
+                        inventory.inventory -= item
+                        if(!isEmptySlot(equipItem)) {
+                          inventory.inventory += equipItem
+                        }
+                        sender ! Success
+                      } else {
+                        sender ! Failure
+                      }
+                    case "weapon1" => 
+                      if(equipment.equipWeapon1(item)) {
+                        sender ! Success
+                      } else {
+                        sender ! Failure
+                      }
+                    case "feet" => 
+                      if(equipment.equipFeet(item)) {
+                        sender ! Success
+                      } else {
+                        sender ! Failure
+                      }
+                    case "legs" => 
+                      if(equipment.equipLegs(item)) {
+                        sender ! Success
+                      } else {
+                        sender ! Failure
+                      }
+                    case "weapon2" => 
+                      if(equipment.equipWeapon2(item)) {
+                        sender ! Success
+                      } else {
+                        sender ! Failure
+                      }
+                    case "torso" => 
+                      if(equipment.equipTorso(item)) {
+                        sender ! Success
+                      } else {
+                        sender ! Failure
+                      }
+                  }                  
+                case _ => sender ! Failure
               }
-               
+               sender ! Failure
         }
         
       case _ => println("Error from MessageProcessor.")
         sender ! Failure
     }
+  }
+
+  def isEmptySlot(item: Item): Boolean = {
+    item.isInstanceOf[EmptySlot]
   }
 
   def receive = {

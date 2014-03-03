@@ -5,4 +5,5 @@ import net.liftweb.json._
 
 trait ItemType {
 	def asJson(): JObject
+	def copy(): ItemType
 }
