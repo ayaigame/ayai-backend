@@ -13,7 +13,12 @@ object EmptyType extends ItemType {
   }
 class Equipment() extends Component {
   val equipmentMap: HashMap[String,Item] = new HashMap[String, Item]()
-
+  equipmentMap += ("helmet" -> new EmptySlot())
+  equipmentMap += ("weapon1" -> new EmptySlot())
+  equipmentMap += ("weapon2" -> new EmptySlot())
+  equipmentMap += ("torso" -> new EmptySlot())
+  equipmentMap += ("feet" -> new EmptySlot())
+  equipmentMap += ("legs" -> new EmptySlot())
   //if true then it is right weapon type and is equipped
   // and put old item back in
   //and take old back

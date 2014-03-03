@@ -169,7 +169,6 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //}
       }
       case EquipMessage(userId: String, slot: Int, equipmentType: String) => 
-        println("INSIDE EQUIP MESSAGE")
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory]),

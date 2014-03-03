@@ -76,7 +76,6 @@ object EntityFactory {
         p.components += inventory
 
         val equipment = new Equipment()
-        equipment.equipWeapon1(inventory.getItem(1))
         p.components += equipment
 
         world.addEntity(p)
