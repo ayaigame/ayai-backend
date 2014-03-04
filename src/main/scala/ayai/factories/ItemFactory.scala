@@ -36,7 +36,8 @@ object ItemFactory {
   def bootup(networkSystem: ActorSystem) = {
     val items: List[AllItemValues] = getItemsList("src/main/resources/configs/items/items.json")
 
-    instantiateWeapons(networkSystem, items.filter((item: AllItemValues) => item.itemType == "weapon"))
+    instantiateWeapons(networkSystem, items.filter((item: AllItemValues) => item.itemType == "weapon1"))
+    instantiateWeapons(networkSystem, items.filter((item: AllItemValues) => item.itemType == "weapon2"))
     // instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "armor"))
     instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "helmet"))
     instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "braces"))

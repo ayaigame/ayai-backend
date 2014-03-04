@@ -74,7 +74,7 @@ class GameStateSerializer(world: World) extends Actor {
          }
 
     }
-
+    println(compact(render(getCharacterAssets(e))))
     sender ! compact(render(("type" -> "update")~(roomJSON)~(getCharacterAssets(e))))
   }
 
