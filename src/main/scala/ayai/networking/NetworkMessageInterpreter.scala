@@ -3,7 +3,9 @@ package ayai.networking
 /** Ayai Imports **/
 import ayai.gamestate._
 import ayai.actions._
+import ayai.persistence._
 import ayai.apps.Constants
+import ayai.networking.chat._
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
@@ -107,8 +109,14 @@ class NetworkMessageInterpreter extends Actor {
         val message = compact(render(rootJSON \ "message"))
         val tempSender: String = compact(render(rootJSON \ "sender"))
         val sender = tempSender.substring(1, tempSender.length - 1)
-        queue ! new AddInterpretedMessage(world, new PublicChatMessage(message, sender))
-
+        val account = AyaiDB.getAccount(sender)
+        account match {
+          case Some(a: Account) =>
+            context.system.actorOf(Props[ChatReceiver]) ! new ChatHolder(new PublicChat(message, a), lookUpWorldByName(world))
+          case _ =>
+            println(s"Could not find user $sender")
+        }
+                
       case "open" =>
         val containerId: String = (rootJSON \ "containerId").extract[String]
         queue ! new AddInterpretedMessage(world, new OpenMessage(userId, containerId))

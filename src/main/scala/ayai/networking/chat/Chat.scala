@@ -6,6 +6,7 @@ package ayai.networking.chat
 
 /** Ayai Imports **/
 import ayai.persistence.Account
+import crane.World
 
 trait Chat { 
   val text: String
@@ -14,6 +15,6 @@ trait Chat {
 
 case class PublicChat(text: String, sender: Account) extends Chat
 case class PrivateChat(text: String, sender: Account, receiver: Account) extends Chat
-case class ChatHolder(held: Chat)
+case class ChatHolder(held: Chat, world: World)
 
 case class CheckIn(receiver: Account)
