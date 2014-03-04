@@ -187,11 +187,29 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   }
               }
         }
+        sender ! Success
+      case UnequipMessage(userId: String, equipmentType: String) =>
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) =>
+            (e.getComponent(classOf[Inventory]),
+              e.getComponent(classOf[Equipment])) match {
+                case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
+                  val equippedItem = equipment.equipmentMap(equipmentType)
+                  equippedItem match {
+                    case weapon: Weapon => 
+                      inventory.inventory += equippedItem
+                    case armor: Armor => 
+                      inventory.inventory += equippedItem
+                    case _ =>
+                  }
+              }
+        }
+        sender ! Success
         
       case _ => println("Error from MessageProcessor.")
     }
-    sender ! Success
   }
+
 
   def isEmptySlot(item: Item): Boolean = {
     item.isInstanceOf[EmptySlot]
