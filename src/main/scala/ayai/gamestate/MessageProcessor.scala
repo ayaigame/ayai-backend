@@ -205,7 +205,17 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               }
         }
         sender ! Success
-        
+      case DropItemMessage(userId: String, slot: Int) =>
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) =>
+            (e.getComponent(classOf[Inventory])) match {
+                case (Some(inventory: Inventory)) =>
+                  if(!(inventory.inventory.size <= 0)) {
+                    inventory.inventory -= inventory.inventory(slot)
+                  }
+              }
+        }
+        sender ! Success        
       case _ => println("Error from MessageProcessor.")
     }
   }

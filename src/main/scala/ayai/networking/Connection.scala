@@ -44,3 +44,4 @@ case class OpenMessage(socketId: String, containerId: String) extends NetworkMes
 case class CharacterList(socketId: String, accountName: String) extends NetworkMessage
 case class EquipMessage(userId: String, slot: Int, equipmentType: String) extends NetworkMessage
 case class UnequipMessage(userId: String, equipmentType: String) extends NetworkMessage
+case class DropItemMessage(userId: String, slot: Int) extends NetworkMessage
