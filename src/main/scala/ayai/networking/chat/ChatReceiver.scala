@@ -21,10 +21,24 @@ import crane.World
 //import scala.slick.driver.H2Driver.simple.{Database,Session}
 import scala.concurrent.duration._
 import scala.concurrent.Await
+import net.liftweb.json.JsonDSL._
+import net.liftweb.json._
+import net.liftweb.json.Serialization.{read, write}
+
+class JChat(sender: String, text: String) {
+  implicit val formats = Serialization.formats(NoTypeHints)
+  implicit def asJson: JObject = {
+    ("type" -> "chat") ~
+    ("sender" -> sender) ~
+    ("message" -> text)
+  }
+  override def toString: String ={
+    write(this.asJson)
+  }
+}
 
 
 class ChatReceiver extends Actor {
-  var typeOfChat: String = ""
 
   def receive = {
     case ChatHolder(chat, world) =>
@@ -52,7 +66,6 @@ class ChatReceiver extends Actor {
     chat match {
       // Attempt to send Private chat
       case PrivateChat(text, sender, receiver) =>
-        typeOfChat = "private"
         // TODO: Private Chats
         //val targetFuture = context.system.actorSelection("user/SockoSender" + receiver.id).resolveOne(100.milliseconds)
         //val targetRef = Await.result(targetFuture, 100.milliseconds)
@@ -65,13 +78,11 @@ class ChatReceiver extends Actor {
         //}
       // Send Public Chat to every chat sender
       case PublicChat(text, sender) =>
-        typeOfChat = "public"
         val entities = world.getEntitiesByComponents(classOf[NetworkingActor])
         entities.foreach{ e =>  
           (e.getComponent(classOf[NetworkingActor]): @unchecked) match {
             case(Some(na: NetworkingActor)) =>
-              println("Networking actor found")
-              na.actor ! new ConnectionWrite("{\"type\": \"chat\", \"sender\": \"" + sender.username + "\", \"message\": " + text + "}\n") 
+              na.actor! new ConnectionWrite(new JChat(sender.username, text).toString)
           }
         }
         return true
