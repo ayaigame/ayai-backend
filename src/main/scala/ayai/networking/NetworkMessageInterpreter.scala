@@ -20,6 +20,7 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.util.Random
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.collection.immutable.StringOps
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
@@ -34,6 +35,8 @@ class NetworkMessageInterpreter extends Actor {
   val roomList = context.system.actorSelection("user/RoomList")
 
   implicit val formats = Serialization.formats(NoTypeHints)
+
+  def stripQuotes(s: StringOps): String = { s.filter(_ != '\"') }
 
   def lookUpUserBySocketId(socketId: String): String = {
     val future = socketUserMap ? GetUserId(socketId)
@@ -54,8 +57,7 @@ class NetworkMessageInterpreter extends Actor {
 
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
     val rootJSON = parse(wsFrame.readText)
-    val tempType: String = compact(render(rootJSON \ "type"))
-    val msgType: String = tempType.substring(1, tempType.length - 1)
+    val msgType: String = stripQuotes(compact(render(rootJSON \ "type")))
 
     val userId = msgType match {
       case "init" => ""
@@ -75,8 +77,7 @@ class NetworkMessageInterpreter extends Actor {
         context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(wsFrame.webSocketId, id)
         context.system.actorSelection("user/UserRoomMap") ! AddAssociation(id, lookUpWorldByName("room0"))
 
-        val tempName: String = compact(render(rootJSON \ "name"))
-        val characterName:String = compact(render(rootJSON \ "name")).substring(1, tempName.length - 1)
+        val characterName: String = stripQuotes(compact(render(rootJSON \ "name")))
         queue ! new AddInterpretedMessage(world, new AddNewCharacter(id, characterName, Constants.STARTING_X, Constants.STARTING_Y))
 
       case "move" =>
@@ -106,9 +107,8 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new AttackMessage(userId))
 
       case "chat" =>
-        val message = compact(render(rootJSON \ "message"))
-        val tempSender: String = compact(render(rootJSON \ "sender"))
-        val sender = tempSender.substring(1, tempSender.length - 1)
+        val message: String = stripQuotes(compact(render(rootJSON \ "message")))
+        val sender: String = stripQuotes(compact(render(rootJSON \ "sender")))
         val account = AyaiDB.getAccount(sender)
         account match {
           case Some(a: Account) =>
