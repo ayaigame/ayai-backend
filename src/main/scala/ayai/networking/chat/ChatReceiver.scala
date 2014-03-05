@@ -8,6 +8,7 @@ package ayai.networking.chat
 /** Ayai Imports **/
 import ayai.networking.ConnectionWrite
 import ayai.components.NetworkingActor
+import ayai.persistence.AyaiDB
 //import ayai.persistence.{StoredChat, StoredChats, NewStoredChat}
 
 /** Akka Imports **/
@@ -28,35 +29,24 @@ class ChatReceiver extends Actor {
   def receive = {
     case ChatHolder(chat, world) =>
       val received = reroute(chat, world)
-      //store(chat, received)
+      store(chat, received)
       context.stop(self)
 
     case _ => println("Unknown chat type")
    }
 
   private def store(chat: Chat, received: Boolean) = {
-    //var storedChat = None : Option[NewStoredChat]
-    //// Create the type of stored chat based on the type of chat we receive
-    //// This is since Public Chats do not have a reciever and are automatically
-    //// considered "received"
-    //chat match {
-    //  case PrivateChat(text, sender, receiver) =>
-    //    storedChat = Some(NewStoredChat(text, sender.id, receiver.id, received))
-    //  case PublicChat(text, sender) =>
-    //    storedChat = Some(NewStoredChat(text, sender.id, -1, true))
-    //}
+    // Create the type of stored chat based on the type of chat we receive
+    // This is since Public Chats do not have a reciever and are automatically
+    // considered "received"
+    chat match {
+      case PublicChat(text, sender) =>
+        AyaiDB.storePublicChat(chat.asInstanceOf[PublicChat])
+      case _ =>
+        println ("not yet implemented")
+    }
+  }  
 
-    //// Insert the chat into the DB
-    //storedChat match {
-    //  case None => 
-    //    println("Should not get here - this is a private method")
-    //  case Some(chat) =>
-    //    Database.forURL("jdbc:h2:file:ayai", driver = "org.h2.Driver") withSession { implicit session:Session =>
-    //      StoredChats.autoInc.insert(chat)
-    //    }
-    //}  
-
-  }
 
   def reroute(chat: Chat, world: World) : Boolean = {
     chat match {
@@ -70,6 +60,7 @@ class ChatReceiver extends Actor {
         //  return false
         //} else {
         //  targetRef ! chatHolder
+        println("Not yet implemented")
         return true
         //}
       // Send Public Chat to every chat sender
@@ -83,7 +74,6 @@ class ChatReceiver extends Actor {
               na.actor ! new ConnectionWrite("{\"type\": \"chat\", \"sender\": \"" + sender.username + "\", \"message\": " + text + "}\n") 
           }
         }
-        println("Public Chat")
         return true
     }
   }

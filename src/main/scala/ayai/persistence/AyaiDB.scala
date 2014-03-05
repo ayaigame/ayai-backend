@@ -5,6 +5,7 @@ package ayai.persistence
  */
 
 import ayai.apps.Constants //Only necessary to create a character for each account.
+import ayai.networking.chat.{PublicChat, PrivateChat}
 
 import org.squeryl.{Schema, KeyedEntity}
 import org.squeryl.PrimitiveTypeMode._
@@ -122,6 +123,18 @@ object AyaiDB extends Schema {
     return token
   }
 
+  def storePublicChat(chat: PublicChat) = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    transaction {
+      chats.insert(new Chat(chat.text, chat.sender.id, None, true))
+    }
+  }
+
   def validatePassword(username: String, password: String): String  = {
     getAccount(username) match {
       case Some(account: Account) =>
@@ -155,10 +168,10 @@ case class Token(
 case class Chat(
              val message: String,
              val sender_id: Long,
-             val receiver_id: Long,
+             val receiver_id: Option[Long],
              var received: Boolean)
            extends AccountDb2Object {
-             def this() = this("", 0, 0, false)
+             def this() = this("", 0, Some(0), false)
              lazy val sender = AyaiDB.senderToChat.right(this)
              lazy val receiver = AyaiDB.receiverToChat.right(this)
 }
