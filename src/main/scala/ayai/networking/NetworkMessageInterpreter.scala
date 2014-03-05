@@ -36,7 +36,15 @@ class NetworkMessageInterpreter extends Actor {
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def stripQuotes(s: StringOps): String = { s.filter(_ != '\"') }
+  /** 
+   * Remove quotes from beginning and end of string if they exist
+   */
+  def stripQuotes(s: StringOps): String = { 
+    (s.head, s.last) match {
+      case('\"', '\"') => s.tail.take(s.length - 2)
+      case _ => s
+    }
+  }
 
   def lookUpUserBySocketId(socketId: String): String = {
     val future = socketUserMap ? GetUserId(socketId)

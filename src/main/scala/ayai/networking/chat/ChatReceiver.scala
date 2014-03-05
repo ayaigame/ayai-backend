@@ -32,7 +32,7 @@ class JChat(sender: String, text: String) {
     ("sender" -> sender) ~
     ("message" -> text)
   }
-  override def toString: String ={
+  override def toString: String = {
     write(this.asJson)
   }
 }
