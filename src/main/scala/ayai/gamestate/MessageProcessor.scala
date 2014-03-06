@@ -5,7 +5,7 @@ import ayai.actions._
 import ayai.components._
 import ayai.networking._
 import ayai.networking.chat._
-import ayai.persistence.CharacterTable
+import ayai.persistence.{CharacterTable, InventoryTable}//Just testing this table
 import ayai.factories.EntityFactory
 import ayai.apps.{Constants, GameLoop}
 
@@ -144,7 +144,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case _ =>
             log.warn("8a87265: getComponent failed to return anything")
       }
-      sender ! Success      
+      sender ! Success
     }
 
       case ItemMessage(userId: String, itemAction: ItemAction) => {
@@ -168,12 +168,13 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //    println("Error from PublicChatMessage")
         //}
       }
-      case EquipMessage(userId: String, slot: Int, equipmentType: String) => 
+      case EquipMessage(userId: String, slot: Int, equipmentType: String) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
-                case (Some(inventory: Inventory), Some(equipment: Equipment)) => 
+                case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
+                  InventoryTable.saveInventory(e)
                   val item = inventory.inventory(slot)
                   val equipItem = equipment.equipmentMap(equipmentType)
                   if(equipment.equipItem(item)) {
@@ -182,7 +183,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                       inventory.inventory += equipItem
                     }
                     // sender ! Success
-                  } 
+                  }
                   else {
                   }
               }
@@ -196,9 +197,9 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
                   val equippedItem = equipment.equipmentMap(equipmentType)
                   equippedItem match {
-                    case weapon: Weapon => 
+                    case weapon: Weapon =>
                       inventory.inventory += equippedItem
-                    case armor: Armor => 
+                    case armor: Armor =>
                       inventory.inventory += equippedItem
                     case _ =>
                   }
@@ -215,7 +216,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   }
               }
         }
-        sender ! Success        
+        sender ! Success
       case _ => println("Error from MessageProcessor.")
     }
   }

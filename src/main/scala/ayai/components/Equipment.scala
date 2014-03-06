@@ -6,7 +6,7 @@ import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import scala.collection.mutable.HashMap
 
-case class EmptySlot extends Item("",0,0,EmptyType) {}
+case class EmptySlot extends Item(0,"",0,0,EmptyType) {}
 object EmptyType extends ItemType {
     override def asJson(): JObject = ("empty" -> "")
     override def copy(): ItemType = EmptyType
