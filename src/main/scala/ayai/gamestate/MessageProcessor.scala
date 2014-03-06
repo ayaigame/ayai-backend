@@ -114,7 +114,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
               //get the range of the characters weapon
               val weaponRange = initiator.getComponent(classOf[Equipment]) match {
-                case Some(e: Equipment) => e.weapon1.itemType match {
+                case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
                   case weapon : Weapon => weapon.range
                   case _ => 5
                 }
@@ -168,10 +168,61 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //    println("Error from PublicChatMessage")
         //}
       }
-      case EquipMessage() => 
+      case EquipMessage(userId: String, slot: Int, equipmentType: String) => 
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) =>
+            (e.getComponent(classOf[Inventory]),
+              e.getComponent(classOf[Equipment])) match {
+                case (Some(inventory: Inventory), Some(equipment: Equipment)) => 
+                  val item = inventory.inventory(slot)
+                  val equipItem = equipment.equipmentMap(equipmentType)
+                  if(equipment.equipItem(item)) {
+                    inventory.inventory -= item
+                    if(!isEmptySlot(equipItem)) {
+                      inventory.inventory += equipItem
+                    }
+                    // sender ! Success
+                  } 
+                  else {
+                  }
+              }
+        }
+        sender ! Success
+      case UnequipMessage(userId: String, equipmentType: String) =>
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) =>
+            (e.getComponent(classOf[Inventory]),
+              e.getComponent(classOf[Equipment])) match {
+                case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
+                  val equippedItem = equipment.equipmentMap(equipmentType)
+                  equippedItem match {
+                    case weapon: Weapon => 
+                      inventory.inventory += equippedItem
+                    case armor: Armor => 
+                      inventory.inventory += equippedItem
+                    case _ =>
+                  }
+              }
+        }
+        sender ! Success
+      case DropItemMessage(userId: String, slot: Int) =>
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) =>
+            (e.getComponent(classOf[Inventory])) match {
+                case (Some(inventory: Inventory)) =>
+                  if(!(inventory.inventory.size <= 0)) {
+                    inventory.inventory -= inventory.inventory(slot)
+                  }
+              }
+        }
+        sender ! Success        
       case _ => println("Error from MessageProcessor.")
-        sender ! Failure
     }
+  }
+
+
+  def isEmptySlot(item: Item): Boolean = {
+    item.isInstanceOf[EmptySlot]
   }
 
   def receive = {

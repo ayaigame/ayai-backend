@@ -3,7 +3,9 @@ package ayai.networking
 /** Ayai Imports **/
 import ayai.gamestate._
 import ayai.actions._
+import ayai.persistence._
 import ayai.apps.Constants
+import ayai.networking.chat._
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
@@ -18,6 +20,7 @@ import org.mashupbots.socko.events.WebSocketFrameEvent
 import scala.util.Random
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.collection.immutable.StringOps
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
@@ -32,6 +35,16 @@ class NetworkMessageInterpreter extends Actor {
   val roomList = context.system.actorSelection("user/RoomList")
 
   implicit val formats = Serialization.formats(NoTypeHints)
+
+  /** 
+   * Remove quotes from beginning and end of string if they exist
+   */
+  def stripQuotes(s: StringOps): String = { 
+    (s.head, s.last) match {
+      case('\"', '\"') => s.tail.take(s.length - 2)
+      case _ => s
+    }
+  }
 
   def lookUpUserBySocketId(socketId: String): String = {
     val future = socketUserMap ? GetUserId(socketId)
@@ -52,8 +65,7 @@ class NetworkMessageInterpreter extends Actor {
 
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
     val rootJSON = parse(wsFrame.readText)
-    val tempType: String = compact(render(rootJSON \ "type"))
-    val msgType: String = tempType.substring(1, tempType.length - 1)
+    val msgType: String = stripQuotes(compact(render(rootJSON \ "type")))
 
     val userId = msgType match {
       case "init" => ""
@@ -73,8 +85,7 @@ class NetworkMessageInterpreter extends Actor {
         context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(wsFrame.webSocketId, id)
         context.system.actorSelection("user/UserRoomMap") ! AddAssociation(id, lookUpWorldByName("room0"))
 
-        val tempName: String = compact(render(rootJSON \ "name"))
-        val characterName:String = compact(render(rootJSON \ "name")).substring(1, tempName.length - 1)
+        val characterName: String = stripQuotes(compact(render(rootJSON \ "name")))
         queue ! new AddInterpretedMessage(world, new AddNewCharacter(id, characterName, Constants.STARTING_X, Constants.STARTING_Y))
 
       case "move" =>
@@ -104,11 +115,16 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new AttackMessage(userId))
 
       case "chat" =>
-        val message = compact(render(rootJSON \ "message"))
-        val tempSender: String = compact(render(rootJSON \ "sender"))
-        val sender = tempSender.substring(1, tempSender.length - 1)
-        queue ! new AddInterpretedMessage(world, new PublicChatMessage(message, sender))
-
+        val message: String = stripQuotes(compact(render(rootJSON \ "message")))
+        val sender: String = stripQuotes(compact(render(rootJSON \ "sender")))
+        val account = AyaiDB.getAccount(sender)
+        account match {
+          case Some(a: Account) =>
+            context.system.actorOf(Props[ChatReceiver]) ! new ChatHolder(new PublicChat(message, a), lookUpWorldByName(world))
+          case _ =>
+            println(s"Could not find user $sender")
+        }
+                
       case "open" =>
         val containerId: String = (rootJSON \ "containerId").extract[String]
         queue ! new AddInterpretedMessage(world, new OpenMessage(userId, containerId))
@@ -117,7 +133,15 @@ class NetworkMessageInterpreter extends Actor {
         val accountName: String = (rootJSON \ "accountName").extract[String]
         queue ! new CharacterList(userId, accountName)
       case "equip" => 
-        
+        val slot: Int = (rootJSON \ "slot").extract[Int]
+        val equipmentType: String = (rootJSON \ "equipmentType").extract[String]
+        queue ! new AddInterpretedMessage(world, new EquipMessage(userId, slot, equipmentType))    
+      case "unequip" =>
+        val equipmentType = (rootJSON \ "equipmentType").extract[String]
+        queue ! new AddInterpretedMessage(world, new UnequipMessage(userId, equipmentType))        
+      case "dropitem" =>
+        val slot = (rootJSON \ "slot").extract[Int]
+        queue ! new AddInterpretedMessage(world, new DropItemMessage(userId, slot))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
 

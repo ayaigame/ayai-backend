@@ -7,13 +7,16 @@ import net.liftweb.json._
 case class Armor(
   slot: String,
   protection: Int,
-  itemtype: String)
+  itemType: String)
   extends ItemType {
 
     def asJson(): JObject = {
       ("slot" -> slot) ~
       ("protection" -> protection) ~
-      ("type" -> itemtype)
+      ("type" -> itemType)
     }
-  
+	override def copy(): ItemType = {
+    	new Armor(slot, protection, itemType)
+  	}
+
 }
