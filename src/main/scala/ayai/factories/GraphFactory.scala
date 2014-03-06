@@ -27,6 +27,14 @@ object GraphFactory {
     (math.round((position.x / ratio)), math.round((position.y / ratio)))
   }
 
+  def inBounds(max: Int, indexes: Int*): Boolean = {
+    indexes.foreach{index =>
+      if(index > max || index < 0)
+        return false // NEEDS TO BE EXPLICIT
+    }
+    true
+  }
+
   def generateGraph(world: RoomWorld): Array[Array[Node]] = {
     val tileMap = world.tileMap
     val entities = world.getEntitiesByComponents(classOf[Position], classOf[Bounds])
@@ -38,7 +46,8 @@ object GraphFactory {
       (position: @unchecked) match {
         case Some(p: Position) =>
           val gridPosition = convertPositionToGrid(p, tileMap.tileSize.toFloat)
-          entityArray(gridPosition._1)(gridPosition._2) = Node(IMPASS)
+          if(inBounds(gridPosition._1, gridPosition._2))
+            entityArray(gridPosition._1)(gridPosition._2) = Node(IMPASS)
       }
     }
 
