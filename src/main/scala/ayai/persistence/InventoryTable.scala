@@ -35,11 +35,10 @@ object InventoryTable {
                 new H2Adapter))
 
             val inventoryRows = inventory.inventory groupBy ((item:Item) => item.id) map {p => new InventoryRow(characterRow.id, p._1, p._2.length)}
-            // ((item: Item) => new InventoryRow(characterRow.id, item.id))
             println(s"Inserting $inventoryRows")
+
             transaction {
               inventoryRows foreach ((inventoryRow: InventoryRow) => AyaiDB.inventory.insertOrUpdate(inventoryRow))
-              // AyaiDB.inventory.insertOrUpdate(inventoryRows)
             }
           case _ =>
             println(s"Can't find account for $character.name")
