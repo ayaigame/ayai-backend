@@ -10,9 +10,7 @@ import crane.Entity
  */
 class StatusEffect (val etype: EffectType, var attribute: String, var value: Float) {
 	def process(e: Entity) {
-		etype match {
-			case _ => 
-		}
+    etype.process(value, attribute)
 		
 	}
 }
