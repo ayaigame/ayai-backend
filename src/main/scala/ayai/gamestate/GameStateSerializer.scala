@@ -22,7 +22,7 @@ sealed trait QueryResponse
 case class CharacterRadius(characterId: String) extends QueryType
 case class CharacterResponse(json: String)  extends QueryResponse
 case class MapRequest(room: Entity)
-case class GetRoomJson(e:Entity)
+case class GetRoomJson(e: Entity)
 case object Refresh
 case object SomeData
 
@@ -74,7 +74,6 @@ class GameStateSerializer(world: World) extends Actor {
          }
 
     }
-    println(compact(render(getCharacterAssets(e))))
     sender ! compact(render(("type" -> "update")~(roomJSON)~(getCharacterAssets(e))))
   }
 
@@ -115,7 +114,7 @@ class GameStateSerializer(world: World) extends Actor {
   }
 
   def receive = {
-    case GetRoomJson(e:Entity) => getRoom(e)
+    case GetRoomJson(e: Entity) => getRoom(e)
     case MapRequest(room) => sendMapInfo(room)
     case Refresh => valid = false
     case _ => println("Error: from serializer.")
