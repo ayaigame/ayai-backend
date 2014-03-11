@@ -80,11 +80,15 @@ class GameStateSerializer(world: World) extends Actor {
   def getCharacterAssets(entity: Entity): JObject = {
     val jsonLift = (entity.getComponent(classOf[Inventory]),
       entity.getComponent(classOf[Equipment]),
-      entity.getComponent(classOf[QuestBag])) match {
-        case (Some(inventory: Inventory), Some(equipment: Equipment), Some(quests: QuestBag)) => 
+      entity.getComponent(classOf[QuestBag]),
+      entity.getComponent(classOf[Loot])) match {
+        case (Some(inventory: Inventory), Some(equipment: Equipment), Some(quests: QuestBag), None) => 
           (inventory.asJson) ~
           (equipment.asJson) ~
           (quests.asJson)
+        case Some(inventory: Inventory), None, None, Some(loot: Loot)
+          (inventory.asJson) ~
+          (loot.asJson)
         case _ => JNothing
       }
     ("models" -> jsonLift)

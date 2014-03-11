@@ -11,4 +11,9 @@ case class Loot(val looter: String) {
 	def isLootable(id: String): Boolean = {
 		id == looter
 	}
+
+	def asJson(): JObject = {
+		("loot" -> 
+			("id" -> looter))
+	}
 }

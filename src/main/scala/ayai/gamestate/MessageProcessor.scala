@@ -215,7 +215,49 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   }
               }
         }
-        sender ! Success        
+        sender ! Success
+      // copy quest information from npc to player
+      case AcceptQuestMessage(userId: String, npcId: String, questId: String) =>
+        //might want to calculate interact message here
+        // also might want to check distance between npc and player
+        var npcQuest: Quest = _
+        world.getEntityByTag(s"$userid") match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
+            case Some(questBag: QuestBag) =>
+              for(quest <- questBag.quests) {
+                if(quest.id == questId) {
+                  npcQuest = quest
+                }
+              }
+          }
+          case _ => null
+        }
+
+        world.getEntityByTag(s"$userid") match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
+            case Some(questBag: QuestBag) =>
+              questBag.addQuest(npcQuest)
+          }
+          case _ =>
+        }        
+      // dont know if this should exist, might just be a stop interacting button or cancel on frontend
+      case DeclineQuestMessage(userId: String, npcId: String, questId: String) =>
+      // will abandon quest (remove from players quest bag)
+      case AbandonQuestMessage(userId: String, questId: String) =>
+        world.getEntityByTag(s"$userid") match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
+            case Some(questBag: QuestBag) =>
+              for(quest <- questBag.quests) {
+                if(quest.id == questId) {
+                  questBag -= quest
+                  // tell frontend that quest is removed
+                }
+              }
+          }
+          
+        }
+        
+      case InteractMessage(userId: String, npcId: String, questId: String) =>
       case _ => println("Error from MessageProcessor.")
     }
   }
