@@ -8,14 +8,14 @@ import net.liftweb.json._
 import scala.collection.mutable.ArrayBuffer
 
 class QuestBag(quests: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()) extends Component {
-	def asJson(): JObject = {
-		("quests" -> quests.map{quest => quest.asJson})
-	}
+  def asJson(): JObject = {
+    ("quests" -> quests.map{quest => quest.asJson})
+  }
 
-	def addQuest(questToAdd: Quest) = {
-	    if(questToAdd != null) {
-	      quests += questToAdd
-	    }
+  def addQuest(questToAdd: Quest) = {
+      if(questToAdd != null) {
+        quests += questToAdd
+        }
   
-  	}
+    }
 }

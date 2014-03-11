@@ -14,7 +14,7 @@ class StatusEffectSystem(actorSystem: ActorSystem) extends EntityProcessingSyste
   def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[StatusEffectBag]) match {
       case (Some(statusBag: StatusEffectBag)) => 
-        for(status -> statusBag.statuses) {
+        for(status <- statusBag.statuses) {
           status.process(e)
         }
       case _ =>
