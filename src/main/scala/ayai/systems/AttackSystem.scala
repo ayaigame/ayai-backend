@@ -18,9 +18,11 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       case Some(attack: Attack) =>  
       if(!attack.victims.isEmpty) {
         for(victim <- attack.victims) {
-          getDamage(attack.initiator, victim)
+          if(!attack.attacked.contains(victim)) {
+            getDamage(attack.initiator, victim)
+          }
         }
-        attack.removeVictims()
+        attack.moveVictims()
       }
       case _ => 
     }
