@@ -144,15 +144,15 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new DropItemMessage(userId, slot))
       case "acceptquest" =>
         val npcID = (rootJSON \ "npcId").extract[String]
-        val questID = (rootJSON \ "questId").extract[String]
+        val questId = (rootJSON \ "questId").extract[String]
         queue ! new AddInterpretedMessage(world, new AcceptQuestMessage(userId, npcID, questId))
       case "declinequest" =>
         val npcId = (rootJSON \ "npcId").extract[String]
         val questId = (rootJSON \ "questId").extract[String]
         queue ! new AddInterpretedMessage(world, new DeclineQuestMessage(userId, npcId, questId))
       case "abandonquest" =>
-        val questID = (rootJSON \ "questId").extract[String]
-        queue ! new AddInterpretedMessage(world, new AbandonQuestMessage(userId, questID))
+        val questId = (rootJSON \ "questId").extract[String]
+        queue ! new AddInterpretedMessage(world, new AbandonQuestMessage(userId, questId))
       case "interact" =>
         val npcId = (rootJSON \ "npcId").extract[String]
         queue ! new AddInterpretedMessage(world, new InteractMessage(userId, npcId))

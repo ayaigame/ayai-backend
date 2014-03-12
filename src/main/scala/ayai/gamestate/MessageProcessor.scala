@@ -220,8 +220,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case AcceptQuestMessage(userId: String, npcId: String, questId: String) =>
         //might want to calculate interact message here
         // also might want to check distance between npc and player
-        var npcQuest: Quest = _
-        world.getEntityByTag(s"$userid") match {
+        var npcQuest: Quest = null
+        world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               for(quest <- questBag.quests) {
@@ -233,7 +233,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case _ => null
         }
 
-        world.getEntityByTag(s"$userid") match {
+        world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               questBag.addQuest(npcQuest)
@@ -245,12 +245,12 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case DeclineQuestMessage(userId: String, npcId: String, questId: String) =>
       // will abandon quest (remove from players quest bag)
       case AbandonQuestMessage(userId: String, questId: String) =>
-        world.getEntityByTag(s"$userid") match {
+        world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               for(quest <- questBag.quests) {
                 if(quest.id == questId) {
-                  questBag -= quest
+                  questBag.quests -= quest
                   // tell frontend that quest is removed
                 }
               }
@@ -259,7 +259,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         sender ! Success
         
-      case InteractMessage(userId: String, npcId: String, questId: String) =>
+      case InteractMessage(userId: String, npcId: String) =>
       // get both the user entity and item entity 
       case LootMessage(userId: String, entityId: String, items: ArrayBuffer[String]) => 
         val userEntity = world.getEntityByTag(s"$userId") match {
@@ -301,7 +301,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             ("message" -> "Not withing distance of item")
         }
         sender ! Success
-      case RequestLootInventory(userId: String, itemId: String) =>
+      case RequestLootInventory(userId: String, entityId: String) =>
         val userEntity = world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e
         }

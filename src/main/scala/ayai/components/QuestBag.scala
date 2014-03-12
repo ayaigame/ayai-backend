@@ -7,7 +7,7 @@ import net.liftweb.json._
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
 
-class QuestBag(quests: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()) extends Component {
+case class QuestBag(quests: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()) extends Component {
   def asJson(): JObject = {
     ("quests" -> quests.map{quest => quest.asJson})
   }

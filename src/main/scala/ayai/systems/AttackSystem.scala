@@ -1,8 +1,12 @@
 package ayai.systems
 
-import crane.{Component, Entity}
+import crane.{Component, Entity, World, EntityProcessingSystem}
 import ayai.components._
+import ayai.networking._
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 object AttackSystem {
   def apply(actorSystem: ActorSystem) = new AttackSystem(actorSystem)
@@ -91,13 +95,14 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
 
     //if the victims health reaches zero, then take the persons inventory and make it lootable
     if(healthComponent.currentHealth <= 0) {
-      val loot = world.createEntity("LOOT"+initiatorId)
+      val loot:Entity = world.createEntity("LOOT"+initiatorId)
       loot.components += new Loot(initiatorId)
-      loot.components += initiator.getComponent(classOf[Inventory]) match {
-        case Some(inv: Inventory) =>
+      val inventory = initiator.getComponent(classOf[Inventory]) match {
+        case (Some(inv: Inventory)) =>
           inv.copy()
         case _ => null
       }
+      loot.components += inventory
     }
 
     val att = ("type" -> "attack") ~

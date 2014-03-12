@@ -86,7 +86,7 @@ class GameStateSerializer(world: World) extends Actor {
           (inventory.asJson) ~
           (equipment.asJson) ~
           (quests.asJson)
-        case Some(inventory: Inventory), None, None, Some(loot: Loot)
+        case (Some(inventory: Inventory), None, None, Some(loot: Loot)) =>
           (inventory.asJson) ~
           (loot.asJson)
         case _ => JNothing
