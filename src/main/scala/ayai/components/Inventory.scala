@@ -45,4 +45,12 @@ case class Inventory (inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()) ex
     inventory map (_.weight) reduceLeft (_+_)
   }
 
+  def copy(): Inventory = {
+    var copyInventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()
+    for(item <- inventory) {
+      copyInventory += item.copy
+    }
+    new Inventory(copyInventory)
+  }
+
 }

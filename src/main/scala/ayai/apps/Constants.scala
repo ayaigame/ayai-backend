@@ -26,6 +26,7 @@ object Constants {
 
   val experienceSource = scala.io.Source.fromFile("src/main/resources/configs/classes/experience.json")
   val experienceLines = experienceSource.mkString
+  val SPACE_FOR_INTERACTION = 40
   experienceSource.close()
 
   val EXPERIENCE_ARRAY = parse(experienceLines).extract[List[Int]]

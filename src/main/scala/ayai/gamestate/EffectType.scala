@@ -1,7 +1,21 @@
 package ayai.gamestate
 
-sealed class EffectType 
-case object Percentage extends EffectType
-case object Addition extends EffectType
-case object Multiplier extends EffectType
-case object TimedInterval extends EffectType
+class EffectType {
+	def process(value: Float, attribute: String) {}
+}
+case class Percentage extends EffectType {
+	override def process(value: Float, attribute: String){}
+
+}
+case class Addition() extends EffectType {
+	override def process(value: Float, attribute: String){}
+
+}
+case class Multiplier() extends EffectType {
+	override def process(value: Float, attribute: String) {}
+
+}
+
+case class TimedInterval(startTime: Long, timeInterval: Long) extends EffectType {
+	override def process(value: Float, attribute: String){}
+}
