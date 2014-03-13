@@ -25,7 +25,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Promise, Future}
-
+import scala.math._
 
 import java.rmi.server.UID
 
@@ -215,7 +215,131 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   }
               }
         }
-        sender ! Success        
+        sender ! Success
+      // copy quest information from npc to player
+      case AcceptQuestMessage(userId: String, npcId: String, questId: String) =>
+        //might want to calculate interact message here
+        // also might want to check distance between npc and player
+        var npcQuest: Quest = null
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
+            case Some(questBag: QuestBag) =>
+              for(quest <- questBag.quests) {
+                if(quest.id == questId) {
+                  npcQuest = quest
+                }
+              }
+          }
+          case _ => null
+        }
+
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
+            case Some(questBag: QuestBag) =>
+              questBag.addQuest(npcQuest)
+          }
+          case _ =>
+        }        
+        sender ! Success
+      // dont know if this should exist, might just be a stop interacting button or cancel on frontend
+      case DeclineQuestMessage(userId: String, npcId: String, questId: String) =>
+      // will abandon quest (remove from players quest bag)
+      case AbandonQuestMessage(userId: String, questId: String) =>
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
+            case Some(questBag: QuestBag) =>
+              for(quest <- questBag.quests) {
+                if(quest.id == questId) {
+                  questBag.quests -= quest
+                  // tell frontend that quest is removed
+                }
+              }
+          }
+          
+        }
+        sender ! Success
+        
+      case InteractMessage(userId: String, npcId: String) =>
+      // get both the user entity and item entity 
+      case LootMessage(userId: String, entityId: String, items: ArrayBuffer[String]) => 
+        val userEntity = world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) => e
+        }
+        val itemEntity = world.getEntityByTag(s"$entityId") match {
+          case Some(e: Entity) => e 
+        }
+
+        val isValidDistance: Boolean = (userEntity.getComponent(classOf[Position]),
+                                        itemEntity.getComponent(classOf[Position])) match {
+          case (Some(userPosition: Position), Some(itemPosition:Position)) =>
+            sqrt(pow(userPosition.x-itemPosition.x,2)+pow(userPosition.y-itemPosition.y,2)) <= Constants.SPACE_FOR_INTERACTION
+          case _ => false
+        }
+
+        //if valid distance then pick up items
+        if(isValidDistance) {
+          val loot = itemEntity.getComponent(classOf[Inventory]) match {
+            case Some(inv: Inventory) => inv
+            case _ => null
+          }
+          val playerInventory = userEntity.getComponent(classOf[Inventory]) match {
+            case Some(inv: Inventory) => inv
+            case _ => null 
+          }
+          
+
+          //take item and put it in player inventory
+          for(item <- loot.inventory) {
+            playerInventory.addItem(item)
+            loot.inventory -= item
+          }
+
+//          actorSelection ! ConnectionWrite(compact(render(json)))
+        }
+        else {
+          val json = ("type" -> "error") ~
+            ("message" -> "Not withing distance of item")
+        }
+        sender ! Success
+      case RequestLootInventory(userId: String, entityId: String) =>
+        val userEntity = world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) => e
+        }
+        val itemEntity = world.getEntityByTag(s"$entityId") match {
+          case Some(e: Entity) => e 
+        }
+
+        val isValidDistance: Boolean = (userEntity.getComponent(classOf[Position]),
+                                        itemEntity.getComponent(classOf[Position])) match {
+          case (Some(userPosition: Position), Some(itemPosition:Position)) =>
+            sqrt(pow(userPosition.x-itemPosition.x,2)+pow(userPosition.y-itemPosition.y,2)) <= Constants.SPACE_FOR_INTERACTION
+          case _ => false
+        }
+        val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
+          case Some(na: NetworkingActor) => 
+            na.actor
+        }
+
+        //if valid distance then pick up items
+        if(isValidDistance) {
+          val inventory = itemEntity.getComponent(classOf[Inventory]) match {
+            case Some(inv: Inventory) => inv
+            case _ => null
+          }
+          
+          val json = ("type" -> "loot") ~
+            (inventory.asJson)
+
+          actorSelection ! ConnectionWrite(compact(render(json)))
+        }
+        else {
+          val json = ("type" -> "error") ~
+            ("message" -> "Not withing distance of item")
+        }
+                                        
+        sender ! Success
+        
+        
       case _ => println("Error from MessageProcessor.")
     }
   }
