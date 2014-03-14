@@ -11,6 +11,7 @@ import org.squeryl.{Schema, KeyedEntity}
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.annotations.Column
 import org.mindrot.jbcrypt.BCrypt
+import org.squeryl.dsl.CompositeKey2
 import java.util.Date
 import java.sql.Timestamp
 
@@ -24,6 +25,7 @@ object AyaiDB extends Schema {
   val chats = table[Chat]
   val tokens = table[Token]
   val characters = table[CharacterRow]("CHARACTERS")
+  val inventory = table[InventoryRow]("INVENTORY")
   val senderToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.sender_id)
   val receiverToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.receiver_id)
   val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.account_id)
@@ -190,9 +192,11 @@ case class CharacterRow (
 
 case class InventoryRow (
             val playerId: Long,
-            val itemId: Long)
-          extends AccountDb2Object {
-            def this() = this(0, 0)
+            val itemId: Long,
+            val quantity: Long)
+          extends KeyedEntity[CompositeKey2[Long,Long]] {
+            def id = compositeKey(playerId, itemId)
+            def this() = this(0, 0, 0)
 }
 
 
