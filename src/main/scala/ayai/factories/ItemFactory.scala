@@ -83,7 +83,7 @@ object ItemFactory {
   }
 
   def instantiateConsumables(networkSystem: ActorSystem, items: List[AllItemValues]) = {
-
+    
   }
 
   def instantiateBaseItems(networkSystem: ActorSystem,  items: List[AllItemValues]) = {

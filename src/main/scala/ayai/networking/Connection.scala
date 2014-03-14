@@ -9,7 +9,7 @@ import akka.actor.Actor
 /** Socko Imports **/
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
-
+import scala.collection.mutable._
 /** External Imports **/
 import java.net.Socket
 
@@ -45,3 +45,9 @@ case class CharacterList(socketId: String, accountName: String) extends NetworkM
 case class EquipMessage(userId: String, slot: Int, equipmentType: String) extends NetworkMessage
 case class UnequipMessage(userId: String, equipmentType: String) extends NetworkMessage
 case class DropItemMessage(userId: String, slot: Int) extends NetworkMessage
+case class AbandonQuestMessage(userId: String, questId: String) extends NetworkMessage
+case class DeclineQuestMessage(userId: String, npcId: String, questId: String) extends NetworkMessage
+case class AcceptQuestMessage(userId: String, npcId: String, questId: String) extends NetworkMessage
+case class InteractMessage(userId: String, npcId: String) extends NetworkMessage
+case class LootMessage( userId: String, entityId: String, items: ArrayBuffer[String]) extends NetworkMessage
+case class RequestLootInventory(userId: String, entityId: String) extends NetworkMessage

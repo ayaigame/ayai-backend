@@ -36,94 +36,16 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
 
   def valueInRange(value: Int, min: Int, max: Int): Boolean = (value >= min) && (value <= max)
 
-  // Eventually create a damage system to calculate this based on the users
-  // equipped item
-  def handleAttackDamage(damage: Int, attackee: Health) = attackee.currentHealth -= damage
-
-  def getWeaponStat(entity: Entity): Int = {
-    var playerBase: Int = 5
-    var weaponValue: Int = 5
-    entity.getComponent(classOf[Stats]) match {
-      case Some(stats: Stats) =>
-        for(stat <- stats.stats) {
-          if(stat.attributeType == "strength"){
-            playerBase += stat.magnitude
-          }
-        }
-      case _ =>
-    }
-    entity.getComponent(classOf[Equipment]) match {
-      case Some(equipment: Equipment) =>
-          equipment.equipmentMap("weapon1").itemType match {
-            case weapon: Weapon =>
-            weaponValue += weapon.damage
-            case _ =>
-        }
-          equipment.equipmentMap("weapon2").itemType match {
-            case weapon: Weapon =>
-            weaponValue += weapon.damage
-            case _ =>
-        }
-    }
-    weaponValue + playerBase
-  }
-
-  def getArmorStat(entity: Entity) : Int = {
-    var playerBase : Int = 0
-    var armorValue : Int = 0
-    entity.getComponent(classOf[Stats]) match {
-      case Some(stats : Stats) =>
-        for(stat <- stats.stats) {
-          if(stat.attributeType == "defense"){
-            playerBase += stat.magnitude
-          }
-        }
-      case _ =>
-    }
-   armorValue + playerBase
-  }
-
-  def getDamage(initiator: Entity, victim: Entity) {
-    // calculate the attack
-    var damage : Int = getWeaponStat(initiator)
-    damage -= getArmorStat(victim)
-    val healthComponent = victim.getComponent(classOf[Health]) match {
-      case Some(health : Health) => health
-      case _ => null
-    }
-    // remove the attack component of entity A
-    var damageDone = handleAttackDamage(damage, healthComponent)
-    val initiatorId = initiator.getComponent(classOf[Character]) match {
-      case Some(character : Character) =>
-        character.id
-    }
-    val victimId = victim.getComponent(classOf[Character]) match {
-      case Some(character : Character) => character.id
-    }
-
-    val att = ("type" -> "attack") ~
-      ("damage" -> damage) ~
-      ("initiator" -> initiatorId) ~
-      ("victim" -> victimId)
-    val actorSelection = actorSystem.actorSelection("user/SockoSender*")
-    actorSelection ! new ConnectionWrite(compact(render(att)))
-  }
-
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
     (entityA.getComponent(classOf[Attack]),
       entityB.getComponent(classOf[Attack]),
       entityA.getComponent(classOf[Health]),
       entityB.getComponent(classOf[Health])) match {
       case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
-          //calculate the attack
-          getDamage(attackComponentA.initiator, entityB)
-          entityA.kill()
-          entityA.components += new Dead()
+          attackComponentA.addVictim(entityB)
           true
       case (None, Some(attackComponentB : Attack), Some(healthComponentA : Health), None) =>
-          getDamage(attackComponentB.initiator, entityA)
-          entityB.kill()
-          entityB.components += new Dead()
+          attackComponentB.addVictim(entityA)
           true
       case _ => false
       }
