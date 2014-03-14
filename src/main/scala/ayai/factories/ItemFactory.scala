@@ -54,6 +54,7 @@ object ItemFactory {
   def instantiateWeapons(networkSystem: ActorSystem, items: List[AllItemValues]) = {
     items.foreach (item => {
       var weapon = new Item(
+        item.id,
         item.name,
         item.value,
         item.weight,
@@ -69,6 +70,7 @@ object ItemFactory {
   def instantiateArmor(networkSystem: ActorSystem, items: List[AllItemValues]) = {
     items.foreach (item => {
       var armor = new Item(
+        item.id,
         item.name,
         item.value,
         item.weight,
@@ -105,7 +107,7 @@ object ItemFactory {
     val otherPaths = (parsedJson \\ "externalItems").extract[List[String]]
 
     val listOfLists: List[List[AllItemValues]] = otherPaths.map((path: String) => getItemsList(path))
-    
+
     var itemsList = new ArrayBuffer[AllItemValues]()
     itemsList.appendAll(rootItems)
 
