@@ -74,6 +74,7 @@ class GameStateSerializer(world: World) extends Actor {
          }
 
     }
+    // println(compact(render(getCharacterAssets(e))))
     sender ! compact(render(("type" -> "update")~(roomJSON)~(getCharacterAssets(e))))
   }
 
@@ -92,6 +93,7 @@ class GameStateSerializer(world: World) extends Actor {
         case _ => JNothing
       }
     ("models" -> jsonLift)
+
   }
   //Once characters actually have belonging we'll want to implement this and use it in getCharacterRadius
   // def getCharacterBelongings(characterId: String) = {

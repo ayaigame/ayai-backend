@@ -174,12 +174,14 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) => 
+        println("EquippingType: " + equipmentType)
                   val item = inventory.inventory(slot)
                   val equipItem = equipment.equipmentMap(equipmentType)
                   if(equipment.equipItem(item)) {
                     inventory.inventory -= item
                     if(!isEmptySlot(equipItem)) {
                       inventory.inventory += equipItem
+                      println("Equip Item " + equipment.equipmentMap(equipmentType))
                     }
                     // sender ! Success
                   } 
@@ -189,21 +191,26 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         sender ! Success
       case UnequipMessage(userId: String, equipmentType: String) =>
+      println("TEST")
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
                   val equippedItem = equipment.equipmentMap(equipmentType)
-                  equippedItem match {
+                  equippedItem.itemType match {
                     case weapon: Weapon => 
                       inventory.inventory += equippedItem
+                      equipment.equipmentMap(equipmentType) = new EmptySlot()
                     case armor: Armor => 
                       inventory.inventory += equippedItem
+                      equipment.equipmentMap(equipmentType) = new EmptySlot()
                     case _ =>
+                      println(equipmentType + " not valiid")
                   }
               }
         }
+        println("UnequipingMessage: " + equipmentType)
         sender ! Success
       case DropItemMessage(userId: String, slot: Int) =>
         world.getEntityByTag(s"$userId") match {
