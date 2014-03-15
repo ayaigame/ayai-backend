@@ -232,7 +232,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         var npcQuest: Quest = world.getEntityByTag(s"$npcId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
-              val tempQuest: Quest 
+              var tempQuest: Quest = null 
               for(quest <- questBag.quests) {
                 if(quest.id == questId) {
                   tempQuest = quest

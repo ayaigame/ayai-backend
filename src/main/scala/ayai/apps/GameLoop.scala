@@ -50,7 +50,6 @@ object GameLoop {
 
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
-
     val itemFactory = ItemFactory.bootup(networkSystem)    
     val questFactory = QuestFactory.bootup(networkSystem)
 
@@ -59,7 +58,8 @@ object GameLoop {
 
     for((name, world) <- worlds)
       roomList ! AddWorld(world)
-
+    val npcFactory = NPCFactory.bootup(networkSystem)
+    
     val receptionist = SockoServer(networkSystem)
     receptionist.run(Constants.SERVER_PORT)
 
