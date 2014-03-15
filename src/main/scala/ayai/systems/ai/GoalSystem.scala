@@ -2,28 +2,31 @@ package ayai.systems
 
 import ayai.components._
 import ayai.actions._
+import ayai.gamestate._
+import ayai.maps._
 
 import crane.{Entity, System}
 
 import scala.math.abs
+import scala.collection.mutable._
 
 object GoalSystem {
   def apply() = new GoalSystem()
 }
 
 class GoalSystem extends System {
-  def getScore(current : Position, goal : Position) = Int {
+  def getScore(current : Position, goal : Position) : Int = {
     val dx = abs(current.x - goal.x)
     val dy = abs(current.y - goal.y)
     val dist = dx + dy
     return dist
   }
 
-  def getNewMove(possibleMoves : Array[Tile], goal : Position) = Tile {
-    val score = 1000000
-    val bestMove = null
+  def getNewMove(possibleMoves : Array[Tile], goal : Position) : Tile = {
+    var score = 1000000
+    var bestMove = possibleMoves(0)
     for(move <- possibleMoves) {
-      temp = getScore(move.position, goal)
+      val temp = getScore(move.tilePosition, goal)
       if(temp < score){
         score = temp
         bestMove = move
@@ -32,78 +35,78 @@ class GoalSystem extends System {
     return bestMove
   }
 
-  def findMoves(current : Tile, map : Array[Array[Tile]]) = Array[Tile] {
-    val MinX = null
-    val MaxX = null
-    val MinY = null
-    val MaxY = null
-    val possibleMoves = Array[Tile]
+  def findMoves(current : Tile, map : Array[Array[Tile]]) : Array[Tile] = {
+    var MinX = -1
+    var MaxX = -1
+    var MinY = -1
+    var MaxY = -1
+    var possibleMoves = new ArrayBuffer[Tile]()
 
-    if(current.position.x - 1 >= 0){
-      MinX = current.position.x - 1
+    if(current.indexPosition.x - 1 >= 0){
+      MinX = current.indexPosition.x - 1
     }
-    if(current.position.x + 1 <= map[0].count){
-      MaxX = current.position.x + 1
+    if(current.indexPosition.x + 1 <= map.length){
+      MaxX = current.indexPosition.x + 1
     }
-    if(current.position.y - 1 >= 0){
-      MinY = current.position.y - 1
+    if(current.indexPosition.y - 1 >= 0){
+      MinY = current.indexPosition.y - 1
     }
-    if(current.position.y + 1 <= map.count){
-      MaxY = current.position.y + 1
+    if(current.indexPosition.y + 1 <= map.length){
+      MaxY = current.indexPosition.y + 1
     }
 
-    if(MinX != null && MaxY != null){
-      if(!map[MaxY][MinX].isCollidable){
-        possibleMoves.+(map[MaxY][MinX])
+    if(MinX != -1 && MaxY != -1){
+      if(!map(MaxY)(MinX).isCollidable){
+        possibleMoves.append(map(MaxY)(MinX))
       }
     }
-    if(MaxY != null){
-      if(!map[MaxY][current.position.x].isCollidable){
-        possibleMoves.+(map[MaxY][current.position.x])
+    if(MaxY != -1){
+      if(!map(MaxY)(current.indexPosition.x).isCollidable){
+        possibleMoves.append(map(MaxY)(current.indexPosition.x))
       }
     }
-    if(MaxX != null && MaxY != null){
-      if(!map[MaxY][MaxX].isCollidable){
-        possibleMoves.+(map[MaxY][MaxX])
+    if(MaxX != -1 && MaxY != -1){
+      if(!map(MaxY)(MaxX).isCollidable){
+        possibleMoves.append(map(MaxY)(MaxX))
       }
     }
-    if(MinX != null){
-      if(!map[current.position.y][MinX].isCollidable){
-        possibleMoves.+(map[current.position.y][MinX])
+    if(MinX != -1){
+      if(!map(current.indexPosition.y)(MinX).isCollidable){
+        possibleMoves.append(map(current.indexPosition.y)(MinX))
       }
     }
-    if(MaxX != null){
-      if(!map[current.position.y][MaxX].isCollidable){
-        possibleMoves.+(map[current.position.y][MaxX])
+    if(MaxX != -1){
+      if(!map(current.indexPosition.y)(MaxX).isCollidable){
+        possibleMoves.append(map(current.indexPosition.y)(MaxX))
       }
     }
-    if(MinX != null && MinY != null){
-      if(!map[MinY][MinX].isCollidable){
-        possibleMoves.+(map[MinY][MinX])
+    if(MinX != -1 && MinY != -1){
+      if(!map(MinY)(MinX).isCollidable){
+        possibleMoves.append(map(MinY)(MinX))
       }
     }
-    if(MinY != null){
-      if(!map[MinY][current.position.x].isCollidable){
-        possibleMoves.+(map[MinY][current.position.x])
+    if(MinY != -1){
+      if(!map(MinY)(current.indexPosition.x).isCollidable){
+        possibleMoves.append(map(MinY)(current.indexPosition.x))
       }
     }
-    if(MaxX != null && MinY != null){
-      if(!map[MinY][MaxX].isCollidable){
-        possibleMoves.+(map[MinY][MaxX])
+    if(MaxX != -1 && MinY != -1){
+      if(!map(MinY)(MaxX).isCollidable){
+        possibleMoves.append(map(MinY)(MaxX))
       }
     }
-    return possibleMoves
+    return possibleMoves.toArray
   }
 
   def findDirection(entity: Entity, tp: Position): MoveDirection = {
     (entity.getComponent(classOf[Position]): @unchecked) match {
       case Some(ep: Position) =>
-        val tMap = world.tileMap
+        val tMap = world.asInstanceOf[RoomWorld].tileMap
         val map = tMap.array
         val possibleMoves = findMoves(tMap.getTileByPosition(ep), map)
         val bestMove = getNewMove(possibleMoves, tp)
-        val xDistance = ep.x - bestMove.position.x
-        val yDistance = ep.y - bestMove.position.y
+        val xDistance = ep.x - bestMove.tilePosition.x
+        val yDistance = ep.y - bestMove.tilePosition.y
 
         (abs(xDistance) > abs(yDistance), xDistance > 0, yDistance > 0) match {
           case(true, true, _) =>
