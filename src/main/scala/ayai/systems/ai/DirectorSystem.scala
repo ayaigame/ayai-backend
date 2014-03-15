@@ -19,8 +19,8 @@ class DirectorSystem extends TimedSystem(3000) {
 
     // Create enough entities to make it even in healthwise-ness
 
-    val factionHealths = factions.values.map{
-      faction => faction.foldLeft(0){
+    val factionHealths = factions.map{
+      case(key, faction) => (key, faction.foldLeft(0){
         (x: Int, y: Entity) =>  
           (y.getComponent(classOf[Health])) match {
             case Some(yh: Health) =>
@@ -28,23 +28,20 @@ class DirectorSystem extends TimedSystem(3000) {
             case _ =>
               x
           }
-      }
+      })
     }
 
-    println(factionHealths)
 
     val factionToAdd = factionHealths.map{
-      factionHealth =>
-        factionHealths.max / factionHealth - 1
+      case (name, factionHealth) =>
+        (name, factionHealths.values.max / factionHealth - 1)
     }
 
-    println(factionToAdd)
     factionToAdd.foreach{
-      amount => 
+      case (name, amount) => 
         for(_ <- 1 to amount) {
-          val entity = EntityFactory.createAI(world)
+          val entity = EntityFactory.createAI(world, name)
           world.addEntity(entity)
-          println("Created entity")
         }
     }
     

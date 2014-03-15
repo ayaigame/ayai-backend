@@ -101,7 +101,7 @@ object EntityFactory {
         actorSelection ! new ConnectionWrite(":(")
     }
   }
-  def createAI(world: World): Entity = {
+  def createAI(world: World, faction: String): Entity = {
     val name = java.util.UUID.randomUUID.toString
     val entity: Entity = world.createEntity(tag=name)
     entity.components += new Position(200, 200)
@@ -112,7 +112,7 @@ object EntityFactory {
     entity.components += new Mana(200, 200)
     entity.components += new Character(name, name, 0)
     entity.components += new Goal
-    entity.components += new Faction("axis")
+    entity.components += new Faction(faction)
     entity.components += new Room(0)
 
     entity
