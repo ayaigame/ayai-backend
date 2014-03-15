@@ -10,7 +10,7 @@ object DirectorSystem {
 
 class DirectorSystem extends TimedSystem(2000) {
   override def processTime(delta: Int) {
-    val entities = world.getEntitiesByComponents(classOf[Character], classOf[Goal], classOf[Faction])
+    val entities = world.getEntitiesByComponents(classOf[Character], classOf[Faction])
     val factions = entities.groupBy(e => (e.getComponent(classOf[Faction])) match {
       case(Some(f: Faction)) => f.name
       case _ => ""
@@ -18,7 +18,7 @@ class DirectorSystem extends TimedSystem(2000) {
 
     for((faction, i) <- factions.values.view.zipWithIndex) {
       val otherIndex = i match {
-        case x if x + 1 >= factions.values.size => x
+        case x if x + 1 >= factions.values.size => 0
         case _ => i + 1
       }
 
@@ -31,6 +31,7 @@ class DirectorSystem extends TimedSystem(2000) {
       faction.foreach{ entity => 
         (entity.getComponent(classOf[Goal]): @unchecked) match {
           case(Some(g: Goal)) => g.goal = new MoveTo(position)
+          case _ => ()
         }
       }
     }

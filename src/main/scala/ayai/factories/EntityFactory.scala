@@ -50,6 +50,7 @@ object EntityFactory {
         p.components += new Mana(200,200)
         p.components += new Room(characterRow.room_id)
         p.components += new Character(entityId, characterRow.name, characterRow.experience)
+        p.components += new Faction("allies")
 
         val questbag = new QuestBag()
         val questSelection = networkSystem.actorSelection("user/QuestMap")
@@ -110,21 +111,20 @@ object EntityFactory {
         actorSelection ! new ConnectionWrite(":(")
     }
   }
-  def createAI(world: World) = {
+  def createAI(world: World): Entity = {
     val name = java.util.UUID.randomUUID.toString
-    val p: Entity = world.createEntity(tag=name)
-    p.components += new Position(200, 200)
-    p.components += new Velocity(3,4)
-    p.components += new Bounds(32, 32)
-    p.components += new Velocity(4, 4)
-    p.components += new Actionable(false, DownDirection)
-    p.components += new Health(100,100)
-    p.components += new Mana(200,200)
-    p.components += new Character(name, name, 0)
-    p.components += new Goal
-    p.components += new Faction("allies")
-
-    world.addEntity(p)
+    val entity: Entity = world.createEntity(tag=name)
+    entity.components += new Position(200, 200)
+    entity.components += new Velocity(3,4)
+    entity.components += new Bounds(32, 32)
+    entity.components += new Velocity(4, 4)
+    entity.components += new Actionable(false, DownDirection)
+    entity.components += new Health(100,100)
+    entity.components += new Mana(200,200)
+    entity.components += new Character(name, name, 0)
+    entity.components += new Goal
+    entity.components += new Faction("axis")
+    entity
   }
 
 
