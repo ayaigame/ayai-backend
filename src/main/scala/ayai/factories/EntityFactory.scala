@@ -41,7 +41,6 @@ object EntityFactory {
       case Some(characterRow: CharacterRow) =>
         val p: Entity = world.createEntity(tag=entityId)
         p.components += new Position(characterRow.pos_x,characterRow.pos_y)
-        p.components += new Velocity(3,4)
         p.components += new Bounds(32, 32)
         p.components += new Velocity(4, 4)
         p.components += new Actionable(false, DownDirection)
@@ -115,7 +114,6 @@ object EntityFactory {
     val name = java.util.UUID.randomUUID.toString
     val entity: Entity = world.createEntity(tag=name)
     entity.components += new Position(200, 200)
-    entity.components += new Velocity(3,4)
     entity.components += new Bounds(32, 32)
     entity.components += new Velocity(4, 4)
     entity.components += new Actionable(false, DownDirection)
@@ -124,6 +122,8 @@ object EntityFactory {
     entity.components += new Character(name, name, 0)
     entity.components += new Goal
     entity.components += new Faction("axis")
+    entity.components += new Room(0)
+
     entity
   }
 
