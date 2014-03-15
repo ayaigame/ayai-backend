@@ -229,4 +229,15 @@ object EntityFactory {
     //val entityRoom: Entity = createRoom(world, id, tileMap)
     //entityRoom
   }
+
+
+  def characterToLoot(initiator: Entity, lootEntity: Entity): Entity {
+      lootEntity.components += new Loot(id)
+      val inventory = initiator.getComponent(classOf[Inventory]) match {
+        case (Some(inv: Inventory)) =>
+          lootEntity.components += inv.copy()
+          case _ => 
+      }
+      lootEntity
+  }
 }

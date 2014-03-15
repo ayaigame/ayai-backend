@@ -97,14 +97,10 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
 
     //if the victims health reaches zero, then take the persons inventory and make it lootable
     if(healthComponent.currentHealth <= 0) {
-      val loot:Entity = world.createEntity("LOOT"+initiatorId)
-      loot.components += new Loot(initiatorId)
-      val inventory = initiator.getComponent(classOf[Inventory]) match {
-        case (Some(inv: Inventory)) =>
-          inv.copy()
-        case _ => null
-      }
-      loot.components += inventory
+      val id = (new UID()).toString
+      val loot:Entity = world.createEntity(tag=id)
+      loot = EntityFactory.characterToLoot(initiator, loot)
+      world.addEntity(loot)
     }
 
     val att = ("type" -> "attack") ~

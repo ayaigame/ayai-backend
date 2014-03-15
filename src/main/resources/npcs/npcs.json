@@ -10,7 +10,13 @@
 			"yposition": 100,
 			"quests": [{
 				"questId": 1
-			}]
+			}],
+			"inventory": [{
+				"itemId": 1
+				},
+				{
+					"itemId":2
+				}]
 
 		},
 		{
@@ -23,6 +29,10 @@
 			"yposition": 100,
 			"quests": [{
 				"questId": 2
+			}],
+			"inventory": [{
+				"itemId": 1
 			}]
+
 		}]
 }
