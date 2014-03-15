@@ -13,10 +13,10 @@ object HealthSystem {
 class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health], classOf[Character]), exclude=List(classOf[Respawn])) {
   override def processEntity(e: Entity, deltaTime: Int) {
     val character = (e.getComponent(classOf[Character]): @unchecked) match {
-      case(Some(c : Character)) => c
+      case(Some(c: Character)) => c
     }
     val health = (e.getComponent(classOf[Health]): @unchecked) match {
-      case(Some(h : Health)) => h
+      case(Some(h: Health)) => h
     }
     //look at the status effects of the character
 

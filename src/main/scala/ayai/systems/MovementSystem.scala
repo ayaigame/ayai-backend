@@ -25,21 +25,20 @@ import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
 object MovementSystem {
-  def apply(actorSystem: ActorSystem) = new MovementSystem(actorSystem)
+  def apply() = new MovementSystem()
 }
 
-class MovementSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity],classOf[Room], classOf[Character], classOf[Actionable]),
+class MovementSystem extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity], classOf[Character], classOf[Actionable]),
                                                     exclude=List(classOf[Transport], classOf[Respawn])) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
   private val log = LoggerFactory.getLogger(getClass)
   //this will only move characters who have received a movement key and the current component is still set to True
-  override def processEntity(e: Entity, delta : Int) {
+  override def processEntity(e: Entity, delta: Int) {
   (e.getComponent(classOf[Actionable]),
     e.getComponent(classOf[Position]),
     e.getComponent(classOf[Velocity]),
-    e.getComponent(classOf[Room]),
     e.getComponent(classOf[Bounds])) match {
-    case (Some(actionable: Actionable), Some(position: Position), Some(velocity: Velocity), Some(room: Room), Some(bounds: Bounds)) =>
+    case (Some(actionable: Actionable), Some(position: Position), Some(velocity: Velocity), Some(bounds: Bounds)) =>
       val originalPosition = new Position(position.x, position.y)
       //if moving then process for the given direction
       if(actionable.active) {
@@ -53,8 +52,6 @@ class MovementSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(in
       }
 
       //now check to see if movement has created gone past the map (if so put it at edge)
-      //TODO: Replace with room entity
-      //val roomEntity: Entity = roomHash(room.id)
       val roomEntity: Entity = new Entity
       //will update position in function
       val tileMap: TileMap = world.asInstanceOf[RoomWorld].tileMap
@@ -66,24 +63,6 @@ class MovementSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(in
       if(collision) {
         position.x = originalPosition.x
         position.y = originalPosition.y
-      }
-      val roomId:String = tileMap.checkIfTransport(position)
-      if(roomId != "") {
-        position.x = 100
-        position.y = 100
-        val future = actorSystem.actorSelection("user/RoomList") ? GetWorldByName("room"+roomId)
-        val result = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]]
-        val world = result match {
-          case Some(roomWorld: RoomWorld) => roomWorld 
-        }
-        val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, world)
-        Await.result(future1, timeout.duration)
-        val tileMap = world.tileMap
-        val json = ("type" -> "map") ~
-                    ("tilemap" -> tileMap.file) ~
-                    (tileMap.tilesets.asJson)
-        val actorSelection = actorSystem.actorSelection("user/SockoSender"+e.tag)
-        actorSelection ! new ConnectionWrite(compact(render(json)))
       }
       case _ =>
         log.warn("bb12e5d: getComponent failed to get anything")
