@@ -2,8 +2,8 @@ package ayai.systems
 
 import ayai.components._
 import ayai.actions._
-import ayai.gamestate._
-import ayai.maps._
+import ayai.gamestate.RoomWorld
+import ayai.maps.Tile
 
 import crane.{Entity, System}
 

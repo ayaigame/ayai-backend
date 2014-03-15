@@ -1,20 +1,50 @@
 package ayai.systems
 
-import crane.TimedSystem
+import crane.{Entity, TimedSystem}
 
 import ayai.components._
+import ayai.factories.EntityFactory
 
 object DirectorSystem {
   def apply() = new DirectorSystem()
 }
 
-class DirectorSystem extends TimedSystem(2000) {
+class DirectorSystem extends TimedSystem(3000) {
   override def processTime(delta: Int) {
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[Faction])
     val factions = entities.groupBy(e => (e.getComponent(classOf[Faction])) match {
       case(Some(f: Faction)) => f.name
       case _ => ""
     })
+
+    // Create enough entities to make it even in healthwise-ness
+
+    val factionHealths = factions.map{
+      case(key, faction) => (key, faction.foldLeft(0){
+        (x: Int, y: Entity) =>  
+          (y.getComponent(classOf[Health])) match {
+            case Some(yh: Health) =>
+              x + yh.currentHealth
+            case _ =>
+              x
+          }
+      })
+    }
+
+
+    val factionToAdd = factionHealths.map{
+      case (name, factionHealth) =>
+        (name, factionHealths.values.max / factionHealth - 1)
+    }
+
+    factionToAdd.foreach{
+      case (name, amount) => 
+        for(_ <- 1 to amount) {
+          val entity = EntityFactory.createAI(world, name)
+          world.addEntity(entity)
+        }
+    }
+    
 
     for((faction, i) <- factions.values.view.zipWithIndex) {
       val otherIndex = i match {

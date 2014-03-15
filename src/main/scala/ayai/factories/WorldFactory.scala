@@ -14,20 +14,20 @@ class WorldFactory(networkSystem: ActorSystem) {
     val tileMap = EntityFactory.loadRoomFromJson(s"$file.json")
     var world: RoomWorld = RoomWorld(name, tileMap)
 
-    world.addSystem(MovementSystem(networkSystem), 1)
+    world.addSystem(MovementSystem(), 1)
+    world.addSystem(TransportSystem(networkSystem), 2)
     world.addSystem(HealthSystem())
     world.addSystem(RespawningSystem())
     world.addSystem(FrameExpirationSystem())
     world.addSystem(DirectorSystem())
     world.addSystem(GoalSystem())
     world.addSystem(RoomChangingSystem(networkSystem))
-    world.addSystem(NetworkingSystem(networkSystem), 2)
+    world.addSystem(NetworkingSystem(networkSystem), 3)
     world.addSystem(CollisionSystem(networkSystem))
     world.addSystem(AttackSystem(networkSystem))
     val serializer = networkSystem.actorOf(Props(GameStateSerializer(world)), s"Serializer$name")
     val nmProcessor = networkSystem.actorOf(Props(MessageProcessorSupervisor(world)), name=s"MProcessor$name")
-
-    val entity = EntityFactory.createAI(world)
+    val entity = EntityFactory.createAI(world, "axis")
     world.addEntity(entity)
 
     world
