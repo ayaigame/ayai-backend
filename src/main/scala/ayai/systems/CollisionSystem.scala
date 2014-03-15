@@ -80,7 +80,8 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
                 RightDirection.process(entityA)
                 LeftDirection.process(entityB)
               }
-            } else {
+            } 
+            else {
               if(positionA.y < positionB.y) {
                 UpDirection.process(entityA)
                 DownDirection.process(entityB)

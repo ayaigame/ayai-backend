@@ -8,7 +8,7 @@ import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
 
-class Item(name: String, value: Int, var weight: Double, val itemType: ItemType) extends Component{
+class Item(val id: Long, name: String, value: Int, var weight: Double, val itemType: ItemType) extends Component{
   var image: String = ""
   def asJson: JObject = {
   	("name" -> name) ~
@@ -19,6 +19,6 @@ class Item(name: String, value: Int, var weight: Double, val itemType: ItemType)
   }
 
   def copy(): Item = {
-  	new Item(name, value, weight, itemType.copy)
+  	new Item(id, name, value, weight, itemType.copy)
   }
 }
