@@ -64,6 +64,16 @@ object EntityFactory {
 
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
+        future = itemSelection ? GetItem("ITEM1")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+
+        future = itemSelection ? GetItem("ITEM2")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        future = itemSelection ? GetItem("ITEM1")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        future = itemSelection ? GetItem("ITEM0")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+
         p.components += inventory
 
         val equipment = new Equipment()

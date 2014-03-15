@@ -174,7 +174,6 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
-                  InventoryTable.saveInventory(e)
                   val item = inventory.inventory(slot)
                   val equipItem = equipment.equipmentMap(equipmentType)
                   if(equipment.equipItem(item)) {
@@ -186,6 +185,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   }
                   else {
                   }
+                  InventoryTable.saveInventory(e)
               }
         }
         sender ! Success
