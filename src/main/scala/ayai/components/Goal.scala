@@ -8,15 +8,25 @@ import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-case class Goal extends Component {
+trait Intent
+
+case class MoveTo(position: Position) extends Intent {
+  override def toString: String = {
+    s"Move To $position" 
+  }
+}
+
+class Goal extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
+
+  var goal: Intent = new MoveTo(new Position(0, 0))
 
   override def toString: String = {
     write(this)
   }
 
-  implicit def asJson: JObject = {
-    ("goal" ->
-      ("goal" -> goal))
-  }
+  //implicit def asJson: JObject = {
+  //  ("goal" -> 
+  //    ("goal" -> goal))
+  //}
 }

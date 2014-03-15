@@ -1,6 +1,6 @@
-package ayai.systems.ai
+package ayai.systems
 
-import crane.{EntityProcessingSystem, Entity, World}
+import crane.TimedSystem
 
 import ayai.components._
 
@@ -8,27 +8,30 @@ object DirectorSystem {
   def apply() = new DirectorSystem()
 }
 
-class DirectorSystem extends System {
-  override def process(deltaTime: Int) {
-    val entitites = world.getEntitiesByComponents(classOf[Character], classOf[Faction])
-    val factions = entities.groupBy((_.getComponent(classOf[Faction])) match {
-      case(Some(h: Faction)) => f.name
+class DirectorSystem extends TimedSystem(2000) {
+  override def processTime(delta: Int) {
+    val entities = world.getEntitiesByComponents(classOf[Character], classOf[Goal], classOf[Faction])
+    val factions = entities.groupBy(e => (e.getComponent(classOf[Faction])) match {
+      case(Some(f: Faction)) => f.name
+      case _ => ""
     })
 
-    for((faction, i) <- factions.view.zipWithIndex) {
-      val otherIndex = i.match {
-        case x if x + 1 >= factions.length => x
+    for((faction, i) <- factions.values.view.zipWithIndex) {
+      val otherIndex = i match {
+        case x if x + 1 >= factions.values.size => x
         case _ => i + 1
       }
-      val position = factions(otherIndex)(0).getComponent(classOf[Position]: @unchecked) match {
-          case(Some(p: Position)) => p
-        }
+
+      val position = factions.values.toList(otherIndex)(0).getComponent(classOf[Position]: @unchecked) match {
+        case(Some(p: Position)) => p
+      }
+
+      println(s"go to $position")
 
       faction.foreach{ entity => 
-        val goal = (e.getComponent(classOf[Goal]): @unchecked) match {
-          case(Some(g: Character)) => g
+        (entity.getComponent(classOf[Goal]): @unchecked) match {
+          case(Some(g: Goal)) => g.goal = new MoveTo(position)
         }
-        goal.goal = new MoveTo(position)
       }
     }
   }
