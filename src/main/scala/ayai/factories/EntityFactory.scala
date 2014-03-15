@@ -108,8 +108,8 @@ object EntityFactory {
     entity.components += new Bounds(32, 32)
     entity.components += new Velocity(4, 4)
     entity.components += new Actionable(false, DownDirection)
-    entity.components += new Health(100,100)
-    entity.components += new Mana(200,200)
+    entity.components += new Health(50, 50)
+    entity.components += new Mana(200, 200)
     entity.components += new Character(name, name, 0)
     entity.components += new Goal
     entity.components += new Faction("axis")

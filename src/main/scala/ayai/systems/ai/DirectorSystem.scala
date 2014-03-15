@@ -1,6 +1,6 @@
 package ayai.systems
 
-import crane.TimedSystem
+import crane.{Entity, TimedSystem}
 
 import ayai.components._
 
@@ -8,7 +8,7 @@ object DirectorSystem {
   def apply() = new DirectorSystem()
 }
 
-class DirectorSystem extends TimedSystem(2000) {
+class DirectorSystem extends TimedSystem(3000) {
   override def processTime(delta: Int) {
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[Faction])
     val factions = entities.groupBy(e => (e.getComponent(classOf[Faction])) match {
@@ -16,7 +16,21 @@ class DirectorSystem extends TimedSystem(2000) {
       case _ => ""
     })
 
-    for((faction, i) <- factions.values.view.zipWithIndex) {
+    // Create enough entities to make it even in healthwise-ness
+
+    val factionHealths = factions.values.map{
+      faction => faction.foldLeft(0){
+        (x: Int, y: Entity) =>  
+          (y.getComponent(classOf[Health])) match {
+            case Some(yh: Health) =>
+              x + yh.currentHealth
+            case _ =>
+              x
+          }
+      }
+    }
+
+      for((faction, i) <- factions.values.view.zipWithIndex) {
       val otherIndex = i match {
         case x if x + 1 >= factions.values.size => 0
         case _ => i + 1
