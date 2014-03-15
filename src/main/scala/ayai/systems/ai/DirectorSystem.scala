@@ -3,6 +3,7 @@ package ayai.systems
 import crane.{Entity, TimedSystem}
 
 import ayai.components._
+import ayai.factories.EntityFactory
 
 object DirectorSystem {
   def apply() = new DirectorSystem()
@@ -30,7 +31,25 @@ class DirectorSystem extends TimedSystem(3000) {
       }
     }
 
-      for((faction, i) <- factions.values.view.zipWithIndex) {
+    println(factionHealths)
+
+    val factionToAdd = factionHealths.map{
+      factionHealth =>
+        factionHealths.max / factionHealth - 1
+    }
+
+    println(factionToAdd)
+    factionToAdd.foreach{
+      amount => 
+        for(_ <- 1 to amount) {
+          val entity = EntityFactory.createAI(world)
+          world.addEntity(entity)
+          println("Created entity")
+        }
+    }
+    
+
+    for((faction, i) <- factions.values.view.zipWithIndex) {
       val otherIndex = i match {
         case x if x + 1 >= factions.values.size => 0
         case _ => i + 1
