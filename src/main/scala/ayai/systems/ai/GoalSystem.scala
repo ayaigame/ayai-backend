@@ -43,8 +43,14 @@ class GoalSystem extends System {
       val direction = findDirection(entity, goal.goal.asInstanceOf[MoveTo].position)
       (entity.getComponent(classOf[Actionable]): @unchecked) match {
         case Some(actionable: Actionable) =>
-          actionable.active = true
+        (entity.getComponent(classOf[Position]): @unchecked) match {
+          case Some(ep: Position) =>
+
+          val tp = goal.goal.asInstanceOf[MoveTo].position
+          actionable.active = !(ep.x == tp.x && ep.y == tp.y)
           actionable.action = direction
+
+        }
       }
       // TODO: instead of findDirection, use A*
   
