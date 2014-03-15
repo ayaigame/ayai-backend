@@ -63,15 +63,6 @@ object EntityFactory {
         val inventory = new Inventory()
 
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
-        future = itemSelection ? GetItem("ITEM1")
-        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-
-        future = itemSelection ? GetItem("ITEM2")
-        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-        future = itemSelection ? GetItem("ITEM1")
-        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-        future = itemSelection ? GetItem("ITEM0")
-        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
         p.components += inventory
 
@@ -192,8 +183,12 @@ object EntityFactory {
     for(i <- 0 until (width*height)) {
       for(bundle <- bundles) {
         if(bundle.data(i) != 0 ) {
-          if(bundle.name != "collision")
+          val relativePosition: Position = new Position((i % width)*32+16,(i / width)*32+16)
+          arrayTile(i%width)(i/width).tilePosition = relativePosition
+          arrayTile(i%width)(i/width).indexPosition = new Position(i % width,i / width)
+          if(bundle.name != "collision") {
             arrayTile(i % width)(i / width).layers += new NormalLayer(bundle.data(i))
+          }
           else {
             arrayTile(i % width)(i / width).layers += new CollidableLayer(bundle.data(i))
           }

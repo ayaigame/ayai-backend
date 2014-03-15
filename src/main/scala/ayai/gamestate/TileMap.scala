@@ -21,7 +21,7 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
   def maximumHeight: Int = array(0).length * tileSize
 
   def getTileByPosition(position: Position): Tile = array(valueToTile(position.x))(valueToTile(position.y))
-
+  
   // Get a tile by a x or y value from the array (example: 32 tilesize value, 65 (position) / 32) = 2 tile
   def valueToTile(value: Int): Int = value / tileSize
 
