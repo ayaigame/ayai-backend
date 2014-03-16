@@ -27,7 +27,7 @@ class GoalSystem extends System {
     var bestMove = possibleMoves(0)
     for(move <- possibleMoves) {
       val temp = getScore(move.tilePosition, goal)
-      if(temp < score){
+      if(temp <= score){
         score = temp
         bestMove = move
       }
@@ -36,63 +36,19 @@ class GoalSystem extends System {
   }
 
   def findMoves(current : Tile, map : Array[Array[Tile]]) : Array[Tile] = {
-    var MinX = -1
-    var MaxX = -1
-    var MinY = -1
-    var MaxY = -1
+    val currentX = current.indexPosition.x
+    val currentY = current.indexPosition.y
     var possibleMoves = new ArrayBuffer[Tile]()
 
-    if(current.indexPosition.x - 1 >= 0){
-      MinX = current.indexPosition.x - 1
-    }
-    if(current.indexPosition.x + 1 <= map.length){
-      MaxX = current.indexPosition.x + 1
-    }
-    if(current.indexPosition.y - 1 >= 0){
-      MinY = current.indexPosition.y - 1
-    }
-    if(current.indexPosition.y + 1 <= map.length){
-      MaxY = current.indexPosition.y + 1
-    }
-
-    if(MinX != -1 && MaxY != -1){
-      if(!map(MaxY)(MinX).isCollidable){
-        possibleMoves.append(map(MaxY)(MinX))
-      }
-    }
-    if(MaxY != -1){
-      if(!map(MaxY)(current.indexPosition.x).isCollidable){
-        possibleMoves.append(map(MaxY)(current.indexPosition.x))
-      }
-    }
-    if(MaxX != -1 && MaxY != -1){
-      if(!map(MaxY)(MaxX).isCollidable){
-        possibleMoves.append(map(MaxY)(MaxX))
-      }
-    }
-    if(MinX != -1){
-      if(!map(current.indexPosition.y)(MinX).isCollidable){
-        possibleMoves.append(map(current.indexPosition.y)(MinX))
-      }
-    }
-    if(MaxX != -1){
-      if(!map(current.indexPosition.y)(MaxX).isCollidable){
-        possibleMoves.append(map(current.indexPosition.y)(MaxX))
-      }
-    }
-    if(MinX != -1 && MinY != -1){
-      if(!map(MinY)(MinX).isCollidable){
-        possibleMoves.append(map(MinY)(MinX))
-      }
-    }
-    if(MinY != -1){
-      if(!map(MinY)(current.indexPosition.x).isCollidable){
-        possibleMoves.append(map(MinY)(current.indexPosition.x))
-      }
-    }
-    if(MaxX != -1 && MinY != -1){
-      if(!map(MinY)(MaxX).isCollidable){
-        possibleMoves.append(map(MinY)(MaxX))
+    for(i <- -1 to 1){
+      for(j <- -1 to 1){
+        if(map.isDefinedAt(currentY+i) && map(currentY+i).isDefinedAt(currentX+j)){
+          if(!(i==0 && j==0)){
+            if(!map(currentY+i)(currentX+j).isCollidable){
+              possibleMoves.append(map(currentY+i)(currentX+j))
+            }
+          }
+        }
       }
     }
     return possibleMoves.toArray
