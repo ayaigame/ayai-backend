@@ -104,9 +104,9 @@ object EntityFactory {
   def createAI(world: World, faction: String): Entity = {
     val name = java.util.UUID.randomUUID.toString
     val entity: Entity = world.createEntity(tag=name)
-    entity.components += new Position(200, 200)
+    entity.components += new Position(400, 400)
     entity.components += new Bounds(32, 32)
-    entity.components += new Velocity(4, 4)
+    entity.components += new Velocity(2, 2)
     entity.components += new Actionable(false, DownDirection)
     entity.components += new Health(50, 50)
     entity.components += new Mana(200, 200)
