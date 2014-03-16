@@ -15,10 +15,24 @@ object ClassFactory {
   case class AllClassValues(
       id: Int,
       name: String,
+      description: String,
       baseHealth: Int,
       baseMana: Int,
       baseStats: Option[List[Stat]],
-      statGrowths: Option[List[Stat]])
+      statGrowths: Option[List[Stat]]) {
+
+    def getStatsJson: JObject = {
+      ("stats" ->
+        ("health" -> baseHealth) ~
+        ("mana" -> baseMana))
+
+    //How do I make a list JSON?
+    def asJson: JObject = {
+      ("id" -> id) ~
+        ("name" -> name) ~
+        ("description" -> description) ~
+        getStatsJson)
+  }
 
   def bootup(world: World) = {
     val classes: List[AllClassValues] = getClassesList("src/main/resources/configs/classes/classes.json")
@@ -47,6 +61,16 @@ object ClassFactory {
     new Stats(statsArray)
   }
 
+  def asJson(): JObject = {
+    ("classes" ->
+      ("helmet" -> equipmentMap("helmet").asJson) ~
+      ("weapon1" -> equipmentMap("weapon1").asJson) ~
+      ("weapon2" -> equipmentMap("weapon2").asJson) ~
+      ("torso" -> equipmentMap("torso").asJson) ~
+      ("legs" -> equipmentMap("legs").asJson) ~
+      ("feet" -> equipmentMap("feet").asJson))
+  }
+
   def getClassesList(path: String): List[AllClassValues] = {
     implicit val formats = net.liftweb.json.DefaultFormats
 
@@ -60,7 +84,7 @@ object ClassFactory {
     val otherPaths = (parsedJson \\ "externalClasses").extract[List[String]]
 
     val listOfLists: List[List[AllClassValues]] = otherPaths.map((path: String) => getClassesList(path))
-    
+
     var classesList = new ArrayBuffer[AllClassValues]()
     classesList.appendAll(rootClasses)
 
