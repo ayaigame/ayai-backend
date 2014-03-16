@@ -177,7 +177,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   val item = inventory.inventory(slot)
                   val equipItem = equipment.equipmentMap(equipmentType)
                   if(equipment.equipItem(item)) {
-                    inventory.inventory -= item
+                    inventory.removeItem(item)
                     if(!isEmptySlot(equipItem)) {
                       inventory.inventory += equipItem
                     }
@@ -195,7 +195,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
-                  val equippedItem = equipment.equipmentMap(equipmentType)
+                  val equippedItem = equipment.unequipItem(equipmentType)
                   equippedItem match {
                     case weapon: Weapon =>
                       inventory.inventory += equippedItem
@@ -203,9 +203,14 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                       inventory.inventory += equippedItem
                     case _ =>
                   }
+                case _ =>
+                  println(s"User $userId cannot equip $equipmentType.")
               }
+          case _ =>
+            println(s"User $userId not found while unequiping.")
         }
         sender ! Success
+
       case DropItemMessage(userId: String, slot: Int) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
