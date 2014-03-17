@@ -114,6 +114,7 @@ object EntityFactory {
     entity.components += new Goal
     entity.components += new Faction(faction)
     entity.components += new Room(0)
+    entity.components += new Equipment()
 
     entity
   }
