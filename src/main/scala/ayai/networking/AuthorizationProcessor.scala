@@ -1,6 +1,7 @@
 package ayai.networking
 
 import ayai.persistence._
+import ayai.factories.ClassFactory
 
 /** Akka Imports **/
 import akka.actor.{Actor}
@@ -14,6 +15,8 @@ import org.squeryl.SessionFactory
 import org.squeryl.adapters.H2Adapter
 import org.squeryl.PrimitiveTypeMode._
 import com.typesafe.config.ConfigFactory
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 class AuthorizationProcessor extends Actor {
 
@@ -77,11 +80,12 @@ class AuthorizationProcessor extends Actor {
     val content:String = request.request.content.toString
     var accountId: Long = -1
 
-    //Validate request
+    //Validate request, this is not done correctly. It can throw if token does not exist.
+    //Looks like other cases are done like this too.
     transaction {
       accountId = AyaiDB.tokens.where(token => token.token === content).single.account_id
     }
-
+    request.response.write(HttpResponseStatus.OK, compact(render(ClassFactory.asJson)))
 
   case CreateCharacterPost(request: HttpRequestEvent) =>
     val content:String = request.request.content.toString

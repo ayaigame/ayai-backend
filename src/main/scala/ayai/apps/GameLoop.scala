@@ -46,13 +46,15 @@ object GameLoop {
     val userRoomMap = networkSystem.actorOf(Props[UserRoomMap], name="UserRoomMap")
     val roomList = networkSystem.actorOf(Props[RoomList], name="RoomList")
     val itemMap = networkSystem.actorOf(Props[ItemMap], name="ItemMap")
+    val classMap = networkSystem.actorOf(Props[ClassMap], name="ClassMap")
     val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
 
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
 
-    val itemFactory = ItemFactory.bootup(networkSystem)    
+    val itemFactory = ItemFactory.bootup(networkSystem)
     val questFactory = QuestFactory.bootup(networkSystem)
+    val classFactory = ClassFactory.bootup(networkSystem)
 
     for((file, index) <- rooms.zipWithIndex)
       worlds(s"room$index") = worldFactory.createWorld(s"room$index", s"$file")

@@ -1,16 +1,23 @@
 package ayai.factories
 
 import ayai.components._
+import ayai.gamestate._
 
 /** Crane Imports **/
 import crane.{Entity, World}
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
+import net.liftweb.json.Extraction._
+// import net.liftweb.json.Printer._
 
 import scala.collection.mutable._
 
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+
 object ClassFactory {
+  implicit val formats = net.liftweb.json.DefaultFormats
+  val classes: List[AllClassValues] = getClassesList("src/main/resources/configs/classes/classes.json")
 
   case class AllClassValues(
       id: Int,
@@ -21,37 +28,43 @@ object ClassFactory {
       baseStats: Option[List[Stat]],
       statGrowths: Option[List[Stat]]) {
 
-    def getStatsJson: JObject = {
-      ("stats" ->
-        ("health" -> baseHealth) ~
-        ("mana" -> baseMana))
+    def getStatsJson: List[JObject] = {
+      baseStats match {
+        case Some(stats: List[Stat]) =>
+          // var jsonStats =
+          var statsArray = new ArrayBuffer[Stat]()
+          statsArray appendAll stats
+          statsArray += new Stat("health", baseHealth)
+          statsArray += new Stat("mana", baseMana)
+          var statsMap = HashMap[String, Int]()
+          statsMap += ("test" -> 2)
+          println(compact(render(decompose(statsMap))))
+          statsArray.toList.map{ stat =>
+            (stat.asJson)}
+      }
+    }
 
-    //How do I make a list JSON?
     def asJson: JObject = {
       ("id" -> id) ~
         ("name" -> name) ~
         ("description" -> description) ~
-        getStatsJson)
+        ("stats" -> getStatsJson)
+    }
   }
 
-  def bootup(world: World) = {
-    val classes: List[AllClassValues] = getClassesList("src/main/resources/configs/classes/classes.json")
-
+  def bootup(networkSystem: ActorSystem) = {
+    println(compact(render(asJson)))
     classes.foreach(classData => {
-      var entityClass: Entity = world.createEntity(tag="CLASS"+classData.id)
       var classComponent = new Class(
         classData.id,
         classData.name,
         classData.baseHealth,
         classData.baseMana)
 
-      entityClass.components += classComponent
-
       //Construct stats component
-      entityClass.components += buildStats(classData.baseStats)
+      // classComponent.components += buildStats(classData.baseStats)
 
-      world.addEntity(entityClass)
-      // world.getManager(classOf[TagManager]).register("CLASSES" + classData.id, entityClass)
+      networkSystem.actorSelection("user/ClassMap") ! AddClass("CLASS"+classData.id, classComponent)
     })
   }
 
@@ -61,14 +74,9 @@ object ClassFactory {
     new Stats(statsArray)
   }
 
-  def asJson(): JObject = {
-    ("classes" ->
-      ("helmet" -> equipmentMap("helmet").asJson) ~
-      ("weapon1" -> equipmentMap("weapon1").asJson) ~
-      ("weapon2" -> equipmentMap("weapon2").asJson) ~
-      ("torso" -> equipmentMap("torso").asJson) ~
-      ("legs" -> equipmentMap("legs").asJson) ~
-      ("feet" -> equipmentMap("feet").asJson))
+  def asJson: JObject = {
+    ("classes" -> classes.map{ c =>
+        (c.asJson)})
   }
 
   def getClassesList(path: String): List[AllClassValues] = {
