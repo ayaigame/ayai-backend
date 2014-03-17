@@ -63,7 +63,26 @@ class GameStateSerializer(world: World) extends Actor {
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
              }})
-
+            var npcs = world.getEntitiesByComponents(classOf[Interactable], classOf[Character], classOf[Position],
+                                                     classOf[Health], classOf[Mana])
+            jsonLift += ("npcs" -> npcs.map { npc =>
+              (npc.getComponent(classOf[Interactable]),
+                npc.getComponent(classOf[Character]),
+                npc.getComponent(classOf[Position]),
+                npc.getComponent(classOf[Health]),
+                npc.getComponent(classOf[Mana]))}) match {
+                  case (Some(interact: Interact), Some(character: Character), Some(position: Position),
+                    Some(health: Health), Some(mana: Mana)) =>
+                    ((interact.asJson) ~
+                      (character.asJson) ~
+                      (position.asJson) ~
+                      (health.asJson) ~
+                      (mana.asJson))
+                  case _ =>  
+                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
+                    JNothing
+                }
+                
          try {
            roomJSON = jsonLift
            valid = true

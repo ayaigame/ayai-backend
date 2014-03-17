@@ -4,7 +4,8 @@ import crane.{Component, Entity, World, EntityProcessingSystem}
 import ayai.components._
 import ayai.networking._
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-
+import java.rmi.server.UID
+import ayai.factories._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
@@ -99,7 +100,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     if(healthComponent.currentHealth <= 0) {
       val id = (new UID()).toString
       val loot:Entity = world.createEntity(tag=id)
-      loot = EntityFactory.characterToLoot(initiator, loot)
+      EntityFactory.characterToLoot(initiator, loot)
       world.addEntity(loot)
     }
 

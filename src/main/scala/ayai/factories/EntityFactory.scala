@@ -231,13 +231,17 @@ object EntityFactory {
   }
 
 
-  def characterToLoot(initiator: Entity, lootEntity: Entity): Entity {
-      lootEntity.components += new Loot(id)
+  def characterToLoot(initiator: Entity, lootEntity: Entity) {
+
+      lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
+        case Some(character: Character) => character.id 
+        case _ => "0"
+      })
+
       val inventory = initiator.getComponent(classOf[Inventory]) match {
         case (Some(inv: Inventory)) =>
           lootEntity.components += inv.copy()
           case _ => 
       }
-      lootEntity
   }
 }

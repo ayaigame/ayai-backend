@@ -349,6 +349,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
 
         sender ! Success
+      case InteractMessage(userId: String, npcId: String) => 
+                
 
       case _ => println("Error from MessageProcessor.")
     }
