@@ -15,43 +15,32 @@ object GoalSystem {
 }
 
 class GoalSystem extends System {
-  def getScore(current : Position, goal : Position) : Int = {
-    val dx = abs(current.x - goal.x)
-    val dy = abs(current.y - goal.y)
-    val dist = dx + dy
-    return dist
+  def getScore(current: Position, goal: Position): Int = {
+    abs(current.x - goal.x) + abs(current.y - goal.y)
   }
 
-  def getNewMove(possibleMoves : Array[Tile], goal : Position) : Tile = {
-    var score = 1000000
-    var bestMove = possibleMoves(0)
-    for(move <- possibleMoves) {
-      val temp = getScore(move.tilePosition, goal)
-      if(temp <= score){
-        score = temp
-        bestMove = move
-      }
-    }
-    return bestMove
+  def getNewMove(possibleMoves: Array[Tile], goal: Position): Tile = {
+    // Get all scores, sort them by score, return the tile with the lowest score
+    possibleMoves.map{
+      move => (move, getScore(move.tilePosition, goal))
+    }.sortWith((x, y) => x._2 < y._2).head._1
   }
 
-  def findMoves(current : Tile, map : Array[Array[Tile]]) : Array[Tile] = {
-    val currentX = current.indexPosition.x
-    val currentY = current.indexPosition.y
-    var possibleMoves = new ArrayBuffer[Tile]()
+  def neighbors(position: Position) = (position.x, position.y) match {
+    case(x, y) =>
+      for { 
+        dx <- -1 to 1
+        dy <- -1 to 1
+        if !(dx == 0 && dy == 0) && !(abs(dx) == abs(dy))
+      } yield (x + dx, y + dy)
+  }
 
-    for(i <- -1 to 1){
-      for(j <- -1 to 1){
-        if(map.isDefinedAt(currentY+i) && map(currentY+i).isDefinedAt(currentX+j)){
-          if(!(i==0 && j==0)){
-            if(!map(currentY+i)(currentX+j).isCollidable){
-              possibleMoves.append(map(currentY+i)(currentX+j))
-            }
-          }
-        }
-      }
-    }
-    return possibleMoves.toArray
+  def findMoves(current: Tile, tileMap: Array[Array[Tile]]): Array[Tile] = {
+    neighbors(current.indexPosition).withFilter{
+      pos => tileMap.isDefinedAt(pos._2) && tileMap(pos._2).isDefinedAt(pos._1)
+    }.map(pos => tileMap(pos._2)(pos._1)).filter{
+      tile => !tileMap(tile.indexPosition.y)(tile.indexPosition.x).isCollidable
+    }.toArray
   }
 
   def findDirection(entity: Entity, tp: Position): MoveDirection = {
@@ -59,8 +48,8 @@ class GoalSystem extends System {
       case Some(ep: Position) =>
         val tMap = world.asInstanceOf[RoomWorld].tileMap
         val map = tMap.array
-        val possibleMoves = findMoves(tMap.getTileByPosition(ep), map)
-        val bestMove = getNewMove(possibleMoves, tp)
+        val bestMove = getNewMove(findMoves(tMap.getTileByPosition(ep), map), tp)
+
         val xDistance = ep.x - bestMove.tilePosition.x
         val yDistance = ep.y - bestMove.tilePosition.y
 
@@ -69,7 +58,7 @@ class GoalSystem extends System {
             LeftDirection
           case(true, false, _) =>
             RightDirection
-          case(false, _ ,true) =>
+          case(false, _, true) =>
             UpDirection
           case(false, _, false) =>
             DownDirection
@@ -95,7 +84,6 @@ class GoalSystem extends System {
           val tp = goal.goal.asInstanceOf[MoveTo].position
           actionable.active = !(ep.x == tp.x && ep.y == tp.y)
           actionable.action = direction
-
         }
       }
     }
