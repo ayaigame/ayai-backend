@@ -75,15 +75,29 @@ class GoalSystem extends System {
       val goal = (entity.getComponent(classOf[Goal]): @unchecked) match {
         case Some(g: Goal) => g
       }
-      val direction = findDirection(entity, goal.goal.asInstanceOf[MoveTo].position)
+
+      val position = goal.goal match {
+	case (mt: MoveTo) =>
+          mt.position
+        case (at: AttackTo) =>
+          at.position
+      }
+
+      val direction = findDirection(entity, position)
       (entity.getComponent(classOf[Actionable]): @unchecked) match {
         case Some(actionable: Actionable) =>
         (entity.getComponent(classOf[Position]): @unchecked) match {
           case Some(ep: Position) =>
-
-          val tp = goal.goal.asInstanceOf[MoveTo].position
-          actionable.active = !(ep.x == tp.x && ep.y == tp.y)
-          actionable.action = direction
+	  goal.goal match {
+	    case mt: MoveTo =>
+              val tp = mt.position
+              actionable.active = !(ep.x == tp.x && ep.y == tp.y)
+              actionable.action = direction
+            case at: AttackTo =>
+              val tp = at.position
+              actionable.active = !(ep.x == tp.x && ep.y == tp.y)
+              actionable.action = direction
+	  }
         }
       }
     }

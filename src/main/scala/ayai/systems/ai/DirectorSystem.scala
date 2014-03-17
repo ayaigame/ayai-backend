@@ -58,7 +58,7 @@ class DirectorSystem extends TimedSystem(3000) {
 
       faction.foreach{ entity => 
         (entity.getComponent(classOf[Goal]): @unchecked) match {
-          case(Some(g: Goal)) => g.goal = new MoveTo(position)
+          case(Some(g: Goal)) => g.goal = new AttackTo(position)
           case _ => ()
         }
       }
