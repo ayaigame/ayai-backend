@@ -4,17 +4,23 @@ import ayai.components._
 import ayai.actions._
 import ayai.gamestate.RoomWorld
 import ayai.maps.Tile
+import ayai.networking.{AttackMessage, ProcessMessage}
 
 import crane.{Entity, System}
+
+import akka.actor.ActorSystem
 
 import scala.math.abs
 import scala.collection.mutable._
 
 object GoalSystem {
-  def apply() = new GoalSystem()
+  def apply(actorSystem: ActorSystem) = new GoalSystem(actorSystem)
 }
 
-class GoalSystem extends System {
+class GoalSystem(actorSystem: ActorSystem) extends System {
+  def getScore(current: Position, goal: Position): Int = {
+    abs(current.x - goal.x) + abs(current.y - goal.y)
+  }
   def findDirection(entity: Entity, tp: Position): MoveDirection = {
     (entity.getComponent(classOf[Position]): @unchecked) match {
       case Some(ep: Position) =>
@@ -26,7 +32,7 @@ class GoalSystem extends System {
             LeftDirection
           case(true, false, _) =>
             RightDirection
-          case(false, _ ,true) =>
+          case(false, _, true) =>
             UpDirection
           case(false, _, false) =>
             DownDirection
@@ -34,23 +40,40 @@ class GoalSystem extends System {
       case _ =>
         new MoveDirection(0,0)
     }
-  }
-
+  } 
   override def process(delta: Int) {
-    val entities = world.getEntitiesByComponents(classOf[Goal], classOf[Position], classOf[Actionable])
+    val entities = world.getEntitiesByComponents(classOf[Goal], classOf[Position], classOf[Actionable], classOf[Character])
     for(entity <- entities) {
       val goal = (entity.getComponent(classOf[Goal]): @unchecked) match {
-        case Some(g: Goal) => g
+        case Some(g: Goal) => g.goal
       }
-      val direction = findDirection(entity, goal.goal.asInstanceOf[MoveTo].position)
-      (entity.getComponent(classOf[Actionable]): @unchecked) match {
-        case Some(actionable: Actionable) =>
-          actionable.active = true
-          actionable.action = direction
+
+      val position = goal match {
+	    case mt: MoveTo =>
+          mt.position
+        case at: AttackTo =>
+          at.position
       }
-      // TODO: instead of findDirection, use A*
-  
+
+      val direction = findDirection(entity, position)
+      (entity.getComponent(classOf[Actionable]), entity.getComponent(classOf[Character]), entity.getComponent(classOf[Position])) match {
+        case (Some(actionable: Actionable), Some(character: Character), Some(ep: Position)) =>
+	      goal match {
+	        case mt: MoveTo =>
+              val tp = mt.position
+              actionable.active = !(ep.x == tp.x && ep.y == tp.y)
+              actionable.action = direction
+            case at: AttackTo =>
+              val tp = at.position
+              actionable.active = !(ep.x == tp.x && ep.y == tp.y)
+              actionable.action = direction
+              if(getScore(ep, tp) > 5 && getScore(ep, tp) < 64){
+                val name = world.asInstanceOf[RoomWorld].name
+                actorSystem.actorSelection(s"user/MProcessor$name") !  new ProcessMessage(new AttackMessage(character.name))
+
+              }
+	      }
+      }
     }
   }
-
 }
