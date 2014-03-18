@@ -1,6 +1,7 @@
 package ayai.networking
 
 import ayai.persistence._
+import ayai.factories.ClassFactory
 
 /** Akka Imports **/
 import akka.actor.{Actor}
@@ -14,6 +15,8 @@ import org.squeryl.SessionFactory
 import org.squeryl.adapters.H2Adapter
 import org.squeryl.PrimitiveTypeMode._
 import com.typesafe.config.ConfigFactory
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 class AuthorizationProcessor extends Actor {
 
@@ -59,8 +62,17 @@ class AuthorizationProcessor extends Actor {
 
     val username = content.slice(0, delimiter).replaceAll("email=", "")
     val password = content.slice(delimiter + 1, content.length).replaceAll("password=", "")
-    if(AyaiDB.registerUser(username, password))
-      request.response.write(HttpResponseStatus.OK, "GOOD")
+    if(AyaiDB.registerUser(username, password)) {
+      var token: String = ""
+      token = AyaiDB.validatePassword(username, password)
+
+      token match {
+        case "" =>
+          request.response.write(HttpResponseStatus.UNAUTHORIZED)
+        case _ =>
+          request.response.write(HttpResponseStatus.OK, token)
+      }
+    }
     else
       request.response.write(HttpResponseStatus.CONFLICT)
 
@@ -72,6 +84,9 @@ class AuthorizationProcessor extends Actor {
       accountId = AyaiDB.tokens.where(token => token.token === content).single.account_id
     }
     CharacterTable.characterList(request, accountId)
+
+  case ClassListGet(request: HttpRequestEvent) =>
+    request.response.write(HttpResponseStatus.OK, compact(render(ClassFactory.asJson)))
 
   case CreateCharacterPost(request: HttpRequestEvent) =>
     val content:String = request.request.content.toString

@@ -35,7 +35,7 @@ object CharacterTable {
         new H2Adapter))
 
     transaction {
-      AyaiDB.characters.insert(new CharacterRow(characterName, characterName, 0, accountId, startingRoom, startingX, startingY))
+      AyaiDB.characters.insert(new CharacterRow(characterName, className, 0, accountId, startingRoom, startingX, startingY))
     }
   }
 

@@ -123,7 +123,7 @@ object EntityFactory {
         actorSelection ! new ConnectionWrite(compact(render(json)))
 
       case _ =>
-        println("CHARACTER NOT FOUND!!!!!!!!!!")
+        println(s"CHARACTER $characterName NOT FOUND!!!!!!!!!!")
         val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
         actorSelection ! new ConnectionWrite(":(")
     }
