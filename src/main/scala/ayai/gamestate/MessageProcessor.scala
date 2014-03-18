@@ -109,16 +109,15 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 case _ =>
                   println("Not match for movedirection")
                   new MoveDirection(0, 0)
-                  //SHOULD WE THROW?
               }
 
               //get the range of the characters weapon
               val weaponRange = initiator.getComponent(classOf[Equipment]) match {
                 case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
                   case weapon: Weapon => weapon.range
-                  case _ => 5
+                  case _ => 30
                 }
-                case _ => 5
+                case _ => 30
               }
 
               val upperLeftx = pos.x
@@ -127,8 +126,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val xDirection = m.xDirection
               val yDirection = m.yDirection
 
-              val topLeftOfAttackx = ((weaponRange+1) * xDirection) + upperLeftx
-              val topLeftOfAttacky = ((weaponRange+1) * yDirection) + upperLefty
+              val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
+              val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
 
               val p: Entity = world.createEntity("ATTACK"+bulletId)
 
