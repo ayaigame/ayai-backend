@@ -23,19 +23,44 @@ import net.liftweb.json.Serialization.{read, write}
 
 object CharacterTable {
 
-  def createCharacter(characterName: String, className: String, accountId: Long) {
-    this.createCharacter(characterName, className, accountId, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y)
+  //This should check for an existing character with characterName
+  def createCharacter(request: HttpRequestEvent, characterName: String, className: String, accountId: Long) {
+    this.createCharacter(request, characterName, className, accountId, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y)
   }
 
-  def createCharacter(characterName: String, className: String, accountId: Long, startingRoom: Long, startingX: Int, startingY: Int) {
-    Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
-        Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
+  def createCharacter(request: HttpRequestEvent,
+                      characterName: String,
+                      className: String,
+                      accountId: Long,
+                      startingRoom: Long,
+                      startingX: Int,
+                      startingY: Int) {
+    AyaiDB.getCharacter(characterName) match {
+      case Some(character: CharacterRow) =>
+        request.response.write(HttpResponseStatus.CONFLICT)
 
-    transaction {
-      AyaiDB.characters.insert(new CharacterRow(characterName, className, 0, accountId, startingRoom, startingX, startingY))
+      case _ =>
+        Class.forName("org.h2.Driver");
+        SessionFactory.concreteFactory = Some (() =>
+            Session.create(
+            java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+            new H2Adapter))
+
+        transaction {
+          AyaiDB.characters.insert(new CharacterRow(characterName, className, 0, accountId, startingRoom, startingX, startingY))
+          val characterQuery =
+            from(AyaiDB.characters)(row =>
+              where(row.name === characterName)
+              select(row)
+            )
+
+          //give them some starting items
+          AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 0, 1))
+          AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 1, 1))
+          AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 2, 1))
+
+          request.response.write(HttpResponseStatus.OK, "GOOD")
+        }
     }
   }
 

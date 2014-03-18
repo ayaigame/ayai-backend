@@ -1,9 +1,9 @@
 package ayai.persistence
 
-import ayai.components.{Character, Inventory, Item, Equipment, Weapon, Armor}
+import ayai.components.{Character, Inventory, Item, Equipment, Weapon, Armor, EmptyType}
 import ayai.apps.Constants
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, HashMap}
 
 import crane.Entity
 
@@ -22,13 +22,72 @@ import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
 
 object InventoryTable {
+
+  //returns a list of item ids which are in the character's id
+  def getInventory(characterEntity: Entity): List[Long] = {
+    characterEntity.getComponent(classOf[Character]) match {
+      case Some(character: Character) =>
+        Class.forName("org.h2.Driver");
+        SessionFactory.concreteFactory = Some (() =>
+            Session.create(
+            java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+            new H2Adapter))
+
+        transaction {
+          val characterQuery =
+            from(AyaiDB.characters)(row =>
+              where(row.name === character.name)
+              select(row)
+            )
+
+          val inventoryRows =
+            from(AyaiDB.inventory)(row =>
+              where(row.characterId === characterQuery.single.id)
+              select(row.itemId)
+            )
+
+          inventoryRows.toList// map ((row: InventoryRow) => row.itemId)
+        }
+    }
+  }
+
+  //returns a map of slots to item ids
+  def getEquipment(characterEntity: Entity): Map[String, Long] = {
+    characterEntity.getComponent(classOf[Character]) match {
+      case Some(character: Character) =>
+        Class.forName("org.h2.Driver");
+        SessionFactory.concreteFactory = Some (() =>
+            Session.create(
+            java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+            new H2Adapter))
+
+        transaction {
+          val characterQuery =
+            from(AyaiDB.characters)(row =>
+              where(row.name === character.name)
+              select(row)
+            )
+
+          val equipmentRows =
+            from(AyaiDB.equipment)(row =>
+              where(row.characterId === characterQuery.single.id)
+              select(row)
+            )
+
+          equipmentRows map ((row: EquipmentRow) => (row.slot, row.itemId)) toMap
+        }
+    }
+  }
+
+
+
+
   //MUST BE CALLED FROM WITHIN TRANSACTION
   //This is so it can be done multiple times within a single transaction.
   //Deletes all copies of the item in the character's inventory
-  def deleteAllOfItem(itemEnity: Entity, characterEntity: Entity) {
-   (itemEnity.getComponent(classOf[Item]),
-      characterEntity.getComponent(classOf[Character])) match {
-      case (Some(item: Item), Some(character: Character)) =>
+  def deleteAllOfItem(item: Item, characterEntity: Entity) {
+    characterEntity.getComponent(classOf[Character]) match {
+      case Some(character: Character) =>
         val characterQuery =
           from(AyaiDB.characters)(row =>
             where(row.name === character.name)
@@ -42,15 +101,27 @@ object InventoryTable {
 
       case _ =>
         println("Error in InventoryTable - deleteAllOfItem")
-      }
+    }
+  }
+
+  def deleteItem(item: Item, characterEntity: Entity) {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+
+    transaction {
+      decrementItem(item, characterEntity)
+    }
   }
 
   //MUST BE CALLED FROM WITHIN TRANSACTION
   //This is so it can be done multiple times within a single transaction.
-  def deleteItem(itemEnity: Entity, characterEntity: Entity) {
-   (itemEnity.getComponent(classOf[Item]),
-      characterEntity.getComponent(classOf[Character])) match {
-      case (Some(item: Item), Some(character: Character)) =>
+  def decrementItem(item: Item, characterEntity: Entity) {
+    characterEntity.getComponent(classOf[Character]) match {
+      case Some(character: Character) =>
         val characterQuery =
             from(AyaiDB.characters)(row =>
               where(row.name === character.name)
@@ -80,6 +151,7 @@ object InventoryTable {
         else {
           println("Error: duplicate inventory row.")
         }
+
       case _ =>
         println("Error in InventoryTable - deleteItem")
     }
@@ -125,14 +197,14 @@ object InventoryTable {
 
             //save equipment
             transaction {
-              equipmentList map ((item: Item)=> AyaiDB.equipment.insert(new EquipmentRow(characterRow.id, item.id, getSlot(item))))
+              equipmentList filter (p => p.itemType != EmptyType) map (
+                (item: Item)=> AyaiDB.equipment.insert(new EquipmentRow(characterRow.id, item.id, getSlot(item))))
             }
 
             val inventoryRows = inventory.inventory groupBy(
               (item:Item) => item.id) map {
                 p => new InventoryRow(characterRow.id, p._1, p._2.length)}
 
-            println(s"Saving $inventoryRows")
             transaction {
               inventoryRows foreach ((row: InventoryRow) => AyaiDB.inventory.insert(row))
             }
@@ -148,18 +220,17 @@ object InventoryTable {
   //  If it doesn't exist creates it with quantity 1.
   //  If it does exist it will increment the quantity field.
   //Don't use for a lot of saves. Each call will be a seperate transaction.
-  def incrementItem(itemEnity: Entity, characterEntity: Entity) {
-    incrementItemMultiple(itemEnity, characterEntity, 1)
+  def incrementItem(item: Item, characterEntity: Entity) {
+    incrementItemMultiple(item, characterEntity, 1)
   }
 
   //Upserts the item.
   //  If it doesn't exist creates it with quantity=quantity.
   //  If it does exist it will increment the quantity field by the quantity parameter.
   //Don't use this in a loop. Each call will be a seperate transaction.
-  def incrementItemMultiple(itemEnity: Entity, characterEntity: Entity, quantity: Int) {
-  (itemEnity.getComponent(classOf[Item]),
-    characterEntity.getComponent(classOf[Character])) match {
-      case(Some(item: Item), Some(character : Character)) =>
+  def incrementItemMultiple(item: Item, characterEntity: Entity, quantity: Int) {
+    characterEntity.getComponent(classOf[Character]) match {
+      case Some(character : Character) =>
         Class.forName("org.h2.Driver");
         SessionFactory.concreteFactory = Some (() =>
             Session.create(

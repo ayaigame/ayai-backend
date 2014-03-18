@@ -3,6 +3,7 @@ package ayai.systems
 /** Ayai Imports **/
 import ayai.components._
 import ayai.gamestate._
+import ayai.persistence.InventoryTable
 
 /** Crane Imports **/
 import crane.{Entity, EntityProcessingSystem}
@@ -32,8 +33,8 @@ class RoomChangingSystem(networkSystem: ActorSystem) extends EntityProcessingSys
       e.getComponent(classOf[Position])) match {
       case(Some(transport: Transport), Some(room: Room),
         Some(position: Position)) =>
-        // TODO: Change Rooms
         userRoomMap ! SwapWorld(e.tag, transport.toRoom)
+        InventoryTable.saveInventory(e)
         e.removeComponent(classOf[Transport])
       case _ =>
         log.warn("052ef02: getComponent failed to return anything")
