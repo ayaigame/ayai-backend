@@ -100,8 +100,7 @@ class AuthorizationProcessor extends Actor {
     transaction {
       accountId = AyaiDB.tokens.where(token => token.token === userToken).single.account_id
     }
-    CharacterTable.createCharacter(characterName, className, accountId)
-    request.response.write(HttpResponseStatus.OK, "GOOD")
+    CharacterTable.createCharacter(request, characterName, className, accountId)
 
   case RecoveryPost(request: HttpRequestEvent) =>
     println("RECOVERY")
