@@ -29,6 +29,7 @@ class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Roo
     if(respawn.isReady(System.currentTimeMillis())) {
       health.refill()
       e.removeComponent(classOf[Respawn])
+      e.removeComponent(classOf[Dead])
     }
   }
 }
