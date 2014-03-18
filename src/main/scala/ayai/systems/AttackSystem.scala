@@ -98,6 +98,9 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
 
     //if the victims health reaches zero, then take the persons inventory and make it lootable
     if(healthComponent.currentHealth <= 0) {
+      victim.components += new Time(20000, System.currentTimeMillis())
+      victim.components += new Dead()
+      println("Victim is dead")
       val id = (new UID()).toString
       val loot:Entity = world.createEntity(tag=id)
       EntityFactory.characterToLoot(initiator, loot)

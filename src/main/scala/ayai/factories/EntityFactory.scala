@@ -53,17 +53,17 @@ object EntityFactory {
         p.components += new Faction("allies")
 
         val questbag = new QuestBag()
-        val questSelection = networkSystem.actorSelection("user/QuestMap")
-        var future = questSelection ? GetQuest("QUEST1")
-        questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
-        future = questSelection ? GetQuest("QUEST2")
-        questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
+        // val questSelection = networkSystem.actorSelection("user/QuestMap")
+        // var future = questSelection ? GetQuest("QUEST1")
+        // questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
+        // future = questSelection ? GetQuest("QUEST2")
+        // questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
 
         p.components += questbag
 
         val inventory = new Inventory()
 
-        val itemSelection = networkSystem.actorSelection("user/ItemMap")
+        // val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
         p.components += inventory
 
@@ -112,6 +112,8 @@ object EntityFactory {
     p.components += new Actionable(false, DownDirection)
     p.components += new Health(npcValue.maximumHealth, npcValue.maximumHealth)
     p.components += new Mana(1,1)
+    p.components += new NPC(0)
+    p.components += new Respawnable()
     p.components += new Room(npcValue.roomId)
     p.components += new Character(id, npcValue.name, 0)
     p.components += new Faction("allies")
@@ -232,13 +234,13 @@ object EntityFactory {
 
 
   def characterToLoot(initiator: Entity, lootEntity: Entity) {
-
+      lootEntity.components += new NPC(0)
       lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
         case Some(character: Character) => character.id 
         case _ => "0"
       })
 
-      val inventory = initiator.getComponent(classOf[Inventory]) match {
+      initiator.getComponent(classOf[Inventory]) match {
         case (Some(inv: Inventory)) =>
           lootEntity.components += inv.copy()
           case _ => 

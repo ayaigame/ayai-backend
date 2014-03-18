@@ -43,8 +43,9 @@ class GameStateSerializer(world: World) extends Actor {
   //Returns a character's belongings and surroundings.
   def getRoom(e: Entity) = {
     if(!valid) {
-      var entities = world.getEntitiesByComponents(classOf[Character], classOf[Position],
-                                                      classOf[Health], classOf[Mana])
+      var entities = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
+                                                      classOf[Health], classOf[Mana]),
+                                                     exclude=List(classOf[NPC]))
         val jsonLift: JObject =
             ("players" -> entities.map{ e =>
              (e.getComponent(classOf[Character]),
@@ -63,18 +64,16 @@ class GameStateSerializer(world: World) extends Actor {
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
              }})
-        var npcs = world.getEntitiesByComponents(classOf[Interact], classOf[Character], classOf[Position],
-                                                 classOf[Health], classOf[Mana])
+        var npcs = world.getEntitiesByComponents(classOf[Character], classOf[Position],
+                                                 classOf[Health], classOf[Mana], classOf[NPC])
         npcJSON= ("npcs" -> npcs.map{ npc =>
-          (npc.getComponent(classOf[Interact]),
-            npc.getComponent(classOf[Character]),
+          (npc.getComponent(classOf[Character]),
             npc.getComponent(classOf[Position]),
             npc.getComponent(classOf[Health]),
             npc.getComponent(classOf[Mana])) match {
-              case (Some(interact: Interact), Some(character: Character), Some(position: Position),
+              case (Some(character: Character), Some(position: Position),
                 Some(health: Health), Some(mana: Mana)) =>
-                ((interact.asJson) ~
-                  (character.asJson) ~
+                ((character.asJson) ~
                   (position.asJson) ~
                   (health.asJson) ~
                   (mana.asJson))

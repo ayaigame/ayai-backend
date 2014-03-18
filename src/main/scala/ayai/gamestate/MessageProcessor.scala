@@ -191,7 +191,6 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         sender ! Success
       case UnequipMessage(userId: String, equipmentType: String) =>
-      println("TEST")
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory]),
