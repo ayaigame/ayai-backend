@@ -288,6 +288,12 @@ object EntityFactory {
         case Some(character: Character) => character.id 
         case _ => "0"
       })
+
+      initiator.getComponent(classOf[Character]) match {
+        case (Some(char: Character)) => initiator.components += char
+        case _ =>
+      }
+      
       initiator.getComponent(classOf[Inventory]) match {
         case (Some(inv: Inventory)) =>
           lootEntity.components += inv.copy()
