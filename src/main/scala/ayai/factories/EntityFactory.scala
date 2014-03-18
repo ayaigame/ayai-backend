@@ -285,8 +285,8 @@ object EntityFactory {
       animations += new Animation("facedown", 0, 0)
       lootEntity.components += new SpriteSheet("props", animations, 40, 40)
       lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
-        case Some(character: Character) => character.id 
-        case _ => "0"
+        case Some(character: Character) => character
+        case _ => null
       })
       initiator.getComponent(classOf[Inventory]) match {
         case (Some(inv: Inventory)) =>
