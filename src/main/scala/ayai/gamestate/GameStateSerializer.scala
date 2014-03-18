@@ -66,9 +66,10 @@ class GameStateSerializer(world: World) extends Actor {
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
              }})
-        var npcs = world.getEntitiesByComponents(classOf[Character], classOf[Position],
+        var npcs = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
                                                  classOf[Health], classOf[Mana], 
-                                                 classOf[NPC], classOf[SpriteSheet])
+                                                 classOf[NPC], classOf[SpriteSheet]),
+                                                  exclude=List(classOf[Dead]))
         npcJSON= ("npcs" -> npcs.map{ npc =>
           (npc.getComponent(classOf[Character]),
             npc.getComponent(classOf[Position]),
