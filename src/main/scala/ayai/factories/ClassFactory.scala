@@ -57,7 +57,6 @@ object ClassFactory {
   }
 
   def bootup(networkSystem: ActorSystem) = {
-    println(compact(render(asJson)))
     classes.foreach(classData => {
       var classComponent = new Class(
         classData.id,
