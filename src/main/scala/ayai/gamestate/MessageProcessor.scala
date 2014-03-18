@@ -68,6 +68,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             System.out.println(s"Can't find character attached to socket $socketId.")
           case Some(character : Entity) =>
             CharacterTable.saveCharacter(character)
+            InventoryTable.saveInventory(character)
             character.kill
             context.system.actorSelection("user/SocketUserMap") ! RemoveSocketUser(socketId)
         }

@@ -205,7 +205,6 @@ object InventoryTable {
               (item:Item) => item.id) map {
                 p => new InventoryRow(characterRow.id, p._1, p._2.length)}
 
-            println(s"Saving $inventoryRows")
             transaction {
               inventoryRows foreach ((row: InventoryRow) => AyaiDB.inventory.insert(row))
             }
