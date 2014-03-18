@@ -38,7 +38,7 @@ case class RegisterPost(request: HttpRequestEvent) extends NetworkMessage
 case class RecoveryPost(request: HttpRequestEvent) extends NetworkMessage
 case class CharactersPost(request: HttpRequestEvent) extends NetworkMessage
 case class CreateCharacterPost(request: HttpRequestEvent) extends NetworkMessage
-case class ClassListPost(request: HttpRequestEvent) extends NetworkMessage
+case class ClassListGet(request: HttpRequestEvent) extends NetworkMessage
 
 case class PublicChatMessage(message: String, sender: String) extends NetworkMessage
 case class OpenMessage(socketId: String, containerId: String) extends NetworkMessage

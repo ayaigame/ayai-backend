@@ -76,15 +76,7 @@ class AuthorizationProcessor extends Actor {
     }
     CharacterTable.characterList(request, accountId)
 
-  case ClassListPost(request: HttpRequestEvent) =>
-    val content:String = request.request.content.toString
-    var accountId: Long = -1
-
-    //Validate request, this is not done correctly. It can throw if token does not exist.
-    //Looks like other cases are done like this too.
-    transaction {
-      accountId = AyaiDB.tokens.where(token => token.token === content).single.account_id
-    }
+  case ClassListGet(request: HttpRequestEvent) =>
     request.response.write(HttpResponseStatus.OK, compact(render(ClassFactory.asJson)))
 
   case CreateCharacterPost(request: HttpRequestEvent) =>
