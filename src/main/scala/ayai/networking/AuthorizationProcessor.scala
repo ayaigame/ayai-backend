@@ -62,8 +62,17 @@ class AuthorizationProcessor extends Actor {
 
     val username = content.slice(0, delimiter).replaceAll("email=", "")
     val password = content.slice(delimiter + 1, content.length).replaceAll("password=", "")
-    if(AyaiDB.registerUser(username, password))
-      request.response.write(HttpResponseStatus.OK, "GOOD")
+    if(AyaiDB.registerUser(username, password)) {
+      var token: String = ""
+      token = AyaiDB.validatePassword(username, password)
+
+      token match {
+        case "" =>
+          request.response.write(HttpResponseStatus.UNAUTHORIZED)
+        case _ =>
+          request.response.write(HttpResponseStatus.OK, token)
+      }
+    }
     else
       request.response.write(HttpResponseStatus.CONFLICT)
 

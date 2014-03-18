@@ -52,9 +52,6 @@ object AyaiDB extends Schema {
         }
         getAccount(username) match {
           case Some(account: Account) =>
-            transaction {
-              characters.insert(new CharacterRow(username, "Warrior", 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
-            }
             true
           case _ =>
             throw(new Exception("Account creation failed!"))
