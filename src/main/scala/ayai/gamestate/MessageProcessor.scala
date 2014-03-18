@@ -147,7 +147,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               world.addEntity(p)
 
             case _ =>
-              log.warn("424e244: getComponent failed to return anything")
+              // log.warn("424e244: Cooldown is present, cannot attack")
           }
           case _ =>
             log.warn("8a87265: getComponent failed to return anything")

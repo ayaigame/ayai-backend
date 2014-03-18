@@ -28,7 +28,6 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
               case Some(faction: Faction) => faction.name
               case _ => "" 
             }
-            println("victim faction: " + victimFaction + "   initiatorFaction: " + initiatorFaction)
             if(victimFaction != initiatorFaction) {
               getDamage(attack.initiator, victim)
             } 
