@@ -68,10 +68,10 @@ object EntityFactory {
 
         val questbag = new QuestBag()
         val questSelection = networkSystem.actorSelection("user/QuestMap")
-        var future = questSelection ? GetQuest("QUEST1")
-        questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
-        future = questSelection ? GetQuest("QUEST2")
-        questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
+        // var future = questSelection ? GetQuest("QUEST1")
+        // questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
+        // future = questSelection ? GetQuest("QUEST2")
+        // questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
 
         p.components += questbag
 
@@ -79,7 +79,7 @@ object EntityFactory {
 
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
-        future = itemSelection ? GetItem("ITEM1")
+        var future = itemSelection ? GetItem("ITEM1")
         inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
         future = itemSelection ? GetItem("ITEM2")

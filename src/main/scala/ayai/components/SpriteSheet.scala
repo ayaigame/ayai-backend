@@ -10,8 +10,8 @@ case class SpriteSheet( path: String, animations: ArrayBuffer[Animation], xsize:
 	def asJson: JObject = {
 		("spritesheet" -> 
 			("path" -> path) ~
-			("animations" -> animations.map{a =>a.asJson}))
+			("animations" -> animations.map{a =>a.asJson}) ~
 			("xsize" -> xsize) ~
-			("ysize" -> ysize)
+			("ysize" -> ysize))
 	}
 }
