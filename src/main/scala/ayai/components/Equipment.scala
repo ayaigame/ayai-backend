@@ -55,13 +55,17 @@ class Equipment() extends Component {
     }
   }
 
+  def equipItem(item: Item, slot: String): Boolean = {
+    equipmentMap(slot) = item
+    return true
+  }
+
   def unequipItem(equipmentType: String): Item = {
     val equippedItem = equipmentMap(equipmentType).copy
     equipmentMap(equipmentType) = new EmptySlot
     return equippedItem
 
   }
-
 
   def asJson(): JObject = {
     ("equipment" ->

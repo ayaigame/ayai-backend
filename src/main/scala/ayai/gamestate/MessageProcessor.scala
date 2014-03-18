@@ -68,6 +68,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             System.out.println(s"Can't find character attached to socket $socketId.")
           case Some(character : Entity) =>
             CharacterTable.saveCharacter(character)
+            InventoryTable.saveInventory(character)
             character.kill
             context.system.actorSelection("user/SocketUserMap") ! RemoveSocketUser(socketId)
         }
@@ -228,11 +229,14 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory])) match {
-                case (Some(inventory: Inventory)) =>
-                  if(!(inventory.inventory.size <= 0)) {
-                    inventory.inventory -= inventory.inventory(slot)
-                  }
-              }
+              case (Some(inventory: Inventory)) =>
+                if(!(inventory.inventory.size <= 0)) {
+                  //This should drop by item id not by slot
+                  val item = inventory.inventory(slot)
+                  inventory.inventory -= item
+                  InventoryTable.deleteItem(item, e)
+                }
+            }
         }
         sender ! Success
 
@@ -244,7 +248,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         var npcQuest: Quest = world.getEntityByTag(s"$entityId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
-              var tempQuest: Quest = null 
+              var tempQuest: Quest = null
               for(quest <- questBag.quests) {
                 if(quest.id == questId) {
                   tempQuest = quest
@@ -309,7 +313,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           var typename: String = ""
           val jsonObject: JObject = (entity.getComponent(classOf[QuestBag]),
             entity.getComponent(classOf[Loot])) match {
-              case (Some(quests: QuestBag), Some(loot: Loot)) => 
+              case (Some(quests: QuestBag), Some(loot: Loot)) =>
                 typename = quests.typename
                 quests.asJson
               case (Some(quests: QuestBag), None) =>
@@ -321,21 +325,21 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 } else {
                   quests.asJson
                 }
-              case ( None, Some(loot: Loot)) => 
+              case ( None, Some(loot: Loot)) =>
                 typename = loot.typename
                 entity.getComponent(classOf[Inventory]) match {
                   case Some(inventory: Inventory) =>
                    inventory.asJson
                   case _ => null
                 }
-                
+
               case _ => null
           }
-        
+
           if(jsonObject != null) {
             // check for quest and loot status on a player (will add more later)
-            val json = ("type" -> typename)~jsonObject       
-            println(compact(render(json)))     
+            val json = ("type" -> typename)~jsonObject
+            println(compact(render(json)))
             actorSelection ! ConnectionWrite(compact(render(json)))
           } else {
             val json = ("type" -> "chat") ~
@@ -346,7 +350,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         else {
           val json = ("type" -> "chat") ~
-            ("message" -> "Not within distance of item") ~ 
+            ("message" -> "Not within distance of item") ~
             ("sender" -> "error")
           //check if player is an actor
           actorSelection ! ConnectionWrite(compact(render(json)))
@@ -385,7 +389,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           for(item <- loot.inventory) {
             if(items.contains(item.id)) {
               playerInventory.addItem(item)
-              loot.inventory -= item 
+              InventoryTable.incrementItem(item, userEntity)
+              loot.inventory -= item
             }
           }
 
@@ -393,7 +398,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         else {
           val json = ("type" -> "chat") ~
-            ("message" -> "Not withing distance of item") ~ 
+            ("message" -> "Not withing distance of item") ~
             ("sender" -> "error")
           val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
             case Some(na: NetworkingActor) =>
@@ -403,7 +408,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
         }
         sender ! Success
-                
+
 
       case _ => println("Error from MessageProcessor.")
     }
