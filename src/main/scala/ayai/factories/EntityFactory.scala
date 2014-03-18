@@ -57,7 +57,8 @@ object EntityFactory {
         animations += new Animation("attackleft",18, 21)
         animations += new Animation("attackright", 24, 27)
         animations += new Animation("attackup", 30, 33)
-        p.components += new SpriteSheet("guy", animations, 32 ,32)
+        val spritesheet: SpriteSheet = new SpriteSheet("guy", animations, 32 ,32) 
+        p.components += spritesheet
         p.components += new Actionable(false, DownDirection)
         p.components += new Health(100,100)
         p.components += new NetworkingActor(actor)
@@ -113,7 +114,8 @@ object EntityFactory {
           ("x" -> x) ~
           ("y" -> y) ~
           ("tilemap" -> tileMap.file) ~
-          (tileMap.tilesets.asJson)
+          (tileMap.tilesets.asJson) ~
+          (spritesheet.asJson)
 
         )
 
@@ -277,6 +279,8 @@ object EntityFactory {
 
   def characterToLoot(initiator: Entity, lootEntity: Entity) {
       lootEntity.components += new NPC(0)
+      lootEntity.components += new Health(10000,10000)
+      lootEntity.components += new Mana(10000,10000)
       val animations = new ArrayBuffer[Animation]()
       animations += new Animation("facedown", 0, 0)
       lootEntity.components += new SpriteSheet("props", animations, 40, 40)
@@ -284,11 +288,16 @@ object EntityFactory {
         case Some(character: Character) => character.id 
         case _ => "0"
       })
-
       initiator.getComponent(classOf[Inventory]) match {
         case (Some(inv: Inventory)) =>
           lootEntity.components += inv.copy()
           case _ => 
       }
+      initiator.getComponent(classOf[Position]) match {
+        case Some(position: Position) => 
+          lootEntity.components += new Position(position.x, position.y) 
+        case _ =>
+      }
+      
   }
 }
