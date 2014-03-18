@@ -1,6 +1,6 @@
 package ayai.persistence
 
-import ayai.components.{Character, Inventory, Item, Equipment}
+import ayai.components.{Character, Inventory, Item, Equipment, Weapon, Armor}
 import ayai.apps.Constants
 
 import scala.collection.mutable.ArrayBuffer
@@ -28,7 +28,7 @@ object InventoryTable {
   def upsertRow(inventoryRow: InventoryRow) {
     val itemQuery =
       from(AyaiDB.inventory)(row =>
-        where(row.playerId === inventoryRow.playerId
+        where(row.characterId === inventoryRow.characterId
           and row.itemId === inventoryRow.itemId)
         select(row)
       )
@@ -58,7 +58,7 @@ object InventoryTable {
           )
 
         AyaiDB.inventory.deleteWhere(row =>
-          (row.playerId === characterQuery.single.id) and
+          (row.characterId === characterQuery.single.id) and
           (row.itemId === item.id)
         )
 
@@ -81,7 +81,7 @@ object InventoryTable {
 
         val itemQuery =
           from(AyaiDB.inventory)(row =>
-            where(row.playerId === characterQuery.single.id
+            where(row.characterId === characterQuery.single.id
               and row.itemId === item.id)
             select(row)
           )
@@ -89,12 +89,12 @@ object InventoryTable {
         if (itemQuery.size == 1) {
           var inventoryRow = itemQuery.single
           if(inventoryRow.quantity > 0) {
-            var newRow = new InventoryRow(inventoryRow.playerId, inventoryRow.itemId, inventoryRow.quantity - 1, inventoryRow.equipped)
+            var newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity - 1, inventoryRow.equipped)
             AyaiDB.inventory.update(newRow)
           }
           else {
             AyaiDB.inventory.deleteWhere(row =>
-              (row.playerId === inventoryRow.playerId) and
+              (row.characterId === inventoryRow.characterId) and
               (row.itemId === item.id)
             )
           }
@@ -148,17 +148,43 @@ object InventoryTable {
 //do the groupby
 //equipped field = lookup
 //need a map of id -> slotVal
-// m1 foreach {case (key, value) => println (key + "-->" + value)}
-            val idsToSlots = equipment.equipmentMap filter (_._2.id >= 0) map
-                {case (slot: String, item: Item) => (slotToInt(slot), item.id)} groupBy(
-                  (_._1)) map(
-                    )
+// // m1 foreach {case (key, value) => println (key + "-->" + value)}
+//             val idsToSlots = equipment.equipmentMap filter (_._2.id >= 0) map
+//                 {case (slot: String, item: Item) => (slotToInt(slot), item.id)} groupBy(
+//                   (_._1)) map(
+//                     )
 
-              // case (slot: String, item: Item) => (item.id >= 0))
-                // {case (slot: String, item: Item) => (item.id, slotToInt(slot))}
-            println(idsToSlots)
+//               // case (slot: String, item: Item) => (item.id >= 0))
+//                 // {case (slot: String, item: Item) => (item.id, slotToInt(slot))}
+//             println(idsToSlots)
 
-            val equippedIds = equipment.equipmentMap.values.toList map ((item:Item) => item.id)
+            val equipmentList: List[Item] = equipment.equipmentMap.values.toList
+            // val equippedIds = equipmentList map ((item:Item) => item.id)
+
+            //delete equipment
+             transaction {
+                AyaiDB.equipment.deleteWhere(row =>
+                  (row.characterId === characterRow.id))
+              }
+
+            def getSlot(item: Item): String = {
+              var slot = ""
+              item.itemType match {
+                  case weapon: Weapon =>
+                    slot = weapon.itemType
+                  case armor: Armor =>
+                    slot = armor.itemType
+                  case _ =>
+                    println(s"Error with item $item , cannot save.")
+                }
+              return slot
+            }
+
+
+            //save equipment
+            transaction {
+              equipmentList map ((item: Item)=> AyaiDB.equipment.insert(new EquipmentRow(characterRow.id, item.id, getSlot(item))))
+            }
 
             val inventoryRows = inventory.inventory groupBy(
               (item:Item) => item.id) map {
@@ -207,7 +233,7 @@ object InventoryTable {
 
           val itemQuery =
             from(AyaiDB.inventory)(row =>
-              where(row.playerId === characterQuery.single.id
+              where(row.characterId === characterQuery.single.id
                 and row.itemId === item.id)
               select(row)
             )
@@ -217,7 +243,7 @@ object InventoryTable {
           }
           else if (itemQuery.size == 1) {
             var inventoryRow = itemQuery.single
-            val newRow = new InventoryRow(inventoryRow.playerId, inventoryRow.itemId, inventoryRow.quantity + quantity, inventoryRow.equipped)
+            val newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity + quantity, inventoryRow.equipped)
             AyaiDB.inventory.update(newRow)
           }
           else {
