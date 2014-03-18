@@ -44,6 +44,20 @@ object EntityFactory {
         p.components += new Position(characterRow.pos_x,characterRow.pos_y)
         p.components += new Bounds(32, 32)
         p.components += new Velocity(4, 4)
+        val animations = new ArrayBuffer[Animation]()
+        animations += new Animation("facedown", 1, 1 )
+        animations += new Animation("faceleft", 4, 4 )
+        animations += new Animation("faceright", 7, 7 )
+        animations += new Animation("faceup", 10, 10 )
+        animations += new Animation("walkdown", 0, 2 )
+        animations += new Animation("walkleft", 3, 5 )
+        animations += new Animation("walkright", 6, 8 )
+        animations += new Animation("walkup", 9, 11)
+        animations += new Animation("attack", 12, 15)
+        animations += new Animation("attackleft",18, 21)
+        animations += new Animation("attackright", 24, 27)
+        animations += new Animation("attackup", 30, 33)
+        p.components += new SpriteSheet("guy", animations, 32 ,32)
         p.components += new Actionable(false, DownDirection)
         p.components += new Health(100,100)
         p.components += new NetworkingActor(actor)
@@ -111,6 +125,9 @@ object EntityFactory {
     p.components += new Velocity(2, 2)
     p.components += new Actionable(false, DownDirection)
     p.components += new Health(npcValue.maximumHealth, npcValue.maximumHealth)
+    val animations = new ArrayBuffer[Animation]()
+    animations += new Animation("facedown",0,0)
+    p.components += new SpriteSheet("npc", animations,32, 48)
     p.components += new Mana(1,1)
     p.components += new NPC(0)
     p.components += new Respawnable()
@@ -235,6 +252,9 @@ object EntityFactory {
 
   def characterToLoot(initiator: Entity, lootEntity: Entity) {
       lootEntity.components += new NPC(0)
+      val animations = new ArrayBuffer[Animation]()
+      animations += new Animation("facedown", 0, 0)
+      lootEntity.components += new SpriteSheet("props", animations, 40, 40)
       lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
         case Some(character: Character) => character.id 
         case _ => "0"

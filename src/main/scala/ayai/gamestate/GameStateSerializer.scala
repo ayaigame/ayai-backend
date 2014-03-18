@@ -44,7 +44,7 @@ class GameStateSerializer(world: World) extends Actor {
   def getRoom(e: Entity) = {
     if(!valid) {
       var entities = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
-                                                      classOf[Health], classOf[Mana]),
+                                                      classOf[Health], classOf[Mana], classOf[SpriteSheet]),
                                                      exclude=List(classOf[NPC]))
         val jsonLift: JObject =
             ("players" -> entities.map{ e =>
@@ -52,31 +52,36 @@ class GameStateSerializer(world: World) extends Actor {
                e.getComponent(classOf[Position]),
                e.getComponent(classOf[Health]),
                e.getComponent(classOf[Mana]),
-               e.getComponent(classOf[Actionable])) match {
+               e.getComponent(classOf[Actionable]),
+               e.getComponent(classOf[SpriteSheet])) match {
                  case (Some(character: Character), Some(position: Position), Some(health: Health),
-                       Some(mana: Mana), Some(actionable: Actionable)) =>
+                       Some(mana: Mana), Some(actionable: Actionable), Some(spritesheet: SpriteSheet)) =>
                    ((character.asJson) ~
                    (position.asJson) ~
                    (health.asJson) ~
                    (mana.asJson) ~
-                   (actionable.action.asJson))
+                   (actionable.action.asJson) ~
+                   (spritesheet.asJson))
                  case _ =>
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
              }})
         var npcs = world.getEntitiesByComponents(classOf[Character], classOf[Position],
-                                                 classOf[Health], classOf[Mana], classOf[NPC])
+                                                 classOf[Health], classOf[Mana], 
+                                                 classOf[NPC], classOf[SpriteSheet])
         npcJSON= ("npcs" -> npcs.map{ npc =>
           (npc.getComponent(classOf[Character]),
             npc.getComponent(classOf[Position]),
             npc.getComponent(classOf[Health]),
-            npc.getComponent(classOf[Mana])) match {
+            npc.getComponent(classOf[Mana]),
+            npc.getComponent(classOf[SpriteSheet])) match {
               case (Some(character: Character), Some(position: Position),
-                Some(health: Health), Some(mana: Mana)) =>
+                Some(health: Health), Some(mana: Mana), Some(spritesheet: SpriteSheet)) =>
                 ((character.asJson) ~
                   (position.asJson) ~
                   (health.asJson) ~
-                  (mana.asJson))
+                  (mana.asJson) ~
+                  (spritesheet.asJson))
               case _ =>  
                 log.warn("f3d3275: getComponent failed to return anything BLARG2")
                 JNothing
