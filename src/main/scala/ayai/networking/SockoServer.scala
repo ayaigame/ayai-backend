@@ -68,6 +68,13 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
         authorization ! new CreateCharacterPost(httpRequest)
       }
 
+      case GET(Path("/classes")) => {
+        if (httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+        authorization ! new ClassListGet(httpRequest)
+      }
+
       case _ => {
         if (httpRequest.request.is100ContinueExpected)
           httpRequest.response.write100Continue

@@ -25,6 +25,7 @@ class WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(NetworkingSystem(networkSystem), 3)
     world.addSystem(CollisionSystem(networkSystem))
     world.addSystem(AttackSystem(networkSystem))
+    world.addSystem(CooldownSystem(networkSystem))
     val serializer = networkSystem.actorOf(Props(GameStateSerializer(world)), s"Serializer$name")
     val nmProcessor = networkSystem.actorOf(Props(MessageProcessorSupervisor(world)), name=s"MProcessor$name")
     val entity = EntityFactory.createAI(world, "axis")

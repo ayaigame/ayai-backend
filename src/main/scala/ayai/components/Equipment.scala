@@ -6,7 +6,7 @@ import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import scala.collection.mutable.HashMap
 
-case class EmptySlot extends Item(0,"",0,0,EmptyType) {}
+case class EmptySlot extends Item(-1,"",0,0,EmptyType) {}
 object EmptyType extends ItemType {
     override def asJson(): JObject = ("empty" -> "")
     override def copy(): ItemType = EmptyType
@@ -19,18 +19,15 @@ class Equipment() extends Component {
   equipmentMap += ("torso" -> new EmptySlot())
   equipmentMap += ("feet" -> new EmptySlot())
   equipmentMap += ("legs" -> new EmptySlot())
-  //if true then it is right weapon type and is equipped
-  // and put old item back in
-  //and take old back
-  // return to sender a success
+
   def equipItem(item: Item): Boolean = {
     item.itemType match {
       case weapon: Weapon =>
         weapon.itemType match {
-          case "weapon1" => 
+          case "weapon1" =>
             equipmentMap(weapon.itemType) = item
             return true
-          case "weapon2" => 
+          case "weapon2" =>
             equipmentMap(weapon.itemType) = item
             return true
           case _ =>
@@ -38,7 +35,7 @@ class Equipment() extends Component {
         }
       case armor: Armor =>
         armor.itemType match {
-          case "helmet" => 
+          case "helmet" =>
             equipmentMap(armor.itemType) = item
             return true
           case "feet" =>
@@ -53,7 +50,7 @@ class Equipment() extends Component {
           case _ =>
             return false
         }
-      case _ => 
+      case _ =>
         return false
     }
   }

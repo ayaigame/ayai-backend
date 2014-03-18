@@ -3,6 +3,7 @@
 		{
 			"id": 0,
 			"name": "mage",
+			"description": "Shoots fireballs and stuff. C'mon, you know what mages are.",
 			"baseHealth": 100,
 			"baseMana": 100,
 			"baseStats": [
@@ -36,6 +37,48 @@
 			"abilities": [
 				{
 					"name": "fireball",
+					"levelRequirement": 1,
+					"fillThisIn": "later"
+				}
+			]
+		},
+		{
+			"id": 1,
+			"name": "warrior",
+			"description": "Pretty much just a meatshield.",
+			"baseHealth": 200,
+			"baseMana": 50,
+			"baseStats": [
+				{
+					"attributeType": "intelligence",
+					"magnitude": 13
+				},
+				{
+					"attributeType": "strength",
+					"magnitude": 18
+				},
+				{
+					"attributeType": "agility",
+					"magnitude": 15
+				}
+			],
+			"statGrowths":[
+				{
+					"attributeType": "intelligence",
+					"magnitude": 1
+				},
+				{
+					"attributeType": "strength",
+					"magnitude": 2
+				},
+				{
+					"attributeType": "agility",
+					"magnitude": 1
+				}
+			],
+			"abilities": [
+				{
+					"name": "cleave",
 					"levelRequirement": 1,
 					"fillThisIn": "later"
 				}

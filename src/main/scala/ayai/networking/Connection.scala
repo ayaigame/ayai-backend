@@ -38,6 +38,7 @@ case class RegisterPost(request: HttpRequestEvent) extends NetworkMessage
 case class RecoveryPost(request: HttpRequestEvent) extends NetworkMessage
 case class CharactersPost(request: HttpRequestEvent) extends NetworkMessage
 case class CreateCharacterPost(request: HttpRequestEvent) extends NetworkMessage
+case class ClassListGet(request: HttpRequestEvent) extends NetworkMessage
 
 case class PublicChatMessage(message: String, sender: String) extends NetworkMessage
 case class OpenMessage(socketId: String, containerId: String) extends NetworkMessage
@@ -45,9 +46,9 @@ case class CharacterList(socketId: String, accountName: String) extends NetworkM
 case class EquipMessage(userId: String, slot: Int, equipmentType: String) extends NetworkMessage
 case class UnequipMessage(userId: String, equipmentType: String) extends NetworkMessage
 case class DropItemMessage(userId: String, slot: Int) extends NetworkMessage
-case class AbandonQuestMessage(userId: String, questId: String) extends NetworkMessage
+case class AbandonQuestMessage(userId: String, questId: Int) extends NetworkMessage
 case class DeclineQuestMessage(userId: String, npcId: String, questId: String) extends NetworkMessage
-case class AcceptQuestMessage(userId: String, npcId: String, questId: String) extends NetworkMessage
-case class InteractMessage(userId: String, npcId: String) extends NetworkMessage
-case class LootMessage( userId: String, entityId: String, items: ArrayBuffer[String]) extends NetworkMessage
+case class AcceptQuestMessage(userId: String, entityID: String, questId: Int) extends NetworkMessage
+case class InteractMessage(userId: String, entityId: String) extends NetworkMessage
+case class LootMessage( userId: String, entityId: String, items: List[Int]) extends NetworkMessage
 case class RequestLootInventory(userId: String, entityId: String) extends NetworkMessage

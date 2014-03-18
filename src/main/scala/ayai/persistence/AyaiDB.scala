@@ -26,6 +26,7 @@ object AyaiDB extends Schema {
   val tokens = table[Token]
   val characters = table[CharacterRow]("CHARACTERS")
   val inventory = table[InventoryRow]("INVENTORY")
+  val equipment = table[EquipmentRow]("EQUIPMENT")
   val senderToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.sender_id)
   val receiverToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.receiver_id)
   val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.account_id)
@@ -51,9 +52,6 @@ object AyaiDB extends Schema {
         }
         getAccount(username) match {
           case Some(account: Account) =>
-            transaction {
-              characters.insert(new CharacterRow(username, "Warrior", 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
-            }
             true
           case _ =>
             throw(new Exception("Account creation failed!"))
@@ -191,16 +189,21 @@ case class CharacterRow (
 }
 
 case class InventoryRow (
-            val playerId: Long,
+            val characterId: Long,
             val itemId: Long,
             val quantity: Long)
           extends KeyedEntity[CompositeKey2[Long,Long]] {
-            def id = compositeKey(playerId, itemId)
+            def id = compositeKey(characterId, itemId)
             def this() = this(0, 0, 0)
 }
 
-
-
+case class EquipmentRow (
+            val characterId: Long,
+            val itemId: Long,
+            val slot: String)
+          extends AccountDb2Object {
+            def this() = this(0, 0, "")
+}
 class AccountDb2Object extends KeyedEntity[Long] {
   val id: Long = 0
 }

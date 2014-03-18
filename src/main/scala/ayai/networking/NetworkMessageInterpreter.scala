@@ -66,7 +66,9 @@ class NetworkMessageInterpreter extends Actor {
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
     val rootJSON = parse(wsFrame.readText)
     val msgType: String = stripQuotes(compact(render(rootJSON \ "type")))
-
+    if(msgType == "interact") {
+      println(wsFrame.readText)
+    }
     val userId = msgType match {
       case "init" => ""
       case _ =>
@@ -142,23 +144,23 @@ class NetworkMessageInterpreter extends Actor {
       case "dropitem" =>
         val slot = (rootJSON \ "slot").extract[Int]
         queue ! new AddInterpretedMessage(world, new DropItemMessage(userId, slot))
-      case "acceptquest" =>
-        val npcID = (rootJSON \ "npcId").extract[String]
-        val questId = (rootJSON \ "questId").extract[String]
-        queue ! new AddInterpretedMessage(world, new AcceptQuestMessage(userId, npcID, questId))
-      case "declinequest" =>
-        val npcId = (rootJSON \ "npcId").extract[String]
-        val questId = (rootJSON \ "questId").extract[String]
-        queue ! new AddInterpretedMessage(world, new DeclineQuestMessage(userId, npcId, questId))
-      case "abandonquest" =>
-        val questId = (rootJSON \ "questId").extract[String]
+      case "quest-accept" =>
+        println(wsFrame.readText)
+        val entityId = (rootJSON \ "entityId").extract[String]
+        val questId = (rootJSON \ "questId").extract[Int]
+        queue ! new AddInterpretedMessage(world, new AcceptQuestMessage(userId, entityId, questId))
+      case "quest-abandon" =>
+        val questId = (rootJSON \ "questId").extract[Int]
         queue ! new AddInterpretedMessage(world, new AbandonQuestMessage(userId, questId))
+      case "loot-pickup" =>
+        val entityId = (rootJSON \ "entityId").extract[String]
+        val inventoryIds = (rootJSON \ "itemIds").extract[List[Int]]
+        queue ! new AddInterpretedMessage(world, new LootMessage(userId, entityId, inventoryIds))
       case "interact" =>
-        val npcId = (rootJSON \ "npcId").extract[String]
-        queue ! new AddInterpretedMessage(world, new InteractMessage(userId, npcId))
+        val entityId = (rootJSON \ "entityId").extract[String]
+        queue ! new AddInterpretedMessage(world, new InteractMessage(userId, entityId))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
-
     }
   }
 

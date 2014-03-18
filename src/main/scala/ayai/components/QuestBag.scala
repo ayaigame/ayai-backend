@@ -8,6 +8,7 @@ import net.liftweb.json._
 import scala.collection.mutable.ArrayBuffer
 
 case class QuestBag(quests: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()) extends Component {
+  val typename = "quest-offer"
   def asJson(): JObject = {
     ("quests" -> quests.map{quest => quest.asJson})
   }

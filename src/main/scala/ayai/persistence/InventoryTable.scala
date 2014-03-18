@@ -1,6 +1,6 @@
 package ayai.persistence
 
-import ayai.components.{Character, Position, Room, Inventory, Item}
+import ayai.components.{Character, Inventory, Item, Equipment, Weapon, Armor}
 import ayai.apps.Constants
 
 import scala.collection.mutable.ArrayBuffer
@@ -22,28 +22,6 @@ import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
 
 object InventoryTable {
-
-  //MUST BE CALLED FROM WITHIN TRANSACTION
-  //This is so it can be done multiple times within a single transaction.
-  def upsertRow(inventoryRow: InventoryRow) {
-    val itemQuery =
-      from(AyaiDB.inventory)(row =>
-        where(row.playerId === inventoryRow.playerId
-          and row.itemId === inventoryRow.itemId)
-        select(row)
-      )
-
-    if(itemQuery.size == 0) {
-      AyaiDB.inventory.insert(inventoryRow)
-    }
-    else if (itemQuery.size == 1) {
-      AyaiDB.inventory.update(inventoryRow)
-    }
-    else {
-      println("Error: duplicate inventory row.")
-    }
-  }
-
   //MUST BE CALLED FROM WITHIN TRANSACTION
   //This is so it can be done multiple times within a single transaction.
   //Deletes all copies of the item in the character's inventory
@@ -58,7 +36,7 @@ object InventoryTable {
           )
 
         AyaiDB.inventory.deleteWhere(row =>
-          (row.playerId === characterQuery.single.id) and
+          (row.characterId === characterQuery.single.id) and
           (row.itemId === item.id)
         )
 
@@ -81,7 +59,7 @@ object InventoryTable {
 
         val itemQuery =
           from(AyaiDB.inventory)(row =>
-            where(row.playerId === characterQuery.single.id
+            where(row.characterId === characterQuery.single.id
               and row.itemId === item.id)
             select(row)
           )
@@ -89,12 +67,12 @@ object InventoryTable {
         if (itemQuery.size == 1) {
           var inventoryRow = itemQuery.single
           if(inventoryRow.quantity > 0) {
-            var newRow = new InventoryRow(inventoryRow.playerId, inventoryRow.itemId, inventoryRow.quantity - 1)
+            var newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity - 1)
             AyaiDB.inventory.update(newRow)
           }
           else {
             AyaiDB.inventory.deleteWhere(row =>
-              (row.playerId === inventoryRow.playerId) and
+              (row.characterId === inventoryRow.characterId) and
               (row.itemId === item.id)
             )
           }
@@ -107,11 +85,13 @@ object InventoryTable {
     }
   }
 
-  //Saves all items in a character's inventory to the database.
+  //Deletes all item rows for the character out of both InventoryTable and EquipmentTable.
+  //Then saves all items from Inventory to InventoryTable and Equipment to EquipmentTable.
   def saveInventory(entity: Entity) {
     (entity.getComponent(classOf[Inventory]),
-      entity.getComponent(classOf[Character])) match {
-      case (Some(inventory: Inventory), Some(character: Character)) =>
+      entity.getComponent(classOf[Character]),
+      entity.getComponent(classOf[Equipment])) match {
+      case (Some(inventory: Inventory), Some(character: Character), Some(equipment: Equipment)) =>
         AyaiDB.getCharacter(character.name) match {
           case Some(characterRow: CharacterRow) =>
             Class.forName("org.h2.Driver");
@@ -120,11 +100,41 @@ object InventoryTable {
                 java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
                 new H2Adapter))
 
-            val inventoryRows = inventory.inventory groupBy ((item:Item) => item.id) map {p => new InventoryRow(characterRow.id, p._1, p._2.length)}
-            println(s"Inserting $inventoryRows")
+            val equipmentList: List[Item] = equipment.equipmentMap.values.toList
 
+            //delete all items
             transaction {
-              inventoryRows map upsertRow
+              AyaiDB.equipment.deleteWhere(row =>
+                (row.characterId === characterRow.id))
+              AyaiDB.inventory.deleteWhere(row =>
+                (row.characterId === characterRow.id))
+            }
+
+            def getSlot(item: Item): String = {
+              var slot = ""
+              item.itemType match {
+                  case weapon: Weapon =>
+                    slot = weapon.itemType
+                  case armor: Armor =>
+                    slot = armor.itemType
+                  case _ =>
+                    println(s"Error with item $item , cannot save.")
+                }
+              return slot
+            }
+
+            //save equipment
+            transaction {
+              equipmentList map ((item: Item)=> AyaiDB.equipment.insert(new EquipmentRow(characterRow.id, item.id, getSlot(item))))
+            }
+
+            val inventoryRows = inventory.inventory groupBy(
+              (item:Item) => item.id) map {
+                p => new InventoryRow(characterRow.id, p._1, p._2.length)}
+
+            println(s"Saving $inventoryRows")
+            transaction {
+              inventoryRows foreach ((row: InventoryRow) => AyaiDB.inventory.insert(row))
             }
           case _ =>
             println(s"Can't find account for $character.name")
@@ -165,7 +175,7 @@ object InventoryTable {
 
           val itemQuery =
             from(AyaiDB.inventory)(row =>
-              where(row.playerId === characterQuery.single.id
+              where(row.characterId === characterQuery.single.id
                 and row.itemId === item.id)
               select(row)
             )
@@ -175,7 +185,7 @@ object InventoryTable {
           }
           else if (itemQuery.size == 1) {
             var inventoryRow = itemQuery.single
-            val newRow = new InventoryRow(inventoryRow.playerId, inventoryRow.itemId, inventoryRow.quantity + quantity)
+            val newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity + quantity)
             AyaiDB.inventory.update(newRow)
           }
           else {
