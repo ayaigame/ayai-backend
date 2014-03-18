@@ -67,7 +67,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
               val tp = at.position
               actionable.active = !(ep.x == tp.x && ep.y == tp.y)
               actionable.action = direction
-              if(getScore(ep, tp) > 5 && getScore(ep, tp) < 64){
+              if(getScore(ep, tp) < 64){
                 val name = world.asInstanceOf[RoomWorld].name
                 actorSystem.actorSelection(s"user/MProcessor$name") !  new ProcessMessage(new AttackMessage(character.name))
               }
