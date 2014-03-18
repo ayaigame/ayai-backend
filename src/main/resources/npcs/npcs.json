@@ -1,0 +1,38 @@
+{
+	"npcs": [
+		{
+			"id": 1,
+			"name": "Rodrigo",
+			"roomId": 0,
+			"level": 10,
+			"maximumHealth": 200,
+			"xposition": 100,
+			"yposition": 100,
+			"quests": [{
+				"questId": 1
+			}],
+			"inventory": [{
+				"itemId": 1
+				},
+				{
+					"itemId":2
+				}]
+
+		},
+		{
+			"id": 2,
+			"name": "Jarrad",
+			"roomId": 1,
+			"level": 20,
+			"maximumHealth": 500,
+			"xposition": 100,
+			"yposition": 100,
+			"quests": [{
+				"questId": 2
+			}],
+			"inventory": [{
+				"itemId": 1
+			}]
+
+		}]
+}

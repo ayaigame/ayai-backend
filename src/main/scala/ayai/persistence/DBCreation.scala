@@ -39,20 +39,20 @@ object DBCreation {
         // AyaiDB.printDdl
       }
 
-    Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
-        Session.create(
-          java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-          new H2Adapter))
+    // Class.forName("org.h2.Driver");
+    // SessionFactory.concreteFactory = Some (() =>
+    //     Session.create(
+    //       java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+    //       new H2Adapter))
 
-    var account: Long = 0
+    // var account: Long = 0
 
-    transaction {
-      AyaiDB.accounts.deleteWhere(a =>
-        (1 === 1))
-      AyaiDB.characters.deleteWhere(a =>
-        (1 === 1))
-    }
+    // transaction {
+    //   AyaiDB.accounts.deleteWhere(a =>
+    //     (1 === 1))
+    //   AyaiDB.characters.deleteWhere(a =>
+    //     (1 === 1))
+    // }
 
     val tim = new Account("tim", BCrypt.hashpw("tim", BCrypt.gensalt()))
 

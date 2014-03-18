@@ -29,7 +29,8 @@ import scala.io.Source
 import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
 import akka.pattern.ask
 import akka.util.Timeout
-
+import java.rmi.server.UID
+import ayai.apps._
 
 object EntityFactory {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
@@ -43,6 +44,21 @@ object EntityFactory {
         p.components += new Position(characterRow.pos_x,characterRow.pos_y)
         p.components += new Bounds(32, 32)
         p.components += new Velocity(4, 4)
+        val animations = new ArrayBuffer[Animation]()
+        animations += new Animation("facedown", 1, 1 )
+        animations += new Animation("faceleft", 4, 4 )
+        animations += new Animation("faceright", 7, 7 )
+        animations += new Animation("faceup", 10, 10 )
+        animations += new Animation("walkdown", 0, 2 )
+        animations += new Animation("walkleft", 3, 5 )
+        animations += new Animation("walkright", 6, 8 )
+        animations += new Animation("walkup", 9, 11)
+        animations += new Animation("attackdown", 12, 15)
+        animations += new Animation("attackleft",18, 21)
+        animations += new Animation("attackright", 24, 27)
+        animations += new Animation("attackup", 30, 33)
+        val spritesheet: SpriteSheet = new SpriteSheet("guy", animations, 32 ,32) 
+        p.components += spritesheet
         p.components += new Actionable(false, DownDirection)
         p.components += new Health(100,100)
         p.components += new NetworkingActor(actor)
@@ -53,16 +69,26 @@ object EntityFactory {
 
         val questbag = new QuestBag()
         val questSelection = networkSystem.actorSelection("user/QuestMap")
-        var future = questSelection ? GetQuest("QUEST1")
-        questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
-        future = questSelection ? GetQuest("QUEST2")
-        questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
+        // var future = questSelection ? GetQuest("QUEST1")
+        // questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
+        // future = questSelection ? GetQuest("QUEST2")
+        // questbag.addQuest(Await.result(future, timeout.duration).asInstanceOf[Quest])
 
         p.components += questbag
 
         val inventory = new Inventory()
 
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
+
+        var future = itemSelection ? GetItem("ITEM1")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+
+        future = itemSelection ? GetItem("ITEM2")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        future = itemSelection ? GetItem("ITEM1")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        future = itemSelection ? GetItem("ITEM0")
+        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
         p.components += inventory
 
@@ -88,7 +114,8 @@ object EntityFactory {
           ("x" -> x) ~
           ("y" -> y) ~
           ("tilemap" -> tileMap.file) ~
-          (tileMap.tilesets.asJson)
+          (tileMap.tilesets.asJson) ~
+          (spritesheet.asJson)
 
         )
 
@@ -101,19 +128,55 @@ object EntityFactory {
         actorSelection ! new ConnectionWrite(":(")
     }
   }
+
+  def createNPC(world: World, faction: String, npcValue: AllNPCValues, questBuffer: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()): Entity = {
+    val id = (new UID()).toString
+    val p: Entity = world.createEntity(tag=id)
+    p.components += new Position(npcValue.xposition, npcValue.yposition)
+    p.components += new Bounds(32, 32)
+    p.components += new Velocity(2, 2)
+    p.components += new Actionable(false, DownDirection)
+    p.components += new Health(npcValue.maximumHealth, npcValue.maximumHealth)
+    val animations = new ArrayBuffer[Animation]()
+    animations += new Animation("facedown",0,0)
+    p.components += new SpriteSheet("npc", animations,32, 48)
+    p.components += new Mana(1,1)
+    p.components += new NPC(0)
+    p.components += new Respawnable()
+    p.components += new Room(npcValue.roomId)
+    p.components += new Character(id, npcValue.name, 0)
+    p.components += new Faction("allies")
+    p
+  }
+
   def createAI(world: World, faction: String): Entity = {
     val name = java.util.UUID.randomUUID.toString
     val entity: Entity = world.createEntity(tag=name)
-    entity.components += new Position(200, 200)
+    entity.components += new Position(400, 400)
     entity.components += new Bounds(32, 32)
-    entity.components += new Velocity(4, 4)
+    entity.components += new Velocity(2, 2)
     entity.components += new Actionable(false, DownDirection)
     entity.components += new Health(50, 50)
+    val animations = new ArrayBuffer[Animation]()
+    animations += new Animation("facedown", 1, 1 )
+    animations += new Animation("faceleft", 4, 4 )
+    animations += new Animation("faceright", 7, 7 )
+    animations += new Animation("faceup", 10, 10 )
+    animations += new Animation("walkdown", 0, 2 )
+    animations += new Animation("walkleft", 3, 5 )
+    animations += new Animation("walkright", 6, 8 )
+    animations += new Animation("walkup", 9, 11)
+    animations += new Animation("attackdown", 12, 15)
+    animations += new Animation("attackleft",18, 21)
+    animations += new Animation("attackright", 24, 27)
+    animations += new Animation("attackup", 30, 33)
+    entity.components += new SpriteSheet("guy", animations, 32 ,32)
     entity.components += new Mana(200, 200)
     entity.components += new Character(name, name, 0)
     entity.components += new Goal
     entity.components += new Faction(faction)
     entity.components += new Room(0)
+    entity.components += new Equipment()
 
     entity
   }
@@ -211,5 +274,30 @@ object EntityFactory {
     //new Entity
     //val entityRoom: Entity = createRoom(world, id, tileMap)
     //entityRoom
+  }
+
+
+  def characterToLoot(initiator: Entity, lootEntity: Entity) {
+      lootEntity.components += new NPC(0)
+      lootEntity.components += new Health(10000,10000)
+      lootEntity.components += new Mana(10000,10000)
+      val animations = new ArrayBuffer[Animation]()
+      animations += new Animation("facedown", 0, 0)
+      lootEntity.components += new SpriteSheet("props", animations, 40, 40)
+      lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
+        case Some(character: Character) => character.id 
+        case _ => "0"
+      })
+      initiator.getComponent(classOf[Inventory]) match {
+        case (Some(inv: Inventory)) =>
+          lootEntity.components += inv.copy()
+          case _ => 
+      }
+      initiator.getComponent(classOf[Position]) match {
+        case Some(position: Position) => 
+          lootEntity.components += new Position(position.x, position.y) 
+        case _ =>
+      }
+      
   }
 }

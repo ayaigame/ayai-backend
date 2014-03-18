@@ -42,10 +42,14 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
       entityA.getComponent(classOf[Health]),
       entityB.getComponent(classOf[Health])) match {
       case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
-          attackComponentA.addVictim(entityB)
+          if(attackComponentA.initiator != entityB) {
+            attackComponentA.addVictim(entityB)
+          }
           true
       case (None, Some(attackComponentB : Attack), Some(healthComponentA : Health), None) =>
-          attackComponentB.addVictim(entityA)
+          if(attackComponentB.initiator != entityA) {
+            attackComponentB.addVictim(entityA)
+          }
           true
       case _ => false
       }
@@ -71,24 +75,25 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
             if (handleAttack(entityA, entityB)) {
               return // EXPLICIT RETURN TO ESCAPE handleCollision
             }
-            // check to see if they are movable
-            if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
-              if(positionA.x < positionB.x) {
-                LeftDirection.process(entityA)
-                RightDirection.process(entityB)
-              } else {
-                RightDirection.process(entityA)
-                LeftDirection.process(entityB)
-              }
-            } else {
-              if(positionA.y < positionB.y) {
-                UpDirection.process(entityA)
-                DownDirection.process(entityB)
-              } else {
-                DownDirection.process(entityA)
-                UpDirection.process(entityB)
-              }
-            }
+            // // check to see if they are movable
+            // if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
+            //   if(positionA.x < positionB.x) {
+            //     LeftDirection.process(entityA)
+            //     RightDirection.process(entityB)
+            //   } else {
+            //     RightDirection.process(entityA)
+            //     LeftDirection.process(entityB)
+            //   }
+            // } 
+            // else {
+            //   if(positionA.y < positionB.y) {
+            //     UpDirection.process(entityA)
+            //     DownDirection.process(entityB)
+            //   } else {
+            //     DownDirection.process(entityA)
+            //     UpDirection.process(entityB)
+            //   }
+            // }
           }
         case _ => return
       }

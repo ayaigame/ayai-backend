@@ -16,6 +16,12 @@ case class MoveTo(position: Position) extends Intent {
   }
 }
 
+case class AttackTo(position: Position) extends Intent {
+  override def toString: String = {
+    s"Attack To $position" 
+  }
+}
+
 class Goal extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
 

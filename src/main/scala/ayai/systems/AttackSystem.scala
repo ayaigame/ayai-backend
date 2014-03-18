@@ -4,7 +4,8 @@ import crane.{Component, Entity, World, EntityProcessingSystem}
 import ayai.components._
 import ayai.networking._
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-
+import java.rmi.server.UID
+import ayai.factories._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
@@ -97,14 +98,18 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
 
     //if the victims health reaches zero, then take the persons inventory and make it lootable
     if(healthComponent.currentHealth <= 0) {
-      val loot:Entity = world.createEntity("LOOT"+initiatorId)
-      loot.components += new Loot(initiatorId)
-      val inventory = initiator.getComponent(classOf[Inventory]) match {
-        case (Some(inv: Inventory)) =>
-          inv.copy()
-        case _ => null
-      }
-      loot.components += inventory
+      victim.components += new Time(20000, System.currentTimeMillis())
+      victim.components += new Dead()
+      println("Victim is dead")
+      val id = (new UID()).toString
+      val loot:Entity = world.createEntity(tag=id)
+      EntityFactory.characterToLoot(initiator, loot)
+      world.addEntity(loot)
+      val json = ("type" -> "disconnect") ~
+        ("id" -> victimId)
+      val actorSelectionDisc = actorSystem.actorSelection("user/SockoSender*")
+      actorSelectionDisc ! new ConnectionWrite(compact(render(json)))
+
     }
 
     val att = ("type" -> "attack") ~

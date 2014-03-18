@@ -61,6 +61,7 @@ object GameLoop {
 
     for((name, world) <- worlds)
       roomList ! AddWorld(world)
+    val npcFactory = NPCFactory.bootup(networkSystem)
 
     val receptionist = SockoServer(networkSystem)
     receptionist.run(Constants.SERVER_PORT)

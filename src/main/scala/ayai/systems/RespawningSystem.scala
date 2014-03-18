@@ -10,26 +10,25 @@ object RespawningSystem {
   def apply() = new RespawningSystem()
 }
 
-class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn])) {
+class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn], classOf[NetworkingActor])) {
   override def processEntity(e: Entity, delta: Int) {
     var respawn = (e.getComponent(classOf[Respawn]): @unchecked) match {
       case (Some(r: Respawn)) => r
+      case _ => null
     }
     val health = (e.getComponent(classOf[Health]): @unchecked) match {
       case(Some(h: Health)) => h
-    }
-    val room = (e.getComponent(classOf[Room]): @unchecked) match {
-      case Some(r: Room) => r
+      case _ => null
     }
 
     val position = (e.getComponent(classOf[Position]): @unchecked) match {
       case Some(p: Position) => p
+      case _ => null
     }
 
     if(respawn.isReady(System.currentTimeMillis())) {
       health.refill()
       e.removeComponent(classOf[Respawn])
-      //e.components += new Transport(position, room)
     }
   }
 }
