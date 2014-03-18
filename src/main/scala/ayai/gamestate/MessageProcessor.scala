@@ -230,7 +230,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
       // copy quest information from npc to player
       // FIX NULLS IN MESSAGES
-      case AcceptQuestMessage(userId: String, entityId: String) =>
+      case AcceptQuestMessage(userId: String, entityId: String, questId: String) =>
         //might want to calculate interact message here
         // also might want to check distance between npc and player
         var npcQuest: Quest = world.getEntityByTag(s"$entityId") match {
@@ -306,7 +306,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 typename = quests.typename
                 //fix this for a list
                 if(!quests.quests.isEmpty) {
-                  ("quest" -> quests.quests(0).asJson) 
+                  ("quest" -> quests.quests(0).asJson) ~
+                  ("entityId" -> entityId) 
                 } else {
                   quests.asJson
                 }
