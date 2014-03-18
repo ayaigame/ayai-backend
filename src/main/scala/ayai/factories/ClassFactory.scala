@@ -15,6 +15,8 @@ import scala.collection.mutable._
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
+case class InvalidJsonException(smth:String)  extends Exception
+
 object ClassFactory {
   implicit val formats = net.liftweb.json.DefaultFormats
   val classes: List[AllClassValues] = getClassesList("src/main/resources/configs/classes/classes.json")
@@ -28,7 +30,7 @@ object ClassFactory {
       baseStats: Option[List[Stat]],
       statGrowths: Option[List[Stat]]) {
 
-    def getStatsJson: List[JObject] = {
+    def getStatsJson: JValue = {
       baseStats match {
         case Some(stats: List[Stat]) =>
           // var jsonStats =
@@ -36,11 +38,13 @@ object ClassFactory {
           statsArray appendAll stats
           statsArray += new Stat("health", baseHealth)
           statsArray += new Stat("mana", baseMana)
-          var statsMap = HashMap[String, Int]()
-          statsMap += ("test" -> 2)
-          println(compact(render(decompose(statsMap))))
-          statsArray.toList.map{ stat =>
-            (stat.asJson)}
+
+          var statsMapping = statsArray map ((stat: Stat) => (stat.attributeType -> stat.magnitude))
+          var statsMap = statsMapping.toMap
+          statsMap
+
+        case _ =>
+          throw new InvalidJsonException("Cannot read stats in class factory.")
       }
     }
 
