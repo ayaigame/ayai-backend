@@ -97,15 +97,15 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
         (world.getEntityByTag(s"$userId")) match {
 
-        case Some(initiator : Entity) =>
+        case Some(initiator: Entity) =>
           val position = initiator.getComponent(classOf[Position])
           val movable = initiator.getComponent(classOf[Actionable])
           val character = initiator.getComponent(classOf[Character])
           val room = initiator.getComponent(classOf[Room])
           (position, movable, character, room) match {
-            case(Some(pos: Position), Some(a : Actionable), Some(c : Character), Some(r : Room)) =>
+            case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room)) =>
               val m = a.action match {
-                case (move : MoveDirection) => move
+                case (move: MoveDirection) => move
                 case _ =>
                   println("Not match for movedirection")
                   new MoveDirection(0, 0)
@@ -115,7 +115,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               //get the range of the characters weapon
               val weaponRange = initiator.getComponent(classOf[Equipment]) match {
                 case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
-                  case weapon : Weapon => weapon.range
+                  case weapon: Weapon => weapon.range
                   case _ => 5
                 }
                 case _ => 5
@@ -173,12 +173,11 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
-                case (Some(inventory: Inventory), Some(equipment: Equipment)) => 
-                  InventoryTable.saveInventory(e)
+                case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
                   val item = inventory.inventory(slot)
                   val equipItem = equipment.equipmentMap(equipmentType)
                   if(equipment.equipItem(item)) {
-                    inventory.inventory -= item
+                    inventory.removeItem(item)
                     if(!isEmptySlot(equipItem)) {
                       inventory.inventory += equipItem
                       println("Equip Item " + equipment.equipmentMap(equipmentType))
@@ -187,6 +186,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   }
                   else {
                   }
+                  InventoryTable.saveInventory(e)
               }
         }
         sender ! Success
@@ -196,21 +196,26 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
-                  val equippedItem = equipment.equipmentMap(equipmentType)
+                  val equippedItem = equipment.unequipItem(equipmentType)
                   equippedItem.itemType match {
-                    case weapon: Weapon => 
+                    case weapon: Weapon =>
                       inventory.inventory += equippedItem
                       equipment.equipmentMap(equipmentType) = new EmptySlot()
-                    case armor: Armor => 
+                    case armor: Armor =>
                       inventory.inventory += equippedItem
                       equipment.equipmentMap(equipmentType) = new EmptySlot()
                     case _ =>
                       println(equipmentType + " not valiid")
                   }
+                case _ =>
+                  println(s"User $userId cannot equip $equipmentType.")
               }
+          case _ =>
+            println(s"User $userId not found while unequiping.")
         }
         println("UnequipingMessage: " + equipmentType)
         sender ! Success
+
       case DropItemMessage(userId: String, slot: Int) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
