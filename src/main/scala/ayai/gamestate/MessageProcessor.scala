@@ -94,8 +94,9 @@ class MessageProcessor(world: RoomWorld) extends Actor {
        // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
       case AttackMessage(userId: String) => {
         //create a projectile
-        val bulletId = (new UID()).toString
 
+        val bulletId = (new UID()).toString
+       
         (world.getEntityByTag(s"$userId")) match {
 
         case Some(initiator: Entity) =>
@@ -103,8 +104,10 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           val movable = initiator.getComponent(classOf[Actionable])
           val character = initiator.getComponent(classOf[Character])
           val room = initiator.getComponent(classOf[Room])
-          (position, movable, character, room) match {
-            case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room)) =>
+          val cooldown = initiator.getComponent(classOf[Cooldown])
+          (position, movable, character, room, cooldown) match {
+            case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None) =>
+
               val m = a.action match {
                 case (move: MoveDirection) => move
                 case _ =>
@@ -130,16 +133,22 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
               val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
 
+
               val p: Entity = world.createEntity("ATTACK"+bulletId)
 
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Bounds(weaponRange, weaponRange))
               p.components += (new Attack(initiator));
               p.components += (new Frame(30,0))
+
+
+              initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
+
               //p.components += (c)
               world.addEntity(p)
+
             case _ =>
-              log.warn("424e244: getComponent failed to return anything")
+              // log.warn("424e244: Cooldown is present, cannot attack")
           }
           case _ =>
             log.warn("8a87265: getComponent failed to return anything")
@@ -341,7 +350,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         else {
           val json = ("type" -> "chat") ~
-            ("message" -> "Not withing distance of item") ~
+            ("message" -> "Not within distance of item") ~
             ("sender" -> "error")
           //check if player is an actor
           actorSelection ! ConnectionWrite(compact(render(json)))

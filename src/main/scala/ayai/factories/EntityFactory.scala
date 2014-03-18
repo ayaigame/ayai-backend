@@ -147,14 +147,14 @@ object EntityFactory {
     p.components += new Respawnable()
     p.components += new Room(npcValue.roomId)
     p.components += new Character(id, npcValue.name, 0)
-    p.components += new Faction("allies")
+    p.components += new Faction("axis")
     p
   }
 
   def createAI(world: World, faction: String): Entity = {
     val name = java.util.UUID.randomUUID.toString
     val entity: Entity = world.createEntity(tag=name)
-    entity.components += new Position(400, 400)
+    entity.components += new Position(300, 300)
     entity.components += new Bounds(32, 32)
     entity.components += new Velocity(2, 2)
     entity.components += new Actionable(false, DownDirection)
@@ -176,6 +176,7 @@ object EntityFactory {
     entity.components += new Mana(200, 200)
     entity.components += new Character(name, name, 0)
     entity.components += new Goal
+    entity.components += new NPC(0)
     entity.components += new Faction(faction)
     entity.components += new Room(0)
     entity.components += new Equipment()
