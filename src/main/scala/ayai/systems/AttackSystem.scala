@@ -116,7 +116,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       EntityFactory.characterToLoot(initiator, loot)
       world.addEntity(loot)
       val json = ("type" -> "disconnect") ~
-        ("id" -> victimId)
+         ("id" -> victimId)
       val actorSelectionDisc = actorSystem.actorSelection("user/SockoSender*")
       actorSelectionDisc ! new ConnectionWrite(compact(render(json)))
 

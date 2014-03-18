@@ -157,6 +157,7 @@ object EntityFactory {
     entity.components += new Position(300, 300)
     entity.components += new Bounds(32, 32)
     entity.components += new Velocity(2, 2)
+    entity.components += new Respawnable()
     entity.components += new Actionable(false, DownDirection)
     entity.components += new Health(50, 50)
     val animations = new ArrayBuffer[Animation]()
