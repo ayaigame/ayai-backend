@@ -45,7 +45,7 @@ class GameStateSerializer(world: World) extends Actor {
     if(!valid) {
       var entities = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
                                                       classOf[Health], classOf[Mana], classOf[SpriteSheet]),
-                                                     exclude=List(classOf[NPC]))
+                                                     exclude=List(classOf[NPC], classOf[Dead]))
         val jsonLift: JObject =
             ("players" -> entities.map{ e =>
              (e.getComponent(classOf[Character]),
