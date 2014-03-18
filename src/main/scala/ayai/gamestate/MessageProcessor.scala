@@ -266,7 +266,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
         }
         sender ! Success
-
+        //sends loot-open and quest-offer
       case InteractMessage(userId: String, entityId: String) =>
         val entity = world.getEntityByTag(s"$entityId") match {
           case Some(e: Entity) => e
@@ -279,6 +279,10 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case (Some(userPosition: Position), Some(entityPosition: Position)) =>
             sqrt(pow(userPosition.x-entityPosition.x,2)+pow(userPosition.y-entityPosition.y,2)) <= Constants.SPACE_FOR_INTERACTION
           case _ => false
+        }
+        val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
+          case Some(na: NetworkingActor) =>
+            na.actor
         }
         //if valid distance then pick up items
         if(isValidDistance) {
@@ -315,13 +319,10 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               case _ => null
           }
         
-          val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
-            case Some(na: NetworkingActor) =>
-              na.actor
-          }
           if(jsonObject != null) {
             // check for quest and loot status on a player (will add more later)
-            val json = ("type" -> typename)~jsonObject            
+            val json = ("type" -> typename)~jsonObject       
+            println(compact(render(json)))     
             actorSelection ! ConnectionWrite(compact(render(json)))
           } else {
             val json = ("type" -> "chat") ~
@@ -335,10 +336,6 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             ("message" -> "Not withing distance of item") ~ 
             ("sender" -> "error")
           //check if player is an actor
-          val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
-            case Some(na: NetworkingActor) =>
-              na.actor
-          }
           actorSelection ! ConnectionWrite(compact(render(json)))
         }
         sender ! Success
@@ -393,45 +390,6 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
         }
         sender ! Success
-      case RequestLootInventory(userId: String, entityId: String) =>
-        val userEntity = world.getEntityByTag(s"$userId") match {
-          case Some(e: Entity) => e
-        }
-        val itemEntity = world.getEntityByTag(s"$entityId") match {
-          case Some(e: Entity) => e
-        }
-
-        val isValidDistance: Boolean = (userEntity.getComponent(classOf[Position]),
-                                        itemEntity.getComponent(classOf[Position])) match {
-          case (Some(userPosition: Position), Some(itemPosition:Position)) =>
-            sqrt(pow(userPosition.x-itemPosition.x,2)+pow(userPosition.y-itemPosition.y,2)) <= Constants.SPACE_FOR_INTERACTION
-          case _ => false
-        }
-        val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
-          case Some(na: NetworkingActor) =>
-            na.actor
-        }
-
-        //if valid distance then pick up items
-        if(isValidDistance) {
-          val inventory = itemEntity.getComponent(classOf[Inventory]) match {
-            case Some(inv: Inventory) => inv
-            case _ => null
-          }
-
-          val json = ("type" -> "loot") ~
-            (inventory.asJson)
-
-          actorSelection ! ConnectionWrite(compact(render(json)))
-        }
-        else {
-          val json = ("type" -> "chat") ~
-            ("message" -> "Not withing distance of item") ~
-            ("sender" -> "error")
-        }
-
-        sender ! Success
-      case InteractMessage(userId: String, npcId: String) => 
                 
 
       case _ => println("Error from MessageProcessor.")

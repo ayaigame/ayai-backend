@@ -66,7 +66,9 @@ class NetworkMessageInterpreter extends Actor {
   def interpretMessage(wsFrame: WebSocketFrameEvent) = {
     val rootJSON = parse(wsFrame.readText)
     val msgType: String = stripQuotes(compact(render(rootJSON \ "type")))
-
+    if(msgType == "interact") {
+      println(wsFrame.readText)
+    }
     val userId = msgType match {
       case "init" => ""
       case _ =>
