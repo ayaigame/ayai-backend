@@ -395,8 +395,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           }
 
 //          actorSelection ! ConnectionWrite(compact(render(json)))
-        }
-        else {
+        } else {
           val json = ("type" -> "chat") ~
             ("message" -> "Not withing distance of item") ~
             ("sender" -> "error")
@@ -408,7 +407,10 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
         }
         sender ! Success
-
+      case CreateAIMessage =>
+        val ai = EntityFactory.createAI(world, "axis")
+        world.addEntity(ai)
+        sender ! Success
 
       case _ => println("Error from MessageProcessor.")
     }
