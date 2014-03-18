@@ -24,7 +24,7 @@ class DirectorSystem extends TimedSystem(3000) {
         (x: Int, y: Entity) =>  
           (y.getComponent(classOf[Health])) match {
             case Some(yh: Health) =>
-              x + yh.currentHealth
+              x + yh.maximumHealth
             case _ =>
               x
           }
@@ -34,7 +34,12 @@ class DirectorSystem extends TimedSystem(3000) {
 
     val factionToAdd = factionHealths.map{
       case (name, factionHealth) =>
-        (name, factionHealths.values.max / factionHealth - 1)
+        if(factionHealth > 0) {
+          (name, (factionHealths.values.max / factionHealth) - 1)
+        }
+        else {
+          (name, 0)
+        }
     }
 
     factionToAdd.foreach{
@@ -58,7 +63,7 @@ class DirectorSystem extends TimedSystem(3000) {
 
       faction.foreach{ entity => 
         (entity.getComponent(classOf[Goal]): @unchecked) match {
-          case(Some(g: Goal)) => g.goal = new MoveTo(position)
+          case(Some(g: Goal)) => g.goal = new AttackTo(position)
           case _ => ()
         }
       }
