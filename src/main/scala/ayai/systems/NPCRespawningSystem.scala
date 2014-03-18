@@ -13,6 +13,7 @@ case class NPCRespawningSystem extends EntityProcessingSystem(include=List(class
 			case Some(time: Time) =>
 				if(time.isReady(System.currentTimeMillis)) {
 					entity.removeComponent(classOf[Dead])
+					entity.removeComponent(classOf[Time])
 					//if entity has health then refill
 					entity.getComponent(classOf[Health]) match {
 						case Some(health: Health) => health.refill()
