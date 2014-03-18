@@ -34,7 +34,7 @@ class GameStateSerializer(world: World) extends Actor {
   private val log = LoggerFactory.getLogger(getClass)
   private var roomJSON: JObject = null
   private var valid: Boolean = false
-
+  private var npcJSON: JObject = null
   //Returns a list of entities contained within a room.
   def getRoomEntities(roomId: Long): ArrayBuffer[Entity] = {
     world.groups("ROOM" + roomId)
@@ -45,7 +45,7 @@ class GameStateSerializer(world: World) extends Actor {
     if(!valid) {
       var entities = world.getEntitiesByComponents(classOf[Character], classOf[Position],
                                                       classOf[Health], classOf[Mana])
-         val jsonLift: JObject =
+        val jsonLift: JObject =
             ("players" -> entities.map{ e =>
              (e.getComponent(classOf[Character]),
                e.getComponent(classOf[Position]),
@@ -63,38 +63,38 @@ class GameStateSerializer(world: World) extends Actor {
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
              }})
-            var npcs = world.getEntitiesByComponents(classOf[Interactable], classOf[Character], classOf[Position],
-                                                     classOf[Health], classOf[Mana])
-            jsonLift += ("npcs" -> npcs.map { npc =>
-              (npc.getComponent(classOf[Interactable]),
-                npc.getComponent(classOf[Character]),
-                npc.getComponent(classOf[Position]),
-                npc.getComponent(classOf[Health]),
-                npc.getComponent(classOf[Mana]))}) match {
-                  case (Some(interact: Interact), Some(character: Character), Some(position: Position),
-                    Some(health: Health), Some(mana: Mana)) =>
-                    ((interact.asJson) ~
-                      (character.asJson) ~
-                      (position.asJson) ~
-                      (health.asJson) ~
-                      (mana.asJson))
-                  case _ =>  
-                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
-                    JNothing
-                }
+        var npcs = world.getEntitiesByComponents(classOf[Interact], classOf[Character], classOf[Position],
+                                                 classOf[Health], classOf[Mana])
+        npcJSON= ("npcs" -> npcs.map{ npc =>
+          (npc.getComponent(classOf[Interact]),
+            npc.getComponent(classOf[Character]),
+            npc.getComponent(classOf[Position]),
+            npc.getComponent(classOf[Health]),
+            npc.getComponent(classOf[Mana])) match {
+              case (Some(interact: Interact), Some(character: Character), Some(position: Position),
+                Some(health: Health), Some(mana: Mana)) =>
+                ((interact.asJson) ~
+                  (character.asJson) ~
+                  (position.asJson) ~
+                  (health.asJson) ~
+                  (mana.asJson))
+              case _ =>  
+                log.warn("f3d3275: getComponent failed to return anything BLARG2")
+                JNothing
+            }})
                 
-         try {
+        try {
            roomJSON = jsonLift
            valid = true
-         } catch {
+        } catch {
            case e: Exception =>
              e.printStackTrace()
              sender ! ""
-         }
+        }
 
     }
     // println(compact(render(getCharacterAssets(e))))
-    sender ! compact(render(("type" -> "update")~(roomJSON)~(getCharacterAssets(e))))
+    sender ! compact(render(("type" -> "update")~(roomJSON)~(npcJSON)~(getCharacterAssets(e))))
   }
 
   def getCharacterAssets(entity: Entity): JObject = {

@@ -252,9 +252,6 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case _ =>
         }
         sender ! Success
-      // dont know if this should exist, might just be a stop interacting button or cancel on frontend
-      case DeclineQuestMessage(userId: String, npcId: String, questId: String) =>
-      // will abandon quest (remove from players quest bag)
       case AbandonQuestMessage(userId: String, questId: String) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
@@ -270,9 +267,84 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         sender ! Success
 
-      case InteractMessage(userId: String, npcId: String) =>
-      // get both the user entity and item entity
-      case LootMessage(userId: String, entityId: String, items: ArrayBuffer[String]) =>
+      case InteractMessage(userId: String, entityId: String) =>
+        val entity = world.getEntityByTag(s"$entityId") match {
+          case Some(e: Entity) => e
+        }
+        val userEntity = world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) => e
+        }
+        val isValidDistance: Boolean = (userEntity.getComponent(classOf[Position]),
+                                        entity.getComponent(classOf[Position])) match {
+          case (Some(userPosition: Position), Some(entityPosition: Position)) =>
+            sqrt(pow(userPosition.x-entityPosition.x,2)+pow(userPosition.y-entityPosition.y,2)) <= Constants.SPACE_FOR_INTERACTION
+          case _ => false
+        }
+        //if valid distance then pick up items
+        if(isValidDistance) {
+          val loot = entity.getComponent(classOf[Inventory]) match {
+            case Some(inv: Inventory) => inv
+            case _ => null
+          }
+          val playerInventory = userEntity.getComponent(classOf[Inventory]) match {
+            case Some(inv: Inventory) => inv
+            case _ => null
+          }
+          var typename: String = ""
+          val jsonObject: JObject = (entity.getComponent(classOf[QuestBag]),
+            entity.getComponent(classOf[Loot])) match {
+              case (Some(quests: QuestBag), Some(loot: Loot)) => 
+                typename = quests.typename
+                quests.asJson
+              case (Some(quests: QuestBag), None) =>
+                typename = quests.typename
+                //fix this for a list
+                if(!quests.quests.isEmpty) {
+                  ("quest" -> quests.quests(0).asJson) 
+                } else {
+                  quests.asJson
+                }
+              case ( None, Some(loot: Loot)) => 
+                typename = loot.typename
+                entity.getComponent(classOf[Inventory]) match {
+                  case Some(inventory: Inventory) =>
+                   inventory.asJson
+                  case _ => null
+                }
+                
+              case _ => null
+          }
+        
+          val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
+            case Some(na: NetworkingActor) =>
+              na.actor
+          }
+          if(jsonObject != null) {
+            // check for quest and loot status on a player (will add more later)
+            val json = ("type" -> typename)~jsonObject            
+            actorSelection ! ConnectionWrite(compact(render(json)))
+          } else {
+            val json = ("type" -> "chat") ~
+              ("message" -> "Nothing to Send") ~
+              ("sender" -> "error")
+            actorSelection ! ConnectionWrite(compact(render(json)))
+          }
+        }
+        else {
+          val json = ("type" -> "chat") ~
+            ("message" -> "Not withing distance of item") ~ 
+            ("sender" -> "error")
+          //check if player is an actor
+          val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
+            case Some(na: NetworkingActor) =>
+              na.actor
+          }
+          actorSelection ! ConnectionWrite(compact(render(json)))
+        }
+        sender ! Success
+
+
+      case LootMessage(userId: String, entityId: String, items: List[Int]) =>
         val userEntity = world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e
         }
@@ -301,15 +373,24 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
           //take item and put it in player inventory
           for(item <- loot.inventory) {
-            playerInventory.addItem(item)
-            loot.inventory -= item
+            if(items.contains(item.id)) {
+              playerInventory.addItem(item)
+              loot.inventory -= item 
+            }
           }
 
 //          actorSelection ! ConnectionWrite(compact(render(json)))
         }
         else {
-          val json = ("type" -> "error") ~
-            ("message" -> "Not withing distance of item")
+          val json = ("type" -> "chat") ~
+            ("message" -> "Not withing distance of item") ~ 
+            ("sender" -> "error")
+          val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
+            case Some(na: NetworkingActor) =>
+              na.actor
+          }
+          actorSelection ! ConnectionWrite(compact(render(json)))
+
         }
         sender ! Success
       case RequestLootInventory(userId: String, entityId: String) =>
@@ -344,8 +425,9 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           actorSelection ! ConnectionWrite(compact(render(json)))
         }
         else {
-          val json = ("type" -> "error") ~
-            ("message" -> "Not withing distance of item")
+          val json = ("type" -> "chat") ~
+            ("message" -> "Not withing distance of item") ~
+            ("sender" -> "error")
         }
 
         sender ! Success

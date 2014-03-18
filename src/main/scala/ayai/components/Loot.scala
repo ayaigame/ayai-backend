@@ -10,6 +10,8 @@ import net.liftweb.json.JsonDSL._
 ** I make it account id based in case we want persistance if game shuts down
 **/
 case class Loot(val looter: String) extends Component {
+	val typename = "loot-open"
+
 	def isLootable(id: String): Boolean = {
 		id == looter
 	}

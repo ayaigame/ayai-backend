@@ -75,25 +75,25 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
             if (handleAttack(entityA, entityB)) {
               return // EXPLICIT RETURN TO ESCAPE handleCollision
             }
-            // check to see if they are movable
-            if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
-              if(positionA.x < positionB.x) {
-                LeftDirection.process(entityA)
-                RightDirection.process(entityB)
-              } else {
-                RightDirection.process(entityA)
-                LeftDirection.process(entityB)
-              }
-            } 
-            else {
-              if(positionA.y < positionB.y) {
-                UpDirection.process(entityA)
-                DownDirection.process(entityB)
-              } else {
-                DownDirection.process(entityA)
-                UpDirection.process(entityB)
-              }
-            }
+            // // check to see if they are movable
+            // if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
+            //   if(positionA.x < positionB.x) {
+            //     LeftDirection.process(entityA)
+            //     RightDirection.process(entityB)
+            //   } else {
+            //     RightDirection.process(entityA)
+            //     LeftDirection.process(entityB)
+            //   }
+            // } 
+            // else {
+            //   if(positionA.y < positionB.y) {
+            //     UpDirection.process(entityA)
+            //     DownDirection.process(entityB)
+            //   } else {
+            //     DownDirection.process(entityA)
+            //     UpDirection.process(entityB)
+            //   }
+            // }
           }
         case _ => return
       }

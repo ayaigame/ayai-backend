@@ -48,6 +48,6 @@ case class DropItemMessage(userId: String, slot: Int) extends NetworkMessage
 case class AbandonQuestMessage(userId: String, questId: String) extends NetworkMessage
 case class DeclineQuestMessage(userId: String, npcId: String, questId: String) extends NetworkMessage
 case class AcceptQuestMessage(userId: String, npcId: String, questId: String) extends NetworkMessage
-case class InteractMessage(userId: String, npcId: String) extends NetworkMessage
-case class LootMessage( userId: String, entityId: String, items: ArrayBuffer[String]) extends NetworkMessage
+case class InteractMessage(userId: String, entityId: String) extends NetworkMessage
+case class LootMessage( userId: String, entityId: String, items: List[Int]) extends NetworkMessage
 case class RequestLootInventory(userId: String, entityId: String) extends NetworkMessage
