@@ -9,7 +9,8 @@ object TimeExpirationSystem {
   def apply() = new TimeExpirationSystem()
 }
 
-class TimeExpirationSystem() extends EntityProcessingSystem(include=List(classOf[Time])) {
+class TimeExpirationSystem() extends EntityProcessingSystem(include=List(classOf[Time]),
+                                                            exclude=List(classOf[Respawnable])) {
   def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[Time]) match {
       case Some(time: Time) => 

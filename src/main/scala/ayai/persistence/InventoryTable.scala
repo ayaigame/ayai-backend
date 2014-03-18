@@ -22,28 +22,6 @@ import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
 
 object InventoryTable {
-
-  //MUST BE CALLED FROM WITHIN TRANSACTION
-  //This is so it can be done multiple times within a single transaction.
-  def upsertRow(inventoryRow: InventoryRow) {
-    val itemQuery =
-      from(AyaiDB.inventory)(row =>
-        where(row.characterId === inventoryRow.characterId
-          and row.itemId === inventoryRow.itemId)
-        select(row)
-      )
-
-    if(itemQuery.size == 0) {
-      AyaiDB.inventory.insert(inventoryRow)
-    }
-    else if (itemQuery.size == 1) {
-      AyaiDB.inventory.update(inventoryRow)
-    }
-    else {
-      println("Error: duplicate inventory row.")
-    }
-  }
-
   //MUST BE CALLED FROM WITHIN TRANSACTION
   //This is so it can be done multiple times within a single transaction.
   //Deletes all copies of the item in the character's inventory
@@ -89,7 +67,7 @@ object InventoryTable {
         if (itemQuery.size == 1) {
           var inventoryRow = itemQuery.single
           if(inventoryRow.quantity > 0) {
-            var newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity - 1, inventoryRow.equipped)
+            var newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity - 1)
             AyaiDB.inventory.update(newRow)
           }
           else {
@@ -107,28 +85,8 @@ object InventoryTable {
     }
   }
 
-  def slotToInt(slot: String): Int = {
-    slot match {
-      case "weapon1" =>
-        1
-      case "weapon2" =>
-        2
-      case "helmet" =>
-        4
-      case "feet" =>
-        8
-      case "torso" =>
-        16
-      case "legs" =>
-        32
-      case _ =>
-        println("Slot not found.")
-        -1
-    }
-  }
-
-  //Saves all items in a character's inventory to the database.
-  //Does not delete, which could be a problem later
+  //Deletes all item rows for the character out of both InventoryTable and EquipmentTable.
+  //Then saves all items from Inventory to InventoryTable and Equipment to EquipmentTable.
   def saveInventory(entity: Entity) {
     (entity.getComponent(classOf[Inventory]),
       entity.getComponent(classOf[Character]),
@@ -142,30 +100,15 @@ object InventoryTable {
                 java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
                 new H2Adapter))
 
-
-//make equipped field int for slot
-//combine inventory and equipment into one list
-//do the groupby
-//equipped field = lookup
-//need a map of id -> slotVal
-// // m1 foreach {case (key, value) => println (key + "-->" + value)}
-//             val idsToSlots = equipment.equipmentMap filter (_._2.id >= 0) map
-//                 {case (slot: String, item: Item) => (slotToInt(slot), item.id)} groupBy(
-//                   (_._1)) map(
-//                     )
-
-//               // case (slot: String, item: Item) => (item.id >= 0))
-//                 // {case (slot: String, item: Item) => (item.id, slotToInt(slot))}
-//             println(idsToSlots)
-
             val equipmentList: List[Item] = equipment.equipmentMap.values.toList
-            // val equippedIds = equipmentList map ((item:Item) => item.id)
 
-            //delete equipment
-             transaction {
-                AyaiDB.equipment.deleteWhere(row =>
-                  (row.characterId === characterRow.id))
-              }
+            //delete all items
+            transaction {
+              AyaiDB.equipment.deleteWhere(row =>
+                (row.characterId === characterRow.id))
+              AyaiDB.inventory.deleteWhere(row =>
+                (row.characterId === characterRow.id))
+            }
 
             def getSlot(item: Item): String = {
               var slot = ""
@@ -180,7 +123,6 @@ object InventoryTable {
               return slot
             }
 
-
             //save equipment
             transaction {
               equipmentList map ((item: Item)=> AyaiDB.equipment.insert(new EquipmentRow(characterRow.id, item.id, getSlot(item))))
@@ -188,11 +130,11 @@ object InventoryTable {
 
             val inventoryRows = inventory.inventory groupBy(
               (item:Item) => item.id) map {
-                p => new InventoryRow(characterRow.id, p._1, p._2.length, false)}
+                p => new InventoryRow(characterRow.id, p._1, p._2.length)}
 
             println(s"Saving $inventoryRows")
             transaction {
-              inventoryRows map upsertRow
+              inventoryRows foreach ((row: InventoryRow) => AyaiDB.inventory.insert(row))
             }
           case _ =>
             println(s"Can't find account for $character.name")
@@ -239,11 +181,11 @@ object InventoryTable {
             )
 
           if(itemQuery.size == 0) {
-            AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, item.id, quantity, false))
+            AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, item.id, quantity))
           }
           else if (itemQuery.size == 1) {
             var inventoryRow = itemQuery.single
-            val newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity + quantity, inventoryRow.equipped)
+            val newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity + quantity)
             AyaiDB.inventory.update(newRow)
           }
           else {

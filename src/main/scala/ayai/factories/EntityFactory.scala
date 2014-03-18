@@ -29,7 +29,8 @@ import scala.io.Source
 import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
 import akka.pattern.ask
 import akka.util.Timeout
-
+import java.rmi.server.UID
+import ayai.apps._
 
 object EntityFactory {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
@@ -111,6 +112,24 @@ object EntityFactory {
         actorSelection ! new ConnectionWrite(":(")
     }
   }
+
+  def createNPC(world: World, faction: String, npcValue: AllNPCValues, questBuffer: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()): Entity = {
+    val id = (new UID()).toString
+    val p: Entity = world.createEntity(tag=id)
+    p.components += new Position(npcValue.xposition, npcValue.yposition)
+    p.components += new Bounds(32, 32)
+    p.components += new Velocity(2, 2)
+    p.components += new Actionable(false, DownDirection)
+    p.components += new Health(npcValue.maximumHealth, npcValue.maximumHealth)
+    p.components += new Mana(1,1)
+    p.components += new NPC(0)
+    p.components += new Respawnable()
+    p.components += new Room(npcValue.roomId)
+    p.components += new Character(id, npcValue.name, 0)
+    p.components += new Faction("allies")
+    p
+  }
+
   def createAI(world: World, faction: String): Entity = {
     val name = java.util.UUID.randomUUID.toString
     val entity: Entity = world.createEntity(tag=name)
@@ -222,5 +241,20 @@ object EntityFactory {
     //new Entity
     //val entityRoom: Entity = createRoom(world, id, tileMap)
     //entityRoom
+  }
+
+
+  def characterToLoot(initiator: Entity, lootEntity: Entity) {
+      lootEntity.components += new NPC(0)
+      lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
+        case Some(character: Character) => character.id 
+        case _ => "0"
+      })
+
+      initiator.getComponent(classOf[Inventory]) match {
+        case (Some(inv: Inventory)) =>
+          lootEntity.components += inv.copy()
+          case _ => 
+      }
   }
 }

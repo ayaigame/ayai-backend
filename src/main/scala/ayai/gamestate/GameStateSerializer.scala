@@ -34,7 +34,7 @@ class GameStateSerializer(world: World) extends Actor {
   private val log = LoggerFactory.getLogger(getClass)
   private var roomJSON: JObject = null
   private var valid: Boolean = false
-
+  private var npcJSON: JObject = null
   //Returns a list of entities contained within a room.
   def getRoomEntities(roomId: Long): ArrayBuffer[Entity] = {
     world.groups("ROOM" + roomId)
@@ -43,9 +43,10 @@ class GameStateSerializer(world: World) extends Actor {
   //Returns a character's belongings and surroundings.
   def getRoom(e: Entity) = {
     if(!valid) {
-      var entities = world.getEntitiesByComponents(classOf[Character], classOf[Position],
-                                                      classOf[Health], classOf[Mana])
-         val jsonLift: JObject =
+      var entities = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
+                                                      classOf[Health], classOf[Mana]),
+                                                     exclude=List(classOf[NPC]))
+        val jsonLift: JObject =
             ("players" -> entities.map{ e =>
              (e.getComponent(classOf[Character]),
                e.getComponent(classOf[Position]),
@@ -63,18 +64,36 @@ class GameStateSerializer(world: World) extends Actor {
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
              }})
-
-         try {
+        var npcs = world.getEntitiesByComponents(classOf[Character], classOf[Position],
+                                                 classOf[Health], classOf[Mana], classOf[NPC])
+        npcJSON= ("npcs" -> npcs.map{ npc =>
+          (npc.getComponent(classOf[Character]),
+            npc.getComponent(classOf[Position]),
+            npc.getComponent(classOf[Health]),
+            npc.getComponent(classOf[Mana])) match {
+              case (Some(character: Character), Some(position: Position),
+                Some(health: Health), Some(mana: Mana)) =>
+                ((character.asJson) ~
+                  (position.asJson) ~
+                  (health.asJson) ~
+                  (mana.asJson))
+              case _ =>  
+                log.warn("f3d3275: getComponent failed to return anything BLARG2")
+                JNothing
+            }})
+                
+        try {
            roomJSON = jsonLift
            valid = true
-         } catch {
+        } catch {
            case e: Exception =>
              e.printStackTrace()
              sender ! ""
-         }
+        }
 
     }
-    sender ! compact(render(("type" -> "update")~(roomJSON)~(getCharacterAssets(e))))
+    // println(compact(render(getCharacterAssets(e))))
+    sender ! compact(render(("type" -> "update")~(roomJSON)~(npcJSON)~(getCharacterAssets(e))))
   }
 
   def getCharacterAssets(entity: Entity): JObject = {
@@ -92,6 +111,7 @@ class GameStateSerializer(world: World) extends Actor {
         case _ => JNothing
       }
     ("models" -> jsonLift)
+
   }
   //Once characters actually have belonging we'll want to implement this and use it in getCharacterRadius
   // def getCharacterBelongings(characterId: String) = {

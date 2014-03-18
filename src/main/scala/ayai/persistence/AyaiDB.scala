@@ -194,11 +194,10 @@ case class CharacterRow (
 case class InventoryRow (
             val characterId: Long,
             val itemId: Long,
-            val quantity: Long,
-            val equipped: Boolean)
+            val quantity: Long)
           extends KeyedEntity[CompositeKey2[Long,Long]] {
             def id = compositeKey(characterId, itemId)
-            def this() = this(0, 0, 0, false)
+            def this() = this(0, 0, 0)
 }
 
 case class EquipmentRow (
