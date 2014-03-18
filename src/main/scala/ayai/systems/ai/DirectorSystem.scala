@@ -45,8 +45,8 @@ class DirectorSystem extends TimedSystem(3000) {
     factionToAdd.foreach{
       case (name, amount) => 
         for(_ <- 1 to amount) {
-          // val entity = EntityFactory.createAI(world, name)
-          // world.addEntity(entity)
+          val entity = EntityFactory.createAI(world, name)
+          world.addEntity(entity)
         }
     }
     

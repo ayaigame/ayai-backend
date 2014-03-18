@@ -145,7 +145,7 @@ object EntityFactory {
     p.components += new Respawnable()
     p.components += new Room(npcValue.roomId)
     p.components += new Character(id, npcValue.name, 0)
-    p.components += new Faction("allies")
+    p.components += new Faction("axis")
     p
   }
 
@@ -174,6 +174,7 @@ object EntityFactory {
     entity.components += new Mana(200, 200)
     entity.components += new Character(name, name, 0)
     entity.components += new Goal
+    entity.components += new NPC(0)
     entity.components += new Faction(faction)
     entity.components += new Room(0)
     entity.components += new Equipment()

@@ -87,7 +87,7 @@ class GameStateSerializer(world: World) extends Actor {
                 log.warn("f3d3275: getComponent failed to return anything BLARG2")
                 JNothing
             }})
-                
+            // println(compact(render(npcJSON)))
         try {
            roomJSON = jsonLift
            valid = true

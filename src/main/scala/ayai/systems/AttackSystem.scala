@@ -20,7 +20,18 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       if(!attack.victims.isEmpty) {
         for(victim <- attack.victims) {
           if(!attack.attacked.contains(victim)) {
-            getDamage(attack.initiator, victim)
+            val victimFaction = victim.getComponent(classOf[Faction]) match {
+              case Some(faction: Faction) => faction.name
+              case _ => "" 
+            }
+            val initiatorFaction = attack.initiator.getComponent(classOf[Faction]) match {
+              case Some(faction: Faction) => faction.name
+              case _ => "" 
+            }
+            println("victim faction: " + victimFaction + "   initiatorFaction: " + initiatorFaction)
+            if(victimFaction != initiatorFaction) {
+              getDamage(attack.initiator, victim)
+            } 
           }
         }
         attack.moveVictims()
