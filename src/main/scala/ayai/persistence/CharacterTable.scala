@@ -23,6 +23,7 @@ import net.liftweb.json.Serialization.{read, write}
 
 object CharacterTable {
 
+  //This should check for an existing character with characterName
   def createCharacter(characterName: String, className: String, accountId: Long) {
     this.createCharacter(characterName, className, accountId, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y)
   }
@@ -36,6 +37,16 @@ object CharacterTable {
 
     transaction {
       AyaiDB.characters.insert(new CharacterRow(characterName, className, 0, accountId, startingRoom, startingX, startingY))
+      val characterQuery =
+        from(AyaiDB.characters)(row =>
+          where(row.name === characterName)
+          select(row)
+        )
+
+      //give them some starting items
+      AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 0, 1))
+      AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 1, 1))
+      AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 2, 1))
     }
   }
 

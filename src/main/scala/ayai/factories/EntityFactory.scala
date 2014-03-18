@@ -7,7 +7,7 @@ import ayai.actions._
 import ayai.gamestate._
 import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
-import ayai.persistence.{AyaiDB, CharacterRow}
+import ayai.persistence.{AyaiDB, CharacterRow, InventoryTable}
 import ayai.apps.Constants
 
 /** Crane Imports **/
@@ -57,7 +57,7 @@ object EntityFactory {
         animations += new Animation("attackleft",18, 21)
         animations += new Animation("attackright", 24, 27)
         animations += new Animation("attackup", 30, 33)
-        val spritesheet: SpriteSheet = new SpriteSheet("guy", animations, 32 ,32) 
+        val spritesheet: SpriteSheet = new SpriteSheet("guy", animations, 32 ,32)
         p.components += spritesheet
         p.components += new Actionable(false, DownDirection)
         p.components += new Health(100,100)
@@ -80,19 +80,21 @@ object EntityFactory {
 
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
-        var future = itemSelection ? GetItem("ITEM1")
-        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-
-        future = itemSelection ? GetItem("ITEM2")
-        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-        future = itemSelection ? GetItem("ITEM1")
-        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-        future = itemSelection ? GetItem("ITEM0")
-        inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        InventoryTable.getInventory(p) foreach ((itemId: Long) => {
+          var future = itemSelection ? GetItem("ITEM" + itemId)
+          inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        })
 
         p.components += inventory
 
         val equipment = new Equipment()
+
+        InventoryTable.getEquipment(p) foreach {
+          case (slot: String, itemId: Long) =>
+            var future = itemSelection ? GetItem("ITEM" + itemId)
+            equipment.equipItem(Await.result(future, timeout.duration).asInstanceOf[Item], slot)
+        }
+
         p.components += equipment
 
         world.addEntity(p)
@@ -285,7 +287,7 @@ object EntityFactory {
       animations += new Animation("facedown", 0, 0)
       lootEntity.components += new SpriteSheet("props", animations, 40, 40)
       lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
-        case Some(character: Character) => character.id 
+        case Some(character: Character) => character.id
         case _ => "0"
       })
 
@@ -293,17 +295,17 @@ object EntityFactory {
         case (Some(char: Character)) => initiator.components += char
         case _ =>
       }
-      
+
       initiator.getComponent(classOf[Inventory]) match {
         case (Some(inv: Inventory)) =>
           lootEntity.components += inv.copy()
-          case _ => 
+          case _ =>
       }
       initiator.getComponent(classOf[Position]) match {
-        case Some(position: Position) => 
-          lootEntity.components += new Position(position.x, position.y) 
+        case Some(position: Position) =>
+          lootEntity.components += new Position(position.x, position.y)
         case _ =>
       }
-      
+
   }
 }
