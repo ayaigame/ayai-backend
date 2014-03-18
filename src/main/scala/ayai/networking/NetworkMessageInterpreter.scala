@@ -145,11 +145,12 @@ class NetworkMessageInterpreter extends Actor {
         val slot = (rootJSON \ "slot").extract[Int]
         queue ! new AddInterpretedMessage(world, new DropItemMessage(userId, slot))
       case "quest-accept" =>
+        println(wsFrame.readText)
         val entityId = (rootJSON \ "entityId").extract[String]
         val questId = (rootJSON \ "questId").extract[Int]
         queue ! new AddInterpretedMessage(world, new AcceptQuestMessage(userId, entityId, questId))
       case "quest-abandon" =>
-        val questId = (rootJSON \ "questId").extract[String]
+        val questId = (rootJSON \ "questId").extract[Int]
         queue ! new AddInterpretedMessage(world, new AbandonQuestMessage(userId, questId))
       case "loot-pickup" =>
         val entityId = (rootJSON \ "entityId").extract[String]
@@ -160,7 +161,6 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new InteractMessage(userId, entityId))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
-
     }
   }
 

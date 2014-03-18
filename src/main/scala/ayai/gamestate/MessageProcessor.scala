@@ -256,7 +256,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case _ =>
         }
         sender ! Success
-      case AbandonQuestMessage(userId: String, questId: String) =>
+      case AbandonQuestMessage(userId: String, questId: Int) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
