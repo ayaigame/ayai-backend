@@ -7,7 +7,7 @@ import ayai.actions._
 import ayai.gamestate._
 import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
-import ayai.persistence.{AyaiDB, CharacterRow, InventoryTable}
+import ayai.persistence.{AyaiDB, CharacterTable, CharacterRow, InventoryTable}
 import ayai.apps.Constants
 
 /** Crane Imports **/
@@ -38,7 +38,7 @@ object EntityFactory {
   //Should take characterId: Long as a parameter instead of characterName
   //However can't do that until front end actually gives me the characterId
   def loadCharacter(world: World, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
-    AyaiDB.getCharacter(characterName) match {
+    CharacterTable.getCharacter(characterName) match {
       case Some(characterRow: CharacterRow) =>
         val p: Entity = world.createEntity(tag=entityId)
         p.components += new Position(characterRow.pos_x,characterRow.pos_y)

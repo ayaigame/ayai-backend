@@ -35,7 +35,7 @@ object CharacterTable {
                       startingRoom: Long,
                       startingX: Int,
                       startingY: Int) {
-    AyaiDB.getCharacter(characterName) match {
+    getCharacter(characterName) match {
       case Some(character: CharacterRow) =>
         request.response.write(HttpResponseStatus.CONFLICT)
 
@@ -61,6 +61,38 @@ object CharacterTable {
 
           request.response.write(HttpResponseStatus.OK, "GOOD")
         }
+    }
+  }
+
+  def getCharacter(characterName: String): Option[CharacterRow] = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    transaction {
+      val characterQuery = AyaiDB.characters.where(character => character.name === characterName)
+      if(characterQuery.size == 1)
+        Some(characterQuery.single)
+      else
+        None
+    }
+  }
+
+  def getCharacter(characterId: Long) = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    transaction {
+      val characterQuery = AyaiDB.characters.where(character => character.id === characterId)
+      if(characterQuery.size == 1)
+        Some(characterQuery.single)
+      else
+        None
     }
   }
 

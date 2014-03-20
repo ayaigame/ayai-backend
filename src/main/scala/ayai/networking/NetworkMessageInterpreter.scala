@@ -36,10 +36,10 @@ class NetworkMessageInterpreter extends Actor {
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  /** 
+  /**
    * Remove quotes from beginning and end of string if they exist
    */
-  def stripQuotes(s: StringOps): String = { 
+  def stripQuotes(s: StringOps): String = {
     (s.head, s.last) match {
       case('\"', '\"') => s.tail.take(s.length - 2)
       case _ => s
@@ -119,14 +119,14 @@ class NetworkMessageInterpreter extends Actor {
       case "chat" =>
         val message: String = stripQuotes(compact(render(rootJSON \ "message")))
         val sender: String = stripQuotes(compact(render(rootJSON \ "sender")))
-        val account = AyaiDB.getAccount(sender)
+        val account = AccountTable.getAccount(sender)
         account match {
           case Some(a: Account) =>
             context.system.actorOf(Props[ChatReceiver]) ! new ChatHolder(new PublicChat(message, a), lookUpWorldByName(world))
           case _ =>
             println(s"Could not find user $sender")
         }
-                
+
       case "open" =>
         val containerId: String = (rootJSON \ "containerId").extract[String]
         queue ! new AddInterpretedMessage(world, new OpenMessage(userId, containerId))
@@ -134,13 +134,13 @@ class NetworkMessageInterpreter extends Actor {
       case "chars" =>
         val accountName: String = (rootJSON \ "accountName").extract[String]
         queue ! new CharacterList(userId, accountName)
-      case "equip" => 
+      case "equip" =>
         val slot: Int = (rootJSON \ "slot").extract[Int]
         val equipmentType: String = (rootJSON \ "equipmentType").extract[String]
-        queue ! new AddInterpretedMessage(world, new EquipMessage(userId, slot, equipmentType))    
+        queue ! new AddInterpretedMessage(world, new EquipMessage(userId, slot, equipmentType))
       case "unequip" =>
         val equipmentType = (rootJSON \ "equipmentType").extract[String]
-        queue ! new AddInterpretedMessage(world, new UnequipMessage(userId, equipmentType))        
+        queue ! new AddInterpretedMessage(world, new UnequipMessage(userId, equipmentType))
       case "dropitem" =>
         val slot = (rootJSON \ "slot").extract[Int]
         queue ! new AddInterpretedMessage(world, new DropItemMessage(userId, slot))

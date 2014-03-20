@@ -31,97 +31,13 @@ object AyaiDB extends Schema {
   val receiverToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.receiver_id)
   val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.account_id)
 
-  on(accounts)(a => declare(
-    a.username is(unique)
+  on(accounts)(account => declare(
+    account.username is(unique)
   ))
 
-  def registerUser(username: String, password: String) = {
-    getAccount(username) match {
-      //If an account is found then the username is taken.
-      case Some(account: Account) =>
-        false
-      case _ =>
-        Class.forName("org.h2.Driver");
-        SessionFactory.concreteFactory = Some (() =>
-            Session.create(
-            java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-            new H2Adapter))
-
-        transaction {
-          accounts.insert(new Account(username, BCrypt.hashpw(password, BCrypt.gensalt())))
-        }
-        getAccount(username) match {
-          case Some(account: Account) =>
-            true
-          case _ =>
-            throw(new Exception("Account creation failed!"))
-        }
-    }
-  }
-
-  def getAccount(username: String): Option[Account] = {
-    Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
-        Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
-
-    transaction {
-      val accountQuery = accounts.where(account => account.username === username)
-      if(accountQuery.size == 1)
-        Some(accountQuery.single)
-      else
-        None
-    }
-  }
-
-  def getCharacter(characterName: String): Option[CharacterRow] = {
-    Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
-        Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
-
-    transaction {
-      val characterQuery = characters.where(character => character.name === characterName)
-      if(characterQuery.size == 1)
-        Some(characterQuery.single)
-      else
-        None
-    }
-  }
-
-  def getCharacter(characterId: Long) = {
-    Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
-        Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
-
-    transaction {
-      val characterQuery = characters.where(character => character.id === characterId)
-      if(characterQuery.size == 1)
-        Some(characterQuery.single)
-      else
-        None
-    }
-  }
-
-  def createToken(account: Account): String = {
-    val token = java.util.UUID.randomUUID.toString
-
-    Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
-        Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
-
-    transaction {
-      tokens.insert(new Token(account.id, token))
-    }
-
-    return token
-  }
+  on(characters)(character => declare(
+    character.name is(unique)
+  ))
 
   def storePublicChat(chat: PublicChat) = {
     Class.forName("org.h2.Driver");
@@ -132,19 +48,6 @@ object AyaiDB extends Schema {
 
     transaction {
       chats.insert(new Chat(chat.text, chat.sender.id, None, true))
-    }
-  }
-
-  def validatePassword(username: String, password: String): String  = {
-    getAccount(username) match {
-      case Some(account: Account) =>
-        if(BCrypt.checkpw(password, account.password)) {
-          return createToken(account)
-        } else {
-          return ""
-        }
-      case _ =>
-        return ""
     }
   }
 }
