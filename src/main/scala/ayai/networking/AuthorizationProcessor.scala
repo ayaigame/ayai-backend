@@ -43,7 +43,7 @@ class AuthorizationProcessor extends Actor {
 
       var token: String = ""
 
-      token = AyaiDB.validatePassword(username, password)
+      token = AccountTable.validatePassword(username, password)
 
       token match {
       case "" =>
@@ -62,9 +62,9 @@ class AuthorizationProcessor extends Actor {
 
     val username = content.slice(0, delimiter).replaceAll("email=", "")
     val password = content.slice(delimiter + 1, content.length).replaceAll("password=", "")
-    if(AyaiDB.registerUser(username, password)) {
+    if(AccountTable.registerUser(username, password)) {
       var token: String = ""
-      token = AyaiDB.validatePassword(username, password)
+      token = AccountTable.validatePassword(username, password)
 
       token match {
         case "" =>
@@ -77,30 +77,32 @@ class AuthorizationProcessor extends Actor {
       request.response.write(HttpResponseStatus.CONFLICT)
 
   case CharactersPost(request: HttpRequestEvent) =>
-    val content:String = request.request.content.toString
-    var accountId: Long = -1
+    val token: String = request.request.content.toString
+    var accountId = AccountTable.getAccountIdFromToken(token)
 
-    transaction {
-      accountId = AyaiDB.tokens.where(token => token.token === content).single.account_id
-    }
-    CharacterTable.characterList(request, accountId)
+    if(accountId == -1)
+      request.response.write(HttpResponseStatus.UNAUTHORIZED)
+    else
+      CharacterTable.characterList(request, accountId)
 
   case ClassListGet(request: HttpRequestEvent) =>
     request.response.write(HttpResponseStatus.OK, compact(render(ClassFactory.asJson)))
 
   case CreateCharacterPost(request: HttpRequestEvent) =>
     val content:String = request.request.content.toString
-    var accountId: Long = -1
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
 
     val userToken = content.slice(0, delimiter).replaceAll("token=", "")
     val characterName = content.slice(delimiter + 1, delimiter2).replaceAll("name=", "")
     val className = content.slice(delimiter2 + 1, content.length).replaceAll("class=", "")
-    transaction {
-      accountId = AyaiDB.tokens.where(token => token.token === userToken).single.account_id
-    }
-    CharacterTable.createCharacter(request, characterName, className, accountId)
+
+    var accountId = AccountTable.getAccountIdFromToken(userToken)
+
+    if(accountId == -1)
+      request.response.write(HttpResponseStatus.UNAUTHORIZED)
+    else
+      CharacterTable.createCharacter(request, characterName, className, accountId)
 
   case RecoveryPost(request: HttpRequestEvent) =>
     println("RECOVERY")

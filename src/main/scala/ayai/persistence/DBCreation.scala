@@ -60,7 +60,7 @@ object DBCreation {
       AyaiDB.accounts.insert(tim)
     }
 
-    AyaiDB.getAccount("tim") match {
+    AccountTable.getAccount("tim") match {
       case Some(account: Account) =>
         transaction {
           AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))

@@ -164,7 +164,7 @@ object InventoryTable {
       entity.getComponent(classOf[Character]),
       entity.getComponent(classOf[Equipment])) match {
       case (Some(inventory: Inventory), Some(character: Character), Some(equipment: Equipment)) =>
-        AyaiDB.getCharacter(character.name) match {
+        CharacterTable.getCharacter(character.name) match {
           case Some(characterRow: CharacterRow) =>
             Class.forName("org.h2.Driver");
             SessionFactory.concreteFactory = Some (() =>
