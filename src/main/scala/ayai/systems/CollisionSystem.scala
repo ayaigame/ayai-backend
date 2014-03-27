@@ -119,5 +119,4 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
       }
     }
   }
-
 }

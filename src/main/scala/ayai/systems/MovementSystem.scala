@@ -29,7 +29,7 @@ object MovementSystem {
 }
 
 class MovementSystem extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity], classOf[Character], classOf[Actionable]),
-                                                    exclude=List(classOf[Transport], classOf[Respawn])) {
+                                                    exclude=List(classOf[Transport], classOf[Respawn], classOf[Dead])) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
   private val log = LoggerFactory.getLogger(getClass)
   //this will only move characters who have received a movement key and the current component is still set to True

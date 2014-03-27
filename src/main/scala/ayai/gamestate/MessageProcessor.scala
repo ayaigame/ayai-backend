@@ -105,8 +105,9 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           val character = initiator.getComponent(classOf[Character])
           val room = initiator.getComponent(classOf[Room])
           val cooldown = initiator.getComponent(classOf[Cooldown])
-          (position, movable, character, room, cooldown) match {
-            case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None) =>
+          val dead = initiator.getComponent(classOf[Dead])
+          (position, movable, character, room, cooldown, dead) match {
+            case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) =>
 
               val m = a.action match {
                 case (move: MoveDirection) => move
