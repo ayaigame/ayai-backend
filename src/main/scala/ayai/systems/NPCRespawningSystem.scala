@@ -6,7 +6,10 @@ import ayai.components._
 object NPCRespawningSystem {
   def apply() = new NPCRespawningSystem()
 }
-// this may be a system that is taken over by AI, but just need it for demo
+/**
+** Will respawn any npcs that need to be respawned and will kill any item that has been classfied as "Dead"
+** And needs to be removed from the world
+**/
 class NPCRespawningSystem() extends EntityProcessingSystem(include=List(classOf[Time], classOf[Dead], classOf[NPC])) {
 	// if npc is dead then respawn them
 	def processEntity(entity: Entity, deltaTime:Int) {

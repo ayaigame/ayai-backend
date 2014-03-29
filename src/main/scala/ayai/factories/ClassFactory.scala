@@ -56,6 +56,9 @@ object ClassFactory {
     }
   }
 
+  /**
+  ** Load all loaded classes into classMap actor
+  **/
   def bootup(networkSystem: ActorSystem) = {
     classes.foreach(classData => {
       var classComponent = new Class(
@@ -82,6 +85,9 @@ object ClassFactory {
         (c.asJson)})
   }
 
+  /**
+  ** Get all classes that are listed in classes.json
+  **/
   def getClassesList(path: String): List[AllClassValues] = {
     implicit val formats = net.liftweb.json.DefaultFormats
 

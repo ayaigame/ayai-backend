@@ -39,7 +39,10 @@ object NetworkingSystem {
   def apply(networkSystem: ActorSystem) = new NetworkingSystem(networkSystem)
 }
 
-
+/**
+** Get all entities which contain a NetworkingActor and write the update message to their connection
+** Run every 30 seconds
+**/
 class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) {
   private val log = LoggerFactory.getLogger(getClass)
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)

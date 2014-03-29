@@ -131,6 +131,9 @@ object EntityFactory {
     }
   }
 
+  /**
+  ** Create all NPCS given in npcs.json
+  **/
   def createNPC(world: World, faction: String, npcValue: AllNPCValues, questBuffer: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()): Entity = {
     val id = (new UID()).toString
     val p: Entity = world.createEntity(tag=id)
@@ -222,6 +225,9 @@ object EntityFactory {
   }
   case class JTilesets(image: String)
 
+  /**
+  ** Load a room from a json file (based of tmx file from tiled) and then put in room tilemap
+  **/
   def loadRoomFromJson(jsonFile: String): TileMap = {
     implicit val formats = net.liftweb.json.DefaultFormats
     val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
@@ -280,7 +286,9 @@ object EntityFactory {
     //entityRoom
   }
 
-
+  /**
+  ** Take an entity and take its inventory and create a loot entity
+  **/
   def characterToLoot(initiator: Entity, lootEntity: Entity) {
       lootEntity.components += new NPC(0)
       lootEntity.components += new Health(10000,10000)

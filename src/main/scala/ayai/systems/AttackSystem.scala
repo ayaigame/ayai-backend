@@ -13,6 +13,11 @@ object AttackSystem {
   def apply(actorSystem: ActorSystem) = new AttackSystem(actorSystem)
 }
 
+/**
+** The attack system will only process on Attack components
+** Will process all Attack components and will run damage functions on all attacked victims
+** Does not attack members of own faction
+**/
 class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Attack])) {
   def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[Attack]) match {
@@ -40,6 +45,9 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     
   }
 
+  /**
+  ** Return the amount of weapon damage the initator has
+  **/
   def getWeaponStat(entity: Entity): Int = {
     var playerBase: Int = 5
     var weaponValue: Int = 5
@@ -72,6 +80,9 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     victim.currentHealth -= damage
   }
 
+  /**
+  ** Return armor value of an entity
+  **/
   def getArmorStat(entity: Entity) : Int = {
     var playerBase : Int = 0
     var armorValue : Int = 0
@@ -87,6 +98,9 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     armorValue + playerBase
   }
 
+  /**
+  ** Calculate damage from an initiator to a victim
+  **/
   def getDamage(initiator: Entity, victim: Entity) {
     // calculate the attack
     var damage : Int = getWeaponStat(initiator)
@@ -122,6 +136,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
 
     }
 
+    // attack message to be sent to all players to notify of attacked
     val att = ("type" -> "attack") ~
       ("damage" -> damage) ~
       ("initiator" -> initiatorId) ~

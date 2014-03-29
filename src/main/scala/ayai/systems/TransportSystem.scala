@@ -28,8 +28,14 @@ object TransportSystem {
   def apply(actorSystem: ActorSystem) = new TransportSystem(actorSystem)
 }
 
-class TransportSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Position], classOf[NetworkingActor]),
-                                                    exclude=List(classOf[Transport], classOf[Respawn])) {
+/**
+** Take an entity with a Position and NetworkingActor
+** Swap world of entity to designated room and send information to network actor
+**/
+class TransportSystem(actorSystem: ActorSystem) 
+extends EntityProcessingSystem(include=List(classOf[Position], 
+                                            classOf[NetworkingActor]),
+                               exclude=List(classOf[Respawn])) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
   private val log = LoggerFactory.getLogger(getClass)
   //this will only move characters who have received a movement key and the current component is still set to True
