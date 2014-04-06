@@ -15,8 +15,9 @@ class NPCRespawningSystem() extends EntityProcessingSystem(include=List(classOf[
 	def processEntity(entity: Entity, deltaTime:Int) {
 		val isRespawnable = entity.getComponent(classOf[Respawnable]) match {
 			case Some(r: Respawnable) => true
-			case _ => false
+			case _ => 
 			entity.kill
+			false
 		}
 		
 		entity.getComponent(classOf[Time]) match {

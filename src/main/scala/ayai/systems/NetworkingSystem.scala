@@ -64,12 +64,11 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
       //This is how we get character specific info, once we actually integrate this in.
       val future = serializer ? GetRoomJson(characterEntity)
       val result = Await.result(future, timeout.duration).asInstanceOf[String]
-      val actorSelection = characterEntity.getComponent(classOf[NetworkingActor]) match {
-            case Some(na : NetworkingActor) => na
-            case _ => null
+      characterEntity.getComponent(classOf[NetworkingActor]) match {
+            case Some(na : NetworkingActor) => 
+              na.actor ! new ConnectionWrite(result)
+            case _ => 
       }
-      // println(result)
-      actorSelection.actor ! new ConnectionWrite(result)
     }
     serializer ! Refresh
   }
