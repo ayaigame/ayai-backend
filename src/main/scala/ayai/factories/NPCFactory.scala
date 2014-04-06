@@ -16,11 +16,13 @@ import akka.util.Timeout
 import scala.concurrent.{Await, ExecutionContext, Promise}
 import scala.concurrent.duration._
 import ayai.apps._ 
+
 case class AllNPCValues(
       id: Int,
       name: String,
       roomId: Int,
       level: Int,
+      experience: Long,
       maximumHealth: Int,
       xposition: Int,
       yposition: Int,

@@ -96,17 +96,16 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //create a projectile
 
         val bulletId = (new UID()).toString
-       
+
         (world.getEntityByTag(s"$userId")) match {
 
         case Some(initiator: Entity) =>
-          val position = initiator.getComponent(classOf[Position])
-          val movable = initiator.getComponent(classOf[Actionable])
-          val character = initiator.getComponent(classOf[Character])
-          val room = initiator.getComponent(classOf[Room])
-          val cooldown = initiator.getComponent(classOf[Cooldown])
-          val dead = initiator.getComponent(classOf[Dead])
-          (position, movable, character, room, cooldown, dead) match {
+          (initiator.getComponent(classOf[Position]),
+          initiator.getComponent(classOf[Actionable]),
+          initiator.getComponent(classOf[Character]),
+          initiator.getComponent(classOf[Room]),
+          initiator.getComponent(classOf[Cooldown]),
+          initiator.getComponent(classOf[Dead])) match {
             case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) =>
 
               val m = a.action match {

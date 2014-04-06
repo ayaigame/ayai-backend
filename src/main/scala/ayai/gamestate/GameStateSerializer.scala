@@ -44,7 +44,8 @@ class GameStateSerializer(world: World) extends Actor {
   def getRoom(e: Entity) = {
     if(!valid) {
       var entities = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
-                                                      classOf[Health], classOf[Mana], classOf[SpriteSheet]),
+                                                      classOf[Health], classOf[Mana], classOf[SpriteSheet]
+                                                      , classOf[Experience]),
                                                      exclude=List(classOf[NPC], classOf[Dead]))
         val jsonLift: JObject =
             ("players" -> entities.map{ e =>
@@ -53,15 +54,18 @@ class GameStateSerializer(world: World) extends Actor {
                e.getComponent(classOf[Health]),
                e.getComponent(classOf[Mana]),
                e.getComponent(classOf[Actionable]),
-               e.getComponent(classOf[SpriteSheet])) match {
+               e.getComponent(classOf[SpriteSheet]),
+               e.getComponent(classOf[Experience])) match {
                  case (Some(character: Character), Some(position: Position), Some(health: Health),
-                       Some(mana: Mana), Some(actionable: Actionable), Some(spritesheet: SpriteSheet)) =>
+                       Some(mana: Mana), Some(actionable: Actionable), Some(spritesheet: SpriteSheet),
+                       Some(experience: Experience)) =>
                    ((character.asJson) ~
                    (position.asJson) ~
                    (health.asJson) ~
                    (mana.asJson) ~
                    (actionable.action.asJson) ~
-                   (spritesheet.asJson))
+                   (spritesheet.asJson) ~
+                   (experience.asJson))
                  case _ =>
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing

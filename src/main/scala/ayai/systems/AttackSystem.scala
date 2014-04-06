@@ -124,6 +124,15 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     if(healthComponent.currentHealth <= 0) {
       victim.components += new Time(20000, System.currentTimeMillis())
       victim.components += new Dead()
+      // get experience and add that to the initiators experience
+      (initiator.getComponent(classOf[Experience]), 
+        victim.getComponent(classOf[Experience]),
+        victim.getComponent(classOf[Character])) match {
+        case (Some(initiatorExperience: Experience), Some(victimExperience: Experience), None) => 
+          initiatorExperience.baseExperience += victimExperience.baseExperience
+        case _ =>
+      }
+      
       println("Victim is dead")
       val id = (new UID()).toString
       val loot:Entity = world.createEntity(tag=id)

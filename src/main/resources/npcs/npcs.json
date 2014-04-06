@@ -8,6 +8,7 @@
 			"maximumHealth": 200,
 			"xposition": 100,
 			"yposition": 100,
+			"experience": 1000,
 			"quests": [{
 				"questId": 1
 			}],
@@ -25,6 +26,7 @@
 			"roomId": 1,
 			"level": 20,
 			"maximumHealth": 500,
+			"experience": 2000
 			"xposition": 100,
 			"yposition": 100,
 			"quests": [{

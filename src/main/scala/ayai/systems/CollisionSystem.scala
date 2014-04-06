@@ -48,7 +48,7 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
       entityB.getComponent(classOf[Attack]),
       entityA.getComponent(classOf[Health]),
       entityB.getComponent(classOf[Health])) match {
-      case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>
+      case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>        
           if(attackComponentA.initiator != entityB) {
             attackComponentA.addVictim(entityB)
           }
