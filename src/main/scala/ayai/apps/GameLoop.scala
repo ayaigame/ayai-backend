@@ -23,7 +23,10 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 
 import org.slf4j.{Logger, LoggerFactory}
 
-
+/**
+** The main loop of the Ayai Game 
+** First loads all needed Actors, creates needed worlds, and runs the game loop
+**/
 object GameLoop {
   private val log = LoggerFactory.getLogger(getClass)
 

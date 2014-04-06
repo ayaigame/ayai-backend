@@ -10,8 +10,13 @@ object HealthSystem {
   def apply() = new HealthSystem()
 }
 
-class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health], classOf[Character])
-  , exclude=List(classOf[Respawn])) {
+/**
+** For all entities that contain health and character, but are not in respawn
+** If the currenthealth of the character is at or below zero then classify them as dead and respawn them
+** NPCRespawningSystem will take care of removing all entities that are not needed 
+**/
+class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health], classOf[Character]), 
+                                                    exclude=List(classOf[Respawn])) {
   override def processEntity(e: Entity, deltaTime: Int) {
     val character = (e.getComponent(classOf[Character]): @unchecked) match {
       case(Some(c: Character)) => c
@@ -23,6 +28,7 @@ class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health]
 
     if(health.currentHealth <= 0) {
       //attach respawn to entity
+      e.components += new Dead()
       e.components += new Respawn(1500, System.currentTimeMillis())
     }
   }

@@ -51,7 +51,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
   def processMessage(message: Message) {
     message match {
-      //Should take characterId: Long as a parameter instead of characterName
+      //Should  take characterId: Long as a parameter instead of characterName
       //However can't do that until front end actually gives me the characterId
       case AddNewCharacter(id: String, characterName: String, x: Int, y: Int) => {
         val actor = actorSystem.actorSelection(s"user/SockoSender$id")
@@ -105,8 +105,9 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           val character = initiator.getComponent(classOf[Character])
           val room = initiator.getComponent(classOf[Room])
           val cooldown = initiator.getComponent(classOf[Cooldown])
-          (position, movable, character, room, cooldown) match {
-            case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None) =>
+          val dead = initiator.getComponent(classOf[Dead])
+          (position, movable, character, room, cooldown, dead) match {
+            case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) =>
 
               val m = a.action match {
                 case (move: MoveDirection) => move

@@ -10,6 +10,9 @@ object WorldFactory {
 }
 
 class WorldFactory(networkSystem: ActorSystem) {
+  /**
+  ** Create a world and instantiate all needed systems and create message processors
+  **/
   def createWorld(name: String, file: String): RoomWorld = {
     val tileMap = EntityFactory.loadRoomFromJson(s"$file.json")
     var world: RoomWorld = RoomWorld(name, tileMap)

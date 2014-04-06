@@ -9,6 +9,10 @@ import crane.{Component, Entity}
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
 
+
+/**
+** QuadTree Implementation
+**/
 class QuadTree(var level: Int, var bounds: Rectangle) {
   private val MAX_OBJECTS: Int = 10 
   private val MAX_LEVELS: Int = 8
@@ -26,7 +30,7 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
   }
 
 
-  // Splits node into 4 subnodes
+  // Splits node into 4 subnodes (create 4 leaves on current node)
   private def split() {
     val subWidth: Int = bounds.width / 2
     val subHeight: Int = bounds.height / 2
@@ -40,6 +44,9 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
 
   }
 
+  /**
+  ** Return the index (the area/ quad section) of the given entity
+  **/
   private def getIndex(e: Entity): Int = {
     var index : Int = -1
     (e.getComponent(classOf[Position]), e.getComponent(classOf[Bounds])) match {

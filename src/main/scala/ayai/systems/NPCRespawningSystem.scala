@@ -6,14 +6,22 @@ import ayai.components._
 object NPCRespawningSystem {
   def apply() = new NPCRespawningSystem()
 }
-// this may be a system that is taken over by AI, but just need it for demo
-class NPCRespawningSystem() extends EntityProcessingSystem(include=List(classOf[Time], classOf[Dead], classOf[Respawnable])) {
+/**
+** Will respawn any npcs that need to be respawned and will kill any item that has been classfied as "Dead"
+** And needs to be removed from the world
+**/
+class NPCRespawningSystem() extends EntityProcessingSystem(include=List(classOf[Time], classOf[Dead], classOf[NPC])) {
 	// if npc is dead then respawn them
 	def processEntity(entity: Entity, deltaTime:Int) {
-		println("TIME")
+		val isRespawnable = entity.getComponent(classOf[Respawnable]) match {
+			case Some(r: Respawnable) => true
+			case _ => false
+			entity.kill
+		}
+		
 		entity.getComponent(classOf[Time]) match {
 			case Some(time: Time) =>
-				println("CurrentTime: " + System.currentTimeMillis + " StartedTime: " + time.startTime + " MSActive: " + time.msActive)
+				// println("CurrentTime: " + System.currentTimeMillis + " StartedTime: " + time.startTime + " MSActive: " + time.msActive)
 				if(time.isReady(System.currentTimeMillis)) {
 					entity.removeComponent(classOf[Dead])
 					entity.removeComponent(classOf[Time])

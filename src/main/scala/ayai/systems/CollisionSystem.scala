@@ -31,11 +31,18 @@ object CollisionSystem {
   def apply(actorSystem: ActorSystem) = new CollisionSystem(actorSystem)
 }
 
+/**
+** Collision system puts all entities into a quadtree and processes only ones within a given quadrant
+**/
 class CollisionSystem(actorSystem: ActorSystem) extends System {
   private val log = LoggerFactory.getLogger(getClass)
 
   def valueInRange(value: Int, min: Int, max: Int): Boolean = (value >= min) && (value <= max)
 
+  /**
+  ** If one entity contains an attack component (is an attack) and the other contains a health component (thus can be killed)
+  ** Then add that victim to the attacks victim array
+  **/
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
     (entityA.getComponent(classOf[Attack]),
       entityB.getComponent(classOf[Attack]),
@@ -101,6 +108,7 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
 
 
   override def process(delta: Int) {
+    // get all entities that are not dead or in respawn, but do have a position and bounds
     var entities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds]),
                                                    exclude=List(classOf[Respawn], classOf[Transport], classOf[Dead]))
     var tileMap = world.asInstanceOf[RoomWorld].tileMap
@@ -119,5 +127,4 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
       }
     }
   }
-
 }

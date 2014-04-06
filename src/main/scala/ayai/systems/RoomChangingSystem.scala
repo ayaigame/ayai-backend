@@ -23,6 +23,10 @@ object RoomChangingSystem {
   def apply(networkSystem: ActorSystem) = new RoomChangingSystem(networkSystem)
 }
 
+/**
+** If an entity has a transport component on them, then move them to designated world 
+** (Add errors if world does not exist) 
+**/
 class RoomChangingSystem(networkSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Actionable], classOf[Transport], classOf[Position])) {
   private val log = LoggerFactory.getLogger(getClass)
   val userRoomMap = networkSystem.actorSelection("user/UserRoomMap")

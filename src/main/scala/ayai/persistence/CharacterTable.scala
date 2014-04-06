@@ -1,6 +1,6 @@
 package ayai.persistence
 
-import ayai.components.{Character, Position, Room}
+import ayai.components.{Character, Position, Room, Experience}
 import ayai.apps.Constants
 
 import scala.collection.mutable.ArrayBuffer
@@ -47,7 +47,7 @@ object CharacterTable {
             new H2Adapter))
 
         transaction {
-          AyaiDB.characters.insert(new CharacterRow(characterName, className, 0, accountId, startingRoom, startingX, startingY))
+          AyaiDB.characters.insert(new CharacterRow(characterName, className, 1, 0, accountId, startingRoom, startingX, startingY))
           val characterQuery =
             from(AyaiDB.characters)(row =>
               where(row.name === characterName)
@@ -99,8 +99,9 @@ object CharacterTable {
   def saveCharacter(entity: Entity) = {
   (entity.getComponent(classOf[Position]),
     entity.getComponent(classOf[Character]),
-    entity.getComponent(classOf[Room])) match {
-      case(Some(position : Position), Some(character : Character), Some(room : Room)) =>
+    entity.getComponent(classOf[Room]),
+    entity.getComponent(classOf[Experience])) match {
+      case(Some(position : Position), Some(character : Character), Some(room : Room), Some(experience: Experience)) =>
         Class.forName("org.h2.Driver");
         SessionFactory.concreteFactory = Some (() =>
             Session.create(
@@ -110,7 +111,8 @@ object CharacterTable {
         transaction {
           update(AyaiDB.characters)(dbCharacter =>
             where(dbCharacter.name === character.name)
-            set(dbCharacter.experience := character.experience,
+            set(dbCharacter.experience := experience.baseExperience,
+                dbCharacter.level := experience.level,
                 dbCharacter.pos_x := position.x,
                 dbCharacter.pos_y := position.y,
                 dbCharacter.room_id := room.id))
@@ -138,7 +140,7 @@ object CharacterTable {
       for(character <- characters) {
         characterArray +=
           ("name" -> character.name) ~
-          ("level" -> Constants.EXPERIENCE_ARRAY.indexWhere((exp: Int) => character.experience < exp)) ~
+          ("level" -> character.level) ~
           ("class" -> character.className)
       }
 

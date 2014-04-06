@@ -12,6 +12,9 @@ object StatusEffectSystem {
   def apply(actorSystem: ActorSystem) = new StatusEffectSystem(actorSystem)
 }
 
+/**
+** Take status effects on character and apply them to designated areas
+**/
 class StatusEffectSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
                           include=List(classOf[StatusEffectBag]),
                                                     exclude=List()) {

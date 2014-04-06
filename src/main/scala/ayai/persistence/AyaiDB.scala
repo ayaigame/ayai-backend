@@ -82,13 +82,14 @@ case class Chat(
 case class CharacterRow (
             val name: String,
             val className: String,
+            val level: Int,
             val experience: Long,
             val account_id: Long,
             val room_id: Long,
             val pos_x: Int,
             val pos_y: Int)
           extends AccountDb2Object {
-            def this() = this("", "", 0, 0, 1, 0, 0)
+            def this() = this("", "", 1, 0, 0, 1, 0, 0)
 }
 
 case class InventoryRow (

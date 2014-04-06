@@ -28,8 +28,14 @@ object MovementSystem {
   def apply() = new MovementSystem()
 }
 
+/**
+** Entities must have Position, Velocity, Actionable and Character Components
+** But will exclude any that contain Transport, Respawn, or Dead components
+** Check if characters action is active, if so then process the action
+** Then check current position on tilemap and relocate if colliding 
+**/
 class MovementSystem extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity], classOf[Character], classOf[Actionable]),
-                                                    exclude=List(classOf[Transport], classOf[Respawn])) {
+                                                    exclude=List(classOf[Transport], classOf[Respawn], classOf[Dead])) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
   private val log = LoggerFactory.getLogger(getClass)
   //this will only move characters who have received a movement key and the current component is still set to True
@@ -51,8 +57,6 @@ class MovementSystem extends EntityProcessingSystem(include=List(classOf[Positio
         }
       }
 
-      //now check to see if movement has created gone past the map (if so put it at edge)
-      val roomEntity: Entity = new Entity
       //will update position in function
       val tileMap: TileMap = world.asInstanceOf[RoomWorld].tileMap
       tileMap.isPositionInBounds(position)
