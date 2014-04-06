@@ -63,10 +63,10 @@ object EntityFactory {
         p.components += new Health(100,100)
         p.components += new NetworkingActor(actor)
         p.components += new Mana(200,200)
+        p.components += new Experience(characterRow.experience, characterRow.level)
         p.components += new Room(characterRow.room_id)
-        p.components += new Character(entityId, characterRow.name, characterRow.experience)
+        p.components += new Character(entityId, characterRow.name)
         p.components += new Faction("allies")
-
         val questbag = new QuestBag()
         val questSelection = networkSystem.actorSelection("user/QuestMap")
         // var future = questSelection ? GetQuest("QUEST1")
@@ -90,7 +90,7 @@ object EntityFactory {
         val equipment = new Equipment()
 
         InventoryTable.getEquipment(p) foreach {
-          case (slot: String, itemId: Long) =>
+        case (slot: String, itemId: Long) =>
             var future = itemSelection ? GetItem("ITEM" + itemId)
             equipment.equipItem(Await.result(future, timeout.duration).asInstanceOf[Item], slot)
         }
@@ -149,7 +149,7 @@ object EntityFactory {
     p.components += new NPC(0)
     p.components += new Respawnable()
     p.components += new Room(npcValue.roomId)
-    p.components += new Character(id, npcValue.name, 0)
+    p.components += new Character(id, npcValue.name)
     p.components += new Faction("axis")
     p
   }
@@ -178,7 +178,7 @@ object EntityFactory {
     animations += new Animation("attackup", 30, 33)
     entity.components += new SpriteSheet("guy", animations, 32 ,32)
     entity.components += new Mana(200, 200)
-    entity.components += new Character(name, name, 0)
+    entity.components += new Character(name, name)
     entity.components += new Goal
     entity.components += new NPC(0)
     entity.components += new Faction(faction)

@@ -9,7 +9,7 @@ object WorldFactory {
   def apply(networkSystem: ActorSystem) = new WorldFactory(networkSystem)
 }
 
-class WorldFactory(networkSystem: ActorSystem)   
+class WorldFactory(networkSystem: ActorSystem) {
   /**
   ** Create a world and instantiate all needed systems and create message processors
   **/

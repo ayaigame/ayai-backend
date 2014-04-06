@@ -13,7 +13,6 @@ object NPCRespawningSystem {
 class NPCRespawningSystem() extends EntityProcessingSystem(include=List(classOf[Time], classOf[Dead], classOf[NPC])) {
 	// if npc is dead then respawn them
 	def processEntity(entity: Entity, deltaTime:Int) {
-		println("TIME")
 		val isRespawnable = entity.getComponent(classOf[Respawnable]) match {
 			case Some(r: Respawnable) => true
 			case _ => false
