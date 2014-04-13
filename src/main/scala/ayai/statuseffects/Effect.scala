@@ -7,33 +7,45 @@ import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-case class Effect(effectType: EffectType, value: Double, attribute: Attribute, additive: Additive) {
-	
-	var effectiveValue: Double = 0
-	var imageLocaton: String = ""
+// isRelative means that the effect should take the place of the existing value of the stat/health
+// isValueRelative means that the effect should use the stats value with the multiplier
+case class Effect(val name: String, val description: String, 
+          val effectType: String, private val value: Int, 
+          val attribute: TimeAttribute, val multiplier: Multiplier,
+          val isRelative: Boolean = true, val isValueRelative: Boolean = false ) {
+  
+  var effectiveValue: Int = 0
+  var imageLocation: String = ""
 
-	// first get the value and use it with the additive
-	def initialize() {
-		effectiveValue = additive.process(value)
-	}
+  // first get the value and use it with the additive
+  def initialize() {
+    effectiveValue = multiplier.process(value)
+  }
 
-	def process(entity: Entity) {
-		effectType.process(entity, effectiveValue, attribute)
-	}
+  def process(entity: Entity, effectValue: Int = 0): Int = {
+    updateValue(value)
+    if(isValid) {
+      if(isValueRelative) {
+        updateValue(effectValue)
+      } else {
+        effectiveValue
+      }
+    }
+  }
 
-	def updateValue(value: Double) {
-		effectiveValue = additive.process(value)
-	}
+  def updateValue(value: Int) {
+    effectiveValue = multiplier.process(value)
+  }
 
-	def isValid(): Boolean = {
-		attribute.isValid
-	}
+  def isValid(): Boolean = {
+    attribute.isValid
+  }
 
-	def asJson(): JObject = {
-		("effect" ->
-			(effectType.asJson()) ~
-			("effectiveValue" -> effectiveValue) ~
-			(attribute.asJson()) ~
-			("image" -> image))
-	}
+  def asJson(): JObject = {
+    ("effect" ->
+      "effecttype" -> effectType) ~
+      ("effectiveValue" -> effectiveValue) ~
+      (attribute.asJson()) ~
+      ("image" -> imageLocation))
+  }
 }

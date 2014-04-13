@@ -6,7 +6,8 @@ import ayai.apps.Constants
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-case class Experience(var baseExperience: Long, var level: Int) extends Component {
+case class Experience(var baseExperience: Long, var level: Int, 
+                      var modifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]) extends Component {
   def levelUp(experienceThreshold: Long): Boolean = {
     if(baseExperience >= experienceThreshold) {
       level += 1

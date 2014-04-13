@@ -1,6 +1,6 @@
 package ayai.statuseffects
 
-case class Additive(multiplier: Double) {
+case class Multiplier(multiplier: Double) {
 
 	/**
 	Examples - if you want to add %5 of something do value(1) * .05
