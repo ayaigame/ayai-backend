@@ -3,6 +3,7 @@ package ayai.systems
 import crane.{Component, World, Entity, EntityProcessingSystem}
 import akka.actor.{Actor,ActorSystem,  ActorRef, Props, OneForOneStrategy}
 import ayai.components._
+import ayai.statuseffects
 import akka.util.Timeout
 import akka.pattern.ask
 import scala.concurrent.duration._
@@ -24,7 +25,11 @@ class StatusEffectSystem(actorSystem: ActorSystem) extends EntityProcessingSyste
     e.getComponent(classOf[StatusEffectBag]) match {
       case (Some(statusBag: StatusEffectBag)) => 
         for(status <- statusBag.statusEffects) {
-          status.process(e)
+          if(status.isValid()) {
+            status.process(e)
+          } else {
+            statusBag.removeStatusEffect(status)
+          } 
         }
       case _ =>
     }    

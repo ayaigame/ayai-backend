@@ -25,6 +25,10 @@ case class Effect(effectType: EffectType, value: Double, attribute: Attribute, a
 		effectiveValue = additive.process(value)
 	}
 
+	def isValid(): Boolean = {
+		attribute.isValid
+	}
+
 	def asJson(): JObject = {
 		("effect" ->
 			(effectType.asJson()) ~

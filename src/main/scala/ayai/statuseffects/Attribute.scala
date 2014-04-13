@@ -11,6 +11,7 @@ abstract class Attribute(val name: String, val description: String) {
 	def asJson(): JObject
 	def isReady(): Boolean
 	def initialize()
+	def isValid(): Boolean
 }
 
 case class OneOff() extends Attribute("", "") {
@@ -29,6 +30,14 @@ case class OneOff() extends Attribute("", "") {
 	}
 
 	def isReady(): Boolean = {
+		if(timesUsed >= 1) {
+			false
+		} else {
+			true
+		}
+	}
+
+	def isValid(): Boolean = {
 		if(timesUsed >= 1) {
 			false
 		} else {
@@ -87,5 +96,12 @@ case class TimedInterval(val name: String,
 	def getTimeLeft(): Long = {
 		currentTime = System.currentTimeMillis
 		return maxTime - currentTime
+	}
+	def isValid(): Boolean = {
+		if(timesProcessed == (maxTime / interval) {
+			true
+		} else {
+			false
+		}
 	}
 }

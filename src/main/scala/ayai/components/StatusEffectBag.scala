@@ -7,11 +7,11 @@ import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 case class StatusEffectBag(val statusEffects: ArrayBuffer[Effect] = new ArrayBuffer[Effect]()) extends Component {
-	def removeStatusEffect(statusEffect: StatusEffect) {
+	def removeStatusEffect(statusEffect: Effect) {
 		statusEffects -= statusEffect
 	}
 
-	def addStatus(statusEffect: StatusEffect) {
+	def addStatus(statusEffect: Effect) {
 		statusEffects += statusEffect
 	}
 
