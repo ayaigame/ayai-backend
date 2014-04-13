@@ -1,9 +1,12 @@
 package ayai.components
 
 import crane.Component
-import ayai.gamestate.{StatusEffect, EffectType}
+import ayai.statuseffects._
+/** External Imports **/
 import scala.collection.mutable._
-case class StatusEffectBag(val statusEffects: ArrayBuffer[StatusEffect] = new ArrayBuffer[StatusEffect]()) extends Component {
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
+case class StatusEffectBag(val statusEffects: ArrayBuffer[Effect] = new ArrayBuffer[Effect]()) extends Component {
 	def removeStatusEffect(statusEffect: StatusEffect) {
 		statusEffects -= statusEffect
 	}
@@ -12,5 +15,8 @@ case class StatusEffectBag(val statusEffects: ArrayBuffer[StatusEffect] = new Ar
 		statusEffects += statusEffect
 	}
 
-	
+
+	def asJson(): JObject = {
+		("statuseffects" -> statusEffects.map{se => se.asJson})
+	}
 }
