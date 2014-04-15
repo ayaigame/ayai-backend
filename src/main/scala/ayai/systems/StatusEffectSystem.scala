@@ -10,28 +10,45 @@ import scala.concurrent.duration._
 import ayai.apps._
 
 object StatusEffectSystem {
-  def apply(actorSystem: ActorSystem) = new StatusEffectSystem(actorSystem)
+  def apply() = new StatusEffectSystem()
 }
 
 /**
 ** Take status effects on character and apply them to designated areas
 **/
 class StatusEffectSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
-                          include=List(classOf[StatusEffectBag]),
+                          include=List(classOf[Character]),
                                                     exclude=List()) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
   def processEntity(e: Entity, deltaTime: Int) {
-    e.getComponent(classOf[StatusEffectBag]) match {
-      case (Some(statusBag: StatusEffectBag)) => 
-        for(status <- statusBag.statusEffects) {
-          if(status.isValid()) {
-            status.process(e)
-          } else {
-            statusBag.removeStatusEffect(status)
-          } 
-        }
+
+    e.getComponent(classOf[Health]) match {
+      case Some(health: Health) =>
+        health.updateCachedValue() 
       case _ =>
-    }    
+    }
+    e.getComponent(classOf[Mana]) match {
+      case Some(mana: Mana) =>
+        mana.updateCachedValue() 
+      case _ =>
+    }
+    e.getComponent(classOf[Experience]) match {
+      case Some(experience: Experience) =>
+        experience.updateCachedValue() 
+      case _ =>
+    }
+    e.getComponent(classOf[Stats]) match {
+      case Some(stats: Stats) =>
+        stats.updateCachedValue() 
+      case _ =>
+    }
+    e.getComponent(classOf[Velocity]) match {
+      case Some(velocity: Velocity) =>
+        velocity.updateCachedValue() 
+      case _ =>
+    }
+    
+    
   }
 }

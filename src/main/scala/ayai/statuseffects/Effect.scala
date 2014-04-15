@@ -22,15 +22,16 @@ case class Effect(val name: String, val description: String,
     effectiveValue = multiplier.process(value)
   }
 
-  def process(entity: Entity, effectValue: Int = 0): Int = {
+  def process(effectValue: Int = 0): Int = {
     updateValue(value)
-    if(isValid) {
+    if(attribute.isReady) {
       if(isValueRelative) {
         updateValue(effectValue)
       } else {
         effectiveValue
       }
-    }
+    } 
+    0
   }
 
   def updateValue(value: Int) {
@@ -43,7 +44,7 @@ case class Effect(val name: String, val description: String,
 
   def asJson(): JObject = {
     ("effect" ->
-      "effecttype" -> effectType) ~
+      ("effecttype" -> effectType) ~
       ("effectiveValue" -> effectiveValue) ~
       (attribute.asJson()) ~
       ("image" -> imageLocation))

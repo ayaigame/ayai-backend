@@ -7,11 +7,12 @@ import ayai.statuseffects._
 import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
+import scala.collection.mutable.{ArrayBuffer, HashMap}
 
 // Added tempValues so we can remove any effects from a  given stat
-case class Stat(attributeType: String, magnitude: Int, 
-                modifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]) {
+case class Stat(attributeType: String, magnitude: Int) {
   var cachedValue: Int = 0
+  var modifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
   def asJson: JObject = {
     (attributeType -> magnitude)
   }
@@ -39,6 +40,7 @@ case class Stat(attributeType: String, magnitude: Int,
       if(isAbsolute && absoluteValue != effect) {
         if(effect.isRelative && !effect.isValueRelative) {
           cachedValue = cachedValue + effect.effectiveValue
+        }
       } 
       else if(!isAbsolute) {
         if(effect.isRelative && !effect.isValueRelative) {
@@ -50,6 +52,7 @@ case class Stat(attributeType: String, magnitude: Int,
       if(isAbsolute && absoluteValue != effect) {
         if(effect.isRelative && effect.isValueRelative) {
           cachedValue = cachedValue + effect.process(cachedValue)
+        }
       } 
       else if(!isAbsolute) {
         if(effect.isRelative && effect.isValueRelative) {
@@ -60,7 +63,7 @@ case class Stat(attributeType: String, magnitude: Int,
     return cachedValue
   }
 
-  def getValue() {
+  def getValue(): Int = {
     cachedValue
   }
 }
@@ -88,6 +91,21 @@ class Stats(val stats: ArrayBuffer[Stat]) extends Component {
       }
     }
     return new Stat("", 0)
+  }
+
+  def getValueByAttribute(attributeType: String): Int = {
+    for(stat <- stats) {
+      if(stat.attributeType == attributeType) {
+        return stat.getValue()
+      }
+    }
+    return 0    
+  }
+
+  def updateCachedValue() {
+    for(stat <- stats) {
+      stat.updateCachedValue
+    }
   }
 
   override def toString = {

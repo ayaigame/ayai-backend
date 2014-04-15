@@ -2,6 +2,8 @@ package ayai.components
 
 /** Crane Imports **/
 import crane.Component
+import scala.collection.mutable.{ArrayBuffer, HashMap}
+import ayai.statuseffects._
 
 /** External Imports **/
 import net.liftweb.json.Serialization.{read, write}
@@ -10,9 +12,10 @@ import net.liftweb.json.JsonDSL._
 
 case class Health(var currentHealth: Int, var maximumHealth: Int) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
-  var modifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
-  var cachedCurrentHealth: Int = currentHealth
-  var cachedMaximumHealth: Int = maximumHealth  
+  var currentModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
+  var maxModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
+  var currentCached: Int = currentHealth
+  var maxCached: Int = maximumHealth  
   def isAlive: Boolean = currentHealth > 0
 
   def addDamage(damage: Float) {
@@ -36,51 +39,102 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
   /*
     Will first check if to process the effect again, and if invalid then remove the effect
   */
+
   def updateCachedValue() {
-    var isCurrentAbsolute: Boolean = false 
-    var currentAbsoluteValue: Effect = null
-    var isMaxAbsolute: Boolean = false 
-    var maxAbsoluteValue: Effect = null
+    updateCurrentValue()
+    updateMaxValue()
+  }
 
-    for(effect <- modifiers) {
+  def updateMaxValue() {
+    var isAbsolute: Boolean = false 
+    var absoluteValue: Effect = null
+    maxCached = maximumHealth
+
+    for(effect <- maxModifiers) {
       if(!effect.isValid) {
-        modifiers -= effect
+        maxModifiers -= effect
       } else {
-
         if(!effect.isRelative) {
           isAbsolute = true
           absoluteValue = effect
-          cachedValue = effect.effectiveValue
+          maxCached = effect.effectiveValue
         }
       }
     }
 
-    for(effect <- modifiers) {
+    for(effect <- maxModifiers) {
       if(isAbsolute && absoluteValue != effect) {
         if(effect.isRelative && !effect.isValueRelative) {
-          cachedValue = cachedValue + effect.effectiveValue
+          maxCached = maxCached + effect.effectiveValue
+        }
       } 
       else if(!isAbsolute) {
         if(effect.isRelative && !effect.isValueRelative) {
-          cachedValue = cachedValue + effect.effectiveValue
+          maxCached = maxCached + effect.effectiveValue
         } 
       }
     }
-    for(effect <- modifiers) {
+    for(effect <- maxModifiers) {
       if(isAbsolute && absoluteValue != effect) {
         if(effect.isRelative && effect.isValueRelative) {
-          cachedValue = cachedValue + effect.process(cachedValue)
+          maxCached = maxCached + effect.process(maxCached)
+        }
       } 
       else if(!isAbsolute) {
         if(effect.isRelative && effect.isValueRelative) {
-          cachedValue = cachedValue + effect.process(cachedValue)
+          maxCached = maxCached + effect.process(maxCached)
         } 
       }
     }
-    return cachedValue
   }
 
-  def getValue() {
-    cachedValue
+  def updateCurrentValue() {
+    var isAbsolute: Boolean = false 
+    var absoluteValue: Effect = null
+    currentCached = currentHealth
+
+    for(effect <- currentModifiers) {
+      if(!effect.isValid) {
+        currentModifiers -= effect
+      } else {
+        if(!effect.isRelative) {
+          isAbsolute = true
+          absoluteValue = effect
+          currentCached = effect.effectiveValue
+        }
+      }
+    }
+
+    for(effect <- currentModifiers) {
+      if(isAbsolute && absoluteValue != effect) {
+        if(effect.isRelative && !effect.isValueRelative) {
+          currentCached = currentCached + effect.effectiveValue
+        }
+      } 
+      else if(!isAbsolute) {
+        if(effect.isRelative && !effect.isValueRelative) {
+          currentCached = currentCached + effect.effectiveValue
+        } 
+      }
+    }
+    for(effect <- currentModifiers) {
+      if(isAbsolute && absoluteValue != effect) {
+        if(effect.isRelative && effect.isValueRelative) {
+          currentCached = currentCached + effect.process(currentCached)
+        }
+      } 
+      else if(!isAbsolute) {
+        if(effect.isRelative && effect.isValueRelative) {
+          currentCached = currentCached + effect.process(currentCached)
+        } 
+      }
+    }
+  }
+
+  def getCurrentValue(): Int = {
+    currentCached
+  }
+  def getMaxValue(): Int = {
+    maxCached
   }
 }
