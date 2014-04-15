@@ -16,7 +16,7 @@ object StatusEffectSystem {
 /**
 ** Take status effects on character and apply them to designated areas
 **/
-class StatusEffectSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
+class StatusEffectSystem() extends EntityProcessingSystem(
                           include=List(classOf[Character]),
                                                     exclude=List()) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)

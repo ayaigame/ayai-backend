@@ -55,4 +55,13 @@ class Velocity (var x: Int, var y: Int) extends Component {
   def getValue(): Int = {
     cachedValue
   }
+
+  def addEffect(effect: Effect) {
+    effect.effectType match {
+      case "velocity" => modifiers += effect
+      case _ => 
+        /// print error 
+    }
+    
+  }
 }

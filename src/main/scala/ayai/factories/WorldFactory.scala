@@ -23,6 +23,7 @@ class WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(RespawningSystem())
     world.addSystem(FrameExpirationSystem())
     world.addSystem(StatusEffectSystem())
+    world.addSystem(ItemSystem())
     world.addSystem(LevelingSystem(networkSystem))
     world.addSystem(DirectorSystem())
     world.addSystem(NPCRespawningSystem())

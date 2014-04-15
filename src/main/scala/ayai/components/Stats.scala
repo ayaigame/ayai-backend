@@ -63,6 +63,14 @@ case class Stat(attributeType: String, magnitude: Int) {
     return cachedValue
   }
 
+  def addEffect(effect: Effect) {
+    modifiers += effect
+  }
+
+  def removeEffect(effect: Effect) {
+    modifiers -= effect
+  }
+
   def getValue(): Int = {
     cachedValue
   }
@@ -100,6 +108,11 @@ class Stats(val stats: ArrayBuffer[Stat]) extends Component {
       }
     }
     return 0    
+  }
+
+  def addEffect(effect: Effect) {
+    val stat: Stat = getAttributeByType(effect.effectType)
+    stat.addEffect(effect)
   }
 
   def updateCachedValue() {

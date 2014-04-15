@@ -137,4 +137,13 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
   def getMaxValue(): Int = {
     maxCached
   }
+
+  def addEffect(effect: Effect) {
+    effect.effectType match {
+      case "currentHealth" => currentModifiers += effect
+      case "maxHealth" => maxModifiers += effect
+      case _ => 
+        /// print error 
+    } 
+  }  
 }

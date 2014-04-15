@@ -13,11 +13,11 @@ import ayai.statuseffects._
 case class Mana(var currentMana: Int, var maximumMana: Int) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
   
-  var currentModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
-  var maxModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
+  private var currentModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
+  private var maxModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
 
-  var currentCached: Int = 0
-  var maxCached: Int = 0
+  private var currentCached: Int = 0
+  private var maxCached: Int = 0
 
   def addDamage(damage: Float) {
     currentMana -= damage.toInt
@@ -119,9 +119,21 @@ case class Mana(var currentMana: Int, var maximumMana: Int) extends Component {
   def getCurrentValue(): Int = {
     currentCached
   }
+
   def getMaxValue(): Int = {
     maxCached
   }
+
+  def addEffect(effect: Effect) {
+    effect.effectType match {
+      case "currentMana" => currentModifiers += effect
+      case "maxMana" => maxModifiers += effect
+      case _ => 
+        /// print error 
+    }
+    
+  }
+
   override def toString : String = {
     write(this)
   }

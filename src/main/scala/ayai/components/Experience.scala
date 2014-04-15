@@ -67,6 +67,14 @@ case class Experience(var baseExperience: Long, var level: Int) extends Componen
     cachedValue
   }
 
+  def addEffect(effect: Effect) {
+    effect.effectType match {
+      case "experience" => modifiers += effect
+      case _ => 
+        /// print error 
+    } 
+  }
+
   def asJson() : JObject = {
     ("experience" -> 
       ("baseExperience" -> baseExperience) ~
