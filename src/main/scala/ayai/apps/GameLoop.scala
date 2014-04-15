@@ -7,6 +7,9 @@ import ayai.persistence._
 import ayai.gamestate._
 import ayai.factories._
 
+//Temp for testing!!!
+import ayai.systems.mapgenerator.MapGenerator
+
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Status, Props}
 import akka.actor.Status.{Success, Failure}
@@ -24,10 +27,17 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
-** The main loop of the Ayai Game 
+** The main loop of the Ayai Game
 ** First loads all needed Actors, creates needed worlds, and runs the game loop
 **/
 object GameLoop {
+  // for(i <- 1 to 10) {
+    // val noise = NoiseGenerator.getNoise("perlin", 30, 30, 10)
+    // println(noise.map(_.mkString(" ")).mkString("\n"))
+  //   println("*****************************************************")
+  // }
+  MapGenerator.getMap("map4", 100, 100)
+
   private val log = LoggerFactory.getLogger(getClass)
 
   var running: Boolean = true

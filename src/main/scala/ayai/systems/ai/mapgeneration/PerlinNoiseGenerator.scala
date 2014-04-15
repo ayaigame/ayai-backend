@@ -1,13 +1,29 @@
-package ayai.maps.generator
+package ayai.systems.mapgenerator
 
 import java.util.Random
 
 object PerlinNoiseGenerator {
 
+  //returns noise with values from 0 to 1.
+  def getScaledNoise(width: Int, height: Int, frequency: Int): Array[Array[Double]] = {
+    val noise = getNoise(width, height, frequency)
+    def getMax(row: Array[Double]): Double = {row reduceLeft (_ max _)}
+    def getMin(row: Array[Double]): Double = {row reduceLeft (_ min _)}
+    val noiseMax = noise map getMax reduceLeft (_ max _)
+    val noiseMin = noise map getMin reduceLeft (_ min _)
+    val absoluteMin = noiseMin * -1
+
+    def scalePixel(pixelVal: Double) = {(pixelVal + absoluteMin) / (noiseMax + absoluteMin)}
+    noise map (_ map scalePixel)
+  }
+
   //width*height # of tiles
-  def getNoise(width: Int, height: Int): Array[Array[Double]] = {
+  def getNoise(width: Int, height: Int, frequency: Int): Array[Array[Double]] = {
     val latticeX = 10
     val latticeY = 10
+    // println(s"frequency: $frequency")
+    // val latticeX = width / frequency
+    // val latticeY = height / frequency
     val rand = new Random(5);
 
     def getVector = {Array.fill[Float](2)(rand.nextFloat())}
@@ -16,8 +32,8 @@ object PerlinNoiseGenerator {
 
     //Returns four displacement vectors, one for each corner
     def getDisplacements(x: Int, y: Int): Array[Array[Int]] = {
-      val bottomLeftX = x/latticeX*latticeX
-      val bottomLeftY = y/latticeY*latticeY
+      val bottomLeftX = (x/latticeX)*latticeX
+      val bottomLeftY = (y/latticeY)*latticeY
 
       //Start at bottomLeft, go clockwise
       Array(Array(bottomLeftX - x, bottomLeftY - y),
@@ -29,6 +45,7 @@ object PerlinNoiseGenerator {
     def getGradientVectors(x: Int, y: Int): Array[Array[Float]] = {
       val bottomLeftX = x/latticeX
       val bottomLeftY = y/latticeY
+      // println(s"bottomLeftX: $bottomLeftX, bottomLeftY: $bottomLeftY")
 
       Array(allGradients(bottomLeftX)(bottomLeftY),
             allGradients(bottomLeftX)(bottomLeftY+1),
@@ -60,7 +77,7 @@ object PerlinNoiseGenerator {
     var noise = Array.fill[Array[Double]](width)(Array.fill[Double](height)(0.0f))
 
 
-     for(i <- 0 to width-1) {
+    for(i <- 0 to width-1) {
       for(j <- 0 to height-1) {
         // var x = i / latticeX
         // var y = j / latticeY
@@ -79,6 +96,4 @@ object PerlinNoiseGenerator {
     //higher number of squares is higher frequency
     //f(x, y) = (3x^2 - 2x^3)(3y^2 - 2y^3)
   }
-
-
 }
