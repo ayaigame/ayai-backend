@@ -4,6 +4,7 @@ package ayai.factories
 import ayai.components._
 import ayai.maps._
 import ayai.actions._
+import ayai.statuseffects._
 import ayai.gamestate._
 import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
@@ -80,10 +81,19 @@ object EntityFactory {
 
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
-        InventoryTable.getInventory(p) foreach ((itemId: Long) => {
-          var future = itemSelection ? GetItem("ITEM" + itemId)
-          inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-        })
+        // InventoryTable.getInventory(p) foreach ((itemId: Long) => {
+        //   var future = itemSelection ? GetItem("ITEM" + itemId)
+        //   inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        // })
+
+        
+
+        // var future = itemSelection ? GetItem("ITEM" + itemId)
+        // inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+
+      val item = new Item(4, "Potion", 0, 20, new Consumable())
+      item.effects += new Effect("potion", "restores 50 health", "currentHealth", 50, new OneOff(), new Multiplier(1), false, false)
+
 
         p.components += inventory
 

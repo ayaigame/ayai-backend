@@ -161,6 +161,9 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new InteractMessage(userId, entityId))
       case "createai" =>
         queue ! new AddInterpretedMessage(world, CreateAIMessage)
+      case "useitem" => 
+        val itemId = (rootJSON \ "itemId").extract[String]
+        queue ! new AddInterpretedMessage(world, new UseItemMessage(userId, itemId))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
     }

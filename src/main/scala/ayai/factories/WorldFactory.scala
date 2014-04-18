@@ -25,7 +25,7 @@ class WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(StatusEffectSystem())
     world.addSystem(ItemSystem())
     world.addSystem(LevelingSystem(networkSystem))
-    world.addSystem(DirectorSystem())
+    // world.addSystem(DirectorSystem())
     world.addSystem(NPCRespawningSystem())
     world.addSystem(GoalSystem(networkSystem))
     world.addSystem(RoomChangingSystem(networkSystem))

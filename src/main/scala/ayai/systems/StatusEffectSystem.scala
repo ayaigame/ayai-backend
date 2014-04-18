@@ -48,7 +48,5 @@ class StatusEffectSystem() extends EntityProcessingSystem(
         velocity.updateCachedValue() 
       case _ =>
     }
-    
-    
   }
 }
