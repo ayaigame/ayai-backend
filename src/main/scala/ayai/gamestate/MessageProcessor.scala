@@ -137,10 +137,16 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val p: Entity = world.createEntity("ATTACK"+bulletId)
 
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
-              p.components += (new Bounds(weaponRange, weaponRange))
               p.components += (new Attack(initiator));
-              p.components += (new Frame(30,0))
 
+              //If weapon range >= 100 it is ranged, so fire a projectile
+              if(weaponRange >= 100) {
+                p.components += (new Frame(30,0))//TODO: Calculate how long it should stick around
+              }
+              else { //it's melee
+                p.components += (new Bounds(weaponRange, weaponRange))
+                p.components += (new Frame(30,0))
+              }
 
               initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
 
