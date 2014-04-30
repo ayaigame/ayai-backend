@@ -5,7 +5,7 @@
 			"name": "Iron Sword",
 			"equipable": true,
 			"itemType": "weapon1",
-			"range": 15,
+			"range": 1000,
 			"damage": 3,
 			"damageType": "physical",
 			"value": 10,

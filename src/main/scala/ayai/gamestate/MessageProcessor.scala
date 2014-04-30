@@ -141,11 +141,13 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
               //If weapon range >= 100 it is ranged, so fire a projectile
               if(weaponRange >= 100) {
-                p.components += (new Frame(30,0))//TODO: Calculate how long it should stick around
+                p.components += (new Velocity(Constants.PROJECTILE_VELOCITY, Constants.PROJECTILE_VELOCITY));
+                p.components += (new Bounds(20, 20))
+                p.components += (new Frame(weaponRange/Constants.PROJECTILE_VELOCITY))
               }
               else { //it's melee
                 p.components += (new Bounds(weaponRange, weaponRange))
-                p.components += (new Frame(30,0))
+                p.components += (new Frame(30))
               }
 
               initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
