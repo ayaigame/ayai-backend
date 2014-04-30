@@ -5,6 +5,13 @@ import java.io._
 import scala.collection.immutable.Range
 
 object MapGenerator {
+  //TODO:
+  //Write to mapsList.json file so created worlds get loaded in when the server starts
+  //Add transports to the maps so they will continue
+
+
+
+
   //width and height are in terms of tiles.
   def getMap(name: String, width: Int, height: Int) {
 

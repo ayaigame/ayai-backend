@@ -36,7 +36,7 @@ object GameLoop {
     // println(noise.map(_.mkString(" ")).mkString("\n"))
   //   println("*****************************************************")
   // }
-  MapGenerator.getMap("map4", 100, 100)
+  MapGenerator.getMap("map4", 30, 30)
 
   private val log = LoggerFactory.getLogger(getClass)
 
@@ -62,6 +62,7 @@ object GameLoop {
     val classMap = networkSystem.actorOf(Props[ClassMap], name="ClassMap")
     val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
 
+    //This needs to be read in from a config file
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
 

@@ -13,7 +13,9 @@ object NoiseGenerator {
     // var noise: Array[Array[Int]]
     if(noiseType == "perlin") {
       val noise = PerlinNoiseGenerator.getScaledNoise(width, height, frequency)
-      rescaleNoise(noise)
+      val scaledNoise = rescaleNoise(noise)
+      println(scaledNoise.map(_.mkString(" ")).mkString("\n"))
+      scaledNoise
     }
     else {
       throw new BadConfigException("Cannot match noise algorithm.")
