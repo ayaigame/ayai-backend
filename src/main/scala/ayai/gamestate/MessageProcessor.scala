@@ -139,7 +139,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Bounds(weaponRange, weaponRange))
               p.components += (new Attack(initiator));
-              p.components += (new Frame(30,0))
+              p.components += (new Frame(30))
 
 
               initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
