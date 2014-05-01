@@ -6,7 +6,7 @@ import ayai.components._
 import ayai.networking._
 import ayai.networking.chat._
 import ayai.persistence.{CharacterTable, InventoryTable}//Just testing this table
-import ayai.factories.EntityFactory
+import ayai.factories.{EntityFactory, SpriteSheetFactory}
 import ayai.apps.{Constants, GameLoop}
 
 /** Crane Imports **/
@@ -116,13 +116,19 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   new MoveDirection(0, 0)
               }
 
-              //get the range of the characters weapon
-              val weaponRange = initiator.getComponent(classOf[Equipment]) match {
-                case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
-                  case weapon: Weapon => weapon.range
-                  case _ => 30
+              //get the range and name of the characters weapon
+              var weaponRange = 30
+              var weaponName = ""
+
+              initiator.getComponent(classOf[Equipment]) match {
+                case Some(e: Equipment) =>
+                  val item = e.equipmentMap("weapon1")
+                  weaponName = item.name
+                  item.itemType match {
+                    case weapon: Weapon =>
+                      weaponRange = weapon.range
+                    case _ =>
                 }
-                case _ => 30
               }
 
               val upperLeftx = pos.x
@@ -146,9 +152,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 p.components += (new Bounds(20, 20))
                 p.components += (new Frame(weaponRange/Constants.PROJECTILE_VELOCITY))
 
-                val animations = new ArrayBuffer[Animation]()
-                animations += new Animation("facedown", 0, 0 )
-                p.components += (new SpriteSheet("projectiles", animations, 32 ,32))
+                if(SpriteSheetFactory.hasSpriteSheet(weaponName))
+                  p.components += SpriteSheetFactory.getSpriteSheet(weaponName, xDirection, yDirection)
               }
               else { //it's melee
                 val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
@@ -206,16 +211,15 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                     inventory.removeItem(item)
                     if(!isEmptySlot(equipItem)) {
                       inventory.inventory += equipItem
-                      println("Equip Item " + equipment.equipmentMap(equipmentType))
                     }
                     // sender ! Success
                   }
                   else {
                   }
+                  sender ! Success
                   InventoryTable.saveInventory(e)
               }
         }
-        sender ! Success
       case UnequipMessage(userId: String, equipmentType: String) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>

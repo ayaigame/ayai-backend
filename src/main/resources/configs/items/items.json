@@ -62,6 +62,23 @@
 					"attributeType": "fireDamage",
 					"magnitude": 5
 					}]
+			},
+			{
+			"id": 4,
+			"name": "Elven Bow",
+			"equipable": true,
+			"itemType": "weapon1",
+			"range": 1000,
+			"damage": 15,
+			"damageType": "physical",
+			"value": 10,
+			"weight": 20,
+			"image" : "http://files.softicons.com/download/game-icons/kingdom-icons-by-mihaiciuc-bogdan/png/32x32/Druid%20Bow.png",
+			"stats": [
+				{
+					"attributeType": "waterDamage",
+					"magnitude": 5
+					}]
 			}],
 
 	"externalItems": [
