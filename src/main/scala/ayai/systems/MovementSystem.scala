@@ -34,7 +34,7 @@ object MovementSystem {
 ** Check if characters action is active, if so then process the action
 ** Then check current position on tilemap and relocate if colliding 
 **/
-class MovementSystem extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity], classOf[Character], classOf[Actionable]),
+class MovementSystem extends EntityProcessingSystem(include=List(classOf[Position], classOf[Velocity], classOf[Actionable]),
                                                     exclude=List(classOf[Transport], classOf[Respawn], classOf[Dead])) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
   private val log = LoggerFactory.getLogger(getClass)

@@ -35,6 +35,7 @@ class GameStateSerializer(world: World) extends Actor {
   private var roomJSON: JObject = null
   private var valid: Boolean = false
   private var npcJSON: JObject = null
+  private var projectilesJSON: JObject = null
   //Returns a list of entities contained within a room.
   def getRoomEntities(roomId: Long): ArrayBuffer[Entity] = {
     world.groups("ROOM" + roomId)
@@ -71,9 +72,10 @@ class GameStateSerializer(world: World) extends Actor {
                    JNothing
              }})
         var npcs = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
-                                                 classOf[Health], classOf[Mana], 
+                                                 classOf[Health], classOf[Mana],
                                                  classOf[NPC], classOf[SpriteSheet]),
                                                   exclude=List(classOf[Dead]))
+
         npcJSON= ("npcs" -> npcs.map{ npc =>
           (npc.getComponent(classOf[Character]),
             npc.getComponent(classOf[Position]),
@@ -87,7 +89,26 @@ class GameStateSerializer(world: World) extends Actor {
                   (health.asJson) ~
                   (mana.asJson) ~
                   (spritesheet.asJson))
-              case _ =>  
+              case _ =>
+                log.warn("f3d3275: getComponent failed to return anything BLARG2")
+                JNothing
+            }})
+
+        var projectiles = world.getEntitiesWithExclusions(include=List(classOf[Projectile], classOf[Position], classOf[SpriteSheet]),
+                                                  exclude=List(classOf[Dead]))
+
+
+        projectilesJSON = ("projs" -> projectiles.map{ projectile =>
+          (projectile.getComponent(classOf[Projectile]),
+            projectile.getComponent(classOf[Position]),
+            projectile.getComponent(classOf[SpriteSheet])) match {
+              case (Some(projectileComponent: Projectile),
+                    Some(position: Position),
+                    Some(spritesheet: SpriteSheet)) =>
+                ((projectileComponent.asJson) ~
+                  (position.asJson) ~
+                  (spritesheet.asJson))
+              case _ =>
                 log.warn("f3d3275: getComponent failed to return anything BLARG2")
                 JNothing
             }})
@@ -103,7 +124,7 @@ class GameStateSerializer(world: World) extends Actor {
 
     }
     // println(compact(render(getCharacterAssets(e))))
-    sender ! compact(render(("type" -> "update")~(roomJSON)~(npcJSON)~(getCharacterAssets(e))))
+    sender ! compact(render(("type" -> "update")~(roomJSON)~(npcJSON)~(projectilesJSON)~(getCharacterAssets(e))))
   }
 
   def getCharacterAssets(entity: Entity): JObject = {
@@ -111,7 +132,7 @@ class GameStateSerializer(world: World) extends Actor {
       entity.getComponent(classOf[Equipment]),
       entity.getComponent(classOf[QuestBag]),
       entity.getComponent(classOf[Loot])) match {
-        case (Some(inventory: Inventory), Some(equipment: Equipment), Some(quests: QuestBag), None) => 
+        case (Some(inventory: Inventory), Some(equipment: Equipment), Some(quests: QuestBag), None) =>
           (inventory.asJson) ~
           (equipment.asJson) ~
           (quests.asJson)

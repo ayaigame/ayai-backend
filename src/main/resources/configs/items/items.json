@@ -5,7 +5,7 @@
 			"name": "Iron Sword",
 			"equipable": true,
 			"itemType": "weapon1",
-			"range": 1000,
+			"range": 15,
 			"damage": 3,
 			"damageType": "physical",
 			"value": 10,
@@ -45,6 +45,23 @@
 			"value" : 20,
 			"image" : "http://www.minecraftopia.com/images/blocks/iron_helmet.png",
 			"stats": []
+			},
+			{
+			"id": 3,
+			"name": "Magic Staff",
+			"equipable": true,
+			"itemType": "weapon1",
+			"range": 1000,
+			"damage": 20,
+			"damageType": "physical",
+			"value": 10,
+			"weight": 20,
+			"image" : "http://t3.rbxcdn.com/d5121321a00d448bf4ff5912ef03b62c",
+			"stats": [
+				{
+					"attributeType": "fireDamage",
+					"magnitude": 5
+					}]
 			}],
 
 	"externalItems": [

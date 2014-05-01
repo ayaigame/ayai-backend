@@ -23,7 +23,7 @@ class MoveDirection(val xDirection: Int, val yDirection: Int) extends Action {
       case(Some(position: Position), Some(velocity: Velocity)) =>
         position.x += xDirection * velocity.x
         position.y += yDirection * velocity.y
-      case _ => 
+      case _ =>
     }
   }
 

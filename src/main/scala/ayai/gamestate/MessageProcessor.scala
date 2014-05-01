@@ -83,7 +83,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val oldMovement = (e.getComponent(classOf[Actionable])) match {
                 case Some(oldMove : Actionable) =>
                   oldMove.active = start
-                  oldMove.action = direction
+                  if(start)
+                    oldMove.action = direction
                 case _ =>
                   log.warn("a07270d: getComponent failed to return anything")
               }
@@ -130,22 +131,30 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val xDirection = m.xDirection
               val yDirection = m.yDirection
 
-              val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
-              val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
 
 
               val p: Entity = world.createEntity("ATTACK"+bulletId)
 
-              p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
               p.components += (new Attack(initiator));
 
               //If weapon range >= 100 it is ranged, so fire a projectile
               if(weaponRange >= 100) {
-                p.components += (new Velocity(Constants.PROJECTILE_VELOCITY, Constants.PROJECTILE_VELOCITY));
+                p.components += (new Projectile(bulletId))
+                p.components += (new Velocity(Constants.PROJECTILE_VELOCITY, Constants.PROJECTILE_VELOCITY))
+                p.components += (new Actionable(true, a.action))
+                p.components += (new Position(upperLeftx, upperLefty))
                 p.components += (new Bounds(20, 20))
                 p.components += (new Frame(weaponRange/Constants.PROJECTILE_VELOCITY))
+
+                val animations = new ArrayBuffer[Animation]()
+                animations += new Animation("facedown", 0, 0 )
+                p.components += (new SpriteSheet("projectiles", animations, 32 ,32))
               }
               else { //it's melee
+                val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
+                val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
+
+                p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
                 p.components += (new Bounds(weaponRange, weaponRange))
                 p.components += (new Frame(30))
               }

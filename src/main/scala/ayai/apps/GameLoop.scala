@@ -37,6 +37,7 @@ object GameLoop {
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
     import ExecutionContext.Implicits.global
 
+    // COMMENT ME OUT TO SPEED UP BOOTUP TIME
     DBCreation.ensureDbExists()
 
     var worlds = HashMap[String, RoomWorld]()

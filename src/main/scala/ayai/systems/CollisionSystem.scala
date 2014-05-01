@@ -57,7 +57,7 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
             //If it's sticking around for more than 30 frames it is a projectile.
             //The first collision a projectile has should trigger it ending.
             if(frameComponentA.framesActive > 30)
-              frameComponentA.framesActive = 10
+              frameComponentA.framesActive = 1
           }
           true
       case (None, Some(attackComponentB : Attack), None, Some(frameComponentB: Frame), Some(healthComponentA : Health), None) =>
@@ -65,12 +65,13 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
             attackComponentB.addVictim(entityA)
 
             if(frameComponentB.framesActive > 30)
-              frameComponentB.framesActive = 10
+              frameComponentB.framesActive = 1
           }
           true
       case _ => false
       }
   }
+
 
   def handleCollision(entityA: Entity, entityB: Entity) {
       (entityA.getComponent(classOf[Position]),
