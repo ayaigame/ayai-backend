@@ -2,7 +2,7 @@ package ayai.systems
 
 /** Crane Imports **/
 import crane.{EntityProcessingSystem, Entity, World}
-
+import ayai.statuseffects._
 /** Ayai Imports **/
 import ayai.components._
 
@@ -26,10 +26,19 @@ class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health]
     }
     //look at the status effects of the character
 
-    if(health.currentHealth <= 0) {
+    if(health.getCurrentValue() <= 0) {
       //attach respawn to entity
       e.components += new Dead()
       e.components += new Respawn(1500, System.currentTimeMillis())
+    }
+
+    if(health.getCurrentValue() == 50) {
+      val entity = world.createEntity()
+      val potion = new Item(50, "potion", 20, 0, new Consumable())
+      potion.effects += new Effect("heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
+      entity.components += ItemUse(e, potion, e)
+
+      world.addEntity(entity)
     }
   }
 }

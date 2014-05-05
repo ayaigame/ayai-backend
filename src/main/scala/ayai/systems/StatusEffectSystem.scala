@@ -22,9 +22,13 @@ class StatusEffectSystem() extends EntityProcessingSystem(
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
   def processEntity(e: Entity, deltaTime: Int) {
-
     e.getComponent(classOf[Health]) match {
       case Some(health: Health) =>
+        if(health.currentModifiers.size >= 1) {
+          println("Status Effecting")
+          println(health.currentModifiers)
+
+        }
         health.updateCachedValue() 
       case _ =>
     }

@@ -8,12 +8,12 @@ trait ItemType {
 	def copy(): ItemType
 }
 
-case class Consumable(val name: String = "") extends ItemType {
+case class Consumable() extends ItemType{
 	def asJson(): JObject = {
-		("name" -> name)
+		("type" -> "consumable")
 	}
 
-	def copy(): ItemType = {
-		return new Consumable(name)
+	def copy() : ItemType = {
+		new Consumable()
 	}
 }

@@ -24,6 +24,7 @@ class WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(FrameExpirationSystem())
     world.addSystem(StatusEffectSystem())
     world.addSystem(ItemSystem())
+    world.addSystem(StatusEffectSystem())
     world.addSystem(LevelingSystem(networkSystem))
     // world.addSystem(DirectorSystem())
     world.addSystem(NPCRespawningSystem())
