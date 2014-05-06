@@ -32,13 +32,5 @@ class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health]
       e.components += new Respawn(1500, System.currentTimeMillis())
     }
 
-    if(health.getCurrentValue() == 50) {
-      val entity = world.createEntity()
-      val potion = new Item(50, "potion", 20, 0, new Consumable())
-      potion.effects += new Effect("heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
-      entity.components += ItemUse(e, potion, e)
-
-      world.addEntity(entity)
-    }
   }
 }

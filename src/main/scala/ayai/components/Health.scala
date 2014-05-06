@@ -56,8 +56,29 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
   def updateMaxValue() {
     var isAbsolute: Boolean = false 
     var absoluteValue: Effect = null
-    maxCached = maximumHealth
+    val invalidItems = new ArrayBuffer[Effect]()
+    
+    for(effect <- maxModifiers) {
+      if(!effect.isValid) {
+        invalidItems += effect
+      } else {
+        if(!effect.isRelative) {
+          isAbsolute = true
+          if(effect.isReady) {
+            effect.process(maximumHealth)
+            absoluteValue = effect
+            maxCached = effect.effectiveValue
 
+          }
+        } else {
+          maxCached = maximumHealth
+        }
+      }
+    }
+
+    for(effect <- invalidItems) {
+      maxModifiers -= effect
+    }
     for(effect <- maxModifiers) {
       if(!effect.isValid) {
         maxModifiers -= effect

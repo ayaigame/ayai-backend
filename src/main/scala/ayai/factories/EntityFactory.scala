@@ -61,7 +61,7 @@ object EntityFactory {
         val spritesheet: SpriteSheet = new SpriteSheet("guy", animations, 32 ,32)
         p.components += spritesheet
         p.components += new Actionable(false, DownDirection)
-        p.components += new Health(100,100)
+        p.components += new Health(50,100)
         p.components += new NetworkingActor(actor)
         p.components += new Mana(200,200)
         p.components += new Experience(characterRow.experience, characterRow.level)
@@ -91,9 +91,10 @@ object EntityFactory {
         // var future = itemSelection ? GetItem("ITEM" + itemId)
         // inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
-      val item = new Item(4, "Potion", 0, 20, new Consumable())
-      item.effects += new Effect("potion", "restores 50 health", "currentHealth", 50, new OneOff(), new Multiplier(1), false, false)
-
+        val item = new Item(4, "Potion", 0, 20, new Consumable())
+        item.effects += new Effect("heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
+        
+        inventory.addItem(item)
 
         p.components += inventory
 
