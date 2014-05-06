@@ -10,6 +10,9 @@ import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
+/**
+  currentHealth and maximumHealth should not be touched as they are need to determine what health should be set back to if effect is temporary
+**/
 case class Health(var currentHealth: Int, var maximumHealth: Int) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
   var currentModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
@@ -19,13 +22,17 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
   def isAlive: Boolean = currentHealth > 0
 
   def addDamage(damage: Float) {
-    currentHealth -= damage.toInt
-    if(currentHealth < 0) {
+    currentCached -= damage.toInt
+    if(currentCached < 0) {
+      currentCached = 0
       currentHealth = 0
     }
   }
 
-  def refill() { currentHealth = maximumHealth }
+  def refill() { 
+    currentHealth = maximumHealth 
+    currentCached = currentHealth
+  }
 
   override def toString: String = {
     write(this)
@@ -33,8 +40,8 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
 
   implicit def asJson(): JObject = {
     ("health" ->
-      ("currHealth" -> currentHealth) ~
-      ("maximumHealth" -> maximumHealth))
+      ("currHealth" -> currentCached) ~
+      ("maximumHealth" -> maxCached))
   }
   /*
     Will first check if to process the effect again, and if invalid then remove the effect
@@ -45,11 +52,33 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
     updateMaxValue()
   }
 
+  // update the cached value of the maxHealth effects
   def updateMaxValue() {
     var isAbsolute: Boolean = false 
     var absoluteValue: Effect = null
-    maxCached = maximumHealth
+    val invalidItems = new ArrayBuffer[Effect]()
+    
+    for(effect <- maxModifiers) {
+      if(!effect.isValid) {
+        invalidItems += effect
+      } else {
+        if(!effect.isRelative) {
+          isAbsolute = true
+          if(effect.isReady) {
+            effect.process(maximumHealth)
+            absoluteValue = effect
+            maxCached = effect.effectiveValue
 
+          }
+        } else {
+          maxCached = maximumHealth
+        }
+      }
+    }
+
+    for(effect <- invalidItems) {
+      maxModifiers -= effect
+    }
     for(effect <- maxModifiers) {
       if(!effect.isValid) {
         maxModifiers -= effect
@@ -88,43 +117,55 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
     }
   }
 
+  // update the cached value of the currentHealth effects
   def updateCurrentValue() {
     var isAbsolute: Boolean = false 
     var absoluteValue: Effect = null
-    currentCached = currentHealth
-
+    val invalidItems = new ArrayBuffer[Effect]()
     for(effect <- currentModifiers) {
       if(!effect.isValid) {
-        currentModifiers -= effect
+        invalidItems += effect
       } else {
         if(!effect.isRelative) {
           isAbsolute = true
-          absoluteValue = effect
-          currentCached = effect.effectiveValue
+          if(effect.isReady) {
+            effect.process(currentHealth)
+            absoluteValue = effect
+            currentCached = effect.effectiveValue
+
+          }
         }
       }
     }
 
+    for(effect <- invalidItems) {
+      currentModifiers -= effect
+    }
+
     for(effect <- currentModifiers) {
       if(isAbsolute && absoluteValue != effect) {
-        if(effect.isRelative && !effect.isValueRelative) {
+        if(!effect.isValueRelative) {
+          effect.process(currentHealth)
           currentCached = currentCached + effect.effectiveValue
         }
       } 
       else if(!isAbsolute) {
         if(effect.isRelative && !effect.isValueRelative) {
+          effect.process(currentHealth)
           currentCached = currentCached + effect.effectiveValue
         } 
       }
     }
     for(effect <- currentModifiers) {
       if(isAbsolute && absoluteValue != effect) {
-        if(effect.isRelative && effect.isValueRelative) {
+        if(effect.isValueRelative) {
+          effect.process(currentHealth)
           currentCached = currentCached + effect.process(currentCached)
         }
       } 
       else if(!isAbsolute) {
         if(effect.isRelative && effect.isValueRelative) {
+          effect.process(currentHealth)
           currentCached = currentCached + effect.process(currentCached)
         } 
       }
@@ -140,9 +181,11 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
 
   def addEffect(effect: Effect) {
     effect.effectType match {
-      case "currentHealth" => currentModifiers += effect
+      case "currentHealth" => 
+      currentModifiers += effect
       case "maxHealth" => maxModifiers += effect
       case _ => 
+        println(effect.effectType)
         /// print error 
     } 
   }  

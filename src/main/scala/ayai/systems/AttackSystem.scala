@@ -77,7 +77,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
   }
 
   def handleAttackDamage(damage: Int, victim: Health) = {
-    victim.currentHealth -= damage
+    victim.addDamage(damage)
   }
 
   /**

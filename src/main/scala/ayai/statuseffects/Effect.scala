@@ -25,6 +25,7 @@ case class Effect(val name: String, val description: String,
   def process(effectValue: Int = 0): Int = {
     updateValue(value)
     if(attribute.isReady) {
+      attribute.process()
       if(isValueRelative) {
         updateValue(effectValue)
       } else {
@@ -38,6 +39,9 @@ case class Effect(val name: String, val description: String,
     effectiveValue = multiplier.process(value)
   }
 
+  def isReady(): Boolean = {
+    attribute.isReady
+  }
   def isValid(): Boolean = {
     attribute.isValid
   }

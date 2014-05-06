@@ -68,6 +68,15 @@ object DBCreation {
           AyaiDB.characters.insert(new CharacterRow("Ness", "Warrior", 1, 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
           AyaiDB.characters.insert(new CharacterRow("Ezio", "Thief", 1, 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
         }
+
+        transaction {
+          CharacterTable.getCharacter("Ness") match {
+            case Some(characterRow: CharacterRow) =>
+              AyaiDB.inventory.insert(new InventoryRow(characterRow.id, 0, 1))
+              AyaiDB.inventory.insert(new InventoryRow(characterRow.id, 3, 1))
+            case _ =>
+          }
+        }
       case _ =>
         throw(new Exception("Account creation failed!"))
     }

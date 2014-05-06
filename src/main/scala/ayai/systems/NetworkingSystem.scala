@@ -5,7 +5,7 @@ import ayai.apps.Constants
 import ayai.networking._
 import ayai.components._
 import ayai.persistence._
-import ayai.gamestate.{EffectType, GameStateSerializer, MapRequest, RoomWorld, GetRoomJson, Refresh}
+import ayai.gamestate.{GameStateSerializer, MapRequest, RoomWorld, GetRoomJson, Refresh}
 import ayai.factories._
 
 /** Akka Imports **/
