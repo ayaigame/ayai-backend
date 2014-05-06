@@ -31,6 +31,5 @@ class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health]
       e.components += new Dead()
       e.components += new Respawn(1500, System.currentTimeMillis())
     }
-
   }
 }
