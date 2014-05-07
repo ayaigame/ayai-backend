@@ -23,7 +23,6 @@ object SpriteSheetFactory {
   }
 
   def getSpriteSheet(weaponName: String, xDirection: Int, yDirection: Int): SpriteSheet = {
-    println(weaponName)
     if(weaponName == "Magic Staff") {
       val animations = new ArrayBuffer[Animation]()
       animations += new Animation("facedown", 0, 0 )
