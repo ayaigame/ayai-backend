@@ -4,6 +4,7 @@ package ayai.factories
 import ayai.components._
 import ayai.maps._
 import ayai.actions._
+import ayai.statuseffects._
 import ayai.gamestate._
 import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
@@ -60,7 +61,7 @@ object EntityFactory {
         val spritesheet: SpriteSheet = new SpriteSheet("guy", animations, 32 ,32)
         p.components += spritesheet
         p.components += new Actionable(false, DownDirection)
-        p.components += new Health(100,100)
+        p.components += new Health(50,100)
         p.components += new NetworkingActor(actor)
         p.components += new Mana(200,200)
         p.components += new Experience(characterRow.experience, characterRow.level)
@@ -80,10 +81,20 @@ object EntityFactory {
 
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
-        InventoryTable.getInventory(p) foreach ((itemId: Long) => {
-          var future = itemSelection ? GetItem("ITEM" + itemId)
-          inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-        })
+        // InventoryTable.getInventory(p) foreach ((itemId: Long) => {
+        //   var future = itemSelection ? GetItem("ITEM" + itemId)
+        //   inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        // })
+
+        
+
+        // var future = itemSelection ? GetItem("ITEM" + itemId)
+        // inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+
+        val item = new Item(4, "Potion", 0, 20, new Consumable())
+        item.effects += new Effect("heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
+        
+        inventory.addItem(item)
 
         p.components += inventory
 

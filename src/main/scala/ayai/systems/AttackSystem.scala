@@ -55,7 +55,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       case Some(stats: Stats) =>
         for(stat <- stats.stats) {
           if(stat.attributeType == "strength"){
-            playerBase += stat.magnitude
+            playerBase = stat.magnitude
           }
         }
       case _ =>
@@ -77,7 +77,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
   }
 
   def handleAttackDamage(damage: Int, victim: Health) = {
-    victim.currentHealth -= damage
+    victim.addDamage(damage)
   }
 
   /**

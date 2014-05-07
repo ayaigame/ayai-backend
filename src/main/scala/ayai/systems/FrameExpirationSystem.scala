@@ -20,7 +20,7 @@ class FrameExpirationSystem() extends EntityProcessingSystem(include=List(classO
       if(frame.isReady) {
         e.kill()
       } 
-      frame.frameCounts += 1
+      frame.framesActive -= 1
       case _ =>
     }
   }

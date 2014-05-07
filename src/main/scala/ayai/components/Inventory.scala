@@ -41,6 +41,15 @@ case class Inventory (val inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()
     inventory(itemLocation)
   }
 
+  def getItemById(itemId: Int): Item = {
+    for(item <- inventory) {
+      if(item.id == itemId) {
+        return item
+      }
+    }
+    return null
+  }
+
   def totalWeight : Double = {
     inventory map (_.weight) reduceLeft (_+_)
   }
