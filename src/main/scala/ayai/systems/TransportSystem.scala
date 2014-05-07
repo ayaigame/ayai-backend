@@ -53,12 +53,6 @@ extends EntityProcessingSystem(include=List(classOf[Position],
         val result = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]]
         val world = result match {
           case Some(roomWorld: RoomWorld) => roomWorld
-          case _ => {
-            //Create a room and add it to the worlds.
-            //Need access to the worlds and worldFactory variables from GameLoop
-            //Will discuss this at the code jam tomorrow.
-            //worlds(s"room$index") = worldFactory.createWorld(s"room$index", s"$file")
-          }
         }
         val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, world)
         Await.result(future1, timeout.duration)
