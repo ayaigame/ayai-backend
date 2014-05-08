@@ -7,9 +7,9 @@ package ayai.networking
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, Props, OneForOneStrategy}
-import akka.actor.SupervisorStrategy.Escalate
+import akka.actor.SupervisorStrategy._
 import akka.routing.FromConfig
-
+import crane.exceptions._
 /** External Imports **/
 import scala.concurrent.duration._
 
@@ -17,6 +17,8 @@ class NetworkMessageInterpreterSupervisor extends Actor {
 
   // Escalate exceptions, try up to 10 times, if one actor fails, try just that one again
   val escalator = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 5 seconds) {
+    case _: NullPointerException => Resume
+    case _: DeadEntityException => Resume
     case _: Exception => Escalate
   }
 

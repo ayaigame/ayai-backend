@@ -54,6 +54,45 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
         authorization ! new RecoveryPost(httpRequest)
       }
 
+      case POST(Path("/npc")) => {
+        if(httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+        authorization ! new NPCPost(httpRequest)
+      }
+
+      case POST(Path("/quest")) => {
+        if(httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+        authorization ! new QuestPost(httpRequest)
+      }
+
+      case POST(Path("/class")) => {
+        if(httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+        authorization ! new ClassPost(httpRequest)
+      }
+      case POST(Path("/Item")) => {
+        if(httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+        authorization ! new ItemPost(httpRequest)
+      }
+      case POST(Path("/effect")) => {
+        if(httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+        authorization ! new EffectPost(httpRequest)
+      }
+      case POST(Path("/spell")) => {
+        if(httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+        authorization ! new SpellPost(httpRequest)
+      }
+
       case POST(Path("/chars")) => {
         if (httpRequest.request.is100ContinueExpected)
           httpRequest.response.write100Continue

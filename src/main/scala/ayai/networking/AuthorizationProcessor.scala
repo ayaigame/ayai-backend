@@ -107,6 +107,101 @@ class AuthorizationProcessor extends Actor {
   case RecoveryPost(request: HttpRequestEvent) =>
     println("RECOVERY")
 
+  case ItemPost(request: HttpRequestEvent) =>
+    val content: String = request.request.content.toString
+    val delimiter = content.indexOfSlice("&")
+    val delimiter2 = content.lastIndexOfSlice("&")
+    val userToken = content.slice(0, delimter).replaceAll("token=","")
+    val contentSplit = content.split("&")
+    //get item information
+    val id = contentSplit[1].replaceAll("id=", "")
+    val name = contentSplit[2].replaceAll("name=","")
+    val value = contentSplit[3].replaceAll("value=","")
+    val weight = contentSplit[4].replaceAll("weight=","")
+    val imageLocation = contentSplit[5].replaceAll("image=","")
+    val itemType = contentSplit[6].replaceAll("itemtype=","")
+
+    val item = null
+
+    itemType.toLowerCase match {
+      case "weapon" => 
+        val range = contentSplit[7].replaceAll("range=","")
+        val damage = contentSplit[8].replaceAll("damage=","")
+        val damageType = contentSplit[9].replaceAll("damageType=","")
+        val itemT = contentSplit[10].replaceAll("type=","")
+        item = new Item(id, name, value, weight, new Weapon(range, damage, damageType, itemT))
+      case "armor" =>
+        val slot = contentSplit[7].replaceAll("slot=","")
+        val protection = contentSplit[8].replaceAll("protection=","")
+        val itemT = contentSplit[9].replaceAll("type=","")
+        item = new Item(id, name, value, weight, new Armor(slot, protection, itemT))
+      case "consumable" => 
+        item = new Item(id, name, value, weight, new Consumable())
+
+      case _ =>
+        return request.response.write(HttpResponseStatus.UNAUTHORIZED)
+    }
+    
+    // adds item to the gamestate
+
+    request.response.write(HttpResponseStatus.OK)
+
+  case NPCPost(request: HttpRequestEvent) =>
+    val content: String = request.request.content.toString
+    val delimiter = content.indexOfSlice("&")
+    val delimiter2 = content.lastIndexOfSlice("&")
+    val userToken = content.slice(0, delimter).replaceAll("token=","")
+    val contentSplit = content.split("&")
+    //get item information
+    val id = contentSplit[1].replaceAll("id=", "")
+    val name = contentSplit[2].replaceAll("name=","")
+    val faction = contentSplit[3].replaceAll("faction=","")
+    val room = contentSplit[4].replaceAll("room=","")
+    val weapon1 = contentSplit[5].replaceAll("weapon1=","")
+    val helmet = contentSplit[6].replaceAll("helmet=","")
+    val torso = contentSplit[7].replaceAll("torso=","")
+    val legs = contentSplit[8].replaceAll("legs=","")
+    val feet = contentSplit[9].replaceAll("feet=","")
+    val level = contentSplit[10].replaceAll("level=","")
+    val experience = contentSplit[11].replaceAll("experience=","")
+
+    //get world from room id
+    val entity = world.createEntity("NPC"+id)
+    entity.components += new NPC(id)
+    entity.components += new Character(id, name)
+    entity.components += new Room(room)
+    entity.components += new Faction(faction)
+    entity.components += new Equipment()
+    entity.components += new Inventory()
+    //get equipment ids for weapons given
+
+    // get inventory item ids
+
+
+    
+    request.response.write(HttpResponseStatus.OK)
+
+  case ClassPost(request: HttpRequestEvent) =>
+    val content: String = request.request.content.toString
+    val delimiter = content.indexOfSlice("&")
+    val delimiter2 = content.lastIndexOfSlice("&")
+    val userToken = content.slice(0, delimter).replaceAll("token=","")
+    val contentSplit = content.split("&")
+    //get item information
+    val id = contentSplit[1].replaceAll("id=", "")
+    val name = contentSplit[2].replaceAll("name=","")
+    val baseHealth = contentSplit[3].replaceAll("baseHealth=","")
+    val baseMana = contentSplit[4].replaceAll("baseMana=","")
+    val strength = contentSplit[5].replaceAll("strength=","")
+    val defense = contentSplit[6].replaceAll("=","")
+    val speed = contentSplit[7].replaceAll("torso=","")
+    val strengthLevel= contentSplit[8].replaceAll("feet=","")
+    val defenseLevel = contentSplit[9].replaceAll("level=","")
+    val speedLevel = contentSplit[10].replaceAll("experience=","")
+    val spriteSheetLocation = contentSplit[11].replaceAll("legs=","")
+    
+    request.response.write(HttpResponseStatus.OK)
+
   case _ => println("Error from AuthorizationProcessor.")
   }
 }
