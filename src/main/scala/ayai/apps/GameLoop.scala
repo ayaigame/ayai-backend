@@ -72,8 +72,10 @@ object GameLoop {
     val questFactory = QuestFactory.bootup(networkSystem)
     val classFactory = ClassFactory.bootup(networkSystem)
 
-    for((file, index) <- rooms.zipWithIndex)
-      worlds(index) = worldFactory.createWorld(index, s"$file")
+    for(file <- rooms){
+      val world = worldFactory.createWorld(s"$file")
+      worlds(world.id) = world
+    }
 
     for((id, world) <- worlds)
       roomList ! AddWorld(world)
@@ -92,10 +94,10 @@ object GameLoop {
       val start = System.currentTimeMillis
 
       val processedMessages = new ArrayBuffer[Future[Any]]
-      for((name, world) <- worlds) {
-        val future = mQueue ? FlushMessages(name)
+      for((id, world) <- worlds) {
+        val future = mQueue ? FlushMessages(id)
         val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
-        val mProcessor = networkSystem.actorSelection(s"user/MProcessor$name")
+        val mProcessor = networkSystem.actorSelection(s"user/MProcessor$id")
 //        println("MESSAGES")
  //       println(result.messages)
 
@@ -106,7 +108,7 @@ object GameLoop {
 
       Await.result(Future.sequence(processedMessages), 5 seconds)
 
-      for((name, world) <- worlds) {
+      for((id, world) <- worlds) {
         world.process()
         //println(world.entities)
       }

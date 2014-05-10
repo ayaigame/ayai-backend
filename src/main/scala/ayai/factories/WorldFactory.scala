@@ -22,8 +22,8 @@ class WorldFactory(networkSystem: ActorSystem) {
   /**
   ** Create a world and instantiate all needed systems and create message processors
   **/
-  def createWorld(id: Int, file: String): RoomWorld = {
-    val jsonFile = s"$file.json"
+  def createWorld(fileName: String): RoomWorld = {
+    val jsonFile: String = s"$fileName.json"
 
     implicit val formats = net.liftweb.json.DefaultFormats
     val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
@@ -32,8 +32,9 @@ class WorldFactory(networkSystem: ActorSystem) {
 
     val parsedJson = parse(lines)
 
-    val tileMap = EntityFactory.loadRoomFromJson(s"$file.json")
+    val tileMap = EntityFactory.loadRoomFromJson(jsonFile, parsedJson)
 
+    val id = (parsedJson \ "id").extract[Int]
     var world: RoomWorld = RoomWorld(id, tileMap, true)
 
     world.addSystem(MovementSystem(), 1)

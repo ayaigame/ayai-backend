@@ -243,13 +243,9 @@ object EntityFactory {
   /**
   ** Load a room from a json file (based of tmx file from tiled) and then put in room tilemap
   **/
-  def loadRoomFromJson(jsonFile: String): TileMap = {
+  def loadRoomFromJson(jsonFile: String, parsedJson: JValue): TileMap = {
     implicit val formats = net.liftweb.json.DefaultFormats
-    val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
-    val lines = file.mkString
-    file.close()
 
-    val parsedJson = parse(lines)
     val tmap = parsedJson.extract[JTMap]
     val jtilesets = (parsedJson \\ "tilesets").extract[List[JTilesets]]
     val jtransports = (parsedJson \\ "transports").extract[List[JTransport]]
