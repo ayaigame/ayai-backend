@@ -1,6 +1,6 @@
 package ayai.systems.mapgenerator
 
-import ayai.gamestate.RoomWorld
+import ayai.gamestate.{RoomWorld, RoomList}
 
 /** Akka Imports **/
 import akka.actor.{Actor, Props}
@@ -13,13 +13,13 @@ case class ExpandRoom(room: RoomWorld)
 class WorldGenerator() extends Actor {
   def receive = {
     case ExpandRoom(room: RoomWorld) => {
-      println("I'm supposed to be expanding room: " + room.name)
+      println("I'm supposed to be expanding room: " + room.id)
       val transports = room.tileMap.listOfTransport
 
       val children = transports map (_.toRoomId)
       println("Whose children are: " + children.toString)
 
-      roomList = context.system.actorOf(Props[RoomList])
+      val roomList = context.system.actorOf(Props[RoomList])
     }
 
     case _ => println("Error: from WorldGenerator.")

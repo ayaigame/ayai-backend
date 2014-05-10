@@ -13,9 +13,9 @@ class WorldFactory(networkSystem: ActorSystem) {
   /**
   ** Create a world and instantiate all needed systems and create message processors
   **/
-  def createWorld(name: String, file: String): RoomWorld = {
+  def createWorld(id: Int, file: String): RoomWorld = {
     val tileMap = EntityFactory.loadRoomFromJson(s"$file.json")
-    var world: RoomWorld = RoomWorld(name, tileMap, true)
+    var world: RoomWorld = RoomWorld(id, tileMap, true)
 
     world.addSystem(MovementSystem(), 1)
     world.addSystem(TransportSystem(networkSystem), 2)
@@ -34,8 +34,8 @@ class WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(CollisionSystem(networkSystem))
     world.addSystem(AttackSystem(networkSystem))
     world.addSystem(CooldownSystem(networkSystem))
-    val serializer = networkSystem.actorOf(Props(GameStateSerializer(world)), s"Serializer$name")
-    val nmProcessor = networkSystem.actorOf(Props(MessageProcessorSupervisor(world)), name=s"MProcessor$name")
+    val serializer = networkSystem.actorOf(Props(GameStateSerializer(world)), s"Serializer$id")
+    val nmProcessor = networkSystem.actorOf(Props(MessageProcessorSupervisor(world)), name=s"MProcessor$id")
 
     //HARDCODED ENTITY ADD HAPPENS HERE
     val entity = EntityFactory.createAI(world, "axis")

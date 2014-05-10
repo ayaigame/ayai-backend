@@ -48,8 +48,8 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
   override def processTime(delta: Int) {
-    val name = world.asInstanceOf[RoomWorld].name
-    val serializer = networkSystem.actorSelection(s"user/Serializer$name")
+    val worldId = world.asInstanceOf[RoomWorld].id
+    val serializer = networkSystem.actorSelection(s"user/Serializer$worldId")
 
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[NetworkingActor])
 

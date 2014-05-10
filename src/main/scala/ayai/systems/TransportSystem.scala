@@ -53,7 +53,7 @@ extends EntityProcessingSystem(include=List(classOf[Room],
         val roomId: Int = tileMap.checkIfTransport(position)
 
         if(roomId >= 0) {
-          val future = actorSystem.actorSelection("user/RoomList") ? GetWorldByName("room"+roomId)
+          val future = actorSystem.actorSelection("user/RoomList") ? GetWorldById(roomId)
           val result = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]]
 
           val newWorld = result match {

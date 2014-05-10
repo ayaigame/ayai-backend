@@ -99,9 +99,9 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
     val future = actorSystem.actorSelection("user/SocketUserMap") ? GetUserId(socketId)
     val userId = Await.result(future, timeout.duration).asInstanceOf[String]
     val worldFuture = actorSystem.actorSelection("user/UserRoomMap") ? GetWorld(userId)
-    val world = Await.result(worldFuture, timeout.duration).asInstanceOf[RoomWorld].name
-    println(world)
-    queue ! new AddInterpretedMessage(world, new RemoveCharacter(socketId))
+    val worldId = Await.result(worldFuture, timeout.duration).asInstanceOf[RoomWorld].id
+    println(worldId)
+    queue ! new AddInterpretedMessage(worldId, new RemoveCharacter(socketId))
   }
 
   def run(port: Int) {

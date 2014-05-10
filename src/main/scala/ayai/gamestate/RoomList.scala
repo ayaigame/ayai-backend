@@ -5,7 +5,7 @@ import akka.actor.Actor
 import scala.collection.mutable.ArrayBuffer
 
 case class AddWorld(world: RoomWorld)
-case class GetWorldByName(name: String)
+case class GetWorldById(id: Int)
 
 class RoomList extends Actor {
   val roomList: ArrayBuffer[RoomWorld] = ArrayBuffer[RoomWorld]()
@@ -13,8 +13,8 @@ class RoomList extends Actor {
   def receive = {
     case AddWorld(world: RoomWorld) =>
       roomList += world
-    case GetWorldByName(name: String) =>
-      sender ! roomList.find(r => r.name == name)
+    case GetWorldById(id: Int) =>
+      sender ! roomList.find(r => r.id == id)
   }
 
 }

@@ -28,14 +28,14 @@ class MessageProcessorSupervisor(world: RoomWorld) extends Actor {
     case _: Exception => Escalate
   }
 
-  val name = world.name
+  val id = world.id
   val router = context.system.actorOf(Props(
                 MessageProcessor(world)).withRouter(RoundRobinRouter(nrOfInstances = 3)),
-                name = s"processorrouter$name")
+                name = s"processorrouter$id")
 
   def receive = {
     case message: ProcessMessage =>
-      router forward message 
+      router forward message
     case _ =>
       println("Error: in procesor supervisor")
   }
