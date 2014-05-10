@@ -15,7 +15,7 @@ class WorldFactory(networkSystem: ActorSystem) {
   **/
   def createWorld(name: String, file: String): RoomWorld = {
     val tileMap = EntityFactory.loadRoomFromJson(s"$file.json")
-    var world: RoomWorld = RoomWorld(name, tileMap)
+    var world: RoomWorld = RoomWorld(name, tileMap, true)
 
     world.addSystem(MovementSystem(), 1)
     world.addSystem(TransportSystem(networkSystem), 2)

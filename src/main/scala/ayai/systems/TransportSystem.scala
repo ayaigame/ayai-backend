@@ -6,6 +6,7 @@ import ayai.components._
 import ayai.gamestate._
 import ayai.apps._
 import ayai.networking._
+import ayai.systems.mapgenerator.{WorldGenerator, ExpandRoom}
 /** Crane Imports **/
 import crane.{Entity,EntityProcessingSystem}
 
@@ -58,6 +59,12 @@ extends EntityProcessingSystem(include=List(classOf[Room],
           val newWorld = result match {
             case Some(roomWorld: RoomWorld) => roomWorld
             case _ => throw new NoRoomFoundException("Cannot match room " + roomId)
+          }
+
+          if(newWorld.isLeaf) {
+            //Generate all of its children
+            val worldGenerator = actorSystem.actorSelection("user/WorldGenerator")
+            worldGenerator ! new ExpandRoom(newWorld)
           }
 
           val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, newWorld)

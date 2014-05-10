@@ -17,6 +17,9 @@ object NoiseGenerator {
       println(scaledNoise.map(_.mkString(" ")).mkString("\n"))
       scaledNoise
     }
+    else if(noiseType == "blank") {
+      Array.fill[Array[Int]](width)(Array.fill[Int](height)(0))
+    }
     else {
       throw new BadConfigException("Cannot match noise algorithm.")
     }

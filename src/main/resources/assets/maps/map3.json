@@ -92,8 +92,14 @@
         "start_y" : 0,
         "end_x" : 1,
         "end_y" : 40,
-        "toRoomId" : 1,
-        "toRoomFile" : "map2.json"
+        "toRoomId" : 1
+        },
+        {
+        "start_x" : 58,
+        "start_y" : 0,
+        "end_x" : 59,
+        "end_y" : 40,
+        "toRoomId" : 2
         }],
 
  "npcs" : [{

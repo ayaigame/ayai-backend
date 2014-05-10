@@ -6,6 +6,7 @@ import ayai.components._
 import ayai.persistence._
 import ayai.gamestate._
 import ayai.factories._
+import ayai.systems.mapgenerator.{WorldGenerator, ExpandRoom}
 
 //Temp for testing!!!
 import ayai.systems.mapgenerator.MapGenerator
@@ -36,7 +37,7 @@ object GameLoop {
     // println(noise.map(_.mkString(" ")).mkString("\n"))
   //   println("*****************************************************")
   // }
-  MapGenerator.getMap("map4", 30, 30)
+  // MapGenerator.getMap("map4", 30, 30)
 
   private val log = LoggerFactory.getLogger(getClass)
 
@@ -61,6 +62,7 @@ object GameLoop {
     val itemMap = networkSystem.actorOf(Props[ItemMap], name="ItemMap")
     val classMap = networkSystem.actorOf(Props[ClassMap], name="ClassMap")
     val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
+    val worldGenerator = networkSystem.actorOf(Props[WorldGenerator], name="WorldGenerator")
 
     //This needs to be read in from a config file
     val rooms = List("map3", "map2")
@@ -72,6 +74,10 @@ object GameLoop {
 
     for((file, index) <- rooms.zipWithIndex)
       worlds(s"room$index") = worldFactory.createWorld(s"room$index", s"$file")
+
+    //Ensure the first room is expanded, since its expansion will not be
+    //triggered by the transport system. (Since you don't transport into it.)
+    worldGenerator ! ExpandRoom(worlds("room0"))
 
     for((name, world) <- worlds)
       roomList ! AddWorld(world)

@@ -235,8 +235,8 @@ object EntityFactory {
 
   case class JTMap(id: Int, width: Int, height: Int)
   case class JTiles(data: List[Int], width: Int, height: Int, name: String)
-  case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomFile: String, toRoomId: Int) {
-    override def toString() : String = "start_x: " + start_x + " toRoomFile: " + toRoomFile
+  case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomId: Int) {
+    override def toString() : String = "start_x: " + start_x
   }
   case class JTilesets(image: String)
 
@@ -258,7 +258,7 @@ object EntityFactory {
     for(trans <- jtransports) {
       val startPosition = new Position(trans.start_x, trans.start_y)
       val endPosition = new Position(trans.end_x, trans.end_y)
-      transports = new TransportInfo(startPosition, endPosition, trans.toRoomFile, trans.toRoomId) :: transports
+      transports = new TransportInfo(startPosition, endPosition, trans.toRoomId) :: transports
     }
     val bundles = (parsedJson \\ "layers").extract[List[JTiles]]
     bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width, "name" -> bundle.name)}

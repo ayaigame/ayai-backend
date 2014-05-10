@@ -45,7 +45,7 @@ object MapGenerator {
   }
 
   def writeNoise(width: Int, height: Int, writer: PrintWriter) {
-    val noise = NoiseGenerator.getNoise("perlin", width, height, 1)
+    val noise = NoiseGenerator.getNoise("blank", width, height, 1)
     for(i <- 0 to noise.length-1) {
       for(j <- 0 to noise(i).length-1){
         if(i == noise.length-1 && j == noise(i).length-1)
