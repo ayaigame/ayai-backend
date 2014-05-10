@@ -1,9 +1,18 @@
 package ayai.factories
 
+/** Ayai Imports **/
 import ayai.apps.Constants
 import ayai.systems._
 import ayai.gamestate.{RoomWorld, GameStateSerializer, MessageProcessorSupervisor, TileMap}
+
+/** Akka Imports **/
 import akka.actor.{ActorSystem, Props}
+
+/** External Imports **/
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
+
+import scala.io.Source
 
 object WorldFactory {
   def apply(networkSystem: ActorSystem) = new WorldFactory(networkSystem)
@@ -14,7 +23,17 @@ class WorldFactory(networkSystem: ActorSystem) {
   ** Create a world and instantiate all needed systems and create message processors
   **/
   def createWorld(id: Int, file: String): RoomWorld = {
+    val jsonFile = s"$file.json"
+
+    implicit val formats = net.liftweb.json.DefaultFormats
+    val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
+    val lines = file.mkString
+    file.close()
+
+    val parsedJson = parse(lines)
+
     val tileMap = EntityFactory.loadRoomFromJson(s"$file.json")
+
     var world: RoomWorld = RoomWorld(id, tileMap, true)
 
     world.addSystem(MovementSystem(), 1)

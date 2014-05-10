@@ -47,7 +47,7 @@ object GameLoop {
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
     import ExecutionContext.Implicits.global
 
-    DBCreation.ensureDbExists()
+    // DBCreation.ensureDbExists()
 
     var worlds = HashMap[Int, RoomWorld]()
     var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
@@ -75,12 +75,13 @@ object GameLoop {
     for((file, index) <- rooms.zipWithIndex)
       worlds(index) = worldFactory.createWorld(index, s"$file")
 
+    for((id, world) <- worlds)
+      roomList ! AddWorld(world)
+
     //Ensure the first room is expanded, since its expansion will not be
     //triggered by the transport system. (Since you don't transport into it.)
     worldGenerator ! ExpandRoom(worlds(0))
 
-    for((name, world) <- worlds)
-      roomList ! AddWorld(world)
     val npcFactory = NPCFactory.bootup(networkSystem)
 
     val receptionist = SockoServer(networkSystem)
