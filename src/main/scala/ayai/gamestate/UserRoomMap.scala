@@ -23,7 +23,7 @@ class UserRoomMap extends Actor {
         case Some(e: Entity) =>
           to.addEntity(e.copy())
           userRoomMap(id).removeEntity(e)
-          userRoomMap(id) = to 
+          userRoomMap(id) = to
           sender ! Success
         case _ =>
           println("Error in UserMap Room")

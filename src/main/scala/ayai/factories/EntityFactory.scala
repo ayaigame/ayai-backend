@@ -40,7 +40,7 @@ object EntityFactory {
   //However can't do that until front end actually gives me the characterId
   def loadCharacter(world: World, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
     CharacterTable.getCharacter(characterName) match {
-      case Some(characterRow: CharacterRow) =>
+      case Some(characterRow: CharacterRow) => {
         val p: Entity = world.createEntity(tag=entityId)
         p.components += new Position(characterRow.pos_x,characterRow.pos_y)
         p.components += new Bounds(32, 32)
@@ -134,11 +134,13 @@ object EntityFactory {
 
         val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
         actorSelection ! new ConnectionWrite(compact(render(json)))
+      }
 
-      case _ =>
+      case _ => {
         println(s"CHARACTER $characterName NOT FOUND!!!!!!!!!!")
         val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
         actorSelection ! new ConnectionWrite(":(")
+      }
     }
   }
 

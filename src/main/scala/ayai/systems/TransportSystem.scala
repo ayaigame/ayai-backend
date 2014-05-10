@@ -28,41 +28,57 @@ object TransportSystem {
   def apply(actorSystem: ActorSystem) = new TransportSystem(actorSystem)
 }
 
+class NoRoomFoundException(msg: String) extends RuntimeException(msg)
+
+
 /**
 ** Take an entity with a Position and NetworkingActor
 ** Swap world of entity to designated room and send information to network actor
 **/
-class TransportSystem(actorSystem: ActorSystem) 
-extends EntityProcessingSystem(include=List(classOf[Position], 
+class TransportSystem(actorSystem: ActorSystem)
+extends EntityProcessingSystem(include=List(classOf[Room],
+                                            classOf[Position],
                                             classOf[NetworkingActor]),
                                exclude=List(classOf[Respawn])) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
   private val log = LoggerFactory.getLogger(getClass)
   //this will only move characters who have received a movement key and the current component is still set to True
   override def processEntity(e: Entity, delta : Int) {
-  (e.getComponent(classOf[Position]),
+  (e.getComponent(classOf[Room]),
+    e.getComponent(classOf[Position]),
     e.getComponent(classOf[NetworkingActor])) match {
-    case (Some(position: Position), Some(networkingActor: NetworkingActor)) =>
-        
-      val tileMap: TileMap = world.asInstanceOf[RoomWorld].tileMap
-      val roomId: String = tileMap.checkIfTransport(position)
-      if(roomId != "") {
-        position.x = 100
-        position.y = 100
-        val future = actorSystem.actorSelection("user/RoomList") ? GetWorldByName("room"+roomId)
-        val result = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]]
-        val world = result match {
-          case Some(roomWorld: RoomWorld) => roomWorld
+      case (Some(room: Room), Some(position: Position), Some(networkingActor: NetworkingActor)) => {
+        val tileMap: TileMap = world.asInstanceOf[RoomWorld].tileMap
+        val roomId: Int = tileMap.checkIfTransport(position)
+
+        if(roomId >= 0) {
+          val future = actorSystem.actorSelection("user/RoomList") ? GetWorldByName("room"+roomId)
+          val result = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]]
+
+          val newWorld = result match {
+            case Some(roomWorld: RoomWorld) => roomWorld
+            case _ => throw new NoRoomFoundException("Cannot match room " + roomId)
+          }
+
+          val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, newWorld)
+          Await.result(future1, timeout.duration)
+
+          //Update the room component so it will be saved to the DB on logout
+          room.id = roomId
+
+          val newTileMap = newWorld.tileMap
+
+          position.x = 100
+          position.y = 100
+          val json = ("type" -> "map") ~
+                      ("tilemap" -> newTileMap.file) ~
+                      (newTileMap.tilesets.asJson)
+
+          val actorSelection = actorSystem.actorSelection("user/SockoSender" + e.tag)
+          actorSelection ! new ConnectionWrite(compact(render(json)))
         }
-        val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, world)
-        Await.result(future1, timeout.duration)
-        val tileMap = world.tileMap
-        val json = ("type" -> "map") ~
-                    ("tilemap" -> tileMap.file) ~
-                    (tileMap.tilesets.asJson)
-        val actorSelection = actorSystem.actorSelection("user/SockoSender" + e.tag)
-        actorSelection ! new ConnectionWrite(compact(render(json)))
       }
+
       case _ =>
         log.warn("bb12e5d: getComponent failed to get anything")
     }

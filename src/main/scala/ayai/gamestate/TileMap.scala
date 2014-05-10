@@ -55,8 +55,7 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
   For checkIfTransport, use the characters position and see if they are in any of the transport areas
   If inside transport area, then return the new transport
   **/
-  def checkIfTransport(characterPosition: Position): String = {
-    val inTransport: Boolean = false
+  def checkIfTransport(characterPosition: Position): Int = {
     for(transport <- listOfTransport) {
       val startPosition = transport.startingPosition
       val endPosition = transport.endingPosition
@@ -64,9 +63,9 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
       if((characterPosition.x >= (startPosition.x * tileSize) && characterPosition.y >= (startPosition.y * tileSize)) &&
          (characterPosition.x < (endPosition.x * tileSize) && characterPosition.y < (endPosition.y * tileSize))) {
         //CHANGE STARTING POSITION
-        return transport.toRoomId.toString
+        return transport.toRoomId
       }
     }
-    return ""
+    return -1
   }
 }

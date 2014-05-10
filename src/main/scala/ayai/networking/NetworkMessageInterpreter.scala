@@ -74,7 +74,7 @@ class NetworkMessageInterpreter extends Actor {
       case _ =>
         lookUpUserBySocketId(wsFrame.webSocketId)
     }
-    val world = msgType match {
+    var world = msgType match {
       case "init" => "room0"
       case _ =>
         lookUpWorldByUserId(userId)
@@ -83,11 +83,19 @@ class NetworkMessageInterpreter extends Actor {
     msgType match {
       case "init" =>
         val id = (new UID()).toString
-        context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
-        context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(wsFrame.webSocketId, id)
-        context.system.actorSelection("user/UserRoomMap") ! AddAssociation(id, lookUpWorldByName("room0"))
 
         val characterName: String = stripQuotes(compact(render(rootJSON \ "name")))
+
+        world = CharacterTable.getCharacter(characterName) match {
+          case Some(characterRow: CharacterRow) =>
+            "room" + characterRow.room_id
+          case _ => "room0"
+        }
+
+        context.system.actorOf(Props(new SockoSender(wsFrame)), "SockoSender" + id)
+        context.system.actorSelection("user/SocketUserMap") ! AddSocketUser(wsFrame.webSocketId, id)
+        context.system.actorSelection("user/UserRoomMap") ! AddAssociation(id, lookUpWorldByName(world))
+
         queue ! new AddInterpretedMessage(world, new AddNewCharacter(id, characterName, Constants.STARTING_X, Constants.STARTING_Y))
 
       case "move" =>
