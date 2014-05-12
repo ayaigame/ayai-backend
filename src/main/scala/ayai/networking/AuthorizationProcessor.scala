@@ -165,7 +165,7 @@ class AuthorizationProcessor extends Actor {
     val level = contentSplit[10].replaceAll("level=","")
     val experience = contentSplit[11].replaceAll("experience=","")
 
-    //get world from room id
+    //create a NPC all values object for this
     val entity = world.createEntity("NPC"+id)
     entity.components += new NPC(id)
     entity.components += new Character(id, name)
@@ -193,14 +193,47 @@ class AuthorizationProcessor extends Actor {
     val baseHealth = contentSplit[3].replaceAll("baseHealth=","")
     val baseMana = contentSplit[4].replaceAll("baseMana=","")
     val strength = contentSplit[5].replaceAll("strength=","")
-    val defense = contentSplit[6].replaceAll("=","")
-    val speed = contentSplit[7].replaceAll("torso=","")
-    val strengthLevel= contentSplit[8].replaceAll("feet=","")
-    val defenseLevel = contentSplit[9].replaceAll("level=","")
-    val speedLevel = contentSplit[10].replaceAll("experience=","")
-    val spriteSheetLocation = contentSplit[11].replaceAll("legs=","")
+    val defense = contentSplit[6].replaceAll("defense=","")
+    val speed = contentSplit[7].replaceAll("speed=","")
+    val strengthLevel= contentSplit[8].replaceAll("strengthLevel=","")
+    val defenseLevel = contentSplit[9].replaceAll("defenseLevel=","")
+    val speedLevel = contentSplit[10].replaceAll("speedLevel=","")
+    val spriteSheetLocation = contentSplit[11].replaceAll("spritesheet=","")
     
     request.response.write(HttpResponseStatus.OK)
+
+  case EffectPost(request: HttpRequestEvent) =>
+    val content: String = request.request.content.toString
+    val delimiter = content.indexOfSlice("&")
+    val delimiter2 = content.lastIndexOfSlice("&")
+    val userToken = content.slice(0, delimter).replaceAll("token=","")
+    val contentSplit = content.split("&")
+    //get item information
+    val id = contentSplit[1].replaceAll("id=", "")
+    val name = contentSplit[2].replaceAll("name=","")
+    val description = contentSplit[3].replaceAll("description=","")
+    val effectType = contentSplit[4].replaceAll("effectType=","")
+    val value = contentSplit[5].replaceAll("value=","")
+    val attribute = contentSplit[6].replaceAll("attribute=","")
+    val multiplier = contentSplit[7].replaceAll("multiplier=","")
+    val isRelative= contentSplit[8].replaceAll("isRelative=","")
+    val isValueRelative = contentSplit[9].replaceAll("isValueRelative=","")
+    val image = contentSplit[10].replaceAll("imageLocation=","")
+    
+    val attributeReal = null
+    //get required info needed for these 
+    attribute.toLowerCase() match {
+      case "oneoff" =>
+      case "duration" =>
+      case "timedinterval" =>
+    }
+    
+    val effect = new Effect(name, 
+                            description, effectType,
+                            value, )
+
+    request.response.write(HttpResponseStatus.OK)
+
 
   case _ => println("Error from AuthorizationProcessor.")
   }

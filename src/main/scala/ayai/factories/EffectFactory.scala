@@ -17,17 +17,12 @@ import scala.concurrent.{Await, ExecutionContext, Promise}
 import scala.concurrent.duration._
 import ayai.apps._ 
 
-case class AllNPCValues(
+case class AllEffectValues(
       id: Int,
       name: String,
-      roomId: Int,
-      level: Int,
-      experience: Long,
-      maximumHealth: Int,
-      xposition: Int,
-      yposition: Int,
-      quests: QuestValue,
-      inventory: List[InventoryValue])
+      description: String, 
+      
+)
 case class QuestValue(questId: Int)
 case class InventoryValue(itemId: Int)
 case class EquipmentValues(weaponId: Int, helmetId: Int, torsoId: Int, legsId: Int, feetId: Int)
