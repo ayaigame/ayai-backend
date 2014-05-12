@@ -1,0 +1,29 @@
+{
+	"sprites": [
+		{
+			"name": "guy.png",
+			"path": "",
+			"width": 32,
+			"height": 32,
+			"facedown": "1-1",
+			"faceleft": "4-4",
+			"faceright": "7-7",
+			"faceup": "10-10",
+			"walkdown": "0-2",
+			"walkleft": "3-5",
+			"walkright": "6-8",
+			"walkup": "9-11",
+			"attackdown": "12-15",
+			"attackleft": "18-21",
+			"attackright": "24-27",
+			"attackup": "30-33"
+		},
+		{
+			"name": "npcsheet.png",
+			"path": "",
+			"width": 32,
+			"height": 48,
+			"facedown": "0-0"
+		}
+	]
+}

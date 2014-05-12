@@ -28,7 +28,7 @@ object ClassFactory {
       baseHealth: Int,
       baseMana: Int,
       baseStats: Option[List[Stat]],
-      statGrowths: Option[List[Stat]]) {
+      statGrowths: List[Int]) {
 
     def getStatsJson: JValue = {
       baseStats match {
