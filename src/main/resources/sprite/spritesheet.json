@@ -1,7 +1,7 @@
 {
 	"sprites": [
 		{
-			"name": "guy.png",
+			"name": "guy",
 			"path": "",
 			"width": 32,
 			"height": 32,
@@ -19,11 +19,22 @@
 			"attackup": "30-33"
 		},
 		{
-			"name": "npcsheet.png",
+			"name": "npcsheet",
 			"path": "",
 			"width": 32,
 			"height": 48,
-			"facedown": "0-0"
+			"facedown": "0-0",
+			"faceleft": "0-0",
+			"faceright": "0-0",
+			"faceup": "0-0",
+			"walkdown": "0-0",
+			"walkleft": "0-0",
+			"walkright": "0-0",
+			"walkup": "0-0",
+			"attackdown": "0-0",
+			"attackleft": "0-0",
+			"attackright": "0-0",
+			"attackup": "0-0"
 		}
 	]
 }

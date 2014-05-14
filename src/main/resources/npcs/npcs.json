@@ -26,7 +26,7 @@
 			"roomId": 1,
 			"level": 20,
 			"maximumHealth": 500,
-			"experience": 2000
+			"experience": 2000,
 			"xposition": 100,
 			"yposition": 100,
 			"quests": [{

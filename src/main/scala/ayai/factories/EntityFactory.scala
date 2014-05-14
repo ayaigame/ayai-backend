@@ -280,7 +280,7 @@ object EntityFactory {
       lootEntity.components += new Mana(10000,10000)
       val animations = new ArrayBuffer[Animation]()
       animations += new Animation("facedown", 0, 0)
-      lootEntity.components += new SpriteSheet("props", animations, 40, 40)
+      lootEntity.components += new SpriteSheet("props")
       lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
         case Some(character: Character) => character.id
         case _ => "0"

@@ -1,0 +1,42 @@
+{
+	"effects": [
+		{
+			"id": 1,
+			"name": "Recover_0-100",
+			"description": "",
+			"effectType": 10,
+			"value": 200,
+			"attribute": "duration",
+			"length": 100,
+			"multiplier": 100,
+			"isRelative": true,
+			"isValueRelative": false, 
+			"image": ""
+		},
+		{
+			"id": 2,
+			"name": "Recover_50",
+			"description": "",
+			"effectType": 10,
+			"value": 200,
+			"attribute": "oneoff",
+			"multiplier": 100,
+			"isRelative": true,
+			"isValueRelative": false, 
+			"image": ""
+		}, 
+		{
+			"id": 3,
+			"name": "Recover_50",
+			"description": "",
+			"effectType": 10,
+			"value": 200,
+			"attribute": "timedinterval",
+			"length": 200,
+			"interval": 5,
+			"multiplier": 100,
+			"isRelative": true,
+			"isValueRelative": false, 
+			"image": ""
+		}]
+}
