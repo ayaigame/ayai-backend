@@ -28,7 +28,7 @@ class ItemMap() extends Actor {
 	}
 
 	def outputJson(): JObject = {
-		itemMap.foreach{case (key, value) => value.asJson}
+		// itemMap.foreach{case (key, value) => value.asJson}
 	}
 
 	def receive = {

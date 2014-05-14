@@ -24,7 +24,7 @@ class ClassMap() extends Actor {
 		case RemoveClass(id: String) =>
 		  classMap -= id
 		case OutputJson() =>
-			classMap.foreach{case (key, value) => value.asJson}
+			// classMap.foreach{case (key, value) => value.asJson}
 		case _ => println("No Command for Classes")
 	 		sender ! Failure
 	}
