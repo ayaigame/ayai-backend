@@ -26,7 +26,7 @@ class QuestMap() extends Actor {
 		sender ! questMap(id)
 	}
 
-	def outputJson(): JObject = {
+	def outputJson() {
 		// questMap.foreach{case (key, value) => value.asJson}
 	}
 	def receive = {

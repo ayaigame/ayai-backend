@@ -27,7 +27,7 @@ class ItemMap() extends Actor {
 		itemMap -= id
 	}
 
-	def outputJson(): JObject = {
+	def outputJson() {
 		// itemMap.foreach{case (key, value) => value.asJson}
 	}
 
