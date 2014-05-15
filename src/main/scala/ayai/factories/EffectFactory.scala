@@ -16,6 +16,7 @@ import akka.util.Timeout
 import scala.concurrent.{Await, ExecutionContext, Promise}
 import scala.concurrent.duration._
 import ayai.apps._ 
+import ayai.statuseffects._
 
 case class AllEffectValues(
       id: Int,
@@ -36,7 +37,24 @@ object EffectFactory {
 
   def bootup(networkSystem: ActorSystem) = {
     var effects: List[AllEffectValues] = getEffectList("src/main/resources/effects/effects.json")
+    effects.foreach(effectData => 
+    {
 
+      val att = effectData.attribute.toLowerCase match {
+        case "oneoff" => 
+          new OneOff()
+        case "duration" =>
+          new ayai.statuseffects.Duration(effectData.length.get)
+        case "timedinterval" => 
+          new TimedInterval(effectData.length.get, effectData.interval.get)
+      }
+      
+      val effect = new Effect(effectData.id, effectData.name, effectData.description,
+                              effectData.effectType, effectData.value, att, new Multiplier(effectData.multiplier),
+                              effectData.isRelative, effectData.isValueRelative)
+      effect.imageLocation = effectData.image
+      networkSystem.actorSelection("user/EffectMap") ! AddEffect("Effect"+effectData.id, effect)
+    })
   }
 
   def getEffectList(path: String): List[AllEffectValues] = {

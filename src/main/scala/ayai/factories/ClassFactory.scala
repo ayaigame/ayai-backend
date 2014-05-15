@@ -27,8 +27,7 @@ object ClassFactory {
       description: String,
       baseHealth: Int,
       baseMana: Int,
-      baseStats: Option[List[Stat]],
-      statGrowths: List[Int]) {
+      baseStats: Option[List[Stat]]) {
 
     def getStatsJson: JValue = {
       baseStats match {
@@ -36,8 +35,8 @@ object ClassFactory {
           // var jsonStats =
           var statsArray = new ArrayBuffer[Stat]()
           statsArray appendAll stats
-          statsArray += new Stat("health", baseHealth)
-          statsArray += new Stat("mana", baseMana)
+          statsArray += new Stat("health", baseHealth, 0)
+          statsArray += new Stat("mana", baseMana, 0)
 
           var statsMapping = statsArray map ((stat: Stat) => (stat.attributeType -> stat.magnitude))
           var statsMap = statsMapping.toMap

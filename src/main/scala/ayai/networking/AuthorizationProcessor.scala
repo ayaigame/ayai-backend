@@ -155,17 +155,17 @@ class AuthorizationProcessor extends Actor {
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "")
-    val name = contentSplit(2).replaceAll("name=","")
+    val id = contentSplit(1).replaceAll("id=", "").toInt
+    val name = contentSplit(2).replaceAll("name=","").toInt
     val faction = contentSplit(3).replaceAll("faction=","")
-    val room = contentSplit(4).replaceAll("room=","")
-    val weapon1 = contentSplit(5).replaceAll("weapon1=","")
-    val helmet = contentSplit(6).replaceAll("helmet=","")
-    val torso = contentSplit(7).replaceAll("torso=","")
-    val legs = contentSplit(8).replaceAll("legs=","")
-    val feet = contentSplit(9).replaceAll("feet=","")
-    val level = contentSplit(10).replaceAll("level=","")
-    val experience = contentSplit(11).replaceAll("experience=","")
+    val room = contentSplit(4).replaceAll("room=","").toInt
+    val weapon1 = contentSplit(5).replaceAll("weapon1=","").toInt
+    val helmet = contentSplit(6).replaceAll("helmet=","").toInt
+    val torso = contentSplit(7).replaceAll("torso=","").toInt
+    val legs = contentSplit(8).replaceAll("legs=","").toInt
+    val feet = contentSplit(9).replaceAll("feet=","").toInt
+    val level = contentSplit(10).replaceAll("level=","").toInt
+    val experience = contentSplit(11).replaceAll("experience=","").toInt
 
 
     //get equipment ids for weapons given
@@ -183,16 +183,16 @@ class AuthorizationProcessor extends Actor {
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "")
+    val id = contentSplit(1).replaceAll("id=", "").toInt
     val name = contentSplit(2).replaceAll("name=","")
-    val baseHealth = contentSplit(3).replaceAll("baseHealth=","")
-    val baseMana = contentSplit(4).replaceAll("baseMana=","")
-    val strength = contentSplit(5).replaceAll("strength=","")
-    val defense = contentSplit(6).replaceAll("defense=","")
-    val speed = contentSplit(7).replaceAll("speed=","")
-    val strengthLevel= contentSplit(8).replaceAll("strengthLevel=","")
-    val defenseLevel = contentSplit(9).replaceAll("defenseLevel=","")
-    val speedLevel = contentSplit(10).replaceAll("speedLevel=","")
+    val baseHealth = contentSplit(3).replaceAll("baseHealth=","").toInt
+    val baseMana = contentSplit(4).replaceAll("baseMana=","").toInt
+    val strength = contentSplit(5).replaceAll("strength=","").toInt
+    val defense = contentSplit(6).replaceAll("defense=","").toInt
+    val speed = contentSplit(7).replaceAll("speed=","").toInt
+    val strengthLevel= contentSplit(8).replaceAll("strengthLevel=","").toInt
+    val defenseLevel = contentSplit(9).replaceAll("defenseLevel=","").toInt
+    val speedLevel = contentSplit(10).replaceAll("speedLevel=","").toInt
     val spriteSheetLocation = contentSplit(11).replaceAll("spritesheet=","")
     
     request.response.write(HttpResponseStatus.OK)
@@ -204,7 +204,7 @@ class AuthorizationProcessor extends Actor {
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "")
+    val id = contentSplit(1).replaceAll("id=", "").toInt
     val name = contentSplit(2).replaceAll("name=","")
     val description = contentSplit(3).replaceAll("description=","")
     val effectType = contentSplit(4).replaceAll("effectType=","")
@@ -220,7 +220,7 @@ class AuthorizationProcessor extends Actor {
         val isValueRelative:Boolean = contentSplit(9).replaceAll("isValueRelative=","").toBoolean
         val image = contentSplit(10).replaceAll("imageLocation=","")      
         val attributeType: TimeAttribute = new OneOff()
-        val effect = new Effect(name, 
+        val effect = new Effect(id, name, 
                             description, effectType,
                             value, attributeType,
                             new Multiplier(multiplier), isRelative, isValueRelative)
@@ -233,7 +233,7 @@ class AuthorizationProcessor extends Actor {
         val isValueRelative:Boolean = contentSplit(10).replaceAll("isValueRelative=","").toBoolean
         val image = contentSplit(11).replaceAll("imageLocation=","")
         val attributeType: TimeAttribute = new Duration(duration)
-        val effect = new Effect(name, 
+        val effect = new Effect(id, name, 
                             description, effectType,
                             value, attributeType,
                             new Multiplier(multiplier), isRelative, 
@@ -247,7 +247,7 @@ class AuthorizationProcessor extends Actor {
         val isValueRelative:Boolean = contentSplit(11).replaceAll("isValueRelative=","").toBoolean
         val image = contentSplit(12).replaceAll("imageLocation=","")
         val attributeType: TimeAttribute = new TimedInterval(duration, interval)
-        val effect = new Effect(name, 
+        val effect = new Effect(id,name, 
                             description, effectType,
                             value, attributeType,
                             new Multiplier(multiplier), isRelative, isValueRelative )
