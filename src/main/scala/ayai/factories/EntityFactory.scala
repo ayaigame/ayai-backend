@@ -92,7 +92,7 @@ object EntityFactory {
         // inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
         val item = new Item(4, "Potion", 0, 20, new Consumable())
-        item.effects += new Effect("heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
+        item.effects += new Effect(0,"heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
         
         inventory.addItem(item)
 
@@ -306,7 +306,7 @@ object EntityFactory {
       lootEntity.components += new NPC(0)
       lootEntity.components += new Health(10000,10000)
       lootEntity.components += new Mana(10000,10000)
-      val animations = new ArrayBuffer[Animation]()
+    val animations = new ArrayBuffer[Animation]()
       animations += new Animation("facedown", 0, 0)
       lootEntity.components += new SpriteSheet("props", animations, 40, 40)
       lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {

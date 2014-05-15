@@ -16,7 +16,7 @@ case class QuestBag(quests: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()) exten
   def addQuest(questToAdd: Quest) = {
       if(questToAdd != null) {
         quests += questToAdd
-        }
+      }
   
     }
 }

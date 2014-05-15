@@ -10,11 +10,12 @@ import net.liftweb.json.JsonDSL._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 
 // Added tempValues so we can remove any effects from a  given stat
-case class Stat(attributeType: String, magnitude: Int) {
+case class Stat(attributeType: String, magnitude: Int, growth: Int) {
   var cachedValue: Int = 0
   var modifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
   def asJson: JObject = {
-    (attributeType -> magnitude)
+    (attributeType -> magnitude) ~
+    ("growth" -> growth)
   }
 
   /*
@@ -82,8 +83,8 @@ class Stats(val stats: ArrayBuffer[Stat]) extends Component {
     stats += newStat
   }
 
-  def addStat(attributeType: String, magnitude: Int) = {
-    stats += Stat(attributeType, magnitude)
+  def addStat(attributeType: String, magnitude: Int, growth: Int) = {
+    stats += Stat(attributeType, magnitude, growth)
   }
 
   //Removes all stats which match the statName
@@ -98,7 +99,7 @@ class Stats(val stats: ArrayBuffer[Stat]) extends Component {
         return stat
       }
     }
-    return new Stat("", 0)
+    return new Stat("", 0, 0)
   }
 
   def getValueByAttribute(attributeType: String): Int = {
