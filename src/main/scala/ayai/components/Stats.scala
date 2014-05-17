@@ -77,7 +77,7 @@ case class Stat(attributeType: String, magnitude: Int, growth: Int) {
   }
 }
 
-class Stats(val stats: ArrayBuffer[Stat]) extends Component {
+class Stats(val stats: ArrayBuffer[Stat] = new ArrayBuffer[Stat]()) extends Component {
 
   def addStat(newStat: Stat) = {
     stats += newStat

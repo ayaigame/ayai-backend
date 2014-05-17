@@ -10,7 +10,7 @@ import akka.actor.Status.{Success, Failure}
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-case class AddEffect(id: String, Effect: Effect)
+case class AddEffect(id: String, effect: Effect)
 case class RemoveEffect(id: String)
 case class GetEffect(id: String)
 

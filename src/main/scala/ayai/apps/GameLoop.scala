@@ -44,7 +44,7 @@ object GameLoop {
     val networkSystem = ActorSystem("NetworkSystem")
     val mQueue = networkSystem.actorOf(Props[MessageQueue], name="MQueue")
     val nmInterpreter = networkSystem.actorOf(Props[NetworkMessageInterpreterSupervisor], name="NMInterpreter")
-    val aProcessor = networkSystem.actorOf(Props[AuthorizationProcessor], name="AProcessor")
+    val aProcessor = networkSystem.actorOf(Props(new AuthorizationProcessor(networkSystem)), name="AProcessor")
     val socketUserMap = networkSystem.actorOf(Props[SocketUserMap], name="SocketUserMap")
     val userRoomMap = networkSystem.actorOf(Props[UserRoomMap], name="UserRoomMap")
     val roomList = networkSystem.actorOf(Props[RoomList], name="RoomList")
