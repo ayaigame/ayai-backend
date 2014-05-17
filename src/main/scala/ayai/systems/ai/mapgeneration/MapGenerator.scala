@@ -4,35 +4,21 @@ import java.util.Random
 import java.io._
 import scala.collection.immutable.Range
 
-object MapGenerator {
+/** Akka Imports **/
+import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.Status.{Success, Failure}
+import akka.pattern.ask
+import akka.util.Timeout
+
+//width and height are in terms of tiles.
+case class CreateMap(name: String, width: Int, height: Int)
+
+//This Actor will write to a map.json file and return the name of the file.
+//The WorldGenerator will then be able to use that file to instantiate the room.
+class MapGenerator extends Actor {
   //TODO:
   //Write to mapsList.json file so created worlds get loaded in when the server starts
   //Add transports to the maps so they will continue
-
-
-
-
-  //width and height are in terms of tiles.
-  def getMap(name: String, width: Int, height: Int) {
-
-    // val writer = new PrintWriter(name + ".json")
-    val writer = new PrintWriter("src/main/resources/assets/maps/" + name + ".json")
-
-    writer.print("{\n  \"id\": 1,\n  \"orientation\":\"orthogonal\",\n  \"properties\": {},\n")
-    writer.print("  \"height\":" + height + ",\n  \"width\":" + width + ",\n")
-    writer.print("  \"tilewidth\":32,\n  \"version\":1,\n  \"tileheight\":32,\n")
-    writer.print("  \"transports\" : [],\n")
-    writer.print("  \"tilesets\":[{\n    \"firstgid\":1,\n    \"image\":\"..\\/tiles\\/tiles.png\",\n")
-    writer.print("    \"imageheight\":192,\n    \"imagewidth\":192,\n    \"margin\":0,\n    \"name\":\"tiles\",\n")
-    writer.print("    \"properties\": {},\n    \"spacing\":0,\n    \"tileheight\":32,\n    \"tilewidth\":32\n    }],\n")
-    writer.print("  \"layers\":[{\n    \"name\":\"Tile Layer 1\",\n    \"opacity\":1,\n")
-    writer.print("    \"height\":" + height + ",\n    \"width\":"+ width + ",\n")
-    writer.print("    \"type\":\"tilelayer\",\n    \"visible\":true,\n    \"x\":0,\n    \"y\":0,\n")
-    writer.print("    \"data\":[")
-    writeNoise(width, height, writer)
-    writer.print("  }]\n}")
-    writer.close()
-  }
 
   //Takes a noise value and translates it to the corresponding tile id
   def translateTile(i: Int): Int = {
@@ -55,5 +41,29 @@ object MapGenerator {
           writer.print(translateTile(noise(i)(j)) + ", ")
       }
     }
+  }
+
+  def receive = {
+    case CreateMap(name: String, width: Int, height: Int) => {
+      val writer = new PrintWriter("src/main/resources/assets/maps/" + name + ".json")
+
+      writer.print("{\n  \"id\": 1,\n  \"orientation\":\"orthogonal\",\n  \"properties\": {},\n")
+      writer.print("  \"height\":" + height + ",\n  \"width\":" + width + ",\n")
+      writer.print("  \"tilewidth\":32,\n  \"version\":1,\n  \"tileheight\":32,\n")
+      writer.print("  \"transports\" : [],\n")
+      writer.print("  \"tilesets\":[{\n    \"firstgid\":1,\n    \"image\":\"..\\/tiles\\/tiles.png\",\n")
+      writer.print("    \"imageheight\":192,\n    \"imagewidth\":192,\n    \"margin\":0,\n    \"name\":\"tiles\",\n")
+      writer.print("    \"properties\": {},\n    \"spacing\":0,\n    \"tileheight\":32,\n    \"tilewidth\":32\n    }],\n")
+      writer.print("  \"layers\":[{\n    \"name\":\"Tile Layer 1\",\n    \"opacity\":1,\n")
+      writer.print("    \"height\":" + height + ",\n    \"width\":"+ width + ",\n")
+      writer.print("    \"type\":\"tilelayer\",\n    \"visible\":true,\n    \"x\":0,\n    \"y\":0,\n")
+      writer.print("    \"data\":[")
+      writeNoise(width, height, writer)
+      writer.print("  }]\n}")
+      writer.close()
+    }
+
+    case _ => println("Error: from MapGenerator.")
+      sender ! Failure
   }
 }

@@ -16,6 +16,7 @@ case class ExpandRoom(room: RoomWorld)
 
 class WorldGenerator() extends Actor {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
+  val mapGenerator = context.system.actorOf(Props[MapGenerator], name="MapGenerator")
 
   def _getRoomsToBuild(room: RoomWorld): Set[Int] = {
     // println("I'm supposed to be expanding room: " + room.id)

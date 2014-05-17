@@ -49,7 +49,6 @@ object GameLoop {
 
     // DBCreation.ensureDbExists()
 
-    var worlds = HashMap[Int, RoomWorld]()
     var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
 
     val networkSystem = ActorSystem("NetworkSystem")
@@ -62,27 +61,30 @@ object GameLoop {
     val itemMap = networkSystem.actorOf(Props[ItemMap], name="ItemMap")
     val classMap = networkSystem.actorOf(Props[ClassMap], name="ClassMap")
     val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
+    val worldFactory = networkSystem.actorOf(Props[WorldFactory], name="WorldFactory")
     val worldGenerator = networkSystem.actorOf(Props[WorldGenerator], name="WorldGenerator")
 
     //This needs to be read in from a config file
     val rooms = List("map3", "map2")
-    val worldFactory = WorldFactory(networkSystem)
 
     val itemFactory = ItemFactory.bootup(networkSystem)
     val questFactory = QuestFactory.bootup(networkSystem)
     val classFactory = ClassFactory.bootup(networkSystem)
 
     for(file <- rooms){
-      val world = worldFactory.createWorld(s"$file")
-      worlds(world.id) = world
+      val future = worldFactory ? new CreateWorld(file)
+      val result = Await.result(future, timeout.duration).asInstanceOf[RoomWorld]
+      roomList ! AddWorld(result)
     }
-
-    for((id, world) <- worlds)
-      roomList ! AddWorld(world)
 
     //Ensure the first room is expanded, since its expansion will not be
     //triggered by the transport system. (Since you don't transport into it.)
-    worldGenerator ! ExpandRoom(worlds(0))
+    val futureOfRoom0 = roomList ? GetWorldById(0)
+    Await.result(futureOfRoom0, timeout.duration) match {
+      case Some(room: RoomWorld) =>
+        worldGenerator ! ExpandRoom(room)
+      case _ => println("Cannot find room 0.")
+    }
 
     val npcFactory = NPCFactory.bootup(networkSystem)
 
@@ -94,12 +96,13 @@ object GameLoop {
       val start = System.currentTimeMillis
 
       val processedMessages = new ArrayBuffer[Future[Any]]
-      for((id, world) <- worlds) {
+      val futureWorlds = roomList ? new GetAllWorlds()
+      val worlds = Await.result(futureWorlds, timeout.duration).asInstanceOf[ArrayBuffer[RoomWorld]]
+      for(world <- worlds) {
+        val id = world.id
         val future = mQueue ? FlushMessages(id)
         val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
         val mProcessor = networkSystem.actorSelection(s"user/MProcessor$id")
-//        println("MESSAGES")
- //       println(result.messages)
 
         result.messages.foreach { message =>
           processedMessages += mProcessor ? new ProcessMessage(message)
@@ -108,9 +111,8 @@ object GameLoop {
 
       Await.result(Future.sequence(processedMessages), 5 seconds)
 
-      for((id, world) <- worlds) {
+      for(world <- worlds) {
         world.process()
-        //println(world.entities)
       }
 
       val end = System.currentTimeMillis
