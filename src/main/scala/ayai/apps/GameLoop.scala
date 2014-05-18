@@ -47,7 +47,7 @@ object GameLoop {
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
     import ExecutionContext.Implicits.global
 
-    // DBCreation.ensureDbExists()
+    DBCreation.ensureDbExists()
 
     var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
 

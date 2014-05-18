@@ -60,16 +60,16 @@ object TiledExporter {
 				("tileheight" -> 32) ~
 				("tilesets" -> tilesets.map { item => (
 					("firstgid" -> 1) ~
-					("image" -> "overworld (1).png") ~
-					("imageheight" -> 512) ~
-					("imagewidth" -> 960) ~
+					("image" -> "sd33.png") ~
+					("imageheight" -> 640) ~
+					("imagewidth" -> 1184) ~
 					("margin" -> 0) ~
-					("name" -> "overworld (1)") ~
+					("name" -> "sd33") ~
 					("properties" -> null) ~
 					("spacing" -> 0) ~
 					("tileheight" -> 32) ~
 					("tilewidth" -> 32) ~
-					("transparentcolor" -> "#006496"))}
+					("transparentcolor" -> "#ff00cc"))}
 					) ~
 				("tilewidth" -> 32) ~
 				("version" -> 1) ~

@@ -22,6 +22,7 @@ import org.squeryl.adapters.H2Adapter
 
 object DBCreation {
   def ensureDbExists() = {
+    println("Recreating DataBase....")
 
     // If DB Doesn't exist, create it
     if(Files.exists(Paths.get("ayai.h2.db"))){

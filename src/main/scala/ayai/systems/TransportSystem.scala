@@ -25,6 +25,8 @@ import akka.util.Timeout
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
+import scala.io.Source
+
 object TransportSystem {
   def apply(actorSystem: ActorSystem) = new TransportSystem(actorSystem)
 }
@@ -77,10 +79,17 @@ extends EntityProcessingSystem(include=List(classOf[Room],
 
           position.x = 100
           position.y = 100
+
+          implicit val formats = net.liftweb.json.DefaultFormats
+          val mapFile = Source.fromURL(getClass.getResource("/assets/maps/" + newTileMap.file))
+          val tileMapString = mapFile.mkString
+          mapFile.close()
+
           val json = ("type" -> "map") ~
-                      ("tilemap" -> newTileMap.file) ~
+                      ("tilemap" -> tileMapString) ~
                       (newTileMap.tilesets.asJson)
 
+          println(compact(render(json)))
           val actorSelection = actorSystem.actorSelection("user/SockoSender" + e.tag)
           actorSelection ! new ConnectionWrite(compact(render(json)))
         }
