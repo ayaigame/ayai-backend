@@ -28,8 +28,9 @@ class WorldFactory extends Actor {
       /**
       ** Create a world and instantiate all needed systems and create message processors
       **/
-    case CreateWorld(fileName: String) => {
-      val jsonFile: String = s"$fileName.json"
+    case CreateWorld(jsonFile: String) => {
+      println(jsonFile)
+      // val jsonFile: String = s"$fileName.json"
       implicit val formats = net.liftweb.json.DefaultFormats
       val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
       val lines = file.mkString

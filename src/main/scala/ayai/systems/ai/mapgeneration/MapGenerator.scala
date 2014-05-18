@@ -1,5 +1,9 @@
 package ayai.systems.mapgenerator
 
+import ayai.factories.{WorldFactory, CreateWorld}
+import ayai.gamestate.RoomWorld
+import ayai.apps.Constants
+
 import java.util.Random
 import java.io._
 import scala.collection.immutable.Range
@@ -10,57 +14,59 @@ import akka.actor.Status.{Success, Failure}
 import akka.pattern.ask
 import akka.util.Timeout
 
+/** External Imports **/
+import scala.concurrent.{Await, ExecutionContext, Promise, Future}
+import scala.concurrent.duration._
+
 //width and height are in terms of tiles.
-case class CreateMap(name: String, width: Int, height: Int)
+case class CreateMap(id: Int, width: Int, height: Int)
+case class NewRoomWorld(world: RoomWorld)
 
 //This Actor will write to a map.json file and return the name of the file.
 //The WorldGenerator will then be able to use that file to instantiate the room.
 class MapGenerator extends Actor {
+  implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
   //TODO:
   //Write to mapsList.json file so created worlds get loaded in when the server starts
   //Add transports to the maps so they will continue
 
-  //Takes a noise value and translates it to the corresponding tile id
-  def translateTile(i: Int): Int = {
-    if(i == 0)
-      375
-    else if(i == 1)
-      4
-    else
-      12
-  }
+  def rescaleNoise(noise: Array[Array[Double]]) : Array[Array[Int]] = {
+    def getMax(row: Array[Double]): Double = {row reduceLeft (_ max _)}
+    def getMin(row: Array[Double]): Double = {row reduceLeft (_ min _)}
+    val noiseMax = noise map getMax reduceLeft (_ max _)
+    val noiseMin = noise map getMin reduceLeft (_ min _)
 
-  def writeNoise(width: Int, height: Int, writer: PrintWriter) {
-    val noise = NoiseGenerator.getNoise("blank", width, height, 1)
-    for(i <- 0 to noise.length-1) {
-      for(j <- 0 to noise(i).length-1){
-        if(i == noise.length-1 && j == noise(i).length-1)
-          //last tile should close the list instead of adding a comma
-          writer.print(translateTile(noise(i)(j)) + "]\n")
-        else
-          writer.print(translateTile(noise(i)(j)) + ", ")
-      }
+    val range = noiseMax - noiseMin
+
+    val numLevels = 3
+    val brackets = Range.Double(noiseMin, noiseMax, range/(numLevels - 1))
+
+    def rescaleTile(x: Double): Int = {
+      //Find the bracket the tile falls into
+      brackets.zipWithIndex.find(_._1 >= x).getOrElse((0.0,0))._2
     }
-  }
+
+    def rescaleRow(row: Array[Double]): Array[Int] = {
+      row map rescaleTile
+    }
+
+    noise map rescaleRow
+ }
 
   def receive = {
-    case CreateMap(name: String, width: Int, height: Int) => {
-      val writer = new PrintWriter("src/main/resources/assets/maps/" + name + ".json")
+    case CreateMap(id: Int, width: Int, height: Int) => {
+      val noiseGenerator = FractionalBrownianMotionGenerator(NoiseGenerator("perlin"))
 
-      writer.print("{\n  \"id\": 1,\n  \"orientation\":\"orthogonal\",\n  \"properties\": {},\n")
-      writer.print("  \"height\":" + height + ",\n  \"width\":" + width + ",\n")
-      writer.print("  \"tilewidth\":32,\n  \"version\":1,\n  \"tileheight\":32,\n")
-      writer.print("  \"transports\" : [],\n")
-      writer.print("  \"tilesets\":[{\n    \"firstgid\":1,\n    \"image\":\"..\\/tiles\\/tiles.png\",\n")
-      writer.print("    \"imageheight\":192,\n    \"imagewidth\":192,\n    \"margin\":0,\n    \"name\":\"tiles\",\n")
-      writer.print("    \"properties\": {},\n    \"spacing\":0,\n    \"tileheight\":32,\n    \"tilewidth\":32\n    }],\n")
-      writer.print("  \"layers\":[{\n    \"name\":\"Tile Layer 1\",\n    \"opacity\":1,\n")
-      writer.print("    \"height\":" + height + ",\n    \"width\":"+ width + ",\n")
-      writer.print("    \"type\":\"tilelayer\",\n    \"visible\":true,\n    \"x\":0,\n    \"y\":0,\n")
-      writer.print("    \"data\":[")
-      writeNoise(width, height, writer)
-      writer.print("  }]\n}")
-      writer.close()
+      val noise2d = noiseGenerator.getNoise(width, height)
+      val noise1d = rescaleNoise(noise2d).flatten
+
+      val fileName = TiledExporter.export(id, noise1d, width, height)
+
+      val worldFactory = context.system.actorSelection("user/WorldFactory")
+      val future = worldFactory ? new CreateWorld(fileName)
+
+      // sender ! new NewRoomWorld(Await.result(future, timeout.duration).asInstanceOf[RoomWorld])
+      sender ! Await.result(future, timeout.duration)
     }
 
     case _ => println("Error: from MapGenerator.")

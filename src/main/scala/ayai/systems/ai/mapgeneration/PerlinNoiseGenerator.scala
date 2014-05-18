@@ -2,33 +2,19 @@ package ayai.systems.mapgenerator
 
 import java.util.Random
 
+//Change this to extend noisegenerator instead
 object PerlinNoiseGenerator {
+  //Keep seed constant for all noise generation.
+  val rand = new Random(System.currentTimeMillis());
 
-  //returns noise with values from 0 to 1.
-  def getScaledNoise(width: Int, height: Int, frequency: Int): Array[Array[Double]] = {
-    val noise = getNoise(width, height, frequency)
-    def getMax(row: Array[Double]): Double = {row reduceLeft (_ max _)}
-    def getMin(row: Array[Double]): Double = {row reduceLeft (_ min _)}
-    val noiseMax = noise map getMax reduceLeft (_ max _)
-    val noiseMin = noise map getMin reduceLeft (_ min _)
-    val absoluteMin = noiseMin * -1
-
-    def scalePixel(pixelVal: Double) = {(pixelVal + absoluteMin) / (noiseMax + absoluteMin)}
-    noise map (_ map scalePixel)
-  }
-
-  //width*height # of tiles
+  ///width*height # of tiles
   def getNoise(width: Int, height: Int, frequency: Int): Array[Array[Double]] = {
-    val latticeX = 10
-    val latticeY = 10
-    // println(s"frequency: $frequency")
-    // val latticeX = width / frequency
-    // val latticeY = height / frequency
-    val rand = new Random(5);
+    val latticeX = width/frequency
+    val latticeY = height/frequency
 
-    def getVector = {Array.fill[Float](2)(rand.nextFloat())}
+    def getVector = {Array.fill[Double](2)(rand.nextDouble())}
 
-    val allGradients = Array.fill[Array[Float]](width/latticeX+1, height/latticeY+1)(getVector)
+    var allGradients = Array.fill[Array[Double]](width/latticeX+2, height/latticeY+2)(getVector)
 
     //Returns four displacement vectors, one for each corner
     def getDisplacements(x: Int, y: Int): Array[Array[Int]] = {
@@ -36,16 +22,15 @@ object PerlinNoiseGenerator {
       val bottomLeftY = (y/latticeY)*latticeY
 
       //Start at bottomLeft, go clockwise
-      Array(Array(bottomLeftX - x, bottomLeftY - y),
-            Array(bottomLeftX - x, bottomLeftY + latticeY - y),
-            Array(bottomLeftX + latticeX - x, bottomLeftY + latticeY - y),
-            Array(bottomLeftX + latticeX - x, bottomLeftY - y))
+      Array(Array(x - bottomLeftX, y - bottomLeftY),
+            Array(x - bottomLeftX, y - (bottomLeftY + latticeY)),
+            Array(x -(bottomLeftX + latticeX), y - (bottomLeftY + latticeY)),
+            Array(x - (bottomLeftX + latticeX), y - bottomLeftY))
     }
 
-    def getGradientVectors(x: Int, y: Int): Array[Array[Float]] = {
+    def getGradientVectors(x: Int, y: Int): Array[Array[Double]] = {
       val bottomLeftX = x/latticeX
       val bottomLeftY = y/latticeY
-      // println(s"bottomLeftX: $bottomLeftX, bottomLeftY: $bottomLeftY")
 
       Array(allGradients(bottomLeftX)(bottomLeftY),
             allGradients(bottomLeftX)(bottomLeftY+1),
@@ -53,47 +38,43 @@ object PerlinNoiseGenerator {
             allGradients(bottomLeftX+1)(bottomLeftY))
     }
 
-    def interpolate(points: Array[Float]): Double = {
+    def interpolate(x: Int, y: Int, gradientValues: Array[Double]): Double = {
+      var displacements = getDisplacements(x, y)
 
-      return ((3 * math.pow(points(0), 2.0)) - (2 * math.pow(points(0), 3.0))) *
-             ((3 * math.pow(points(1), 2.0)) - (2 * math.pow(points(1), 3.0))) *
-             ((3 * math.pow(points(2), 2.0)) - (2 * math.pow(points(2), 3.0))) *
-             ((3 * math.pow(points(3), 2.0)) - (2 * math.pow(points(3), 3.0)))
+      var deltaX = (1.0 *displacements(0)(0)) / latticeX
+      var deltaY = (1.0 *displacements(0)(1)) / latticeY
+
+      var weightX = (3 * math.pow(deltaX, 2.0)) - (2 * math.pow(deltaX, 3.0))
+      var v0 = gradientValues(0) + weightX*(gradientValues(3) - gradientValues(0))
+      var v1 = gradientValues(1) + weightX*(gradientValues(2) - gradientValues(1))
+
+      var weightY = (3 * math.pow(deltaY, 2.0)) - (2 * math.pow(deltaY, 3.0))
+      v0 + weightY * (v1 - v0)
     }
 
-    def dotProduct(ints: Array[Int], floats: Array[Float]): Float = {
-      ints(0) * floats(0) + ints(1) * floats(1)
+    def dotProduct(ints: Array[Int], doubles: Array[Double]): Double = {
+      ints(0) * doubles(0) + ints(1) * doubles(1)
     }
 
     //Takes displacement vectors and gradient vectors for a single point
     //Returns gradient values
-    def getGradientValues(x: Int, y: Int): Array[Float] = {
+    def getGradientValues(x: Int, y: Int): Array[Double] = {
       (getDisplacements(x, y), getGradientVectors(x, y)).zipped map (dotProduct(_, _))
     }
 
 
-    //println(getGradientValues(5, 6).deep.mkString("\n"))
 
     var noise = Array.fill[Array[Double]](width)(Array.fill[Double](height)(0.0f))
 
 
-    for(i <- 0 to width-1) {
+     for(i <- 0 to width-1) {
       for(j <- 0 to height-1) {
-        // var x = i / latticeX
-        // var y = j / latticeY
-
-        // print(allGradients(i / latticeX)(j / latticeY)(0), allGradients(i / latticeX)(j / latticeY)(1) + ": ")
-        // println(x + ", " + y)
-
         val gradientValues = getGradientValues(i, j)
-        noise(i)(j) = interpolate(gradientValues)
+        noise(i)(j) = interpolate(i, j, gradientValues)
 
       }
     }
 
     return noise
-    //m rows, n columns
-    //higher number of squares is higher frequency
-    //f(x, y) = (3x^2 - 2x^3)(3y^2 - 2y^3)
   }
 }

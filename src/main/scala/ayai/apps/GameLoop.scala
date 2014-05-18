@@ -65,7 +65,7 @@ object GameLoop {
     val worldGenerator = networkSystem.actorOf(Props[WorldGenerator], name="WorldGenerator")
 
     //This needs to be read in from a config file
-    val rooms = List("map3", "map2")
+    val rooms = List("map0.json", "map1.json")
 
     val itemFactory = ItemFactory.bootup(networkSystem)
     val questFactory = QuestFactory.bootup(networkSystem)
