@@ -61,9 +61,8 @@ object ClassFactory {
   def bootup(networkSystem: ActorSystem) = {
     classes.foreach(classData => {
       var classComponent = new ClassValues(
-        classData.id,
-        classData.description,
         classData.name,
+        classData.description,
         classData.baseHealth,
         classData.baseMana,
         buildStats(classData.baseStats)
@@ -72,7 +71,7 @@ object ClassFactory {
       //Construct stats component
       // classComponent.components += buildStats(classData.baseStats)
 
-      networkSystem.actorSelection("user/ClassMap") ! AddClass(classData.id.toString,classComponent)
+      networkSystem.actorSelection("user/ClassMap") ! AddClass(classData.name,classComponent)
     })
   }
 

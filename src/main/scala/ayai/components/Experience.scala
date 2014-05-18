@@ -79,6 +79,7 @@ case class Experience(var baseExperience: Long, var level: Int) extends Componen
     ("experience" -> 
       ("baseExperience" -> baseExperience) ~
       ("maxExperience" -> Constants.EXPERIENCE_ARRAY(level-1)) ~
-      ("level" -> level))
+      ("level" -> level) ~
+      ("currentEffects" -> (modifiers.map{e => e.asJson})))
   }
 }

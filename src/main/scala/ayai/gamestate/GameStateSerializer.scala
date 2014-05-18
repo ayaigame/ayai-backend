@@ -112,10 +112,12 @@ class GameStateSerializer(world: World) extends Actor {
       entity.getComponent(classOf[QuestBag]),
       entity.getComponent(classOf[Loot]),
       entity.getComponent(classOf[Stats])) match {
-        case (Some(inventory: Inventory), Some(equipment: Equipment), Some(quests: QuestBag), None, None) => 
+        case (Some(inventory: Inventory), Some(equipment: Equipment), 
+              Some(quests: QuestBag), None, Some(stats: Stats)) => 
           (inventory.asJson) ~
           (equipment.asJson) ~
-          (quests.asJson) 
+          (quests.asJson) ~
+          (stats.asJson)
         case (Some(inventory: Inventory), None, None, Some(loot: Loot), None) =>
           (inventory.asJson) ~
           (loot.asJson)

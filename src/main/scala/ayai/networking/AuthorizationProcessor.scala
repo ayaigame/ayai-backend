@@ -227,7 +227,7 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     stats.addStat(new Stat("intelligence", intelligence, intelligenceLevel))
     stats.addStat(new Stat("defense", defenseLevel, defenseLevel))
 
-    val classValue = new ClassValues(id.toInt, name, description,  baseHealth, baseMana, stats)
+    val classValue = new ClassValues(name, description,  baseHealth, baseMana, stats)
         
     networkSystem.actorSelection("user/ClassMap") ! AddClass(id, classValue)
 

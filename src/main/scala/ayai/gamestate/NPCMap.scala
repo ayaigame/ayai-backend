@@ -19,7 +19,9 @@ case class NPCValues(
       level: Int,
       experience: Long,
       maximumHealth: Int,
-      maximumMana: Int)
+      maximumMana: Int) {
+	
+}
 class NPCMap() extends Actor {
 	val npcMap: HashMap[String, NPCValues] = HashMap[String, NPCValues]()
 
@@ -35,14 +37,16 @@ class NPCMap() extends Actor {
 		sender ! npcMap(id)
 	}
 
-	def outputJson() {
-		// questMap.foreach{case (key, value) => value.asJson}
+	def outputJsonToFile() {
+		
+		// ("npcs" -> 
+			// (npcMap.foreach{case (key, value) => (value.asJson)}))
 	}
 	def receive = {
 		case AddNPC(id: String, npc: NPCValues) => addNPC(id, npc)
 		case RemoveNPC(id: String) => removeNPC(id)
 		case GetNPC(id: String) => getNPC(id)
-		case OutputJson() => outputJson
+		// case OutputJson() => outputJson
 		case _ =>
 			sender ! Failure
 	}

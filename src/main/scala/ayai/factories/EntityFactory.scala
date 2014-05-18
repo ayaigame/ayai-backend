@@ -68,6 +68,20 @@ object EntityFactory {
         p.components += new Room(characterRow.room_id)
         p.components += new Character(entityId, characterRow.name)
         p.components += new Faction("allies")
+
+        // get stats needed for class
+        val className = characterRow.className
+        val classFuture = networkSystem.actorSelection("user/ClassMap") ? GetClass(className)
+
+        // not used until we know if new character
+        val classValues: ClassValues = Await.result(classFuture, timeout.duration).asInstanceOf[ClassValues]
+
+        val stats: Stats = new Stats()
+        stats.addStat(new Stat("strength", 10, 5))
+        stats.addStat(new Stat("defense", 10, 5))
+        stats.addStat(new Stat("intelligence", 10, 5))
+        p.components += stats
+
         val questbag = new QuestBag()
         val questSelection = networkSystem.actorSelection("user/QuestMap")
         // var future = questSelection ? GetQuest("QUEST1")
