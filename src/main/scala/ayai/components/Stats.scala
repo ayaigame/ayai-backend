@@ -10,7 +10,7 @@ import net.liftweb.json.JsonDSL._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 
 // Added tempValues so we can remove any effects from a  given stat
-case class Stat(attributeType: String, magnitude: Int, growth: Int) {
+case class Stat(attributeType: String, var magnitude: Int, growth: Int) {
   var cachedValue: Int = 0
   var modifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
   def asJson: JObject = {
@@ -75,9 +75,13 @@ case class Stat(attributeType: String, magnitude: Int, growth: Int) {
   def getValue(): Int = {
     cachedValue
   }
+
+  def levelUp() {
+    magnitude = magnitude + growth
+  }
 }
 
-class Stats(val stats: ArrayBuffer[Stat]) extends Component {
+class Stats(val stats: ArrayBuffer[Stat] = new ArrayBuffer[Stat]()) extends Component {
 
   def addStat(newStat: Stat) = {
     stats += newStat
@@ -120,6 +124,15 @@ class Stats(val stats: ArrayBuffer[Stat]) extends Component {
     for(stat <- stats) {
       stat.updateCachedValue
     }
+  }
+
+  def levelUp() {
+    stats.foreach{stat => stat.levelUp}
+
+  }
+
+  def asJson(): JObject = {
+    ("stats" -> stats.map{ stat => (stat.asJson)})
   }
 
   override def toString = {
