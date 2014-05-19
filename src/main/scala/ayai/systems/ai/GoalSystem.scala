@@ -44,7 +44,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
     }
   } 
   override def process(delta: Int) {
-    val entities = world.getEntitiesByComponents(classOf[Goal], classOf[Position], classOf[Actionable], classOf[Character])
+    val entities = world.getEntitiesWithExclusions(include=List(classOf[Goal], classOf[Position], classOf[Actionable], classOf[Character]), exclude=List(classOf[Dead]))
     for(entity <- entities) {
       val goal = (entity.getComponent(classOf[Goal]): @unchecked) match {
         case Some(g: Goal) => g.goal

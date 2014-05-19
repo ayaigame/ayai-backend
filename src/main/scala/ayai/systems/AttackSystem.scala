@@ -123,6 +123,20 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       case Some(character : Character) => character.id
     }
 
+    // attack message to be sent to all players to notify of attacked
+    val attackMessage = ("type" -> "attack") ~
+      ("damage" -> damage) ~
+      ("initiator" -> initiatorId) ~
+      ("victim" -> victimId)
+    var actorSelection = actorSystem.actorSelection("user/SockoSender*")
+    actorSelection ! new ConnectionWrite(compact(render(attackMessage)))
+
+    val attackChat = ("type" -> "chat") ~
+      ("message" -> ("Damage: " + damage.toString)) ~
+      ("sender" -> "system")
+    actorSelection = actorSystem.actorSelection("user/SockoSender*")
+    actorSelection ! new ConnectionWrite(compact(render(attackChat)))
+
 
     //if the victims health reaches zero, then take the persons inventory and make it lootable
     if(healthComponent.currentHealth <= 0) {
@@ -160,13 +174,5 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       actorSelectionDisc ! new ConnectionWrite(compact(render(json)))
 
     }
-
-    // attack message to be sent to all players to notify of attacked
-    val attackMessage = ("type" -> "attack") ~
-      ("damage" -> damage) ~
-      ("initiator" -> initiatorId) ~
-      ("victim" -> victimId)
-    val actorSelection = actorSystem.actorSelection("user/SockoSender*")
-    actorSelection ! new ConnectionWrite(compact(render(attackMessage)))
   }
 }
