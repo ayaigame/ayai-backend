@@ -12,14 +12,23 @@ import scala.collection.mutable.ArrayBuffer
 case class AddClass(id: String, thisClass: ClassValues)
 case class GetClass(id: String)
 case class RemoveClass(id: String)
-case class GetClassByName(name: String)
 case class OutputJson()
+
 case class ClassValues(
       name: String,
       description: String,
       baseHealth: Int,
       baseMana: Int,
-      baseStats: Stats)
+      baseStats: Stats) {
+
+	def asJson(): JObject = {
+		("name" -> name) ~
+		("description" -> description) ~
+		("baseHealth" -> baseHealth) ~
+		("baseMana" -> baseMana) ~
+		("baseStats" -> baseStats.asJson)
+	}
+}
 class ClassMap() extends Actor {
 	val classMap: HashMap[String, ClassValues] = HashMap[String, ClassValues]()
 
@@ -41,7 +50,7 @@ class ClassMap() extends Actor {
 		case RemoveClass(name: String) =>
 		  classMap -= name
 		case OutputJson() =>
-			// classMap.foreach{case (key, value) => value.asJson}
+			classMap.map{case (key, value) => value.asJson}
 		case _ => println("No Command for Classes")
 	 		sender ! Failure
 	}
