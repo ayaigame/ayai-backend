@@ -62,7 +62,7 @@ object GameLoop {
     val questFactory = QuestFactory.bootup(networkSystem)
     val classFactory = ClassFactory.bootup(networkSystem)
     val effectFactory = EffectFactory.bootup(networkSystem)
-
+    
     for((file, index) <- rooms.zipWithIndex)
       worlds(s"room$index") = worldFactory.createWorld(s"room$index", s"$file")
 
