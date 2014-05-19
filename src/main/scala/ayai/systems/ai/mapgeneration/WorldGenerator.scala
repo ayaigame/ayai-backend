@@ -39,7 +39,7 @@ class WorldGenerator() extends Actor {
   }
 
   def buildRoom(id: Int) = {
-    val future = mapGenerator ? new CreateMap(id, 100, 100)
+    val future = mapGenerator ? new CreateMap(id, 50, 50)
 
     context.system.actorSelection("user/RoomList") ! new AddWorld(Await.result(future, timeout.duration).asInstanceOf[RoomWorld])
 
@@ -48,7 +48,7 @@ class WorldGenerator() extends Actor {
   def receive = {
     case ExpandRoom(room: RoomWorld) => {
       val roomsToBuild = _getRoomsToBuild(room)
-      println("I need to build these rooms: " + roomsToBuild.toString)
+      // println("I need to build these rooms: " + roomsToBuild.toString)
 
       roomsToBuild map buildRoom
     }

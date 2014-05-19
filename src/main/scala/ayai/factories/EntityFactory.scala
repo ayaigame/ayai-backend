@@ -86,14 +86,14 @@ object EntityFactory {
         //   inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
         // })
 
-        
+
 
         // var future = itemSelection ? GetItem("ITEM" + itemId)
         // inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
         val item = new Item(4, "Potion", 0, 20, new Consumable())
         item.effects += new Effect("heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
-        
+
         inventory.addItem(item)
 
         p.components += inventory
@@ -256,13 +256,16 @@ object EntityFactory {
       val endPosition = new Position(trans.end_x, trans.end_y)
       transports = new TransportInfo(startPosition, endPosition, trans.toRoomId) :: transports
     }
+
     val bundles = (parsedJson \\ "layers").extract[List[JTiles]]
     bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width, "name" -> bundle.name)}
     val arrayTile: Array[Array[Tile]] = Array.fill[Tile](tmap.width, tmap.height)(new Tile(ListBuffer()))
+
     //get the overall size and id of maps
     val id: Int = tmap.id
     val height: Int = tmap.height
     val width: Int = tmap.width
+
     //get and transorm tiles from a list to multi-dimensional array
     for(i <- 0 until (width*height)) {
       for(bundle <- bundles) {

@@ -19,6 +19,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 
 import scala.io.Source
+import java.io.File
 
 case class CreateWorld(fileName: String)
 
@@ -29,15 +30,16 @@ class WorldFactory extends Actor {
       ** Create a world and instantiate all needed systems and create message processors
       **/
     case CreateWorld(jsonFile: String) => {
-      println(jsonFile)
-      // val jsonFile: String = s"$fileName.json"
       implicit val formats = net.liftweb.json.DefaultFormats
-      val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
+      val file = Source.fromFile(new File("src/main/resources/assets/maps/" + jsonFile))
+
       val lines = file.mkString
       file.close()
+
       val parsedJson = parse(lines)
       val tileMap = EntityFactory.loadRoomFromJson(jsonFile, parsedJson)
       val id = (parsedJson \ "id").extract[Int]
+
       var world: RoomWorld = RoomWorld(id, tileMap, true)
       world.addSystem(MovementSystem(), 1)
       world.addSystem(TransportSystem(context.system), 2)

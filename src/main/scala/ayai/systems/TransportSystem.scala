@@ -26,6 +26,7 @@ import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
 import scala.io.Source
+import java.io.File
 
 object TransportSystem {
   def apply(actorSystem: ActorSystem) = new TransportSystem(actorSystem)
@@ -33,6 +34,15 @@ object TransportSystem {
 
 class NoRoomFoundException(msg: String) extends RuntimeException(msg)
 
+case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomId: Int) {
+  implicit def asJson(): JObject = {
+    ("start_x" -> start_x) ~
+    ("start_y" -> start_y) ~
+    ("end_x" -> end_x) ~
+    ("end_y" -> end_y) ~
+    ("toRoomId" -> toRoomId)
+  }
+}
 
 /**
 ** Take an entity with a Position and NetworkingActor
@@ -67,6 +77,7 @@ extends EntityProcessingSystem(include=List(classOf[Room],
             //Generate all of its children
             val worldGenerator = actorSystem.actorSelection("user/WorldGenerator")
             worldGenerator ! new ExpandRoom(newWorld)
+            newWorld.isLeaf = false
           }
 
           val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, newWorld)
@@ -81,7 +92,7 @@ extends EntityProcessingSystem(include=List(classOf[Room],
           position.y = 100
 
           implicit val formats = net.liftweb.json.DefaultFormats
-          val mapFile = Source.fromURL(getClass.getResource("/assets/maps/" + newTileMap.file))
+          val mapFile = Source.fromFile(new File("src/main/resources/assets/maps/" + newTileMap.file))
           val tileMapString = mapFile.mkString.filterNot({_ == "\n"})
           mapFile.close()
 
@@ -89,7 +100,6 @@ extends EntityProcessingSystem(include=List(classOf[Room],
                       ("tilemap" -> tileMapString) ~
                       ("tilesets" -> (newWorld.tileMap.tilesets map (_.asJson)))
 
-          println(compact(render(json)))
           val actorSelection = actorSystem.actorSelection("user/SockoSender" + e.tag)
           actorSelection ! new ConnectionWrite(compact(render(json)))
         }

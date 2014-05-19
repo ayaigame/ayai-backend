@@ -32,12 +32,6 @@ import org.slf4j.{Logger, LoggerFactory}
 ** First loads all needed Actors, creates needed worlds, and runs the game loop
 **/
 object GameLoop {
-  // for(i <- 1 to 10) {
-    // val noise = NoiseGenerator.getNoise("perlin", 30, 30, 10)
-    // println(noise.map(_.mkString(" ")).mkString("\n"))
-  //   println("*****************************************************")
-  // }
-  // MapGenerator.getMap("map4", 30, 30)
 
   private val log = LoggerFactory.getLogger(getClass)
 
