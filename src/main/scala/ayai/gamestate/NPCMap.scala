@@ -15,18 +15,28 @@ case class NPCValues(
       name: String,
       faction: String,
       roomId: Int,
-      equipment: Equipment,
+      weapon1: Int,
+      torso: Int,
+      legs: Int,
+      helmet: Int,
+      feet: Int,
       level: Int,
       experience: Long,
       maximumHealth: Int,
-      maximumMana: Int) {
+      maximumMana: Int,
+      xposition: Int = 100,
+      yposition: Int = 100) {
 	
 	def asJson(): JObject = {
 		("id" -> id) ~
 		("name" -> name) ~
 		("faction" -> faction) ~
 		("roomId" -> roomId) ~
-		("equipment" -> equipment.asJson) ~
+		("weapon1" -> weapon1) ~
+		("legs" -> legs) ~
+		("helmet" -> helmet) ~
+		("feet" -> feet) ~
+		("torso" -> torso) ~
 		("level" -> level) ~
 		("experience" -> experience) ~
 		("maximumHealth" -> maximumHealth) ~
@@ -49,7 +59,6 @@ class NPCMap() extends Actor {
 	}
 
 	def outputJson() = {
-		
 		sender ! compact(render((npcMap.map{case (key, value) => (value.asJson)})))
 	}
 	def receive = {

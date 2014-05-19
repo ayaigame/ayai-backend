@@ -13,7 +13,7 @@ import net.liftweb.json.JsonDSL._
 /**
   currentHealth and maximumHealth should not be touched as they are need to determine what health should be set back to if effect is temporary
 **/
-case class Health(var currentHealth: Int, var maximumHealth: Int) extends Component {
+case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: Int = 20) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
   var currentModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
   var maxModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]

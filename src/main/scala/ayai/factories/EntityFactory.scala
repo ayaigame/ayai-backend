@@ -42,6 +42,17 @@ object EntityFactory {
     CharacterTable.getCharacter(characterName) match {
       case Some(characterRow: CharacterRow) =>
         val p: Entity = world.createEntity(tag=entityId)
+        val className = characterRow.className
+        val classFuture = networkSystem.actorSelection("user/ClassMap") ? GetClass(className)
+
+        // not used until we know if new character
+        val classValues: ClassValues = Await.result(classFuture, timeout.duration).asInstanceOf[ClassValues]
+        // calculate stats to add 
+        val stats: Stats = new Stats()
+        classValues.baseStats.stats.foreach{stat => stats.addStat(new Stat(stat.attributeType,
+          stat.magnitude+(stat.growth*characterRow.level), stat.growth))}
+        p.components += stats
+
         p.components += new Position(characterRow.pos_x,characterRow.pos_y)
         p.components += new Bounds(32, 32)
         p.components += new Velocity(4, 4)
@@ -61,26 +72,17 @@ object EntityFactory {
         val spritesheet: SpriteSheet = new SpriteSheet("guy", animations, 32 ,32)
         p.components += spritesheet
         p.components += new Actionable(false, DownDirection)
-        p.components += new Health(50,100)
+        val baseHealth = classValues.baseHealth + (characterRow.level * 20)
+        val baseMana = classValues.baseMana+ (characterRow.level * 10)
+        p.components += new Health(baseHealth,baseHealth)
         p.components += new NetworkingActor(actor)
-        p.components += new Mana(200,200)
+        p.components += new Mana(baseMana, baseMana)
         p.components += new Experience(characterRow.experience, characterRow.level)
         p.components += new Room(characterRow.room_id)
         p.components += new Character(entityId, characterRow.name)
         p.components += new Faction("allies")
 
         // get stats needed for class
-        val className = characterRow.className
-        val classFuture = networkSystem.actorSelection("user/ClassMap") ? GetClass(className)
-
-        // not used until we know if new character
-        val classValues: ClassValues = Await.result(classFuture, timeout.duration).asInstanceOf[ClassValues]
-
-        val stats: Stats = new Stats()
-        stats.addStat(new Stat("strength", 10, 5))
-        stats.addStat(new Stat("defense", 10, 5))
-        stats.addStat(new Stat("intelligence", 10, 5))
-        p.components += stats
 
         val questbag = new QuestBag()
         val questSelection = networkSystem.actorSelection("user/QuestMap")
@@ -171,12 +173,12 @@ object EntityFactory {
     val animations = new ArrayBuffer[Animation]()
     animations += new Animation("facedown",0,0)
     p.components += new SpriteSheet("npc", animations,32, 48)
-    p.components += new Mana(1,1)
+    p.components += new Mana(npcValue.maximumMana,npcValue.maximumMana)
     p.components += new NPC(0)
     p.components += new Respawnable()
     p.components += new Room(npcValue.roomId)
     p.components += new Character(id, npcValue.name)
-    p.components += new Faction("axis")
+    p.components += new Faction(faction)
     p
   }
 

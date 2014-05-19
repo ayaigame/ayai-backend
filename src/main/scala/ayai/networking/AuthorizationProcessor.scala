@@ -189,36 +189,36 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val name = contentSplit(2).replaceAll("name=","unnamed")
     val faction = contentSplit(3).replaceAll("faction=","allies")
     val room = contentSplit(4).replaceAll("room=","1").toInt
-    val weapon1 = contentSplit(5).replaceAll("weapon1=","1")
-    val helmet = contentSplit(6).replaceAll("helmet=","0")
-    val torso = contentSplit(7).replaceAll("torso=","0")
-    val legs = contentSplit(8).replaceAll("legs=","0")
-    val feet = contentSplit(9).replaceAll("feet=","0")
+    val weapon1 = contentSplit(5).replaceAll("weapon1=","0").toInt
+    val helmet = contentSplit(6).replaceAll("helmet=","0").toInt
+    val torso = contentSplit(7).replaceAll("torso=","0").toInt
+    val legs = contentSplit(8).replaceAll("legs=","0").toInt
+    val feet = contentSplit(9).replaceAll("feet=","0").toInt
     val level = contentSplit(10).replaceAll("level=","1").toInt
     val experience = contentSplit(11).replaceAll("experience=","10").toInt
     val health = contentSplit(12).replaceAll("health=","50").toInt
     val mana = contentSplit(13).replaceAll("mana=","50").toInt
 
     //get equipment ids for weapons given
-    val weaponFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(weapon1)
-    val weaponItem = Await.result(weaponFuture, timeout.duration).asInstanceOf[Item]
-    val legsFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(legs)
-    val legsItem = Await.result(legsFuture, timeout.duration).asInstanceOf[Item]
-    val torsoFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(torso)
-    val torsoItem = Await.result(torsoFuture, timeout.duration).asInstanceOf[Item]
-    val helmetFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(helmet)
-    val helmetItem = Await.result(helmetFuture, timeout.duration).asInstanceOf[Item]
-    val feetFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(feet)
-    val feetItem = Await.result(feetFuture, timeout.duration).asInstanceOf[Item]
+    // val weaponFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(weapon1)
+    // val weaponItem = Await.result(weaponFuture, timeout.duration).asInstanceOf[Item]
+    // val legsFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(legs)
+    // val legsItem = Await.result(legsFuture, timeout.duration).asInstanceOf[Item]
+    // val torsoFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(torso)
+    // val torsoItem = Await.result(torsoFuture, timeout.duration).asInstanceOf[Item]
+    // val helmetFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(helmet)
+    // val helmetItem = Await.result(helmetFuture, timeout.duration).asInstanceOf[Item]
+    // val feetFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(feet)
+    // val feetItem = Await.result(feetFuture, timeout.duration).asInstanceOf[Item]
 
-    val equipment: Equipment = new Equipment()
-    equipment.equipItem(weaponItem)
-    equipment.equipItem(feetItem)
-    equipment.equipItem(legsItem)
-    equipment.equipItem(helmetItem)
-    equipment.equipItem(torsoItem)
+    // val equipment: Equipment = new Equipment()
+    // equipment.equipItem(weaponItem)
+    // equipment.equipItem(feetItem)
+    // equipment.equipItem(legsItem)
+    // equipment.equipItem(helmetItem)
+    // equipment.equipItem(torsoItem)
     networkSystem.actorSelection("user/NPCMap") ! AddNPC(id, new NPCValues(id.toInt, name, faction,
-      room, equipment, level, experience, health, mana))
+      room, weapon1, torso, legs, helmet, feet , level, experience, health, mana))
 
     
     request.response.write(HttpResponseStatus.OK)

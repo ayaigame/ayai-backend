@@ -23,6 +23,7 @@
 		{
 			"id": 2,
 			"name": "Jarrad",
+			"faction": "allies",
 			"roomId": 1,
 			"level": 20,
 			"weapon1": 0,
@@ -37,7 +38,6 @@
 			"experience": 2000,
 			"quests": [{
 				"questId": 2
-			}],
-
+			}]
 		}]
 }

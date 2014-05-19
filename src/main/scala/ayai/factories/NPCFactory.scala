@@ -21,6 +21,7 @@ case class AllNPCValues(
       id: Int,
       name: String,
       roomId: Int,
+      faction: String,
       level: Int,
       experience: Long,
       maximumHealth: Int,
@@ -51,7 +52,7 @@ object NPCFactory {
         case Some(room: RoomWorld) => room
         case _ => null
       }
-      val ent: Entity = EntityFactory.createNPC(roomWorld, "allies", npc)
+      val ent: Entity = EntityFactory.createNPC(roomWorld, npc.faction, npc)
       val questfuture =  questMap ? GetQuest("QUEST"+npc.quests.questId)
       Await.result(questfuture, timeout.duration).asInstanceOf[Quest] match {
         case quest: Quest => 
@@ -65,35 +66,40 @@ object NPCFactory {
       var itemFuture = itemMap ? GetItem("ITEM"+npc.weapon1)
       var itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => null 
+        case _ => new EmptySlot()
       }
       equipment.equipItem(itemResult)
       itemFuture = itemMap ? GetItem("ITEM"+npc.feet)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => null 
+        case _ => new EmptySlot()
       }
       equipment.equipItem(itemResult)
       itemFuture = itemMap ? GetItem("ITEM"+npc.torso)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => null 
+        case _ => new EmptySlot()
       }
       equipment.equipItem(itemResult)
       itemFuture = itemMap ? GetItem("ITEM"+npc.helmet)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => null 
+        case _ => new EmptySlot() 
       }
       equipment.equipItem(itemResult)
       itemFuture = itemMap ? GetItem("ITEM"+npc.legs)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => null 
+        case _ => new EmptySlot() 
       }
       equipment.equipItem(itemResult)
       ent.components += equipment
       roomWorld.addEntity(ent)
+
+      // also save npc data to map to be updated
+      networkSystem.actorSelection("user/NPCMap") ! AddNPC(npc.id.toString, new NPCValues(npc.id, npc.name,
+        npc.faction, npc.roomId, npc.weapon1, npc.torso, npc.legs, npc.helmet, npc.feet, npc.level, npc.experience, npc.maximumHealth, 
+        npc.maximumMana, npc.xposition, npc.yposition))
     }
   }
 

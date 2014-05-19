@@ -20,7 +20,12 @@ class ItemMap() extends Actor {
 	}
 
 	def getItem(id: String) = {
-		sender ! itemMap(id)
+		try {
+			val item = itemMap(id)
+			sender ! item
+		} catch {
+			case _ : Throwable => sender ! new EmptySlot()
+		}
 	}
 
 	def removeItem(id: String) = {
