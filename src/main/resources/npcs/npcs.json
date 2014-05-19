@@ -3,38 +3,37 @@
 		{
 			"id": 1,
 			"name": "Rodrigo",
+			"faction": "allies",
 			"roomId": 0,
 			"level": 10,
 			"maximumHealth": 200,
-			"xposition": 100,
-			"yposition": 100,
-			"experience": 1000,
+			"maximumMana": 200,
+			"weapon1": 0,
+			"torso": 0,
+			"legs": 0,
+			"feet": 0,
+			"helmet": 0,
+			"experience": 100,
 			"quests": [{
-				"questId": 1
-			}],
-			"inventory": [{
-				"itemId": 1
-				},
-				{
-					"itemId":2
-				}]
-
+				"questId": 2
+			}]
 		},
 		{
 			"id": 2,
 			"name": "Jarrad",
 			"roomId": 1,
 			"level": 20,
+			"weapon1": 0,
+			"torso": 0,
+			"legs": 0,
+			"feet": 0,
+			"helmet": 0,
 			"maximumHealth": 500,
+			"maximumMana": 400,
 			"experience": 2000,
-			"xposition": 100,
-			"yposition": 100,
 			"quests": [{
 				"questId": 2
 			}],
-			"inventory": [{
-				"itemId": 1
-			}]
 
 		}]
 }
