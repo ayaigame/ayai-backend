@@ -66,7 +66,7 @@ class Equipment() extends Component {
     try {
       equippedItem = equipmentMap(equipmentType).copy
     } catch {
-      case _ => equippedItem = new EmptySlot(equipmentType)
+      case _: Throwable => equippedItem = new EmptySlot(equipmentType)
     }
     equipmentMap(equipmentType) = new EmptySlot(equipmentType)
     return equippedItem

@@ -38,6 +38,8 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
             UpDirection
           case(false, _, false) =>
             DownDirection
+          case _ =>
+            new MoveDirection(0,0)
         }
       case _ =>
         new MoveDirection(0,0)
@@ -130,7 +132,8 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
               }
               case _ =>
             }
-           }// ending brace here
+           }
+           // ending brace here
 	      }
       }
     }

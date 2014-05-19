@@ -228,13 +228,18 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   }
                   if(equipment.equipItem(item)) {
                     inventory.removeItem(item)
-                    if(!isEmptySlot(equipItem)) {
-                      inventory.inventory += equipItem
+                    equipItem.itemType match {
+                      case empty: Weapon => 
+                        inventory.inventory += equipItem
+                      case armor: Armor => 
+                        inventory.inventory += equipItem
+                      case empty: EmptyType =>
+                      case _ =>
                     }
                     // sender ! Success
                   }
                   else {
-                    
+                    // if cannot equip then don't do anything as it is ineligible
                   }
                   sender ! Success
                   InventoryTable.saveInventory(e)
