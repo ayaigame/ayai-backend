@@ -68,6 +68,20 @@ object EntityFactory {
         p.components += new Room(characterRow.room_id)
         p.components += new Character(entityId, characterRow.name)
         p.components += new Faction("allies")
+
+        // get stats needed for class
+        val className = characterRow.className
+        val classFuture = networkSystem.actorSelection("user/ClassMap") ? GetClass(className)
+
+        // not used until we know if new character
+        val classValues: ClassValues = Await.result(classFuture, timeout.duration).asInstanceOf[ClassValues]
+
+        val stats: Stats = new Stats()
+        stats.addStat(new Stat("strength", 10, 5))
+        stats.addStat(new Stat("defense", 10, 5))
+        stats.addStat(new Stat("intelligence", 10, 5))
+        p.components += stats
+
         val questbag = new QuestBag()
         val questSelection = networkSystem.actorSelection("user/QuestMap")
         // var future = questSelection ? GetQuest("QUEST1")
@@ -92,8 +106,9 @@ object EntityFactory {
         // inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
         val item = new Item(4, "Potion", 0, 20, new Consumable())
-        item.effects += new Effect("heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
 
+        item.effects += new Effect(0,"heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
+        
         inventory.addItem(item)
 
         p.components += inventory
@@ -307,7 +322,7 @@ object EntityFactory {
       lootEntity.components += new NPC(0)
       lootEntity.components += new Health(10000,10000)
       lootEntity.components += new Mana(10000,10000)
-      val animations = new ArrayBuffer[Animation]()
+    val animations = new ArrayBuffer[Animation]()
       animations += new Animation("facedown", 0, 0)
       lootEntity.components += new SpriteSheet("props", animations, 40, 40)
       lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {

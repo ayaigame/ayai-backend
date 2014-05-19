@@ -48,7 +48,7 @@ object GameLoop {
     val networkSystem = ActorSystem("NetworkSystem")
     val mQueue = networkSystem.actorOf(Props[MessageQueue], name="MQueue")
     val nmInterpreter = networkSystem.actorOf(Props[NetworkMessageInterpreterSupervisor], name="NMInterpreter")
-    val aProcessor = networkSystem.actorOf(Props[AuthorizationProcessor], name="AProcessor")
+    val aProcessor = networkSystem.actorOf(Props(new AuthorizationProcessor(networkSystem)), name="AProcessor")
     val socketUserMap = networkSystem.actorOf(Props[SocketUserMap], name="SocketUserMap")
     val userRoomMap = networkSystem.actorOf(Props[UserRoomMap], name="UserRoomMap")
     val roomList = networkSystem.actorOf(Props[RoomList], name="RoomList")
@@ -57,6 +57,8 @@ object GameLoop {
     val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
     val worldFactory = networkSystem.actorOf(Props[WorldFactory], name="WorldFactory")
     val worldGenerator = networkSystem.actorOf(Props[WorldGenerator], name="WorldGenerator")
+    val effectMap = networkSystem.actorOf(Props[EffectMap], name="EffectMap")
+    val spriteSheetMap = networkSystem.actorOf(Props[SpriteSheetMap], name="SpriteSheetMap")
 
     //This needs to be read in from a config file
     val rooms = List("map0.json", "map1.json")
@@ -64,6 +66,7 @@ object GameLoop {
     val itemFactory = ItemFactory.bootup(networkSystem)
     val questFactory = QuestFactory.bootup(networkSystem)
     val classFactory = ClassFactory.bootup(networkSystem)
+    val effectFactory = EffectFactory.bootup(networkSystem)
 
     for(file <- rooms){
       val future = worldFactory ? new CreateWorld(file)

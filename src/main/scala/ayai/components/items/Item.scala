@@ -23,6 +23,8 @@ class Item(val id: Long, name: String, value: Int, var weight: Double,
   }
 
   def copy(): Item = {
-  	new Item(id, name, value, weight, itemType.copy)
+  	val item = new Item(id, name, value, weight, itemType.copy)
+    item.image = image
+    item
   }
 }

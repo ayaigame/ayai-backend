@@ -4,6 +4,8 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import scala.collection.mutable.HashMap
 import ayai.components._
 import akka.actor.Status.{Success, Failure}
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 
 case class AddItem(id: String, item: Item)
@@ -25,10 +27,15 @@ class ItemMap() extends Actor {
 		itemMap -= id
 	}
 
+	def outputJson() {
+		// itemMap.foreach{case (key, value) => value.asJson}
+	}
+
 	def receive = {
 		case AddItem(id: String, item: Item) => addItem(id, item)
 		case GetItem(id: String) => getItem(id)
 		case RemoveItem(id: String) => removeItem(id)
+		case OutputJson() => outputJson
 		case _ => println("No Command for Items")
 			sender ! Failure
 	}

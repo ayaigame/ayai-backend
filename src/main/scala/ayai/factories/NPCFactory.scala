@@ -30,6 +30,7 @@ case class AllNPCValues(
       inventory: List[InventoryValue])
 case class QuestValue(questId: Int)
 case class InventoryValue(itemId: Int)
+case class EquipmentValues(weaponId: Int, helmetId: Int, torsoId: Int, legsId: Int, feetId: Int)
 
 object NPCFactory {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)

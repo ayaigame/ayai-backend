@@ -27,8 +27,7 @@ object ClassFactory {
       description: String,
       baseHealth: Int,
       baseMana: Int,
-      baseStats: Option[List[Stat]],
-      statGrowths: Option[List[Stat]]) {
+      baseStats: Option[List[Stat]]) {
 
     def getStatsJson: JValue = {
       baseStats match {
@@ -36,8 +35,8 @@ object ClassFactory {
           // var jsonStats =
           var statsArray = new ArrayBuffer[Stat]()
           statsArray appendAll stats
-          statsArray += new Stat("health", baseHealth)
-          statsArray += new Stat("mana", baseMana)
+          statsArray += new Stat("health", baseHealth, 0)
+          statsArray += new Stat("mana", baseMana, 0)
 
           var statsMapping = statsArray map ((stat: Stat) => (stat.attributeType -> stat.magnitude))
           var statsMap = statsMapping.toMap
@@ -61,16 +60,18 @@ object ClassFactory {
   **/
   def bootup(networkSystem: ActorSystem) = {
     classes.foreach(classData => {
-      var classComponent = new Class(
-        classData.id,
+      var classComponent = new ClassValues(
         classData.name,
+        classData.description,
         classData.baseHealth,
-        classData.baseMana)
+        classData.baseMana,
+        buildStats(classData.baseStats)
+        )
 
       //Construct stats component
       // classComponent.components += buildStats(classData.baseStats)
 
-      networkSystem.actorSelection("user/ClassMap") ! AddClass("CLASS"+classData.id, classComponent)
+      networkSystem.actorSelection("user/ClassMap") ! AddClass(classData.name,classComponent)
     })
   }
 

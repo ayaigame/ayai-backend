@@ -1,0 +1,40 @@
+{
+	"sprites": [
+		{
+			"name": "guy",
+			"path": "",
+			"width": 32,
+			"height": 32,
+			"facedown": "1-1",
+			"faceleft": "4-4",
+			"faceright": "7-7",
+			"faceup": "10-10",
+			"walkdown": "0-2",
+			"walkleft": "3-5",
+			"walkright": "6-8",
+			"walkup": "9-11",
+			"attackdown": "12-15",
+			"attackleft": "18-21",
+			"attackright": "24-27",
+			"attackup": "30-33"
+		},
+		{
+			"name": "npcsheet",
+			"path": "",
+			"width": 32,
+			"height": 48,
+			"facedown": "0-0",
+			"faceleft": "0-0",
+			"faceright": "0-0",
+			"faceup": "0-0",
+			"walkdown": "0-0",
+			"walkleft": "0-0",
+			"walkright": "0-0",
+			"walkup": "0-0",
+			"attackdown": "0-0",
+			"attackleft": "0-0",
+			"attackright": "0-0",
+			"attackup": "0-0"
+		}
+	]
+}

@@ -41,7 +41,10 @@ case class Health(var currentHealth: Int, var maximumHealth: Int) extends Compon
   implicit def asJson(): JObject = {
     ("health" ->
       ("currHealth" -> currentCached) ~
-      ("maximumHealth" -> maxCached))
+      ("maximumHealth" -> maxCached) ~
+      ("currentEffects" -> (currentModifiers.map{ce => ce.asJson}))~
+      ("maximumEffects" -> (maxModifiers.map{me => me.asJson}))
+    )
   }
   /*
     Will first check if to process the effect again, and if invalid then remove the effect

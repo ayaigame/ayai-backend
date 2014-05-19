@@ -9,29 +9,18 @@
 			"baseStats": [
 				{
 					"attributeType": "intelligence",
-					"magnitude": 18
+					"magnitude": 18,
+					"growth": 4
 				},
 				{
 					"attributeType": "strength",
-					"magnitude": 13
+					"magnitude": 13,
+					"growth": 1
 				},
 				{
 					"attributeType": "agility",
-					"magnitude": 15
-				}
-			],
-			"statGrowths":[
-				{
-					"attributeType": "intelligence",
-					"magnitude": 2
-				},
-				{
-					"attributeType": "strength",
-					"magnitude": 1
-				},
-				{
-					"attributeType": "agility",
-					"magnitude": 1
+					"magnitude": 15,
+					"growth": 2
 				}
 			],
 			"abilities": [
@@ -51,29 +40,19 @@
 			"baseStats": [
 				{
 					"attributeType": "intelligence",
-					"magnitude": 13
+					"magnitude": 13,
+					"growth": 2
+
 				},
 				{
 					"attributeType": "strength",
-					"magnitude": 18
+					"magnitude": 18,
+					"growth": 2
 				},
 				{
 					"attributeType": "agility",
-					"magnitude": 15
-				}
-			],
-			"statGrowths":[
-				{
-					"attributeType": "intelligence",
-					"magnitude": 1
-				},
-				{
-					"attributeType": "strength",
-					"magnitude": 2
-				},
-				{
-					"attributeType": "agility",
-					"magnitude": 1
+					"magnitude": 15,
+					"growth": 2					
 				}
 			],
 			"abilities": [
