@@ -55,9 +55,9 @@ object CharacterTable {
             )
 
           //give them some starting items
-          AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 0, 1))
           AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 1, 1))
           AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 2, 1))
+          AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 3, 1))
 
           request.response.write(HttpResponseStatus.OK, "GOOD")
         }

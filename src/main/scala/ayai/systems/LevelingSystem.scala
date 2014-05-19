@@ -32,7 +32,7 @@ class LevelingSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(in
         
         if(leveledUp) {
           val json = ("type" -> "chat") ~
-            ("message" -> "Leveled Up to level $experience.level") ~
+            ("message" -> ("Leveled Up to level " + experience.level.toString)) ~
             ("sender" -> "system")
           val actorSelection = na.actor
           actorSelection ! ConnectionWrite(compact(render(json)))

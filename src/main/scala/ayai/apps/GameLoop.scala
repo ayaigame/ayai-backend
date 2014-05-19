@@ -21,6 +21,8 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.util.Random
 
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -55,6 +57,7 @@ object GameLoop {
     val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
     val effectMap = networkSystem.actorOf(Props[EffectMap], name="EffectMap")
     val spriteSheetMap = networkSystem.actorOf(Props[SpriteSheetMap], name="SpriteSheetMap")
+    val npcMap = networkSystem.actorOf(Props[NPCMap], name="NPCMap")
 
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
@@ -63,7 +66,7 @@ object GameLoop {
     val questFactory = QuestFactory.bootup(networkSystem)
     val classFactory = ClassFactory.bootup(networkSystem)
     val effectFactory = EffectFactory.bootup(networkSystem)
-
+    
     for((file, index) <- rooms.zipWithIndex)
       worlds(s"room$index") = worldFactory.createWorld(s"room$index", s"$file")
 

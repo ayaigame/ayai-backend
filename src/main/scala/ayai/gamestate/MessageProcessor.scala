@@ -94,7 +94,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
        // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
       case AttackMessage(userId: String) => {
-        //create a projectile
+       //create a projectile
 
         val bulletId = (new UID()).toString
 
@@ -176,6 +176,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             log.warn("8a87265: getComponent failed to return anything")
       }
       sender ! Success
+
     }
 
       case ItemMessage(userId: String, itemAction: ItemAction) => {
@@ -206,7 +207,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
                   val item = inventory.inventory(slot)
-                  val equipItem = equipment.equipmentMap(equipmentType)
+                  val equipItem = equipment.unequipItem(equipmentType)
                   if(equipment.equipItem(item)) {
                     inventory.removeItem(item)
                     if(!isEmptySlot(equipItem)) {

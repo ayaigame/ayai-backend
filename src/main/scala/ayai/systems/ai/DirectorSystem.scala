@@ -2,6 +2,8 @@ package ayai.systems
 
 import crane.{Entity, TimedSystem}
 
+import java.rmi.server.UID
+
 import ayai.components._
 import ayai.factories.EntityFactory
 
