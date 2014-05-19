@@ -78,7 +78,6 @@ object DBCreation {
             case _ =>
           }
         }
-
       case _ =>
         throw(new Exception("Account creation failed!"))
     }

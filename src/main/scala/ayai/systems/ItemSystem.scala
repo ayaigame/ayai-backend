@@ -17,13 +17,15 @@ class ItemSystem() extends EntityProcessingSystem(include=List(classOf[ItemUse])
           case Some(inventory: Inventory) => 
             inventory.removeItem(itemuse.item)
             for(effect <- itemuse.getItemEffects()) {
-              addEffect(entity, effect)
+              println(effect.effectType)
+              addEffect(itemuse.initiator, effect)
             }
           case _ => 
         }
         
       case _ =>  
     }
+    entity.kill()
   }
   /**
   Will return the component that the effect tries to use 
@@ -32,7 +34,9 @@ class ItemSystem() extends EntityProcessingSystem(include=List(classOf[ItemUse])
     effect.effectType match {
       case "currentHealth" | "maxHealth" =>
         entity.getComponent(classOf[Health]) match {
-          case Some(health: Health) => health.addEffect(effect)
+          case Some(health: Health) => 
+            println("effecting health")
+            health.addEffect(effect)
           case _ => 
         }
       case "currentMana" | "maxMana" =>

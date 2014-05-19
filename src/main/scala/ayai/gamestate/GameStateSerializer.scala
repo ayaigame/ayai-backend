@@ -131,12 +131,15 @@ class GameStateSerializer(world: World) extends Actor {
     val jsonLift = (entity.getComponent(classOf[Inventory]),
       entity.getComponent(classOf[Equipment]),
       entity.getComponent(classOf[QuestBag]),
-      entity.getComponent(classOf[Loot])) match {
-        case (Some(inventory: Inventory), Some(equipment: Equipment), Some(quests: QuestBag), None) =>
+      entity.getComponent(classOf[Loot]),
+      entity.getComponent(classOf[Stats])) match {
+        case (Some(inventory: Inventory), Some(equipment: Equipment),
+              Some(quests: QuestBag), None, Some(stats: Stats)) =>
           (inventory.asJson) ~
           (equipment.asJson) ~
-          (quests.asJson)
-        case (Some(inventory: Inventory), None, None, Some(loot: Loot)) =>
+          (quests.asJson) ~
+          (stats.asJson)
+        case (Some(inventory: Inventory), None, None, Some(loot: Loot), None) =>
           (inventory.asJson) ~
           (loot.asJson)
         case _ => JNothing

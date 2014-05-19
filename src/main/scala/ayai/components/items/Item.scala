@@ -14,6 +14,7 @@ class Item(val id: Long, val name: String, value: Int, var weight: Double,
            val itemType: ItemType, val effects: ArrayBuffer[Effect] = new ArrayBuffer[Effect]()) extends Component{
   var image: String = ""
   def asJson: JObject = {
+    ("id" -> id) ~
   	("name" -> name) ~
     ("value" -> value) ~
     ("weight" -> weight) ~
@@ -22,6 +23,8 @@ class Item(val id: Long, val name: String, value: Int, var weight: Double,
   }
 
   def copy(): Item = {
-  	new Item(id, name, value, weight, itemType.copy)
+  	val item = new Item(id, name, value, weight, itemType.copy)
+    item.image = image
+    item
   }
 }

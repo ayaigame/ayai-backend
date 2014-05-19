@@ -433,6 +433,23 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         world.addEntity(ai)
         sender ! Success
 
+      case UseItemMessage(userId: String, itemId: Int) =>
+        val itemUseId = (new UID()).toString
+        world.getEntityByTag(s"$userId") match {
+          case Some(e: Entity) =>
+          val entity = world.createEntity("ITEMUSE"+itemUseId)
+            e.getComponent(classOf[Inventory]) match {
+              case Some(inventory: Inventory) =>
+                val item = inventory.getItemById(itemId) 
+                if(item != null) {
+                  entity.components += new ItemUse(e, item, e)
+                  world.addEntity(entity)
+                }
+                case _ =>
+            }
+          case _ => 
+        }
+        sender ! Success
       case _ => println("Error from MessageProcessor.")
     }
   }

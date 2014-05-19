@@ -141,7 +141,10 @@ case class Mana(var currentMana: Int, var maximumMana: Int) extends Component {
   implicit def asJson() : JObject = {
     ("Mana" ->
       ("currMana" -> currentCached) ~
-      ("maximumMana" -> maxCached))
+      ("maximumMana" -> maxCached) ~
+      ("currentEffects" -> (currentModifiers.map{ce => ce.asJson}))~
+      ("maximumEffects" -> (maxModifiers.map{me => me.asJson}))
+      )
   }
 
 }
