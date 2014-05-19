@@ -38,6 +38,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
             } 
           }
         }
+        //moves victims to another array so they arent hit again
         attack.moveVictims()
       }
       case _ => 
@@ -127,10 +128,18 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       // get experience and add that to the initiators experience
       (initiator.getComponent(classOf[Experience]), 
         victim.getComponent(classOf[Experience]),
-        victim.getComponent(classOf[Character])) match {
-        case (Some(initiatorExperience: Experience), Some(victimExperience: Experience), None) => 
+        initiator.getComponent(classOf[NPC]),
+        victim.getComponent(classOf[NPC])) match {
+        case (Some(initiatorExperience: Experience), Some(victimExperience: Experience), None, Some(npc: NPC)) => 
           initiatorExperience.baseExperience += victimExperience.baseExperience
+          initiator.getComponent(classOf[NetworkingActor]) match {
+            case Some(na: NetworkingActor) => 
+            val att = ("type" -> "experience") ~
+                      ("earned" -> victimExperience.baseExperience) 
+            na.actor ! new ConnectionWrite(compact(render(att)))
+          }
         case _ =>
+          //character should not get experience (usually NPCS (they have no need to level up))
       }
       
       println("Victim is dead")
@@ -152,5 +161,5 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       ("victim" -> victimId)
     val actorSelection = actorSystem.actorSelection("user/SockoSender*")
     actorSelection ! new ConnectionWrite(compact(render(att)))
-  } 
+  }
 } 

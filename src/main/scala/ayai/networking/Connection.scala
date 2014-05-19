@@ -45,6 +45,7 @@ case class ClassPost(request: HttpRequestEvent) extends NetworkMessage
 case class ItemPost(request: HttpRequestEvent) extends NetworkMessage
 case class EffectPost(request: HttpRequestEvent) extends NetworkMessage
 case class SpellPost(request: HttpRequestEvent) extends NetworkMessage
+case class NPCGet(request: HttpRequestEvent) extends NetworkMessage
 
 case class PublicChatMessage(message: String, sender: String) extends NetworkMessage
 case class OpenMessage(socketId: String, containerId: String) extends NetworkMessage

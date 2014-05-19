@@ -156,6 +156,10 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
       case _ =>
         request.response.write(HttpResponseStatus.UNAUTHORIZED)
     }
+  case NPCGet(request: HttpRequestEvent) => 
+    val jsonFuture = networkSystem.actorSelection("user/NPCMap") ? OutputJson()
+    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[JObject]
+    request.response.write(HttpResponseStatus.OK, compact(render(json)))
 
   case NPCPost(request: HttpRequestEvent) =>
     val content: String = request.request.content.toString

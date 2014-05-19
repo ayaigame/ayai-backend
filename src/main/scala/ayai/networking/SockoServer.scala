@@ -74,7 +74,7 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
 
         authorization ! new ClassPost(httpRequest)
       }
-      case POST(Path("/Item")) => {
+      case POST(Path("/item")) => {
         if(httpRequest.request.is100ContinueExpected)
           httpRequest.response.write100Continue
 
@@ -114,6 +114,12 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
         authorization ! new ClassListGet(httpRequest)
       }
 
+      case GET(Path("/npcs")) => {
+        if (httpRequest.request.is100ContinueExpected)
+          httpRequest.response.write100Continue
+
+         authorization ! new NPCGet(httpRequest)
+      }
       case _ => {
         if (httpRequest.request.is100ContinueExpected)
           httpRequest.response.write100Continue

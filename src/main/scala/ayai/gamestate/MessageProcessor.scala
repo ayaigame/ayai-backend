@@ -184,7 +184,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
                   val item = inventory.inventory(slot)
-                  val equipItem = equipment.equipmentMap(equipmentType)
+                  val equipItem = equipment.unequipItem(equipmentType)
                   if(equipment.equipItem(item)) {
                     inventory.removeItem(item)
                     if(!isEmptySlot(equipItem)) {

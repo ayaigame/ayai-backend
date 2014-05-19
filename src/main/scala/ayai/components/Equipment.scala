@@ -61,7 +61,13 @@ class Equipment() extends Component {
   }
 
   def unequipItem(equipmentType: String): Item = {
-    val equippedItem = equipmentMap(equipmentType).copy
+    // if equipment map has nothing then return emptyslot
+    var equippedItem: Item = null
+    try {
+      equippedItem = equipmentMap(equipmentType).copy
+    } catch {
+      case _ => equippedItem = new EmptySlot
+    }
     equipmentMap(equipmentType) = new EmptySlot
     return equippedItem
 
