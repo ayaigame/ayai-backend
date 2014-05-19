@@ -30,7 +30,7 @@ class EffectMap() extends Actor {
 	}
 
 	def outputJson() = {
-		sender ! compact(render("effects" -> (effectMap.map{ case (key, value) => value.asJson})))
+		sender ! compact(render((effectMap.map{ case (key, value) => value.asJson})))
 	}
 
 	def receive = {

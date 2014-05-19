@@ -75,9 +75,6 @@ object GameLoop {
     val receptionist = SockoServer(networkSystem)
     receptionist.run(Constants.SERVER_PORT)
 
-    val itemFuture = networkSystem.actorSelection("user/ItemMap" ) ? OutputJson()
-    val itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[String]
-    println(itemResult)
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
       val start = System.currentTimeMillis

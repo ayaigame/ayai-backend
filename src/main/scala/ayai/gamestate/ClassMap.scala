@@ -50,7 +50,7 @@ class ClassMap() extends Actor {
 		case RemoveClass(name: String) =>
 		  classMap -= name
 		case OutputJson() =>
-			sender ! compact(render("class" -> (classMap.map{case (key, value) => value.asJson})))
+			sender ! compact(render((classMap.map{case (key, value) => value.asJson})))
 		case _ => println("No Command for Classes")
 	 		sender ! Failure
 	}
