@@ -45,6 +45,58 @@
 			"value" : 20,
 			"image" : "http://www.minecraftopia.com/images/blocks/iron_helmet.png",
 			"stats": []
+			},
+			{
+			"id": 3,
+			"name": "Magic Staff",
+			"equipable": true,
+			"itemType": "weapon1",
+			"range": 1000,
+			"damage": 20,
+			"damageType": "physical",
+			"value": 10,
+			"weight": 20,
+			"image" : "http://t3.rbxcdn.com/d5121321a00d448bf4ff5912ef03b62c",
+			"spritesheet": {"name": "fireball", "xDim": 32, "yDim": 32, "frames":
+				[{"name":"up", "index": 0},
+				{"name":"upRight", "index": 0},
+				{"name":"right", "index": 0},
+				{"name":"downRight", "index": 0},
+				{"name":"down", "index": 0},
+				{"name":"downLeft", "index": 0},
+				{"name":"Left", "index": 0},
+				{"name":"upLeft", "index": 0}]},
+			"stats": [
+				{
+					"attributeType": "fireDamage",
+					"magnitude": 5
+					}]
+			},
+			{
+			"id": 4,
+			"name": "Elven Bow",
+			"equipable": true,
+			"itemType": "weapon1",
+			"range": 1000,
+			"damage": 15,
+			"damageType": "physical",
+			"value": 10,
+			"weight": 20,
+			"image" : "http://files.softicons.com/download/game-icons/kingdom-icons-by-mihaiciuc-bogdan/png/32x32/Druid%20Bow.png",
+			"spritesheet": {"name": "arrows", "xDim": 24, "yDim": 24, "frames":
+				[{"name":"up", "index": 1},
+				{"name":"upRight", "index": 6},
+				{"name":"right", "index": 3},
+				{"name":"downRight", "index": 4},
+				{"name":"down", "index": 0},
+				{"name":"downLeft", "index": 5},
+				{"name":"Left", "index": 2},
+				{"name":"upLeft", "index": 7}]},
+			"stats": [
+				{
+					"attributeType": "waterDamage",
+					"magnitude": 5
+					}]
 			}],
 
 	"externalItems": [

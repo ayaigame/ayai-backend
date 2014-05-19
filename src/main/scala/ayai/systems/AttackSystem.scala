@@ -21,29 +21,29 @@ object AttackSystem {
 class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Attack])) {
   def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[Attack]) match {
-      case Some(attack: Attack) =>  
+      case Some(attack: Attack) =>
       if(!attack.victims.isEmpty) {
         for(victim <- attack.victims) {
           if(!attack.attacked.contains(victim)) {
             val victimFaction = victim.getComponent(classOf[Faction]) match {
               case Some(faction: Faction) => faction.name
-              case _ => "" 
+              case _ => ""
             }
             val initiatorFaction = attack.initiator.getComponent(classOf[Faction]) match {
               case Some(faction: Faction) => faction.name
-              case _ => "" 
+              case _ => ""
             }
             if(victimFaction != initiatorFaction) {
-              getDamage(attack.initiator, victim)
-            } 
+              processAttack(attack.initiator, victim)
+            }
           }
         }
         //moves victims to another array so they arent hit again
         attack.moveVictims()
       }
-      case _ => 
+      case _ =>
     }
-    
+
   }
 
   /**
@@ -100,9 +100,12 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
   }
 
   /**
-  ** Calculate damage from an initiator to a victim
+  ** I calculate the damage from an initiator to a victim.
+  ** Then I apply the damage and check to see if the victim died.
+  ** If it's dead then I award experience and set up the loot.
+  ** Finally I notify all client connections of the attack.
   **/
-  def getDamage(initiator: Entity, victim: Entity) {
+  def processAttack(initiator: Entity, victim: Entity) {
     // calculate the attack
     var damage : Int = getWeaponStat(initiator)
     damage -= getArmorStat(victim)
@@ -126,7 +129,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       victim.components += new Time(20000, System.currentTimeMillis())
       victim.components += new Dead()
       // get experience and add that to the initiators experience
-      (initiator.getComponent(classOf[Experience]), 
+      (initiator.getComponent(classOf[Experience]),
         victim.getComponent(classOf[Experience]),
         initiator.getComponent(classOf[NPC]),
         victim.getComponent(classOf[NPC])) match {
@@ -146,8 +149,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
         case _ =>
           //character should not get experience (usually NPCS (they have no need to level up))
       }
-      
-      println("Victim is dead")
+
       val id = (new UID()).toString
       val loot:Entity = world.createEntity(tag=id)
       EntityFactory.characterToLoot(initiator, loot)
@@ -160,11 +162,11 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     }
 
     // attack message to be sent to all players to notify of attacked
-    val att = ("type" -> "attack") ~
+    val attackMessage = ("type" -> "attack") ~
       ("damage" -> damage) ~
       ("initiator" -> initiatorId) ~
       ("victim" -> victimId)
     val actorSelection = actorSystem.actorSelection("user/SockoSender*")
-    actorSelection ! new ConnectionWrite(compact(render(att)))
+    actorSelection ! new ConnectionWrite(compact(render(attackMessage)))
   }
-} 
+}

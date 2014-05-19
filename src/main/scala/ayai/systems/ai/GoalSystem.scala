@@ -123,7 +123,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
                   world.addEntity(p)
 
                 case _ =>
-                // log.warn("424e244: Cooldown is present, cannot attack")
+                  println("GoalSystem: Cooldown is present, cannot attack")
               }
               case _ =>
             }
