@@ -61,9 +61,9 @@ class MapGenerator extends Actor {
 
       // println(rescaleNoise(noise2d).map(_.deep.mkString(" ")).mkString("\n"))
 
-      val noise1d = rescaleNoise(noise2d).flatten
+      val rescaledNoise = rescaleNoise(noise2d)
 
-      val fileName = TiledExporter.export(id, noise1d, width, height)
+      val fileName = TiledExporter.export(id, rescaledNoise, width, height)
 
       val worldFactory = context.system.actorSelection("user/WorldFactory")
       val future = worldFactory ? new CreateWorld(fileName)

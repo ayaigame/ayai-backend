@@ -27,6 +27,8 @@ import scala.concurrent.duration._
 import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.io.Source
 
+import java.io.File
+
 /** Akka Imports **/
 import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
 import akka.pattern.ask
@@ -135,14 +137,16 @@ object EntityFactory {
         }
 
         val tileMap = world.asInstanceOf[RoomWorld].tileMap
-
+        val mapFile = Source.fromFile(new File("src/main/resources/assets/maps/" + tileMap.file))
+        val tileMapString = mapFile.mkString.filterNot({_ == "\n"})
+        mapFile.close()
 
         val json = (
           ("type" -> "id") ~
           ("id" -> entityId) ~
           ("x" -> x) ~
           ("y" -> y) ~
-          ("tilemap" -> tileMap.file) ~
+          ("tilemap" -> tileMapString) ~
           ("tilesets" -> (tileMap.tilesets map (_.asJson))) ~
           (spritesheet.asJson)
 
