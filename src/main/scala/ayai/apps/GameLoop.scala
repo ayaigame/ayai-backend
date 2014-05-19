@@ -53,6 +53,7 @@ object GameLoop {
     val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
     val effectMap = networkSystem.actorOf(Props[EffectMap], name="EffectMap")
     val spriteSheetMap = networkSystem.actorOf(Props[SpriteSheetMap], name="SpriteSheetMap")
+    val npcMap = networkSystem.actorOf(Props[NPCMap], name="NPCMap")
 
     val rooms = List("map3", "map2")
     val worldFactory = WorldFactory(networkSystem)
