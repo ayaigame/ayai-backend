@@ -20,7 +20,7 @@ class WorldFactory(networkSystem: ActorSystem) {
     world.addSystem(MovementSystem(), 1)
     world.addSystem(TransportSystem(networkSystem), 2)
     world.addSystem(HealthSystem())
-    world.addSystem(RespawningSystem())
+    world.addSystem(RespawningSystem(networkSystem))
     world.addSystem(FrameExpirationSystem(networkSystem))
     world.addSystem(StatusEffectSystem())
     world.addSystem(ItemSystem())

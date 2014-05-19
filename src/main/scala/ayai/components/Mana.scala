@@ -25,6 +25,11 @@ case class Mana(var currentMana: Int, var maximumMana: Int, val growth: Int = 10
       currentMana = 0
     }
   }
+
+  def levelUp() {
+    maximumMana += growth
+  }
+
   def updateCachedValue() {
     updateCurrentValue()
     updateMaxValue()

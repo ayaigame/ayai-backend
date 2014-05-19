@@ -66,31 +66,31 @@ object NPCFactory {
       var itemFuture = itemMap ? GetItem("ITEM"+npc.weapon1)
       var itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => new EmptySlot()
+        case _ => new EmptySlot("weapon1")
       }
       equipment.equipItem(itemResult)
       itemFuture = itemMap ? GetItem("ITEM"+npc.feet)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => new EmptySlot()
+        case _ => new EmptySlot("feet")
       }
       equipment.equipItem(itemResult)
       itemFuture = itemMap ? GetItem("ITEM"+npc.torso)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => new EmptySlot()
+        case _ => new EmptySlot("torso")
       }
       equipment.equipItem(itemResult)
       itemFuture = itemMap ? GetItem("ITEM"+npc.helmet)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => new EmptySlot() 
+        case _ => new EmptySlot("helmet") 
       }
       equipment.equipItem(itemResult)
       itemFuture = itemMap ? GetItem("ITEM"+npc.legs)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
-        case _ => new EmptySlot() 
+        case _ => new EmptySlot("legs") 
       }
       equipment.equipItem(itemResult)
       ent.components += equipment

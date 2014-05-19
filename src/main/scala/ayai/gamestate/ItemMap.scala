@@ -24,7 +24,7 @@ class ItemMap() extends Actor {
 			val item = itemMap(id)
 			sender ! item
 		} catch {
-			case _ : Throwable => sender ! new EmptySlot()
+			case _ : Throwable => sender ! new EmptySlot("")
 		}
 	}
 

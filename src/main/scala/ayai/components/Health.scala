@@ -29,6 +29,10 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: In
     }
   }
 
+  def levelUp() {
+    maximumHealth += growth
+  }
+
   def refill() { 
     currentHealth = maximumHealth 
     currentCached = currentHealth

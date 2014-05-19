@@ -51,10 +51,12 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
       }
 
       val position = goal match {
-	    case mt: MoveTo =>
+	      case mt: MoveTo =>
           mt.position
         case at: AttackTo =>
           at.position
+        case _ =>
+          new Position(0,0)
       }
 
       val direction = findDirection(entity, position)
@@ -62,12 +64,13 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
         case (Some(actionable: Actionable), Some(character: Character), Some(ep: Position)) =>
 	      goal match {
 	        case mt: MoveTo =>
-              val tp = mt.position
-              actionable.active = !(ep.x == tp.x && ep.y == tp.y)
-              actionable.action = direction
-            case at: AttackTo =>
+              // val tp = mt.position
+              // actionable.active = !(ep.x == tp.x && ep.y == tp.y)
+              // actionable.action = direction
+          case at: AttackTo =>
               val tp = at.position
               actionable.active = !(ep.x == tp.x && ep.y == tp.y)
+              actionable.active = false
               actionable.action = direction
               if(getScore(ep, tp) < 64){
 
@@ -123,7 +126,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
                   world.addEntity(p)
 
                 case _ =>
-                  println("GoalSystem: Cooldown is present, cannot attack")
+                  // println("GoalSystem: Cooldown is present, cannot attack")
               }
               case _ =>
             }
