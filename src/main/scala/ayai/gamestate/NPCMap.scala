@@ -48,10 +48,9 @@ class NPCMap() extends Actor {
 		sender ! npcMap(id)
 	}
 
-	def outputJson(): JObject = {
+	def outputJson() = {
 		
-		("npcs" -> 
-			(npcMap.map{case (key, value) => (value.asJson)}))
+		sender ! compact(render(("npcs" -> (npcMap.map{case (key, value) => (value.asJson)}))))
 	}
 	def receive = {
 		case AddNPC(id: String, npc: NPCValues) => addNPC(id, npc)

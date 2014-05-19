@@ -156,26 +156,26 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
       case _ =>
         request.response.write(HttpResponseStatus.UNAUTHORIZED)
     }
-    
+
   case NPCGet(request: HttpRequestEvent) => 
     val jsonFuture = networkSystem.actorSelection("user/NPCMap") ? OutputJson()
-    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[JObject]
-    request.response.write(HttpResponseStatus.OK, compact(render(json)))
+    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
+    request.response.write(HttpResponseStatus.OK, json)
 
   case EffectGet(request: HttpRequestEvent) => 
     val jsonFuture = networkSystem.actorSelection("user/EffectMap") ? OutputJson()
-    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[JObject]
-    request.response.write(HttpResponseStatus.OK, compact(render(json)))
+    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
+    request.response.write(HttpResponseStatus.OK, json)
 
   case ItemGet(request: HttpRequestEvent) => 
     val jsonFuture = networkSystem.actorSelection("user/ItemMap") ? OutputJson()
-    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[JObject]
-    request.response.write(HttpResponseStatus.OK, compact(render(json)))
+    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
+    request.response.write(HttpResponseStatus.OK, json)
 
   case ClassGet(request: HttpRequestEvent) => 
     val jsonFuture = networkSystem.actorSelection("user/ClassMap") ? OutputJson()
-    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[JObject]
-    request.response.write(HttpResponseStatus.OK, compact(render(json)))
+    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
+    request.response.write(HttpResponseStatus.OK, json)
 
 
   case NPCPost(request: HttpRequestEvent) =>

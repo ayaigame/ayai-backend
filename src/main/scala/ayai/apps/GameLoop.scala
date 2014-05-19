@@ -20,6 +20,8 @@ import scala.collection.concurrent.{Map => ConcurrentMap, TrieMap}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -73,6 +75,9 @@ object GameLoop {
     val receptionist = SockoServer(networkSystem)
     receptionist.run(Constants.SERVER_PORT)
 
+    val itemFuture = networkSystem.actorSelection("user/ItemMap" ) ? OutputJson()
+    val itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[String]
+    println(itemResult)
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
     while(running) {
       val start = System.currentTimeMillis

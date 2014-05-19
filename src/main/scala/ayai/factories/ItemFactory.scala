@@ -40,7 +40,7 @@ object ItemFactory {
     instantiateWeapons(networkSystem, items.filter((item: AllItemValues) => item.itemType == "weapon2"))
     // instantiateArmor(world, items.filter((item: AllItemValues) => item.itemType == "armor"))
     instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "helmet"))
-    instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "braces"))
+    instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "torso"))
     instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "legs"))
     instantiateArmor(networkSystem, items.filter((item: AllItemValues) => item.itemType == "feet"))
   }

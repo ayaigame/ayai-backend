@@ -27,9 +27,10 @@ class ItemMap() extends Actor {
 		itemMap -= id
 	}
 
-	def outputJson() {
-		("items" ->
+	def outputJson() = {
+		val json = ("items" ->
 		 (itemMap.map{case (key, value) => value.asJson}))
+		sender ! compact(render(json))
 	}
 
 	def receive = {
