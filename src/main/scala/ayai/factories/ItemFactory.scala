@@ -31,6 +31,7 @@ object ItemFactory {
       protection: Option[Int],
       stackable: Option[Boolean],
       stats: Option[List[Stat]],
+      spriteSheet: Option[SpriteSheet],
       image: Option[String])
 
   def bootup(networkSystem: ActorSystem) = {

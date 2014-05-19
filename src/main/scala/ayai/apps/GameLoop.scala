@@ -19,6 +19,7 @@ import scala.concurrent.duration._
 import scala.collection.concurrent.{Map => ConcurrentMap, TrieMap}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
+import java.util.Random
 
 
 import org.slf4j.{Logger, LoggerFactory}
@@ -36,6 +37,7 @@ object GameLoop {
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
     import ExecutionContext.Implicits.global
 
+    // COMMENT ME OUT TO SPEED UP BOOTUP TIME
     DBCreation.ensureDbExists()
 
     var worlds = HashMap[String, RoomWorld]()

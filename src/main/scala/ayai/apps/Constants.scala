@@ -11,6 +11,7 @@ object Constants {
 
   val PLAYER_CHARACTER: String = "player char"
   val STARTING_ROOM_ID: Int = 0
+  val PROJECTILE_VELOCITY = 8
 
   val source = scala.io.Source.fromFile("src/main/resources/configs/config.json")
   val lines = source.mkString
