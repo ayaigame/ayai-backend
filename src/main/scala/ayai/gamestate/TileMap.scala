@@ -2,13 +2,13 @@ package ayai.gamestate
 
 /** Ayai Imports **/
 import ayai.components._
-import ayai.maps.{Tile, Layer, TransportInfo, Tilesets}
+import ayai.maps.{Tile, Layer, TransportInfo, Tileset}
 
 /** External Imports **/
 import scala.math._
 
 //128 x 128 is only default
-class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[TransportInfo], var tilesets: Tilesets) {
+class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[TransportInfo], var tilesets: List[Tileset]) {
   var file: String = ""
   var width: Int = 128
   var height: Int = 128

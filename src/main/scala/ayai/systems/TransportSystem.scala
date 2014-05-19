@@ -82,12 +82,12 @@ extends EntityProcessingSystem(include=List(classOf[Room],
 
           implicit val formats = net.liftweb.json.DefaultFormats
           val mapFile = Source.fromURL(getClass.getResource("/assets/maps/" + newTileMap.file))
-          val tileMapString = mapFile.mkString
+          val tileMapString = mapFile.mkString.filterNot({_ == "\n"})
           mapFile.close()
 
           val json = ("type" -> "map") ~
                       ("tilemap" -> tileMapString) ~
-                      (newTileMap.tilesets.asJson)
+                      ("tilesets" -> (newWorld.tileMap.tilesets map (_.asJson)))
 
           println(compact(render(json)))
           val actorSelection = actorSystem.actorSelection("user/SockoSender" + e.tag)

@@ -127,7 +127,7 @@ object EntityFactory {
           ("x" -> x) ~
           ("y" -> y) ~
           ("tilemap" -> tileMap.file) ~
-          (tileMap.tilesets.asJson) ~
+          ("tilesets" -> (tileMap.tilesets map (_.asJson))) ~
           (spritesheet.asJson)
 
         )
@@ -238,7 +238,7 @@ object EntityFactory {
   case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomId: Int) {
     override def toString() : String = "start_x: " + start_x
   }
-  case class JTilesets(image: String)
+  case class JTilesets(image: String, name: String, imageheight: Int, imagewidth: Int)
 
   /**
   ** Load a room from a json file (based of tmx file from tiled) and then put in room tilemap
@@ -281,13 +281,13 @@ object EntityFactory {
     }
     //parse the tilesets and put them in a List[String]
     //by jarrad : THIS IS HORRID, REALLY NEED TO FIX THIS UP AND GET FEATURES WORKING FOR MAPS
-    val images: ListBuffer[String] = ListBuffer()
+    val tilesets: ListBuffer[Tileset] = ListBuffer()
     for(tileset <- jtilesets) {
-      images += tileset.image
+      tilesets += new Tileset(tileset.image, tileset.name, tileset.imageheight, tileset.imagewidth)
     }
-    val tilesets = new Tilesets(images.toList)
+    // val tilesets = new Tilesets(images.toList)
 
-    val tileMap: TileMap = new TileMap(arrayTile, transports, tilesets)
+    val tileMap: TileMap = new TileMap(arrayTile, transports, tilesets.toList)
     tileMap.height = tmap.height
     tileMap.width = tmap.width
     tileMap.file = jsonFile

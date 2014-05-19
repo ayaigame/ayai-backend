@@ -1,10 +1,14 @@
 package ayai.systems.mapgenerator
 
+import ayai.maps.Tileset
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
+
+import scala.collection.mutable.ListBuffer
 
 import net.liftweb.json._;
 import net.liftweb.json.JsonDSL._;
@@ -20,10 +24,12 @@ object TiledExporter {
 		println("saving " + width + "x" + height +" map to "+name);
 
 		for(i <- 0 until width * height) {
-				if(map(i) < 150 &&  map(i) > 0) {
+				// if(map(i) < 150 &&  map(i) > 0) {
+				if(map(i) == 0) {
 					newMap(i) = 121		//light water
 				}
-				else if(map(i) == 0) {
+				// else if(map(i) == 0) {
+				else if(map(i) == 1) {
 					newMap(i) = 211;	//dark water
 				}
 				else {
@@ -35,10 +41,13 @@ object TiledExporter {
 		val list = newMap.toList
 
 		case class Layer()
-		case class Tileset()
+		// case class Tileset()
 
 		val layers = List(Layer())
-		val tilesets = List(Tileset())
+		// val tilesets = ListBuffer(Tileset())
+
+		val tilesets: ListBuffer[Tileset] = ListBuffer()
+    tilesets += new Tileset("overworld (1).png", "overworld (1)", height, width)
 
 		val json = (
 				("id" -> id) ~
@@ -58,19 +67,7 @@ object TiledExporter {
 				("orientation" -> "orthogonal") ~
 				("properties" -> null) ~
 				("tileheight" -> 32) ~
-				("tilesets" -> tilesets.map { item => (
-					("firstgid" -> 1) ~
-					("image" -> "sd33.png") ~
-					("imageheight" -> 640) ~
-					("imagewidth" -> 1184) ~
-					("margin" -> 0) ~
-					("name" -> "sd33") ~
-					("properties" -> null) ~
-					("spacing" -> 0) ~
-					("tileheight" -> 32) ~
-					("tilewidth" -> 32) ~
-					("transparentcolor" -> "#ff00cc"))}
-					) ~
+				("tilesets" -> (tilesets.toList map (_.asJson))) ~
 				("tilewidth" -> 32) ~
 				("version" -> 1) ~
 				("transports" -> List[Int]())

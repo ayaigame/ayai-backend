@@ -58,6 +58,9 @@ class MapGenerator extends Actor {
       val noiseGenerator = FractionalBrownianMotionGenerator(NoiseGenerator("perlin"))
 
       val noise2d = noiseGenerator.getNoise(width, height)
+
+      // println(rescaleNoise(noise2d).map(_.deep.mkString(" ")).mkString("\n"))
+
       val noise1d = rescaleNoise(noise2d).flatten
 
       val fileName = TiledExporter.export(id, noise1d, width, height)
