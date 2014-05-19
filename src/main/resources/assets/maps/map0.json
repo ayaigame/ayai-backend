@@ -92,14 +92,18 @@
         "start_y" : 0,
         "end_x" : 1,
         "end_y" : 40,
-        "toRoomId" : 1
+        "toRoomId" : 1,
+        "to_x": 100,
+        "to_y": 100
         },
         {
         "start_x" : 58,
         "start_y" : 0,
         "end_x" : 59,
         "end_y" : 40,
-        "toRoomId" : 2
+        "toRoomId" : 2,
+        "to_x": 100,
+        "to_y": 100
         }],
 
  "npcs" : [{

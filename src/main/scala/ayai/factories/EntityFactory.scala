@@ -10,6 +10,7 @@ import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
 import ayai.persistence.{AyaiDB, CharacterTable, CharacterRow, InventoryTable}
 import ayai.apps.Constants
+import ayai.systems.JTransport
 
 /** Crane Imports **/
 import crane.Component
@@ -250,9 +251,6 @@ object EntityFactory {
 
   case class JTMap(id: Int, width: Int, height: Int)
   case class JTiles(data: List[Int], width: Int, height: Int, name: String)
-  case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomId: Int) {
-    override def toString() : String = "start_x: " + start_x
-  }
   case class JTilesets(image: String, name: String, imageheight: Int, imagewidth: Int)
 
   /**
@@ -269,7 +267,8 @@ object EntityFactory {
     for(trans <- jtransports) {
       val startPosition = new Position(trans.start_x, trans.start_y)
       val endPosition = new Position(trans.end_x, trans.end_y)
-      transports = new TransportInfo(startPosition, endPosition, trans.toRoomId) :: transports
+      val toPosition = new Position(trans.to_x, trans.to_y)
+      transports = new TransportInfo(startPosition, endPosition, trans.toRoomId, toPosition) :: transports
     }
 
     val bundles = (parsedJson \\ "layers").extract[List[JTiles]]

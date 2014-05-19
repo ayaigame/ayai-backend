@@ -7,6 +7,8 @@ import ayai.gamestate._
 import ayai.apps._
 import ayai.networking._
 import ayai.systems.mapgenerator.{WorldGenerator, ExpandRoom}
+import ayai.maps.TransportInfo
+
 /** Crane Imports **/
 import crane.{Entity,EntityProcessingSystem}
 
@@ -34,13 +36,15 @@ object TransportSystem {
 
 class NoRoomFoundException(msg: String) extends RuntimeException(msg)
 
-case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomId: Int) {
+case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomId: Int, to_x: Int, to_y: Int) {
   implicit def asJson(): JObject = {
     ("start_x" -> start_x) ~
     ("start_y" -> start_y) ~
     ("end_x" -> end_x) ~
     ("end_y" -> end_y) ~
-    ("toRoomId" -> toRoomId)
+    ("toRoomId" -> toRoomId) ~
+    ("to_x" -> to_x) ~
+    ("to_y" -> to_y)
   }
 }
 
@@ -62,46 +66,50 @@ extends EntityProcessingSystem(include=List(classOf[Room],
     e.getComponent(classOf[NetworkingActor])) match {
       case (Some(room: Room), Some(position: Position), Some(networkingActor: NetworkingActor)) => {
         val tileMap: TileMap = world.asInstanceOf[RoomWorld].tileMap
-        val roomId: Int = tileMap.checkIfTransport(position)
+        val transportOption: Option[TransportInfo] = tileMap.checkIfTransport(position)
 
-        if(roomId >= 0) {
-          val future = actorSystem.actorSelection("user/RoomList") ? GetWorldById(roomId)
-          val result = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]]
+        transportOption match {
+          case Some(transport: TransportInfo) => {
+            val roomId: Int = transport.toRoomId
+            val future = actorSystem.actorSelection("user/RoomList") ? GetWorldById(roomId)
+            val result = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]]
 
-          val newWorld = result match {
-            case Some(roomWorld: RoomWorld) => roomWorld
-            case _ => throw new NoRoomFoundException("Cannot match room " + roomId)
+            val newWorld = result match {
+              case Some(roomWorld: RoomWorld) => roomWorld
+              case _ => throw new NoRoomFoundException("Cannot match room " + roomId)
+            }
+
+            if(newWorld.isLeaf) {
+              //Generate all of its children
+              val worldGenerator = actorSystem.actorSelection("user/WorldGenerator")
+              worldGenerator ! new ExpandRoom(newWorld)
+              newWorld.isLeaf = false
+            }
+
+            val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, newWorld)
+            Await.result(future1, timeout.duration)
+
+            //Update the room component so it will be saved to the DB on logout
+            room.id = roomId
+
+            val newTileMap = newWorld.tileMap
+
+            position.x = transport.toPosition.x
+            position.y = transport.toPosition.y
+
+            implicit val formats = net.liftweb.json.DefaultFormats
+            val mapFile = Source.fromFile(new File("src/main/resources/assets/maps/" + newTileMap.file))
+            val tileMapString = mapFile.mkString.filterNot({_ == "\n"})
+            mapFile.close()
+
+            val json = ("type" -> "map") ~
+                        ("tilemap" -> tileMapString) ~
+                        ("tilesets" -> (newWorld.tileMap.tilesets map (_.asJson)))
+
+            val actorSelection = actorSystem.actorSelection("user/SockoSender" + e.tag)
+            actorSelection ! new ConnectionWrite(compact(render(json)))
           }
-
-          if(newWorld.isLeaf) {
-            //Generate all of its children
-            val worldGenerator = actorSystem.actorSelection("user/WorldGenerator")
-            worldGenerator ! new ExpandRoom(newWorld)
-            newWorld.isLeaf = false
-          }
-
-          val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, newWorld)
-          Await.result(future1, timeout.duration)
-
-          //Update the room component so it will be saved to the DB on logout
-          room.id = roomId
-
-          val newTileMap = newWorld.tileMap
-
-          position.x = 100
-          position.y = 100
-
-          implicit val formats = net.liftweb.json.DefaultFormats
-          val mapFile = Source.fromFile(new File("src/main/resources/assets/maps/" + newTileMap.file))
-          val tileMapString = mapFile.mkString.filterNot({_ == "\n"})
-          mapFile.close()
-
-          val json = ("type" -> "map") ~
-                      ("tilemap" -> tileMapString) ~
-                      ("tilesets" -> (newWorld.tileMap.tilesets map (_.asJson)))
-
-          val actorSelection = actorSystem.actorSelection("user/SockoSender" + e.tag)
-          actorSelection ! new ConnectionWrite(compact(render(json)))
+          case _ =>
         }
       }
 

@@ -52,8 +52,8 @@ object TiledExporter {
     tilesets += new Tileset("overworld (1).png", "overworld (1)", 512, 960)
 
     val transports: ListBuffer[JTransport] = ListBuffer()
-    transports += new JTransport(width-2, 0, width-1, min(40, height), id+1)
-    transports += new JTransport(0, 0, 1, min(40, height), id-1)
+    transports += new JTransport(width-2, 0, width-1, min(40, height), id+1, 100, 100)
+    transports += new JTransport(0, 0, 1, min(40, height), id-1, width*32-100, 100)
 
 		val json = (
 				("id" -> id) ~

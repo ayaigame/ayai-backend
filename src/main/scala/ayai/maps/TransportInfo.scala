@@ -5,5 +5,6 @@ import ayai.components.Position
 
 class TransportInfo(var startingPosition: Position,
                     var endingPosition: Position,
-                    var toRoomId: Int) {
+                    var toRoomId: Int,
+                    var toPosition: Position) {
 }

@@ -54,6 +54,8 @@
         "start_y" : 0,
         "end_x" : 1,
         "end_y" : 100,
-        "toRoomId" : 0
+        "toRoomId" : 0,
+        "to_x": 100,
+        "to_y": 100
   }]
 }
