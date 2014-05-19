@@ -134,9 +134,14 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
           initiatorExperience.baseExperience += victimExperience.baseExperience
           initiator.getComponent(classOf[NetworkingActor]) match {
             case Some(na: NetworkingActor) => 
-            val att = ("type" -> "experience") ~
-                      ("earned" -> victimExperience.baseExperience) 
-            na.actor ! new ConnectionWrite(compact(render(att)))
+              val att = ("type" -> "experience") ~
+                        ("earned" -> victimExperience.baseExperience) 
+              na.actor ! new ConnectionWrite(compact(render(att)))
+              val ch =  ("type" -> "chat") ~
+                        ("message" -> ("earned: " + victimExperience.baseExperience.toString + " total experience now " + initiatorExperience.baseExperience.toString))  ~
+                        ("sender" -> "system")
+              na.actor ! new ConnectionWrite(compact(render(ch)))
+            case _ =>
           }
         case _ =>
           //character should not get experience (usually NPCS (they have no need to level up))

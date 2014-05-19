@@ -94,64 +94,67 @@ class MessageProcessor(world: RoomWorld) extends Actor {
        // give id of the item, and what action it should do (equip, use, unequip, remove from inventory)
       case AttackMessage(userId: String) => {
         //create a projectile
+        try {
+          val bulletId = (new UID()).toString
 
-        val bulletId = (new UID()).toString
+          (world.getEntityByTag(s"$userId")) match {
 
-        (world.getEntityByTag(s"$userId")) match {
+          case Some(initiator: Entity) =>
+            (initiator.getComponent(classOf[Position]),
+            initiator.getComponent(classOf[Actionable]),
+            initiator.getComponent(classOf[Character]),
+            initiator.getComponent(classOf[Room]),
+            initiator.getComponent(classOf[Cooldown]),
+            initiator.getComponent(classOf[Dead])) match {
+              case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) =>
 
-        case Some(initiator: Entity) =>
-          (initiator.getComponent(classOf[Position]),
-          initiator.getComponent(classOf[Actionable]),
-          initiator.getComponent(classOf[Character]),
-          initiator.getComponent(classOf[Room]),
-          initiator.getComponent(classOf[Cooldown]),
-          initiator.getComponent(classOf[Dead])) match {
-            case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) =>
+                val m = a.action match {
+                  case (move: MoveDirection) => move
+                  case _ =>
+                    println("Not match for movedirection")
+                    new MoveDirection(0, 0)
+                }
 
-              val m = a.action match {
-                case (move: MoveDirection) => move
-                case _ =>
-                  println("Not match for movedirection")
-                  new MoveDirection(0, 0)
-              }
-
-              //get the range of the characters weapon
-              val weaponRange = initiator.getComponent(classOf[Equipment]) match {
-                case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
-                  case weapon: Weapon => weapon.range
+                //get the range of the characters weapon
+                val weaponRange = initiator.getComponent(classOf[Equipment]) match {
+                  case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
+                    case weapon: Weapon => weapon.range
+                    case _ => 30
+                  }
                   case _ => 30
                 }
-                case _ => 30
-              }
 
-              val upperLeftx = pos.x
-              val upperLefty = pos.y
+                val upperLeftx = pos.x
+                val upperLefty = pos.y
 
-              val xDirection = m.xDirection
-              val yDirection = m.yDirection
+                val xDirection = m.xDirection
+                val yDirection = m.yDirection
 
-              val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
-              val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
+                val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
+                val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
 
 
-              val p: Entity = world.createEntity("ATTACK"+bulletId)
+                val p: Entity = world.createEntity("ATTACK"+bulletId)
 
-              p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
-              p.components += (new Bounds(weaponRange, weaponRange))
-              p.components += (new Attack(initiator));
-              p.components += (new Frame(30))
+                p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
+                p.components += (new Bounds(weaponRange, weaponRange))
+                p.components += (new Attack(initiator));
+                p.components += (new Frame(30))
 
 
-              initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
+                initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
 
-              //p.components += (c)
-              world.addEntity(p)
+                //p.components += (c)
+                world.addEntity(p)
 
+              case _ =>
+                // log.warn("424e244: Cooldown is present, cannot attack")
+            }
             case _ =>
-              // log.warn("424e244: Cooldown is present, cannot attack")
-          }
-          case _ =>
-            log.warn("8a87265: getComponent failed to return anything")
+              log.warn("8a87265: getComponent failed to return anything")
+        }
+      } catch {
+        case _ : Throwable => println("Attack failed to be added, trying again")
       }
       sender ! Success
     }
