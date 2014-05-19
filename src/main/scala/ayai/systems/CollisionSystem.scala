@@ -46,21 +46,32 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
     (entityA.getComponent(classOf[Attack]),
       entityB.getComponent(classOf[Attack]),
+      entityA.getComponent(classOf[Frame]),
+      entityB.getComponent(classOf[Frame]),
       entityA.getComponent(classOf[Health]),
       entityB.getComponent(classOf[Health])) match {
-      case(Some(attackComponentA : Attack), None, None, Some(healthComponentB : Health)) =>        
+      case(Some(attackComponentA: Attack), None, Some(frameComponentA: Frame), None, None, Some(healthComponentB: Health)) =>
           if(attackComponentA.initiator != entityB) {
             attackComponentA.addVictim(entityB)
+
+            //If it's sticking around for more than 30 frames it is a projectile.
+            //The first collision a projectile has should trigger it ending.
+            if(frameComponentA.framesActive > 30)
+              frameComponentA.framesActive = 1
           }
           true
-      case (None, Some(attackComponentB : Attack), Some(healthComponentA : Health), None) =>
+      case (None, Some(attackComponentB : Attack), None, Some(frameComponentB: Frame), Some(healthComponentA : Health), None) =>
           if(attackComponentB.initiator != entityA) {
             attackComponentB.addVictim(entityA)
+
+            if(frameComponentB.framesActive > 30)
+              frameComponentB.framesActive = 1
           }
           true
       case _ => false
       }
   }
+
 
   def handleCollision(entityA: Entity, entityB: Entity) {
       (entityA.getComponent(classOf[Position]),
@@ -91,7 +102,7 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
             //     RightDirection.process(entityA)
             //     LeftDirection.process(entityB)
             //   }
-            // } 
+            // }
             // else {
             //   if(positionA.y < positionB.y) {
             //     UpDirection.process(entityA)

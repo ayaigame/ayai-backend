@@ -98,10 +98,10 @@ object EntityFactory {
 
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
-        // InventoryTable.getInventory(p) foreach ((itemId: Long) => {
-        //   var future = itemSelection ? GetItem("ITEM" + itemId)
-        //   inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
-        // })
+        InventoryTable.getInventory(p) foreach ((itemId: Long) => {
+          var future = itemSelection ? GetItem("ITEM" + itemId)
+          inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+        })
 
 
 

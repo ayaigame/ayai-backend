@@ -45,7 +45,7 @@ class WorldFactory extends Actor {
       world.addSystem(TransportSystem(context.system), 2)
       world.addSystem(HealthSystem())
       world.addSystem(RespawningSystem())
-      world.addSystem(FrameExpirationSystem())
+      world.addSystem(FrameExpirationSystem(context.system))
       world.addSystem(StatusEffectSystem())
       world.addSystem(ItemSystem())
       world.addSystem(StatusEffectSystem())
@@ -67,7 +67,6 @@ class WorldFactory extends Actor {
 
       sender ! world
     }
-
     case _ => println("Error: from WorldFactory.")
       sender ! Failure
   }
