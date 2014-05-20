@@ -240,10 +240,10 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val description = contentSplit(2).replaceAll("description=","")
     val baseHealth = contentSplit(3).replaceAll("health=","").toInt
     val baseMana = contentSplit(4).replaceAll("mana=","").toInt
-    val spriteSheetLocation = contentSplit(5).replaceAll("spritesheet=","")
-    val statsString = contentSplit(6).replaceAll("stats=","")
-    val baseStats = contentSplit(7).replaceAll("base=","")
-    val growthStats = contentSplit(8).replaceAll("growth=","")
+    val statsString = contentSplit(5).replaceAll("stats=","")
+    val baseStats = contentSplit(6).replaceAll("base=","")
+    val growthStats = contentSplit(7).replaceAll("growth=","")
+    val spriteSheetLocation = contentSplit(8).replaceAll("spritesheet=","")
     
     val statsContent = statsString.split("%2C")
     val baseContent = baseStats.split("%2C")
