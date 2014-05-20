@@ -167,7 +167,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
           //character should not get experience (usually NPCS (they have no need to level up))
       }
 
-      val loot = EntityFactory.characterToLoot(world, initiator, victimPosition)
+      val loot = EntityFactory.characterToLoot(world, victim, victimPosition)
       world.addEntity(loot)
       val json = ("type" -> "disconnect") ~
          ("id" -> victimId)
