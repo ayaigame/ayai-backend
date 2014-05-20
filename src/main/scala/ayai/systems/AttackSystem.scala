@@ -137,7 +137,10 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     actorSelection = actorSystem.actorSelection("user/SockoSender*")
     actorSelection ! new ConnectionWrite(compact(render(attackChat)))
 
-
+    var victimPosition = victim.getComponent(classOf[Position]) match {
+      case Some(position: Position) => position
+      case _ => new Position(100,100)
+    }
     //if the victims health reaches zero, then take the persons inventory and make it lootable
     if(healthComponent.currentHealth <= 0) {
       victim.components += new Time(20000, System.currentTimeMillis())
@@ -164,9 +167,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
           //character should not get experience (usually NPCS (they have no need to level up))
       }
 
-      val id = (new UID()).toString
-      val loot:Entity = world.createEntity(tag=id)
-      EntityFactory.characterToLoot(initiator, loot)
+      val loot = EntityFactory.characterToLoot(world, initiator, victimPosition)
       world.addEntity(loot)
       val json = ("type" -> "disconnect") ~
          ("id" -> victimId)

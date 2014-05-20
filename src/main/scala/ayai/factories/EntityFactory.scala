@@ -337,31 +337,24 @@ object EntityFactory {
   /**
   ** Take an entity and take its inventory and create a loot entity
   **/
-  def characterToLoot(initiator: Entity, lootEntity: Entity) {
-     val id = (new UID()).toString
-     lootEntity.components += new NPC(0)
-      val animations = new ArrayBuffer[Animation]()
-      animations += new Animation("facedown", 0, 0)
-      lootEntity.components += new SpriteSheet("props", animations, 40, 40)
-      lootEntity.components += new Loot(id, initiator.getComponent(classOf[Character]) match {
-        case Some(character: Character) => character.id
-        case _ => ""
-      })
+  def characterToLoot(world: World, initiator: Entity, position: Position): Entity = {
+    val id = (new UID()).toString
+    val lootEntity: Entity = world.createEntity(tag=id)
+    val animations = new ArrayBuffer[Animation]()
+    animations += new Animation("facedown", 0, 0)
+    lootEntity.components += new SpriteSheet("props", animations, 40, 40)
 
-      initiator.getComponent(classOf[Character]) match {
-        case (Some(char: Character)) => initiator.components += char
-        case _ =>
-      }
+    lootEntity.components += new Loot(id, initiator.getComponent(classOf[Character]) match {
+      case Some(character: Character) => character.id
+      case _ => ""
+    })
 
-      initiator.getComponent(classOf[Inventory]) match {
-        case (Some(inv: Inventory)) =>
-          lootEntity.components += inv.copy()
-          case _ =>
-      }
-      initiator.getComponent(classOf[Position]) match {
-        case Some(position: Position) =>
-          lootEntity.components += new Position(position.x, position.y)
+    initiator.getComponent(classOf[Inventory]) match {
+      case (Some(inv: Inventory)) =>
+        lootEntity.components += inv.copy()
         case _ =>
-      }
+    }
+    lootEntity.components += position
+    lootEntity
   }
 }
