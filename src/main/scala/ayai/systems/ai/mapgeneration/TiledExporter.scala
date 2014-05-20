@@ -41,7 +41,9 @@ object TiledExporter {
 					newMap(i)(j) = 244;	//grass
 				}
 				else {
-					newMap(i)(j) = 241;	//trees
+					newMap(i)(j) = 4;
+					// newMap(i)(j) = 248;	//mountains
+					// newMap(i)(j) = 241;	//trees
 					collisions(i)(j) = 1
 				}
 			}
