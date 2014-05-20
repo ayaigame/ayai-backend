@@ -420,26 +420,39 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case _ => false
         }
 
+
         //if valid distance then pick up items
         if(isValidDistance) {
           val loot = itemEntity.getComponent(classOf[Inventory]) match {
             case Some(inv: Inventory) => inv
-            case _ => null
+            case _ =>  {
+              println("Could not find inventory")
+              new Inventory()
+            }
           }
-          val playerInventory = userEntity.getComponent(classOf[Inventory]) match {
+
+          val personInv = userEntity.getComponent(classOf[Inventory]) match {
             case Some(inv: Inventory) => inv
-            case _ => null
+            case _ => {
+              println("PlayerInventory could not be made")
+              new Inventory()
+            }
           }
 
 
           //take item and put it in player inventory
+          var itemToRemove: Item  = null
           for(itemInv <- loot.inventory) {
             if(itemInv.id == itemId) {
-              playerInventory.addItem(itemInv)
+              personInv.addItem(itemInv)
               InventoryTable.incrementItem(itemInv, userEntity)
-              loot.inventory -= itemInv
+              itemToRemove = itemInv
             }
           }
+          if(itemToRemove != null) {
+            loot.removeItem(itemToRemove)
+          }
+
 
 //          actorSelection ! ConnectionWrite(compact(render(json)))
         } else {
