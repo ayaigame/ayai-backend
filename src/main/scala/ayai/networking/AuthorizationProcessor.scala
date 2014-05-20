@@ -118,6 +118,7 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
 
   case ItemPost(request: HttpRequestEvent) =>
     val content: String = request.request.content.toString
+    println(content)
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
