@@ -63,6 +63,7 @@ class MapGenerator extends Actor {
     var startY = 0
     var incrX = 0
     var incrY = 0
+    var transportAlignment = 0
 
     //These are inverted because these are incoming directions
     direction match {
@@ -71,6 +72,7 @@ class MapGenerator extends Actor {
 
       case "LeftToRight" =>
         startX = width-2
+        transportAlignment = 1
         incrY = 1
 
       case "BottomToTop" =>
@@ -102,7 +104,7 @@ class MapGenerator extends Actor {
 
       //+incr is a trick to give a buffer of clear non-transport tile
       if(noCollision)
-        return new Position(startX, startY)
+        return new Position(startX+transportAlignment, startY)
 
       startX = startX + incrX
       startY = startY + incrY
@@ -124,7 +126,7 @@ class MapGenerator extends Actor {
   // }
 
   def doesPathExist(startX: Int, startY: Int, endX: Int, endY: Int, map: Array[Array[Int]], width: Int, height: Int): Boolean = {
-    println(s"Finding path from ($startX, $startY) to ($endX, $endY).")
+    // println(s"Finding path from ($startX, $startY) to ($endX, $endY).")
     var blockedIn = false
     var currentX = startX
     var currentY = startY
@@ -169,20 +171,23 @@ class MapGenerator extends Actor {
     return false
   }
 
+  //Creates a map of tiles where each tile's value is equal to how many
+  //non-colllidable neighbors it has. Collidable tiles value is 0.
   def calculateCollisionMap(map: Array[Array[Int]], width: Int, height: Int): Array[Array[Int]] = {
     var newMap = Array.ofDim[Int](width, height)
+    val nonCollisionTile = 1
 
     for(i <- 0 until width) {
       for(j <- 0 until height) {
-        if(map(i)(j) == 1) {
+        if(map(i)(j) == nonCollisionTile) {
           var tileVal = 0
-          if(i+1 < width && map(i+1)(j) ==  1)
+          if(i+1 < width && map(i+1)(j) ==  nonCollisionTile)
             tileVal = tileVal + 1
-          if(j+1 < height && map(i)(j+1) ==  1)
+          if(j+1 < height && map(i)(j+1) ==  nonCollisionTile)
             tileVal = tileVal + 1
-          if(i-1 >= 0 && map(i-1)(j)==  1)
+          if(i-1 >= 0 && map(i-1)(j)==  nonCollisionTile)
             tileVal = tileVal + 1
-          if(j-1 >= 0 && map(i)(j-1) ==  1)
+          if(j-1 >= 0 && map(i)(j-1) ==  nonCollisionTile)
             tileVal = tileVal + 1
           newMap(i)(j) = tileVal
         }
@@ -195,13 +200,6 @@ class MapGenerator extends Actor {
   }
 
   def ensureTraversable(map: Array[Array[Int]], transportPositions: List[Position], width: Int, height: Int): Boolean = {
-  // def ensureTraversable(map: Array[Array[Int]], transportsToRoom: List[TransportInfo], width: Int, height: Int): Boolean = {
-    // var incomingTransportDirections = transportsToRoom map (_.direction)
-
-    // //Add the outbound transport, this is inverted since it's incoming
-    // incomingTransportDirections = incomingTransportDirections ::: List("LeftToRight")
-
-    // var transportPositions: List[Position] = incomingTransportDirections map (findTransportLocation(_, map, width, height))
     var remainingList = transportPositions
     val collisionMap: Array[Array[Int]] = calculateCollisionMap(map, width, height)
 
@@ -252,7 +250,7 @@ class MapGenerator extends Actor {
         transportPositions = incomingTransportDirections map (findTransportLocation(_, rescaledNoise, width, height))
       }
 
-      println(rescaledNoise.map(_.deep.mkString(" ")).mkString("\n"))
+      // println(rescaledNoise.map(_.deep.mkString(" ")).mkString("\n"))
       // println(ensureTraversable(rescaledNoise, transportsToRoom, width, height))
       val jTransports: List[JTransport] = TransportFactory.createTransports(id, transportsToRoom.zip(transportPositions), rescaledNoise, width, height)
       val fileName = TiledExporter.export(id, jTransports, rescaledNoise, width, height)

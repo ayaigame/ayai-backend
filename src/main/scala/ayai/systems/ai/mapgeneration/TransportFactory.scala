@@ -79,57 +79,6 @@ object TransportFactory {
                                     toY,
                                     newDirection)
     }
-    	// var newDirection = ""
-    	// var toX = 100
-    	// var toY = 100
-    	// var startX = 0
-    	// var endX = 1
-    	// var startY = 5
-    	// var endY = 10
-
-     //  //directions.indexWhere()
-    	// transport.direction match {
-    	// 	case "LeftToRight" =>
-    	// 		newDirection = "RightToLeft"
-    	// 		toX = transport.endingPosition.x*32 + 64
-    	// 		toY = (transport.startingPosition.y*32 + transport.endingPosition.y*32) / 2
-		   //  	startX = width-1
-		   //  	endX = width
-		   //  	startY = 5
-		   //  	endY = 10
-
-    	// 	case "RightToLeft" =>
-    	// 		newDirection = "LeftToRight"
-    	// 		toX = transport.startingPosition.x*32 - 2
-    	// 		toY = (transport.startingPosition.y + transport.endingPosition.y) * 32 / 2
-		   //  	startX = 0
-		   //  	endX = 1
-		   //  	startY = 5
-		   //  	endY = 10
-
-    	// 	case "TopToBottom" =>
-    	// 		newDirection = "BottomToTop"
-    	// 		toX = (transport.startingPosition.x*32 + transport.endingPosition.x*32) / 2
-    	// 		toY = transport.endingPosition.y*32 + 64
-		   //  	startX = 5
-		   //  	endX = 10
-		   //  	startY = height - 1
-		   //  	endY = height
-
-    	// 	case "BottomToTop" =>
-    	// 		newDirection = "TopToBottom"
-    	// 		toX = (transport.startingPosition.x*32 + transport.endingPosition.x*32) / 2
-    	// 		toY = transport.startingPosition.y*32 - 64
-		   //  	startX = 0
-		   //  	endX = 1
-		   //  	startY = 0
-		   //  	endY = 1
-
-    	// 	case _ => println("MISSING TRANSPORT DIRECTION IN TiledExporter.")
-    	// }
-
-    // 	transports += new JTransport(startX, startY, endX, endY, transport.fromRoomId, toX, toY, newDirection)
-    // }
 
     transports.toList
   }
