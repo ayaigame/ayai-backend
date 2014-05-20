@@ -468,7 +468,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         sender ! Success
       case CreateAIMessage =>
-        val ai = EntityFactory.createAI(world, "axis")
+        val ai = EntityFactory.createAI(world, "axis", actorSystem)
         world.addEntity(ai)
         sender ! Success
 
@@ -494,7 +494,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         val id = (new UID()).toString
         entityType.toLowerCase match {
             case "npc" => 
-              val entity = EntityFactory.createAI(world, "axis", new Position(x, y))
+              val entity = EntityFactory.createAI(world, "axis", actorSystem, new Position(x, y))
               //edit the new AIs position
               world.addEntity(entity)
 

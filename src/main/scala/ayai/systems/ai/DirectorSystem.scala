@@ -4,14 +4,16 @@ import crane.{Entity, TimedSystem}
 
 import java.rmi.server.UID
 
+/** Akka Imports **/
+import akka.actor.{ActorSystem, Props}
 import ayai.components._
 import ayai.factories.EntityFactory
 
 object DirectorSystem {
-  def apply() = new DirectorSystem()
+  def apply(actorSystem: ActorSystem) = new DirectorSystem(actorSystem)
 }
 
-class DirectorSystem extends TimedSystem(3000) {
+class DirectorSystem(actorSystem: ActorSystem) extends TimedSystem(3000) {
   override def processTime(delta: Int) {
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[Faction])
     val factions = entities.groupBy(e => (e.getComponent(classOf[Faction])) match {
@@ -21,7 +23,7 @@ class DirectorSystem extends TimedSystem(3000) {
 
     // Create enough entities to make it even in healthwise-ness
 
-    val factionHealths = factions.map{
+    val factionHealths = factions.map {
       case(key, faction) => (key, faction.foldLeft(0){
         (x: Int, y: Entity) =>  
           (y.getComponent(classOf[Health])) match {
@@ -47,7 +49,7 @@ class DirectorSystem extends TimedSystem(3000) {
     factionToAdd.foreach{
       case (name, amount) => 
         for(_ <- 1 to amount) {
-          val entity = EntityFactory.createAI(world, name)
+          val entity = EntityFactory.createAI(world, name, actorSystem)
           world.addEntity(entity)
         }
     }

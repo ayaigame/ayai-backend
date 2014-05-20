@@ -50,7 +50,7 @@ class WorldFactory extends Actor {
       world.addSystem(ItemSystem())
       world.addSystem(StatusEffectSystem())
       world.addSystem(LevelingSystem(context.system))
-      // world.addSystem(DirectorSystem())
+      // world.addSystem(DirectorSystem(context.system))
       world.addSystem(NPCRespawningSystem())
       world.addSystem(GoalSystem(context.system))
       world.addSystem(RoomChangingSystem(context.system))
