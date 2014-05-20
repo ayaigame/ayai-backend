@@ -19,9 +19,9 @@ sealed trait EventMessage extends Message
 sealed trait NetworkMessage extends Message
 
 case class ProcessMessage(message: Message)
-case class FlushMessages(world: String)
+case class FlushMessages(worldId: Int)
 case class QueuedMessages(messages: Array[Message])
-case class AddInterpretedMessage(world: String, message: Message)
+case class AddInterpretedMessage(worldId: Int, message: Message)
 case class InterpretMessage(message: WebSocketFrameEvent)
 case class ConnectionWrite(json: String)
 

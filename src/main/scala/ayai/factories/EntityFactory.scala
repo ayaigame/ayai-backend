@@ -10,6 +10,7 @@ import ayai.networking.ConnectionWrite
 import ayai.actions.MoveDirection
 import ayai.persistence.{AyaiDB, CharacterTable, CharacterRow, InventoryTable}
 import ayai.apps.Constants
+import ayai.systems.JTransport
 
 /** Crane Imports **/
 import crane.Component
@@ -26,6 +27,8 @@ import scala.concurrent.duration._
 import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.io.Source
 
+import java.io.File
+
 /** Akka Imports **/
 import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
 import akka.pattern.ask
@@ -40,7 +43,7 @@ object EntityFactory {
   //However can't do that until front end actually gives me the characterId
   def loadCharacter(world: World, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
     CharacterTable.getCharacter(characterName) match {
-      case Some(characterRow: CharacterRow) =>
+      case Some(characterRow: CharacterRow) => {
         val p: Entity = world.createEntity(tag=entityId)
         val className = characterRow.className
         val classFuture = networkSystem.actorSelection("user/ClassMap") ? GetClass(className)
@@ -54,7 +57,7 @@ object EntityFactory {
         p.components += stats
 
         p.components += new Position(characterRow.pos_x,characterRow.pos_y)
-        p.components += new Bounds(32, 32)
+        p.components += new Bounds(28, 28)
         p.components += new Velocity(4, 4)
         val animations = new ArrayBuffer[Animation]()
         animations += new Animation("facedown", 1, 1 )
@@ -102,12 +105,13 @@ object EntityFactory {
           inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
         })
 
-        
+
 
         // var future = itemSelection ? GetItem("ITEM" + itemId)
         // inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
 
         val item = new Item(4, "Potion", 0, 20, new Consumable())
+
         item.effects += new Effect(0,"heal", "Heals for 50 hp", "currentHealth", 50, new OneOff(), new Multiplier(1.0))
         
         inventory.addItem(item)
@@ -135,26 +139,30 @@ object EntityFactory {
         }
 
         val tileMap = world.asInstanceOf[RoomWorld].tileMap
-
+        val mapFile = Source.fromFile(new File("src/main/resources/assets/maps/" + tileMap.file))
+        val tileMapString = mapFile.mkString.filterNot({_ == "\n"})
+        mapFile.close()
 
         val json = (
           ("type" -> "id") ~
           ("id" -> entityId) ~
           ("x" -> x) ~
           ("y" -> y) ~
-          ("tilemap" -> tileMap.file) ~
-          (tileMap.tilesets.asJson) ~
+          ("tilemap" -> tileMapString) ~
+          ("tilesets" -> (tileMap.tilesets map (_.asJson))) ~
           (spritesheet.asJson)
 
         )
 
         val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
         actorSelection ! new ConnectionWrite(compact(render(json)))
+      }
 
-      case _ =>
+      case _ => {
         println(s"CHARACTER $characterName NOT FOUND!!!!!!!!!!")
         val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
         actorSelection ! new ConnectionWrite(":(")
+      }
     }
   }
 
@@ -268,38 +276,36 @@ object EntityFactory {
 
   case class JTMap(id: Int, width: Int, height: Int)
   case class JTiles(data: List[Int], width: Int, height: Int, name: String)
-  case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomFile: String, toRoomId: Int) {
-    override def toString() : String = "start_x: " + start_x + " toRoomFile: " + toRoomFile
-  }
-  case class JTilesets(image: String)
+  case class JTilesets(image: String, name: String, imageheight: Int, imagewidth: Int)
 
   /**
   ** Load a room from a json file (based of tmx file from tiled) and then put in room tilemap
   **/
-  def loadRoomFromJson(jsonFile: String): TileMap = {
+  def loadRoomFromJson(jsonFile: String, parsedJson: JValue): TileMap = {
     implicit val formats = net.liftweb.json.DefaultFormats
-    val file = Source.fromURL(getClass.getResource("/assets/maps/" + jsonFile))
-    val lines = file.mkString
-    file.close()
 
-    val parsedJson = parse(lines)
     val tmap = parsedJson.extract[JTMap]
     val jtilesets = (parsedJson \\ "tilesets").extract[List[JTilesets]]
     val jtransports = (parsedJson \\ "transports").extract[List[JTransport]]
     var transports: List[TransportInfo] = Nil
 
-    for(trans <- jtransports) {
-      val startPosition = new Position(trans.start_x, trans.start_y)
-      val endPosition = new Position(trans.end_x, trans.end_y)
-      transports = new TransportInfo(startPosition, endPosition, trans.toRoomFile, trans.toRoomId) :: transports
-    }
-    val bundles = (parsedJson \\ "layers").extract[List[JTiles]]
-    bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width, "name" -> bundle.name)}
-    val arrayTile: Array[Array[Tile]] = Array.fill[Tile](tmap.width, tmap.height)(new Tile(ListBuffer()))
     //get the overall size and id of maps
     val id: Int = tmap.id
     val height: Int = tmap.height
     val width: Int = tmap.width
+
+    for(trans <- jtransports) {
+      val startPosition = new Position(trans.start_x, trans.start_y)
+      val endPosition = new Position(trans.end_x, trans.end_y)
+      val toPosition = new Position(trans.to_x, trans.to_y)
+      transports = new TransportInfo(startPosition, endPosition, id, trans.toRoomId, toPosition, trans.dir) :: transports
+    }
+
+    val bundles = (parsedJson \\ "layers").extract[List[JTiles]]
+    bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width, "name" -> bundle.name)}
+    val arrayTile: Array[Array[Tile]] = Array.fill[Tile](tmap.width, tmap.height)(new Tile(ListBuffer()))
+
+
     //get and transorm tiles from a list to multi-dimensional array
     for(i <- 0 until (width*height)) {
       for(bundle <- bundles) {
@@ -318,13 +324,13 @@ object EntityFactory {
     }
     //parse the tilesets and put them in a List[String]
     //by jarrad : THIS IS HORRID, REALLY NEED TO FIX THIS UP AND GET FEATURES WORKING FOR MAPS
-    val images: ListBuffer[String] = ListBuffer()
+    val tilesets: ListBuffer[Tileset] = ListBuffer()
     for(tileset <- jtilesets) {
-      images += tileset.image
+      tilesets += new Tileset(tileset.image, tileset.name, tileset.imageheight, tileset.imagewidth)
     }
-    val tilesets = new Tilesets(images.toList)
+    // val tilesets = new Tilesets(images.toList)
 
-    val tileMap: TileMap = new TileMap(arrayTile, transports, tilesets)
+    val tileMap: TileMap = new TileMap(arrayTile, transports, tilesets.toList)
     tileMap.height = tmap.height
     tileMap.width = tmap.width
     tileMap.file = jsonFile

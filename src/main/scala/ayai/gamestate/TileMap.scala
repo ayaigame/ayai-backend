@@ -2,13 +2,13 @@ package ayai.gamestate
 
 /** Ayai Imports **/
 import ayai.components._
-import ayai.maps.{Tile, Layer, TransportInfo, Tilesets}
+import ayai.maps.{Tile, Layer, TransportInfo, Tileset}
 
 /** External Imports **/
 import scala.math._
 
 //128 x 128 is only default
-class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[TransportInfo], var tilesets: Tilesets) {
+class TileMap(val array: Array[Array[Tile]], var transports: List[TransportInfo], var tilesets: List[Tileset]) {
   var file: String = ""
   var width: Int = 128
   var height: Int = 128
@@ -21,7 +21,7 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
   def maximumHeight: Int = array(0).length * tileSize
 
   def getTileByPosition(position: Position): Tile = array(valueToTile(position.x))(valueToTile(position.y))
-  
+
   // Get a tile by a x or y value from the array (example: 32 tilesize value, 65 (position) / 32) = 2 tile
   def valueToTile(value: Int): Int = value / tileSize
 
@@ -55,18 +55,18 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
   For checkIfTransport, use the characters position and see if they are in any of the transport areas
   If inside transport area, then return the new transport
   **/
-  def checkIfTransport(characterPosition: Position): String = {
-    val inTransport: Boolean = false
-    for(transport <- listOfTransport) {
+    def checkIfTransport(characterPosition: Position): Option[TransportInfo] = {
+    for(transport <- transports) {
       val startPosition = transport.startingPosition
       val endPosition = transport.endingPosition
 
       if((characterPosition.x >= (startPosition.x * tileSize) && characterPosition.y >= (startPosition.y * tileSize)) &&
          (characterPosition.x < (endPosition.x * tileSize) && characterPosition.y < (endPosition.y * tileSize))) {
         //CHANGE STARTING POSITION
-        return transport.toRoomId.toString
+        // return transport.toRoomId
+        return Some(transport)
       }
     }
-    return ""
+    return None
   }
 }

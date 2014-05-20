@@ -6,6 +6,10 @@ import ayai.components._
 import ayai.persistence._
 import ayai.gamestate._
 import ayai.factories._
+import ayai.systems.mapgenerator.{WorldGenerator, ExpandRoom}
+
+//Temp for testing!!!
+import ayai.systems.mapgenerator.MapGenerator
 
 /** Akka Imports **/
 import akka.actor.{Actor, ActorRef, ActorSystem, Status, Props}
@@ -27,10 +31,11 @@ import net.liftweb.json.JsonDSL._
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
-** The main loop of the Ayai Game 
+** The main loop of the Ayai Game
 ** First loads all needed Actors, creates needed worlds, and runs the game loop
 **/
 object GameLoop {
+
   private val log = LoggerFactory.getLogger(getClass)
 
   var running: Boolean = true
@@ -42,7 +47,6 @@ object GameLoop {
     // COMMENT ME OUT TO SPEED UP BOOTUP TIME
     DBCreation.ensureDbExists()
 
-    var worlds = HashMap[String, RoomWorld]()
     var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
 
     val networkSystem = ActorSystem("NetworkSystem")
@@ -55,23 +59,35 @@ object GameLoop {
     val itemMap = networkSystem.actorOf(Props[ItemMap], name="ItemMap")
     val classMap = networkSystem.actorOf(Props[ClassMap], name="ClassMap")
     val questMap = networkSystem.actorOf(Props[QuestMap], name="QuestMap")
+    val worldFactory = networkSystem.actorOf(Props[WorldFactory], name="WorldFactory")
+    val worldGenerator = networkSystem.actorOf(Props[WorldGenerator], name="WorldGenerator")
     val effectMap = networkSystem.actorOf(Props[EffectMap], name="EffectMap")
     val spriteSheetMap = networkSystem.actorOf(Props[SpriteSheetMap], name="SpriteSheetMap")
     val npcMap = networkSystem.actorOf(Props[NPCMap], name="NPCMap")
 
-    val rooms = List("map3", "map2")
-    val worldFactory = WorldFactory(networkSystem)
+    //This needs to be read in from a config file
+    val rooms = List("map0.json", "map1.json")
 
     val itemFactory = ItemFactory.bootup(networkSystem)
     val questFactory = QuestFactory.bootup(networkSystem)
     val classFactory = ClassFactory.bootup(networkSystem)
     val effectFactory = EffectFactory.bootup(networkSystem)
-    
-    for((file, index) <- rooms.zipWithIndex)
-      worlds(s"room$index") = worldFactory.createWorld(s"room$index", s"$file")
 
-    for((name, world) <- worlds)
-      roomList ! AddWorld(world)
+    for(file <- rooms){
+      val future = worldFactory ? new CreateWorld(file)
+      val result = Await.result(future, timeout.duration).asInstanceOf[RoomWorld]
+      roomList ! AddWorld(result)
+    }
+
+    //Ensure the first room is expanded, since its expansion will not be
+    //triggered by the transport system. (Since you don't transport into it.)
+    val futureOfRoom0 = roomList ? GetWorldById(0)
+    Await.result(futureOfRoom0, timeout.duration) match {
+      case Some(room: RoomWorld) =>
+        worldGenerator ! ExpandRoom(room)
+      case _ => println("Cannot find room 0.")
+    }
+
     val npcFactory = NPCFactory.bootup(networkSystem)
 
     val receptionist = SockoServer(networkSystem)
@@ -82,12 +98,13 @@ object GameLoop {
       val start = System.currentTimeMillis
 
       val processedMessages = new ArrayBuffer[Future[Any]]
-      for((name, world) <- worlds) {
-        val future = mQueue ? FlushMessages(name)
+      val futureWorlds = roomList ? new GetAllWorlds()
+      val worlds = Await.result(futureWorlds, timeout.duration).asInstanceOf[ArrayBuffer[RoomWorld]]
+      for(world <- worlds) {
+        val id = world.id
+        val future = mQueue ? FlushMessages(id)
         val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
-        val mProcessor = networkSystem.actorSelection(s"user/MProcessor$name")
-//        println("MESSAGES")
- //       println(result.messages)
+        val mProcessor = networkSystem.actorSelection(s"user/MProcessor$id")
 
         result.messages.foreach { message =>
           processedMessages += mProcessor ? new ProcessMessage(message)
@@ -96,9 +113,8 @@ object GameLoop {
 
       Await.result(Future.sequence(processedMessages), 10 seconds)
 
-      for((name, world) <- worlds) {
+      for(world <- worlds) {
         world.process()
-        //println(world.entities)
       }
 
       val end = System.currentTimeMillis

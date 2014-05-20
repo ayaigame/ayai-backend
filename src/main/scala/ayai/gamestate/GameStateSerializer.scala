@@ -176,7 +176,7 @@ class GameStateSerializer(world: World) extends Actor {
     val tileMap = world.asInstanceOf[RoomWorld].tileMap
     val json =  ("type" -> "map") ~
                 ("tilemap" -> tileMap.file) ~
-                (tileMap.tilesets.asJson)
+                ("tilesets" -> (tileMap.tilesets map (_.asJson)))
 
     try {
       sender ! compact(render(json))

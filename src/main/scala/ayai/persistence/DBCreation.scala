@@ -22,6 +22,7 @@ import org.squeryl.adapters.H2Adapter
 
 object DBCreation {
   def ensureDbExists() = {
+    println("Recreating DataBase....")
 
     // If DB Doesn't exist, create it
     if(Files.exists(Paths.get("ayai.h2.db"))){
@@ -65,7 +66,8 @@ object DBCreation {
         transaction {
           AyaiDB.characters.insert(new CharacterRow("Orunin", "Paladin", 1, 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
           AyaiDB.characters.insert(new CharacterRow("Xanthar", "Mage", 1, 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
-          AyaiDB.characters.insert(new CharacterRow("Ness", "Warrior", 1, 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+          // AyaiDB.characters.insert(new CharacterRow("Ness", "Warrior", 1, 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
+          AyaiDB.characters.insert(new CharacterRow("Ness", "Warrior", 1, 0, account.id, Constants.STARTING_ROOM_ID, 1280, Constants.STARTING_Y))
           AyaiDB.characters.insert(new CharacterRow("Ezio", "Thief", 1, 0, account.id, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y))
         }
 

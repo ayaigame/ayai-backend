@@ -23,6 +23,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
   def getScore(current: Position, goal: Position): Int = {
     abs(current.x - goal.x) + abs(current.y - goal.y)
   }
+
   def findDirection(entity: Entity, tp: Position): MoveDirection = {
     (entity.getComponent(classOf[Position]): @unchecked) match {
       case Some(ep: Position) =>
@@ -44,7 +45,8 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
       case _ =>
         new MoveDirection(0,0)
     }
-  } 
+  }
+
   override def process(delta: Int) {
     val entities = world.getEntitiesWithExclusions(include=List(classOf[Goal], classOf[Position], classOf[Actionable], classOf[Character]), exclude=List(classOf[Dead]))
     for(entity <- entities) {
@@ -63,79 +65,84 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
 
       val direction = findDirection(entity, position)
       (entity.getComponent(classOf[Actionable]), entity.getComponent(classOf[Character]), entity.getComponent(classOf[Position])) match {
-        case (Some(actionable: Actionable), Some(character: Character), Some(ep: Position)) =>
-	      goal match {
-	        case mt: MoveTo =>
-              // val tp = mt.position
-              // actionable.active = !(ep.x == tp.x && ep.y == tp.y)
-              // actionable.action = direction
-          case at: AttackTo =>
-              val tp = at.position
-              actionable.active = !(ep.x == tp.x && ep.y == tp.y)
-              actionable.active = false
-              actionable.action = direction
-              if(getScore(ep, tp) < 64){
+        case (Some(actionable: Actionable), Some(character: Character), Some(ep: Position)) => {
+  	      goal match {
+  	        case mt: MoveTo =>
+                // val tp = mt.position
+                // actionable.active = !(ep.x == tp.x && ep.y == tp.y)
+                // actionable.action = direction
+            case at: AttackTo => {
+                val tp = at.position
+                actionable.active = !(ep.x == tp.x && ep.y == tp.y)
+                actionable.active = false
+                actionable.action = direction
+                if(getScore(ep, tp) < 64) {
 
-          val bulletId = (new UID()).toString
+                  val bulletId = (new UID()).toString
 
-          entity match {
-            case initiator: Entity =>
-              (initiator.getComponent(classOf[Position]),
-              initiator.getComponent(classOf[Actionable]),
-              initiator.getComponent(classOf[Character]),
-              initiator.getComponent(classOf[Room]),
-              initiator.getComponent(classOf[Cooldown]),
-              initiator.getComponent(classOf[Dead])) match {
-                case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) =>
+                  entity match {
+                    case initiator: Entity => {
+                      (initiator.getComponent(classOf[Position]),
+                      initiator.getComponent(classOf[Actionable]),
+                      initiator.getComponent(classOf[Character]),
+                      initiator.getComponent(classOf[Room]),
+                      initiator.getComponent(classOf[Cooldown]),
+                      initiator.getComponent(classOf[Dead])) match {
+                        case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) => {
 
-                  val m = a.action match {
-                    case (move: MoveDirection) => move
-                    case _ =>
-                      println("Not match for movedirection")
-                      new MoveDirection(0, 0)
-                  }
+                          val m = a.action match {
+                            case (move: MoveDirection) => move
+                            case _ =>
+                              println("Not match for movedirection")
+                              new MoveDirection(0, 0)
+                          }
 
-                  //get the range of the characters weapon
-                  val weaponRange = initiator.getComponent(classOf[Equipment]) match {
-                    case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
-                      case weapon: Weapon => weapon.range
-                      case _ => 30
+                          //get the range of the characters weapon
+                          val weaponRange = initiator.getComponent(classOf[Equipment]) match {
+                            case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
+                              case weapon: Weapon => weapon.range
+                              case _ => 30
+                            }
+                            case _ => 30
+                          }
+
+                          val upperLeftx = pos.x
+                          val upperLefty = pos.y
+
+                          val xDirection = m.xDirection
+                          val yDirection = m.yDirection
+
+                          val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
+                          val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
+
+
+                          val p: Entity = world.createEntity("ATTACK"+bulletId)
+
+                          p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
+                          p.components += (new Bounds(weaponRange, weaponRange))
+                          p.components += (new Attack(initiator));
+                          p.components += (new Frame(30))
+
+
+                          initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
+
+                        //p.components += (c)
+                          world.addEntity(p)
+                        }
+
+                        case _ =>
+                          // println("GoalSystem: Cooldown is present, cannot attack")
+                      }
                     }
-                    case _ => 30
+                    case _ =>
                   }
-
-                  val upperLeftx = pos.x
-                  val upperLefty = pos.y
-
-                  val xDirection = m.xDirection
-                  val yDirection = m.yDirection
-
-                  val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
-                  val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
-
-
-                  val p: Entity = world.createEntity("ATTACK"+bulletId)
-
-                  p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
-                  p.components += (new Bounds(weaponRange, weaponRange))
-                  p.components += (new Attack(initiator));
-                  p.components += (new Frame(30))
-
-
-                  initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
-
-                //p.components += (c)
-                  world.addEntity(p)
-
-                case _ =>
-                  // println("GoalSystem: Cooldown is present, cannot attack")
+                } //endif
               }
-              case _ =>
+            case _ => println("Goal not found.")
             }
-           }
-           // ending brace here
-	      }
-      }
-    }
+        }
+      case _ =>
+      }//endmatch
+    }//endfor
   }
 }
