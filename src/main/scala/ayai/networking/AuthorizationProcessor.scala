@@ -121,15 +121,15 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     println(content)
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
-    val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "0")
-    val name = contentSplit(2).replaceAll("name=","unnamed")
+    val id = contentSplit(0).replaceAll("id=", "0")
+    val name = contentSplit(1).replaceAll("name=","unnamed")
+    val description = contentSplit(2).replaceAll("description=","unnamed")
     val value = contentSplit(3).replaceAll("value=","1").toInt
     val weight = contentSplit(4).replaceAll("weight=","0").toDouble
     val imageLocation = contentSplit(5).replaceAll("image=","")
-    val itemType = contentSplit(6).replaceAll("itemtype=","consumable")
+    val itemType = contentSplit(6).replaceAll("itemType=","consumable")
 
     var item: Item = null
 
@@ -138,14 +138,14 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
         val range = contentSplit(7).replaceAll("range=","").toInt
         val damage = contentSplit(8).replaceAll("damage=","").toInt
         val damageType = contentSplit(9).replaceAll("damageType=","")
-        val itemT = contentSplit(10).replaceAll("type=","")
+        val itemT = "weapon1"
         item = new Item(id.toLong, name, value, weight, new Weapon(range, damage, damageType, itemT))
         networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
         request.response.write(HttpResponseStatus.OK)
       case "armor" =>
-        val slot = contentSplit(7).replaceAll("slot=","")
-        val protection = contentSplit(8).replaceAll("protection=","").toInt
-        val itemT = contentSplit(9).replaceAll("type=","")
+        val slot = contentSplit(10).replaceAll("slot=","")
+        val protection = contentSplit(11).replaceAll("protection=","").toInt
+        val itemT = contentSplit(12).replaceAll("armorType=","")
         item = new Item(id.toLong, name, value, weight, new Armor(slot, protection, itemT))
         networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
         request.response.write(HttpResponseStatus.OK)
