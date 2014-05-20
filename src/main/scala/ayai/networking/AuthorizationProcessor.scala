@@ -131,10 +131,13 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val imageLocation = contentSplit(5).replaceAll("image=","")
     val itemType = contentSplit(6).replaceAll("itemType=","consumable")
 
+    println("ItemType: Found" + itemType)
+
     var item: Item = null
 
     itemType.toLowerCase match {
       case "weapon1" => 
+        println("Inside weapon1")
         val range = contentSplit(7).replaceAll("range=","").toInt
         val damage = contentSplit(8).replaceAll("damage=","").toInt
         val damageType = contentSplit(9).replaceAll("damageType=","")
