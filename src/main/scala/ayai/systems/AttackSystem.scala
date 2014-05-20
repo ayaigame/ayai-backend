@@ -67,12 +67,12 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
             case weapon: Weapon =>
             weaponValue += weapon.damage
             case _ =>
-        }
+          }
           equipment.equipmentMap("weapon2").itemType match {
             case weapon: Weapon =>
             weaponValue += weapon.damage
             case _ =>
-        }
+          }
     }
     weaponValue + playerBase
   }

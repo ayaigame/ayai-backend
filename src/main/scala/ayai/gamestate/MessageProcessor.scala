@@ -375,7 +375,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 typename = loot.typename
                 entity.getComponent(classOf[Inventory]) match {
                   case Some(inventory: Inventory) =>
-                   inventory.asJson
+                   ("loot" -> loot.asJson)~
+                   (inventory.asJson)
                   case _ => null
                 }
 
