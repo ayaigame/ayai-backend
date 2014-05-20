@@ -121,31 +121,34 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     println(content)
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
-    val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "0")
-    val name = contentSplit(2).replaceAll("name=","unnamed")
-    val value = contentSplit(3).replaceAll("value=","1").toInt
-    val weight = contentSplit(4).replaceAll("weight=","0").toDouble
+    val id = contentSplit(0).replaceAll("id=", "")
+    val name = contentSplit(1).replaceAll("name=","")
+    val description = contentSplit(2).replaceAll("description=","")
+    val value = contentSplit(3).replaceAll("value=","").toInt
+    val weight = contentSplit(4).replaceAll("weight=","").toDouble
     val imageLocation = contentSplit(5).replaceAll("image=","")
-    val itemType = contentSplit(6).replaceAll("itemtype=","consumable")
+    val itemType = contentSplit(6).replaceAll("itemType=","")
+
+    println("ItemType: Found" + itemType)
 
     var item: Item = null
 
     itemType.toLowerCase match {
-      case "weapon" => 
+      case "weapon1" => 
+        println("Inside weapon1")
         val range = contentSplit(7).replaceAll("range=","").toInt
         val damage = contentSplit(8).replaceAll("damage=","").toInt
         val damageType = contentSplit(9).replaceAll("damageType=","")
-        val itemT = contentSplit(10).replaceAll("type=","")
+        val itemT = "weapon1"
         item = new Item(id.toLong, name, value, weight, new Weapon(range, damage, damageType, itemT))
         networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
         request.response.write(HttpResponseStatus.OK)
       case "armor" =>
-        val slot = contentSplit(7).replaceAll("slot=","")
-        val protection = contentSplit(8).replaceAll("protection=","").toInt
-        val itemT = contentSplit(9).replaceAll("type=","")
+        val slot = contentSplit(10).replaceAll("slot=","")
+        val protection = contentSplit(11).replaceAll("protection=","").toInt
+        val itemT = contentSplit(12).replaceAll("armorType=","")
         item = new Item(id.toLong, name, value, weight, new Armor(slot, protection, itemT))
         networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
         request.response.write(HttpResponseStatus.OK)
@@ -186,19 +189,19 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "0")
-    val name = contentSplit(2).replaceAll("name=","unnamed")
-    val faction = contentSplit(3).replaceAll("faction=","allies")
-    val room = contentSplit(4).replaceAll("room=","1").toInt
-    val weapon1 = contentSplit(5).replaceAll("weapon1=","0").toInt
-    val helmet = contentSplit(6).replaceAll("helmet=","0").toInt
-    val torso = contentSplit(7).replaceAll("torso=","0").toInt
-    val legs = contentSplit(8).replaceAll("legs=","0").toInt
-    val feet = contentSplit(9).replaceAll("feet=","0").toInt
-    val level = contentSplit(10).replaceAll("level=","1").toInt
-    val experience = contentSplit(11).replaceAll("experience=","10").toInt
-    val health = contentSplit(12).replaceAll("health=","50").toInt
-    val mana = contentSplit(13).replaceAll("mana=","50").toInt
+    val id = contentSplit(1).replaceAll("id=", "")
+    val name = contentSplit(2).replaceAll("name=","")
+    val faction = contentSplit(3).replaceAll("faction=","")
+    val room = contentSplit(4).replaceAll("room=","").toInt
+    val weapon1 = contentSplit(5).replaceAll("weapon1=","").toInt
+    val helmet = contentSplit(6).replaceAll("helmet=","").toInt
+    val torso = contentSplit(7).replaceAll("torso=","").toInt
+    val legs = contentSplit(8).replaceAll("legs=","").toInt
+    val feet = contentSplit(9).replaceAll("feet=","").toInt
+    val level = contentSplit(10).replaceAll("level=","").toInt
+    val experience = contentSplit(11).replaceAll("experience=","").toInt
+    val health = contentSplit(12).replaceAll("health=","").toInt
+    val mana = contentSplit(13).replaceAll("mana=","").toInt
 
     //get equipment ids for weapons given
     // val weaponFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(weapon1)
@@ -226,32 +229,34 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
 
   case ClassPost(request: HttpRequestEvent) =>
     val content: String = request.request.content.toString
+    println(content)
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "0")
-    val name = contentSplit(2).replaceAll("name=","")
-    val description = contentSplit(3).replaceAll("description=","description")
-    val baseHealth = contentSplit(4).replaceAll("baseHealth=","50").toInt
-    val baseMana = contentSplit(5).replaceAll("baseMana=","50").toInt
-    val strength = contentSplit(6).replaceAll("strength=","1").toInt
-    val defense = contentSplit(7).replaceAll("defense=","1").toInt
-    val intelligence = contentSplit(8).replaceAll("intelligence=","1").toInt
-    val strengthLevel= contentSplit(9).replaceAll("strengthLevel=","1").toInt
-    val defenseLevel = contentSplit(10).replaceAll("defenseLevel=","1").toInt
-    val intelligenceLevel = contentSplit(11).replaceAll("intelligenceLevel=","1").toInt
-    val spriteSheetLocation = contentSplit(12).replaceAll("spritesheet=","")
+    val id = contentSplit(0).replaceAll("id=", "").toInt
+    val name = contentSplit(1).replaceAll("name=","").toLowerCase
+    val description = contentSplit(2).replaceAll("description=","")
+    val baseHealth = contentSplit(3).replaceAll("health=","").toInt
+    val baseMana = contentSplit(4).replaceAll("mana=","").toInt
+    val statsString = contentSplit(5).replaceAll("stats=","")
+    val baseStats = contentSplit(6).replaceAll("base=","")
+    val growthStats = contentSplit(7).replaceAll("growth=","")
+    val spriteSheetLocation = contentSplit(8).replaceAll("spritesheet=","")
     
-    val stats = new Stats()
-    stats.addStat(new Stat("strength", strength, strengthLevel))
-    stats.addStat(new Stat("intelligence", intelligence, intelligenceLevel))
-    stats.addStat(new Stat("defense", defenseLevel, defenseLevel))
+    val statsContent = statsString.split("%2C")
+    val baseContent = baseStats.split("%2C")
+    val growthContent = growthStats.split("%2C")
 
-    val classValue = new ClassValues(name, description,  baseHealth, baseMana, stats)
+    val stats = new Stats()
+    for(a <- 0 until statsContent.length) {
+      stats.addStat(new Stat(statsContent(a), baseContent(a).toInt, growthContent(a).toInt))
+    }
+
+    val classValue = new ClassValues(id, name, description,  baseHealth, baseMana, stats)
         
-    networkSystem.actorSelection("user/ClassMap") ! AddClass(id, classValue)
+    networkSystem.actorSelection("user/ClassMap") ! AddClass(id.toString, classValue)
 
     request.response.write(HttpResponseStatus.OK)
 
@@ -259,15 +264,14 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val content: String = request.request.content.toString
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
-    val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "")
-    val name = contentSplit(2).replaceAll("name=","")
-    val description = contentSplit(3).replaceAll("description=","")
-    val effectType = contentSplit(4).replaceAll("effectType=","")
-    val value:Int = contentSplit(5).replaceAll("value=","").toInt
-    val attribute = contentSplit(6).replaceAll("attribute=","")
+    val id = contentSplit(0).replaceAll("id=", "")
+    val name = contentSplit(1).replaceAll("name=","")
+    val description = contentSplit(2).replaceAll("description=","")
+    val effectType = contentSplit(3).replaceAll("effectType=","")
+    val value:Int = contentSplit(4).replaceAll("value=","").toInt
+    val attribute = contentSplit(5).replaceAll("attribute=","")
 
     
     //get required info needed for these 

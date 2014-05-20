@@ -64,7 +64,7 @@ object ItemFactory {
         item.damageType.get, item.itemType))
       weapon.image = item.image.get
 
-      networkSystem.actorSelection("user/ItemMap") ! AddItem("ITEM"+item.id, weapon)
+      networkSystem.actorSelection("user/ItemMap") ! AddItem(item.id.toString, weapon)
     })
   }
 
@@ -79,7 +79,7 @@ object ItemFactory {
         item.protection.get, item.itemType))
       armor.image = ""
 
-      networkSystem.actorSelection("user/ItemMap") ! AddItem("ITEM"+item.id, armor)
+      networkSystem.actorSelection("user/ItemMap") ! AddItem(item.id.toString, armor)
     })
   }
 

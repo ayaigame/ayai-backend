@@ -63,31 +63,31 @@ object NPCFactory {
       }
 
       val equipment: Equipment = new Equipment()
-      var itemFuture = itemMap ? GetItem("ITEM"+npc.weapon1)
+      var itemFuture = itemMap ? GetItem(npc.weapon1.toString)
       var itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
         case _ => new EmptySlot("weapon1")
       }
       equipment.equipItem(itemResult)
-      itemFuture = itemMap ? GetItem("ITEM"+npc.feet)
+      itemFuture = itemMap ? GetItem(npc.feet.toString)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
         case _ => new EmptySlot("feet")
       }
       equipment.equipItem(itemResult)
-      itemFuture = itemMap ? GetItem("ITEM"+npc.torso)
+      itemFuture = itemMap ? GetItem(npc.torso.toString)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
         case _ => new EmptySlot("torso")
       }
       equipment.equipItem(itemResult)
-      itemFuture = itemMap ? GetItem("ITEM"+npc.helmet)
+      itemFuture = itemMap ? GetItem(npc.helmet.toString)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
         case _ => new EmptySlot("helmet") 
       }
       equipment.equipItem(itemResult)
-      itemFuture = itemMap ? GetItem("ITEM"+npc.legs)
+      itemFuture = itemMap ? GetItem(npc.legs.toString)
       itemResult = Await.result(itemFuture, timeout.duration).asInstanceOf[Item] match {
         case item: Item => item
         case _ => new EmptySlot("legs") 

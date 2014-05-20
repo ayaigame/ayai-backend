@@ -46,10 +46,11 @@ object EntityFactory {
       case Some(characterRow: CharacterRow) => {
         val p: Entity = world.createEntity(tag=entityId)
         val className = characterRow.className
-        val classFuture = networkSystem.actorSelection("user/ClassMap") ? GetClass(className)
+        val classFuture = networkSystem.actorSelection("user/ClassMap") ? GetClassByName(className)
 
         // not used until we know if new character
         val classValues: ClassValues = Await.result(classFuture, timeout.duration).asInstanceOf[ClassValues]
+        println(classValues)
         // calculate stats to add 
         val stats: Stats = new Stats()
         classValues.baseStats.stats.foreach{stat => stats.addStat(new Stat(stat.attributeType,
@@ -101,7 +102,7 @@ object EntityFactory {
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
         InventoryTable.getInventory(p) foreach ((itemId: Long) => {
-          var future = itemSelection ? GetItem("ITEM" + itemId)
+          var future = itemSelection ? GetItem(itemId.toString)
           inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
         })
 
@@ -122,7 +123,7 @@ object EntityFactory {
 
         InventoryTable.getEquipment(p) foreach {
         case (slot: String, itemId: Long) =>
-            var future = itemSelection ? GetItem("ITEM" + itemId)
+            var future = itemSelection ? GetItem(itemId.toString)
             equipment.equipItem(Await.result(future, timeout.duration).asInstanceOf[Item], slot)
         }
 
