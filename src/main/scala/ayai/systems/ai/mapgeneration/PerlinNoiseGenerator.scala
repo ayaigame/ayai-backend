@@ -5,8 +5,11 @@ import java.util.Random
 //Change this to extend noisegenerator instead
 object PerlinNoiseGenerator {
   //Keep seed constant for all noise generation.
-  // val rand = new Random(System.currentTimeMillis());
-  val rand = new Random(25636);
+  val seed = System.currentTimeMillis()
+  println(s"The seed is: $seed")
+  val rand = new Random(seed)
+  // val rand = new Random(25636);
+  //Good seed = 1400572427905
 
   ///width*height # of tiles
   def getNoise(width: Int, height: Int, frequency: Int): Array[Array[Double]] = {

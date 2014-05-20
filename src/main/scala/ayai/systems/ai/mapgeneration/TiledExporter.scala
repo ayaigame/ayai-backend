@@ -108,7 +108,7 @@ object TiledExporter {
 		var fw = new FileWriter(new File("src/main/resources/assets/maps/" + name))
 		var bw = new BufferedWriter(fw)
 
-		println(compact(render(json)))
+		// println(compact(render(json)))
 		bw.write(pretty(render(json)))
 		bw.close()
 		fw.close()

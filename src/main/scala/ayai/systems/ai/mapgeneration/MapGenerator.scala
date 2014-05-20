@@ -44,9 +44,19 @@ class MapGenerator extends Actor {
     val numLevels = 3
     val brackets = Range.Double(noiseMin, noiseMax, range/(numLevels - 1))
 
-    def rescaleTile(x: Double): Int = {
-      //Find the bracket the tile falls into
-      brackets.zipWithIndex.find(_._1 >= x).getOrElse((0.0,0))._2
+    // def rescaleTile(x: Double): Int = {
+    //   //Find the bracket the tile falls into
+    //   brackets.zipWithIndex.find(_._1 >= x).getOrElse((0.0,0))._2
+    // }
+
+    def rescaleTile(x: Double) : Int = {
+      var temp = 0.0;
+      if (x > 0)
+        temp = x / (noiseMax * 2)
+      else
+        temp = x / (noiseMin * -2)
+
+      ((temp + 0.5) * 3).toInt
     }
 
     def rescaleRow(row: Array[Double]): Array[Int] = {
@@ -57,8 +67,11 @@ class MapGenerator extends Actor {
   }
 
   def findTransportLocation(direction: String, map: Array[Array[Int]], width: Int, height: Int): Position = {
-    var widthOfTransport = 2
-    var heightofTransport = 5
+    val transportThickness = 3
+    val transportLength = 5
+
+    var widthOfTransport = transportThickness
+    var heightofTransport = transportLength
     var startX = 0
     var startY = 0
     var incrX = 0
@@ -71,20 +84,20 @@ class MapGenerator extends Actor {
         incrY = 1
 
       case "LeftToRight" =>
-        startX = width-2
-        transportAlignment = 1
+        startX = width-transportThickness
+        transportAlignment = transportThickness - 1
         incrY = 1
 
       case "BottomToTop" =>
         incrX = 1
-        widthOfTransport = 5
-        heightofTransport = 2
+        widthOfTransport = transportLength
+        heightofTransport = transportThickness
 
       case "TopToBottom" =>
-        startY = height-2
+        startY = height-transportThickness
         incrX = 1
-        widthOfTransport = 5
-        heightofTransport = 2
+        widthOfTransport = transportLength
+        heightofTransport = transportThickness
 
       case _ => {
         println("MISSING TRANSPORT DIRECTION IN MapGenerator.")

@@ -2,8 +2,6 @@ package ayai.systems.mapgenerator
 
 import scala.math.{min, log, floor}
 
-import java.util.Random
-
 object FractionalBrownianMotionGenerator {
   def apply(noiseGenerator: NoiseGenerator) = new FractionalBrownianMotionGenerator(noiseGenerator)
 }

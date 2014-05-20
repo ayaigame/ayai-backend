@@ -91,19 +91,19 @@ extends EntityProcessingSystem(include=List(classOf[Room],
             var yOffset = 0
             val landingDirection = transport.direction match {
               case "RightToLeft" =>
-                xOffset = 2
+                xOffset = 1
                 "LeftToRight"
 
               case "LeftToRight" =>
-                xOffset = -2
+                xOffset = -1
                 "RightToLeft"
 
               case "BottomToTop" =>
-                yOffset = 2
+                yOffset = 1
                 "TopToBottom"
 
               case "TopToBottom" =>
-                yOffset = -2
+                yOffset = -1
                 "BottomToTop"
 
               case _ =>
