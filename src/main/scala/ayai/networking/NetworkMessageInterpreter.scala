@@ -154,7 +154,7 @@ class NetworkMessageInterpreter extends Actor {
         queue ! new AddInterpretedMessage(world, new AbandonQuestMessage(userId, questId))
       case "loot-pickup" =>
         val entityId = (rootJSON \ "entityId").extract[String]
-        val inventoryIds = (rootJSON \ "itemIds").extract[List[Int]]
+        val inventoryIds = (rootJSON \ "itemId").extract[Int]
         queue ! new AddInterpretedMessage(world, new LootMessage(userId, entityId, inventoryIds))
       case "interact" =>
         val entityId = (rootJSON \ "entityId").extract[String]

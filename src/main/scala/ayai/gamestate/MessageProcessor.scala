@@ -405,7 +405,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         sender ! Success
 
 
-      case LootMessage(userId: String, entityId: String, items: List[Int]) =>
+      case LootMessage(userId: String, entityId: String, itemId: Int) =>
         val userEntity = world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e
         }
@@ -433,11 +433,11 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
 
           //take item and put it in player inventory
-          for(item <- loot.inventory) {
-            if(items.contains(item.id)) {
-              playerInventory.addItem(item)
-              InventoryTable.incrementItem(item, userEntity)
-              loot.inventory -= item
+          for(itemInv <- loot.inventory) {
+            if(itemInv.id == itemId) {
+              playerInventory.addItem(itemInv)
+              InventoryTable.incrementItem(itemInv, userEntity)
+              loot.inventory -= itemInv
             }
           }
 

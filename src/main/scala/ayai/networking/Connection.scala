@@ -60,7 +60,7 @@ case class AbandonQuestMessage(userId: String, questId: Int) extends NetworkMess
 case class DeclineQuestMessage(userId: String, npcId: String, questId: String) extends NetworkMessage
 case class AcceptQuestMessage(userId: String, entityID: String, questId: Int) extends NetworkMessage
 case class InteractMessage(userId: String, entityId: String) extends NetworkMessage
-case class LootMessage(userId: String, entityId: String, items: List[Int]) extends NetworkMessage
+case class LootMessage(userId: String, entityId: String, itemId: Int) extends NetworkMessage
 case class RequestLootInventory(userId: String, entityId: String) extends NetworkMessage
 case object CreateAIMessage extends NetworkMessage
 case class UseItemMessage(userId: String, itemId: Int) extends NetworkMessage
