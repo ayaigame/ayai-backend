@@ -58,7 +58,7 @@ object CharacterTable {
           AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 1, 1))
           AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 2, 1))
           AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 3, 1))
-          AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 4, 1))
+          // AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 4, 1))
           // AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, 5, 1))
 
           request.response.write(HttpResponseStatus.OK, "GOOD")
