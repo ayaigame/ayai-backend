@@ -238,20 +238,21 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val id = contentSplit(0).replaceAll("id=", "")
     val name = contentSplit(1).replaceAll("name=","")
     val description = contentSplit(2).replaceAll("description=","")
-    val baseHealth = contentSplit(3).replaceAll("baseHealth=","").toInt
-    val baseMana = contentSplit(4).replaceAll("baseMana=","").toInt
-    val strength = contentSplit(5).replaceAll("strength=","").toInt
-    val defense = contentSplit(6).replaceAll("defense=","").toInt
-    val intelligence = contentSplit(7).replaceAll("intelligence=","").toInt
-    val strengthLevel= contentSplit(8).replaceAll("strengthLevel=","").toInt
-    val defenseLevel = contentSplit(9).replaceAll("defenseLevel=","").toInt
-    val intelligenceLevel = contentSplit(10).replaceAll("intelligenceLevel=","").toInt
-    val spriteSheetLocation = contentSplit(11).replaceAll("spritesheet=","")
+    val baseHealth = contentSplit(3).replaceAll("health=","").toInt
+    val baseMana = contentSplit(4).replaceAll("mana=","").toInt
+    val spriteSheetLocation = contentSplit(5).replaceAll("spritesheet=","")
+    val statsString = contentSplit(6).replaceAll("stats=","")
+    val baseStats = contentSplit(7).replaceAll("base=","")
+    val growthStats = contentSplit(8).replaceAll("growth=","")
     
+    val statsContent = statsString.split("%2C")
+    val baseContent = baseStats.split("%2C")
+    val growthContent = growthStats.split("%2C")
+
     val stats = new Stats()
-    stats.addStat(new Stat("strength", strength, strengthLevel))
-    stats.addStat(new Stat("intelligence", intelligence, intelligenceLevel))
-    stats.addStat(new Stat("defense", defenseLevel, defenseLevel))
+    for(a <- 0 until statsContent.length) {
+      stats.addStat(new Stat(statsContent(a), baseContent(a).toInt, growthContent(a).toInt))
+    }
 
     val classValue = new ClassValues(name, description,  baseHealth, baseMana, stats)
         
