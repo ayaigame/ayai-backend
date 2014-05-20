@@ -205,7 +205,7 @@ object EntityFactory {
     entity
   }
 
-  def createAI(world: World, faction: String, position: Position = new Position(300,300), npcValue: NPCValues = null, monsterId: Int = 1, roomId: Int = 0): Entity = {
+  def createAI(world: World, faction: String, networkSystem: ActorSystem, position: Position = new Position(300,300), npcValue: NPCValues = null, monsterId: Int = 1, roomId: Int = 0): Entity = {
     val id = java.util.UUID.randomUUID.toString
     var name = id
     if(npcValue != null) {
@@ -233,6 +233,11 @@ object EntityFactory {
     animations += new Animation("attackleft",18, 21)
     animations += new Animation("attackright", 24, 27)
     animations += new Animation("attackup", 30, 33)
+    val inventory = new Inventory()
+    val itemSelection = networkSystem.actorSelection("user/ItemMap")
+    var future = itemSelection ? GetItem("5")
+    inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
+    entity.components += inventory
     entity.components += new SpriteSheet("guy", animations, 32 ,32)
     entity.components += new Mana(200, 200)
     entity.components += new Character(id, name)
