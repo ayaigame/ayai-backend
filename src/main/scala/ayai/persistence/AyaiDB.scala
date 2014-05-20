@@ -27,9 +27,9 @@ object AyaiDB extends Schema {
   val characters = table[CharacterRow]("CHARACTERS")
   val inventory = table[InventoryRow]("INVENTORY")
   val equipment = table[EquipmentRow]("EQUIPMENT")
-  val senderToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.sender_id)
-  val receiverToChat = oneToManyRelation(accounts, chats).via((a, b) => a.id === b.receiver_id)
-  val accountToToken = oneToManyRelation(accounts, tokens).via((a, b) => a.id === b.account_id)
+  val senderToChat = oneToManyRelation(characters, chats).via((a, b) => a.id === b.sender_id)
+  val receiverToChat = oneToManyRelation(characters, chats).via((a, b) => a.id === b.receiver_id)
+  val accountToToken = oneToManyRelation(characters, tokens).via((a, b) => a.id === b.account_id)
 
   on(accounts)(account => declare(
     account.username is(unique)
@@ -57,9 +57,6 @@ case class Account(
               var password: String)
             extends AccountDb2Object{
                 def this() = this("", "")
-                lazy val sentChats = AyaiDB.senderToChat.left(this)
-                lazy val receivedChats = AyaiDB.receiverToChat.left(this)
-                lazy val registeredTokens = AyaiDB.accountToToken.left(this)
             }
 case class Token(
               val account_id: Long,
@@ -90,6 +87,9 @@ case class CharacterRow (
             val pos_y: Int)
           extends AccountDb2Object {
             def this() = this("", "", 1, 0, 0, 1, 0, 0)
+            lazy val sentChats = AyaiDB.senderToChat.left(this)
+            lazy val receivedChats = AyaiDB.receiverToChat.left(this)
+            lazy val registeredTokens = AyaiDB.accountToToken.left(this)
 }
 
 case class InventoryRow (

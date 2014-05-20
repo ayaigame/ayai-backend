@@ -127,10 +127,10 @@ class NetworkMessageInterpreter extends Actor {
       case "chat" =>
         val message: String = stripQuotes(compact(render(rootJSON \ "message")))
         val sender: String = stripQuotes(compact(render(rootJSON \ "sender")))
-        val account = AccountTable.getAccount(sender)
-        account match {
-          case Some(a: Account) =>
-            context.system.actorOf(Props[ChatReceiver]) ! new ChatHolder(new PublicChat(message, a), lookUpWorldById(worldId))
+        val characterOption = CharacterTable.getCharacter(sender)
+        characterOption match {
+          case Some(row: CharacterRow) =>
+            context.system.actorOf(Props[ChatReceiver]) ! new ChatHolder(new PublicChat(message, row), lookUpWorldById(worldId))
           case _ =>
             println(s"Could not find user $sender")
         }

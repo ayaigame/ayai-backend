@@ -82,7 +82,7 @@ class ChatReceiver extends Actor {
         entities.foreach{ e =>  
           (e.getComponent(classOf[NetworkingActor]): @unchecked) match {
             case(Some(na: NetworkingActor)) =>
-              na.actor! new ConnectionWrite(new JChat(sender.username, text).toString)
+              na.actor! new ConnectionWrite(new JChat(sender.name, text).toString)
           }
         }
         return true
