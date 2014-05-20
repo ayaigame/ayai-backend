@@ -405,7 +405,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         sender ! Success
 
 
-      case LootMessage(userId: String, entityId: String, items: List[Int]) =>
+      case LootMessage(userId: String, entityId: String, itemId: Int) =>
         val userEntity = world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e
         }
@@ -420,26 +420,39 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case _ => false
         }
 
+
         //if valid distance then pick up items
         if(isValidDistance) {
           val loot = itemEntity.getComponent(classOf[Inventory]) match {
             case Some(inv: Inventory) => inv
-            case _ => null
+            case _ =>  {
+              println("Could not find inventory")
+              new Inventory()
+            }
           }
-          val playerInventory = userEntity.getComponent(classOf[Inventory]) match {
+
+          val personInv = userEntity.getComponent(classOf[Inventory]) match {
             case Some(inv: Inventory) => inv
-            case _ => null
+            case _ => {
+              println("PlayerInventory could not be made")
+              new Inventory()
+            }
           }
 
 
           //take item and put it in player inventory
-          for(item <- loot.inventory) {
-            if(items.contains(item.id)) {
-              playerInventory.addItem(item)
-              InventoryTable.incrementItem(item, userEntity)
-              loot.inventory -= item
+          var itemToRemove: Item  = null
+          for(itemInv <- loot.inventory) {
+            if(itemInv.id == itemId) {
+              personInv.addItem(itemInv)
+              InventoryTable.incrementItem(itemInv, userEntity)
+              itemToRemove = itemInv
             }
           }
+          if(itemToRemove != null) {
+            loot.removeItem(itemToRemove)
+          }
+
 
 //          actorSelection ! ConnectionWrite(compact(render(json)))
         } else {
