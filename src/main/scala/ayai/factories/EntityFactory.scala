@@ -182,10 +182,29 @@ object EntityFactory {
     p
   }
 
-  def createAI(world: World, faction: String): Entity = {
-    val name = java.util.UUID.randomUUID.toString
-    val entity: Entity = world.createEntity(tag=name)
-    entity.components += new Position(300, 300)
+  def createLoot(world: World, item: Item, networkSystem: ActorSystem, position: Position = new Position(100,100)): Entity =  {
+    val id = (new UID()).toString
+    val entity = world.createEntity(id)
+    entity.components += new Loot(id, "")
+    val inventory = new Inventory()
+    inventory.addItem(item)
+    entity.components += inventory
+    entity.components += position
+    val animations = new ArrayBuffer[Animation]()
+    animations += new Animation("facedown", 0, 0)
+    entity.components += new SpriteSheet("props", animations, 40, 40)
+    entity
+  }
+
+  def createAI(world: World, faction: String, position: Position = new Position(300,300), npcValue: NPCValues = null, monsterId: Int = 1, roomId: Int = 0): Entity = {
+    val id = java.util.UUID.randomUUID.toString
+    var name = id
+    if(npcValue != null) {
+      name = npcValue.name
+    }
+
+    val entity: Entity = world.createEntity(tag=id)
+    entity.components += position
     entity.components += new Bounds(32, 32)
     entity.components += new Velocity(2, 2)
     entity.components += new Respawnable()
@@ -207,7 +226,7 @@ object EntityFactory {
     animations += new Animation("attackup", 30, 33)
     entity.components += new SpriteSheet("guy", animations, 32 ,32)
     entity.components += new Mana(200, 200)
-    entity.components += new Character(name, name)
+    entity.components += new Character(id, name)
     entity.components += new Goal
     entity.components += new NPC(0)
     entity.components += new Faction(faction)
@@ -318,33 +337,24 @@ object EntityFactory {
   /**
   ** Take an entity and take its inventory and create a loot entity
   **/
-  def characterToLoot(initiator: Entity, lootEntity: Entity) {
-      lootEntity.components += new NPC(0)
-      lootEntity.components += new Health(10000,10000)
-      lootEntity.components += new Mana(10000,10000)
+  def characterToLoot(world: World, initiator: Entity, position: Position): Entity = {
+    val id = (new UID()).toString
+    val lootEntity: Entity = world.createEntity(tag=id)
     val animations = new ArrayBuffer[Animation]()
-      animations += new Animation("facedown", 0, 0)
-      lootEntity.components += new SpriteSheet("props", animations, 40, 40)
-      lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
-        case Some(character: Character) => character.id
-        case _ => "0"
-      })
+    animations += new Animation("facedown", 0, 0)
+    lootEntity.components += new SpriteSheet("props", animations, 40, 40)
 
-      initiator.getComponent(classOf[Character]) match {
-        case (Some(char: Character)) => initiator.components += char
+    lootEntity.components += new Loot(id, initiator.getComponent(classOf[Character]) match {
+      case Some(character: Character) => character.id
+      case _ => ""
+    })
+
+    initiator.getComponent(classOf[Inventory]) match {
+      case (Some(inv: Inventory)) =>
+        lootEntity.components += inv.copy()
         case _ =>
-      }
-
-      initiator.getComponent(classOf[Inventory]) match {
-        case (Some(inv: Inventory)) =>
-          lootEntity.components += inv.copy()
-          case _ =>
-      }
-      initiator.getComponent(classOf[Position]) match {
-        case Some(position: Position) =>
-          lootEntity.components += new Position(position.x, position.y)
-        case _ =>
-      }
-
+    }
+    lootEntity.components += position
+    lootEntity
   }
 }

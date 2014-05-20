@@ -2,15 +2,19 @@ package ayai.systems
 
 /** Ayai Imports **/
 import ayai.components._
+import ayai.networking._
 
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 /** Crane Imports **/
 import crane.{Entity, EntityProcessingSystem, World}
 
 object RespawningSystem {
-  def apply() = new RespawningSystem()
+  def apply(actorSystem: ActorSystem) = new RespawningSystem(actorSystem)
 }
 
-class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn], classOf[NetworkingActor])) {
+class RespawningSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn], classOf[NetworkingActor])) {
   override def processEntity(e: Entity, delta: Int) {
     var respawn = (e.getComponent(classOf[Respawn]): @unchecked) match {
       case (Some(r: Respawn)) => r
@@ -26,10 +30,23 @@ class RespawningSystem() extends EntityProcessingSystem(include=List(classOf[Roo
       case _ => null
     }
 
+
+
     if(respawn.isReady(System.currentTimeMillis())) {
       health.refill()
       e.removeComponent(classOf[Respawn])
       e.removeComponent(classOf[Dead])
+    } else {
+      val na = (e.getComponent(classOf[NetworkingActor])) match {
+        case Some(networkActor: NetworkingActor) =>
+          val json = ("type" -> "chat") ~
+            ("message" -> ("Respawn in: " + respawn.timeLeft(System.currentTimeMillis()).toString)) ~
+            ("sender" -> "system")
+          val actorSelection = networkActor.actor
+          actorSelection ! new ConnectionWrite(compact(render(json)))
+        case _ =>  
+      }
+      
     }
   }
 }

@@ -10,4 +10,7 @@ import crane.Component
 
 class Respawn(val time: Int = 1500, val delta: Long) extends Component {
   def isReady(deltaTime: Long): Boolean = deltaTime - delta > time
+  def timeLeft(deltaTime: Long): Int = {
+  	(deltaTime - delta).toInt
+  }
 }

@@ -23,10 +23,15 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: In
 
   def addDamage(damage: Float) {
     currentCached -= damage.toInt
-    if(currentCached < 0) {
+    if(currentCached <= 0) {
       currentCached = 0
       currentHealth = 0
     }
+  }
+
+  def levelUp() {
+    maximumHealth += growth
+    maxCached = maximumHealth
   }
 
   def refill() { 

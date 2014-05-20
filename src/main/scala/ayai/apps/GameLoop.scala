@@ -94,7 +94,7 @@ object GameLoop {
         }
       }
 
-      Await.result(Future.sequence(processedMessages), 5 seconds)
+      Await.result(Future.sequence(processedMessages), 10 seconds)
 
       for((name, world) <- worlds) {
         world.process()

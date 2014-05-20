@@ -64,3 +64,4 @@ case class LootMessage(userId: String, entityId: String, items: List[Int]) exten
 case class RequestLootInventory(userId: String, entityId: String) extends NetworkMessage
 case object CreateAIMessage extends NetworkMessage
 case class UseItemMessage(userId: String, itemId: Int) extends NetworkMessage
+case class SpawnMessage(userId: String, entityType: String, entityTypeId: Int, x: Int, y: Int) extends NetworkMessage

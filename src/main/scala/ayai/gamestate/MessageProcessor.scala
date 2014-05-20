@@ -207,15 +207,39 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
                   val item = inventory.inventory(slot)
+                  e.getComponent(classOf[NetworkingActor]) match {
+                    case Some(na: NetworkingActor) =>
+                      val json = ("type" -> "chat") ~
+                        ("message" -> ("Equiping Item: " + item.name)) ~
+                        ("sender" -> "system")
+                      na.actor ! ConnectionWrite(compact(render(json)))
+                    case _ => 
+
+                  }
                   val equipItem = equipment.unequipItem(equipmentType)
+                  e.getComponent(classOf[NetworkingActor]) match {
+                    case Some(na: NetworkingActor) =>
+                      val json = ("type" -> "chat") ~
+                        ("message" -> ("Unequipped Item: " + equipItem.name)) ~
+                        ("sender" -> "system")
+                      na.actor ! ConnectionWrite(compact(render(json)))
+                    case _ => 
+
+                  }
                   if(equipment.equipItem(item)) {
                     inventory.removeItem(item)
-                    if(!isEmptySlot(equipItem)) {
-                      inventory.inventory += equipItem
+                    equipItem.itemType match {
+                      case empty: Weapon => 
+                        inventory.inventory += equipItem
+                      case armor: Armor => 
+                        inventory.inventory += equipItem
+                      case empty: EmptyType =>
+                      case _ =>
                     }
                     // sender ! Success
                   }
                   else {
+                    // if cannot equip then don't do anything as it is ineligible
                   }
                   sender ! Success
                   InventoryTable.saveInventory(e)
@@ -231,10 +255,10 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   equippedItem.itemType match {
                     case weapon: Weapon =>
                       inventory.inventory += equippedItem
-                      equipment.equipmentMap(equipmentType) = new EmptySlot()
+                      equipment.equipmentMap(equipmentType) = new EmptySlot(equipmentType)
                     case armor: Armor =>
                       inventory.inventory += equippedItem
-                      equipment.equipmentMap(equipmentType) = new EmptySlot()
+                      equipment.equipmentMap(equipmentType) = new EmptySlot(equipmentType)
                     case _ =>
                       println(equipmentType + " not valiid")
                   }
@@ -351,7 +375,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 typename = loot.typename
                 entity.getComponent(classOf[Inventory]) match {
                   case Some(inventory: Inventory) =>
-                   inventory.asJson
+                   ("loot" -> loot.asJson)~
+                   (inventory.asJson)
                   case _ => null
                 }
 
@@ -435,6 +460,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         sender ! Success
 
       case UseItemMessage(userId: String, itemId: Int) =>
+      println("itemuse message")
         val itemUseId = (new UID()).toString
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
@@ -450,6 +476,40 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             }
           case _ => 
         }
+        sender ! Success
+      case SpawnMessage(userId: String, entityType: String, entityTypeId: Int, x: Int, y: Int) =>
+        val id = (new UID()).toString
+        entityType.toLowerCase match {
+            case "npc" => 
+              val entity = EntityFactory.createAI(world, "axis", new Position(x, y))
+              //edit the new AIs position
+              world.addEntity(entity)
+
+            case "item" => 
+              val itemFuture = actorSystem.actorSelection("user/ItemMap") ? GetItem("ITEM"+entityTypeId)
+              val item = Await.result(itemFuture, timeout.duration).asInstanceOf[Item]
+              if(item != null) {
+                val entity = EntityFactory.createLoot(world, item, actorSystem, new Position(x,y))
+                world.addEntity(entity)
+              } else {
+                world.getEntityByTag(s"$userId") match {
+                  case Some(e: Entity) =>
+                    e.getComponent(classOf[NetworkingActor]) match {
+                      case Some(na: NetworkingActor) => 
+                        val json = ("type" -> "chat") ~
+                          ("message" -> ("Could not create item with id " + entityTypeId)) ~
+                          ("sender" -> "system")
+                        na.actor ! new ConnectionWrite(compact(render(json)))
+                    }
+                    
+                  case _ => 
+                    //no user would be strange
+                }
+              }
+
+            case _ =>
+              // invalid entityType
+          }
         sender ! Success
       case _ => println("Error from MessageProcessor.")
     }

@@ -189,6 +189,7 @@ object InventoryTable {
                     slot = weapon.itemType
                   case armor: Armor =>
                     slot = armor.itemType
+                  case empty: EmptyType => 
                   case _ =>
                     println(s"Error with item $item , cannot save.")
                 }

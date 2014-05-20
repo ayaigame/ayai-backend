@@ -165,6 +165,13 @@ class NetworkMessageInterpreter extends Actor {
         println("use item received")
         val itemId = (rootJSON \ "itemId").extract[Int]
         queue ! new AddInterpretedMessage(world, new UseItemMessage(userId, itemId))
+      case "spawn" =>
+        println("spawned")
+        val entityType = (rootJSON \ "entityType").extract[String]
+        val entityTypeId = (rootJSON \ "entityTypeId").extract[Int]
+        val x = (rootJSON \ "x").extract[Int]
+        val y = (rootJSON \ "y").extract[Int]
+        queue ! new AddInterpretedMessage(world, new SpawnMessage(userId, entityType, entityTypeId, x, y))
       case _ =>
         println("Unknown message in NetworkMessageInterpreter: " + msgType)
     }
