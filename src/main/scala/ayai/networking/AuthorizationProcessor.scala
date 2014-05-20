@@ -236,7 +236,7 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val contentSplit = content.split("&")
     //get item information
     val id = contentSplit(0).replaceAll("id=", "")
-    val name = contentSplit(1).replaceAll("name=","")
+    val name = contentSplit(1).replaceAll("name=","").toLowerCase
     val description = contentSplit(2).replaceAll("description=","")
     val baseHealth = contentSplit(3).replaceAll("health=","").toInt
     val baseMana = contentSplit(4).replaceAll("mana=","").toInt
@@ -254,7 +254,7 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
       stats.addStat(new Stat(statsContent(a), baseContent(a).toInt, growthContent(a).toInt))
     }
 
-    val classValue = new ClassValues(name, description,  baseHealth, baseMana, stats)
+    val classValue = new ClassValues(id, name, description,  baseHealth, baseMana, stats)
         
     networkSystem.actorSelection("user/ClassMap") ! AddClass(id, classValue)
 

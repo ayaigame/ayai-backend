@@ -15,6 +15,7 @@ case class RemoveClass(id: String)
 case class OutputJson()
 
 case class ClassValues(
+	  id: String, 	
       name: String,
       description: String,
       baseHealth: Int,
@@ -22,6 +23,7 @@ case class ClassValues(
       baseStats: Stats) {
 
 	def asJson(): JObject = {
+		("id" -> id) ~
 		("name" -> name) ~
 		("description" -> description) ~
 		("baseHealth" -> baseHealth) ~
