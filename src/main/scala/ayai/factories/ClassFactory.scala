@@ -72,7 +72,7 @@ object ClassFactory {
       //Construct stats component
       // classComponent.components += buildStats(classData.baseStats)
 
-      networkSystem.actorSelection("user/ClassMap") ! AddClass(classData.id,classComponent)
+      networkSystem.actorSelection("user/ClassMap") ! AddClass(classData.id.toString,classComponent)
     })
   }
 

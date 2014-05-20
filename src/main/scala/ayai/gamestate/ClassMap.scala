@@ -15,7 +15,7 @@ case class RemoveClass(id: String)
 case class OutputJson()
 
 case class ClassValues(
-	  id: String, 	
+	  id: Int, 	
       name: String,
       description: String,
       baseHealth: Int,
@@ -47,7 +47,7 @@ class ClassMap() extends Actor {
 		  	stats.addStat(new Stat("strength", 15, 5))
 		  	stats.addStat(new Stat("defense", 20, 5))
 		  	stats.addStat(new Stat("intelligence", 5, 5))
-		  	sender ! new ClassValues("warrior", "Beats up with pure strength", 100, 20, stats)
+		  	sender ! new ClassValues(1, "warrior", "Beats up with pure strength", 100, 20, stats)
 		  }
 		case RemoveClass(name: String) =>
 		  classMap -= name
