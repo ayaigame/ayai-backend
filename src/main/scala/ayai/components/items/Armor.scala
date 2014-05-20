@@ -13,7 +13,7 @@ case class Armor(
     def asJson(): JObject = {
       ("slot" -> slot) ~
       ("protection" -> protection) ~
-      ("type" -> "armor")
+      ("type" -> slot)
     }
 	override def copy(): ItemType = {
     	new Armor(slot, protection, itemType)

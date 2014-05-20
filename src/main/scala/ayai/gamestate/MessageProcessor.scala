@@ -477,9 +477,35 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
         sender ! Success
       case SpawnMessage(userId: String, entityType: String, entityTypeId: Int, x: Int, y: Int) =>
+        val id = (new UID()).toString
         entityType.toLowerCase match {
             case "npc" => 
+              val entity = EntityFactory.createAI(world, "axis", new Position(x, y))
+              //edit the new AIs position
+              world.addEntity(entity)
+
             case "item" => 
+              val itemFuture = actorSystem.actorSelection("user/ItemMap") ? GetItem("ITEM"+entityTypeId)
+              val item = Await.result(itemFuture, timeout.duration).asInstanceOf[Item]
+              if(item != null) {
+                val entity = EntityFactory.createLoot(world, item, actorSystem, new Position(x,y))
+                world.addEntity(entity)
+              } else {
+                world.getEntityByTag(s"$userId") match {
+                  case Some(e: Entity) =>
+                    e.getComponent(classOf[NetworkingActor]) match {
+                      case Some(na: NetworkingActor) => 
+                        val json = ("type" -> "chat") ~
+                          ("message" -> ("Could not create item with id " + entityTypeId)) ~
+                          ("sender" -> "system")
+                        na.actor ! new ConnectionWrite(compact(render(json)))
+                    }
+                    
+                  case _ => 
+                    //no user would be strange
+                }
+              }
+
             case _ =>
               // invalid entityType
           }

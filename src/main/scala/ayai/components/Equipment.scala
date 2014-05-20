@@ -8,7 +8,7 @@ import scala.collection.mutable.HashMap
 
 case class EmptySlot(slot:String) extends Item(-1,"",0,0,EmptyType(slot)) {}
 case class EmptyType(slot: String) extends ItemType {
-    override def asJson(): JObject = ("empty" -> "slot")
+    override def asJson(): JObject = ("type" -> slot)
     override def copy(): ItemType = new EmptyType(slot)
   }
 class Equipment() extends Component {

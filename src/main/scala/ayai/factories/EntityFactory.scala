@@ -182,10 +182,29 @@ object EntityFactory {
     p
   }
 
-  def createAI(world: World, faction: String): Entity = {
-    val name = java.util.UUID.randomUUID.toString
-    val entity: Entity = world.createEntity(tag=name)
-    entity.components += new Position(300, 300)
+  def createLoot(world: World, item: Item, networkSystem: ActorSystem, position: Position = new Position(100,100)): Entity =  {
+    val id = (new UID()).toString
+    val entity = world.createEntity(id)
+    entity.components += new Loot("")
+    val inventory = new Inventory()
+    inventory.addItem(item)
+    entity.components += inventory
+    entity.components += position
+    val animations = new ArrayBuffer[Animation]()
+    animations += new Animation("facedown", 0, 0)
+    entity.components += new SpriteSheet("props", animations, 40, 40)
+    entity
+  }
+
+  def createAI(world: World, faction: String, position: Position = new Position(300,300), npcValue: NPCValues = null, monsterId: Int = 1): Entity = {
+    val id = java.util.UUID.randomUUID.toString
+    var name = id
+    if(npcValue != null) {
+      name = npcValue.name
+    }
+
+    val entity: Entity = world.createEntity(tag=id)
+    entity.components += position
     entity.components += new Bounds(32, 32)
     entity.components += new Velocity(2, 2)
     entity.components += new Respawnable()
@@ -207,7 +226,7 @@ object EntityFactory {
     animations += new Animation("attackup", 30, 33)
     entity.components += new SpriteSheet("guy", animations, 32 ,32)
     entity.components += new Mana(200, 200)
-    entity.components += new Character(name, name)
+    entity.components += new Character(id, name)
     entity.components += new Goal
     entity.components += new NPC(0)
     entity.components += new Faction(faction)
@@ -320,9 +339,7 @@ object EntityFactory {
   **/
   def characterToLoot(initiator: Entity, lootEntity: Entity) {
       lootEntity.components += new NPC(0)
-      lootEntity.components += new Health(10000,10000)
-      lootEntity.components += new Mana(10000,10000)
-    val animations = new ArrayBuffer[Animation]()
+      val animations = new ArrayBuffer[Animation]()
       animations += new Animation("facedown", 0, 0)
       lootEntity.components += new SpriteSheet("props", animations, 40, 40)
       lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
@@ -345,6 +362,5 @@ object EntityFactory {
           lootEntity.components += new Position(position.x, position.y)
         case _ =>
       }
-
   }
 }
