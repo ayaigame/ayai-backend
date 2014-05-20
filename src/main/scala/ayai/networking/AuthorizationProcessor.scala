@@ -262,6 +262,7 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val content: String = request.request.content.toString
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
+    val contentSplit = content.split("&")
     //get item information
     val id = contentSplit(0).replaceAll("id=", "")
     val name = contentSplit(1).replaceAll("name=","")
