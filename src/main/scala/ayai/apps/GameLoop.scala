@@ -25,6 +25,12 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.util.Random
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
@@ -45,7 +51,14 @@ object GameLoop {
     import ExecutionContext.Implicits.global
 
     // COMMENT ME OUT TO SPEED UP BOOTUP TIME
+    //This recreates the database and mapList.json file.
     DBCreation.ensureDbExists()
+    var fwMapList = new FileWriter(new File("src/main/resources/assets/maps/mapList.json"))
+    var bwMapList = new BufferedWriter(fwMapList)
+
+    bwMapList.write(pretty(render(List("map0.json", "map1.json"))))
+    bwMapList.close()
+    fwMapList.close()
 
     var socketMap: ConcurrentMap[String, String] = TrieMap[String, String]()
 
@@ -65,8 +78,14 @@ object GameLoop {
     val spriteSheetMap = networkSystem.actorOf(Props[SpriteSheetMap], name="SpriteSheetMap")
     val npcMap = networkSystem.actorOf(Props[NPCMap], name="NPCMap")
 
-    //This needs to be read in from a config file
-    val rooms = List("map0.json", "map1.json")
+    //Read in list of map files.
+    implicit val formats = net.liftweb.json.DefaultFormats
+    val roomSource = scala.io.Source.fromFile("src/main/resources/assets/maps/mapList.json")
+    val roomLines = roomSource.mkString
+    roomSource.close()
+
+    val rooms = parse(roomLines).extract[List[String]]
+    // val rooms = List("map0.json", "map1.json")
 
     val itemFactory = ItemFactory.bootup(networkSystem)
     val questFactory = QuestFactory.bootup(networkSystem)

@@ -113,6 +113,23 @@ object TiledExporter {
 		bw.close()
 		fw.close()
 
+		//Read in list of map files.
+    implicit val formats = net.liftweb.json.DefaultFormats
+    val roomSource = scala.io.Source.fromFile("src/main/resources/assets/maps/mapList.json")
+    val roomLines = roomSource.mkString
+    roomSource.close()
+
+    var rooms = parse(roomLines).extract[List[String]]
+    rooms = rooms ::: List(name)
+
+    var fwMapList = new FileWriter(new File("src/main/resources/assets/maps/mapList.json"))
+		var bwMapList = new BufferedWriter(fwMapList)
+
+		// println(compact(render(json)))
+		bwMapList.write(pretty(render(rooms)))
+		bwMapList.close()
+		fwMapList.close()
+
 		return name
 	}
 }
