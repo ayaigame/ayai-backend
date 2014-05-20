@@ -29,9 +29,8 @@ class EffectMap() extends Actor {
 		sender ! effectMap(id)
 	}
 
-	def outputJson() {
-		// var json: JObject = null
-		// json += effectMap.foreach{case (key, value) => value.asJson}
+	def outputJson() = {
+		sender ! compact(render((effectMap.map{ case (key, value) => value.asJson})))
 	}
 
 	def receive = {

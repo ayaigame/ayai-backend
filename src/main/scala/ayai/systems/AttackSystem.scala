@@ -38,6 +38,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
             }
           }
         }
+        //moves victims to another array so they arent hit again
         attack.moveVictims()
       }
       case _ =>
@@ -66,12 +67,12 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
             case weapon: Weapon =>
             weaponValue += weapon.damage
             case _ =>
-        }
+          }
           equipment.equipmentMap("weapon2").itemType match {
             case weapon: Weapon =>
             weaponValue += weapon.damage
             case _ =>
-        }
+          }
     }
     weaponValue + playerBase
   }
@@ -122,23 +123,51 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       case Some(character : Character) => character.id
     }
 
+    // attack message to be sent to all players to notify of attacked
+    val attackMessage = ("type" -> "attack") ~
+      ("damage" -> damage) ~
+      ("initiator" -> initiatorId) ~
+      ("victim" -> victimId)
+    var actorSelection = actorSystem.actorSelection("user/SockoSender*")
+    actorSelection ! new ConnectionWrite(compact(render(attackMessage)))
 
+    val attackChat = ("type" -> "chat") ~
+      ("message" -> ("Damage: " + damage.toString)) ~
+      ("sender" -> "system")
+    actorSelection = actorSystem.actorSelection("user/SockoSender*")
+    actorSelection ! new ConnectionWrite(compact(render(attackChat)))
+
+    var victimPosition = victim.getComponent(classOf[Position]) match {
+      case Some(position: Position) => position
+      case _ => new Position(100,100)
+    }
     //if the victims health reaches zero, then take the persons inventory and make it lootable
     if(healthComponent.currentHealth <= 0) {
-      victim.components += new Time(20000, System.currentTimeMillis())
+      victim.components += new Time(1000, System.currentTimeMillis())
       victim.components += new Dead()
       // get experience and add that to the initiators experience
       (initiator.getComponent(classOf[Experience]),
         victim.getComponent(classOf[Experience]),
-        victim.getComponent(classOf[Character])) match {
-        case (Some(initiatorExperience: Experience), Some(victimExperience: Experience), None) =>
+        initiator.getComponent(classOf[NPC]),
+        victim.getComponent(classOf[NPC])) match {
+        case (Some(initiatorExperience: Experience), Some(victimExperience: Experience), None, Some(npc: NPC)) => 
           initiatorExperience.baseExperience += victimExperience.baseExperience
+          initiator.getComponent(classOf[NetworkingActor]) match {
+            case Some(na: NetworkingActor) => 
+              val att = ("type" -> "experience") ~
+                        ("earned" -> victimExperience.baseExperience) 
+              na.actor ! new ConnectionWrite(compact(render(att)))
+              val ch =  ("type" -> "chat") ~
+                        ("message" -> ("earned: " + victimExperience.baseExperience.toString + " total experience now " + initiatorExperience.baseExperience.toString))  ~
+                        ("sender" -> "system")
+              na.actor ! new ConnectionWrite(compact(render(ch)))
+            case _ =>
+          }
         case _ =>
+          //character should not get experience (usually NPCS (they have no need to level up))
       }
 
-      val id = (new UID()).toString
-      val loot:Entity = world.createEntity(tag=id)
-      EntityFactory.characterToLoot(initiator, loot)
+      val loot = EntityFactory.characterToLoot(world, initiator, victimPosition)
       world.addEntity(loot)
       val json = ("type" -> "disconnect") ~
          ("id" -> victimId)
@@ -146,13 +175,5 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       actorSelectionDisc ! new ConnectionWrite(compact(render(json)))
 
     }
-
-    // attack message to be sent to all players to notify of attacked
-    val attackMessage = ("type" -> "attack") ~
-      ("damage" -> damage) ~
-      ("initiator" -> initiatorId) ~
-      ("victim" -> victimId)
-    val actorSelection = actorSystem.actorSelection("user/SockoSender*")
-    actorSelection ! new ConnectionWrite(compact(render(attackMessage)))
   }
 }

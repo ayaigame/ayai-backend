@@ -24,15 +24,23 @@ class LevelingSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(in
       case (Some(experience: Experience), Some(character: Character), Some(na: NetworkingActor)) => 
         var expThresh = Constants.EXPERIENCE_ARRAY(experience.level-1)
         var leveledUp = experience.levelUp(expThresh)
-        entity.getComponent(classOf[Stats]) match {
-          case Some(stats: Stats) => 
-            stats.levelUp()
-          case _ =>
-        }
         
         if(leveledUp) {
+          entity.getComponent(classOf[Stats]) match {
+            case Some(stats: Stats) => 
+              stats.levelUp()
+            case _ =>
+          }
+
+          (entity.getComponent(classOf[Health]), entity.getComponent(classOf[Mana])) match {
+            case (Some(health: Health), Some(mana: Mana)) =>
+              health.levelUp()
+              mana.levelUp()
+            case _ => 
+          }
+          
           val json = ("type" -> "chat") ~
-            ("message" -> "Leveled Up to level $experience.level") ~
+            ("message" -> ("Leveled Up to level " + experience.level.toString)) ~
             ("sender" -> "system")
           val actorSelection = na.actor
           actorSelection ! ConnectionWrite(compact(render(json)))

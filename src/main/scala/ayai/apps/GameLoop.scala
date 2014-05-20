@@ -25,6 +25,8 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.util.Random
 
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -61,6 +63,7 @@ object GameLoop {
     val worldGenerator = networkSystem.actorOf(Props[WorldGenerator], name="WorldGenerator")
     val effectMap = networkSystem.actorOf(Props[EffectMap], name="EffectMap")
     val spriteSheetMap = networkSystem.actorOf(Props[SpriteSheetMap], name="SpriteSheetMap")
+    val npcMap = networkSystem.actorOf(Props[NPCMap], name="NPCMap")
 
     //This needs to be read in from a config file
     val rooms = List("map0.json", "map1.json")
@@ -108,7 +111,7 @@ object GameLoop {
         }
       }
 
-      Await.result(Future.sequence(processedMessages), 5 seconds)
+      Await.result(Future.sequence(processedMessages), 10 seconds)
 
       for(world <- worlds) {
         world.process()

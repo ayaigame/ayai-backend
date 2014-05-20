@@ -1,7 +1,7 @@
 {
 	"items": [
 		{
-			"id": 0,
+			"id": 1,
 			"name": "Iron Sword",
 			"equipable": true,
 			"itemType": "weapon1",
@@ -18,7 +18,7 @@
 					}]
 			},
 			{
-			"id": 1,
+			"id": 2,
 			"name": "Fire Sword",
 			"equipable": true,
 			"itemType": "weapon1",
@@ -35,7 +35,7 @@
 					}]
 			},
 			{
-			"id": 2,
+			"id": 3,
 			"name": "Iron Helmet",
 			"equipable": true,
 			"itemType": "helmet",

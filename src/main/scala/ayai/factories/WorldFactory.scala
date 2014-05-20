@@ -44,7 +44,7 @@ class WorldFactory extends Actor {
       world.addSystem(MovementSystem(), 1)
       world.addSystem(TransportSystem(context.system), 2)
       world.addSystem(HealthSystem())
-      world.addSystem(RespawningSystem())
+      world.addSystem(RespawningSystem(context.system))
       world.addSystem(FrameExpirationSystem(context.system))
       world.addSystem(StatusEffectSystem())
       world.addSystem(ItemSystem())
@@ -62,8 +62,8 @@ class WorldFactory extends Actor {
       val nmProcessor = context.system.actorOf(Props(MessageProcessorSupervisor(world)), name=s"MProcessor$id")
 
       //HARDCODED ENTITY ADD HAPPENS HERE
-      val entity = EntityFactory.createAI(world, "axis")
-      world.addEntity(entity)
+      // val entity = EntityFactory.createAI(world, "axis")
+      // world.addEntity(entity)
 
       sender ! world
     }

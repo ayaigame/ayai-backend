@@ -41,18 +41,18 @@
 				{
 					"attributeType": "intelligence",
 					"magnitude": 13,
-					"growth": 2
+					"growth": 10
 
 				},
 				{
 					"attributeType": "strength",
 					"magnitude": 18,
-					"growth": 2
+					"growth": 15
 				},
 				{
 					"attributeType": "agility",
 					"magnitude": 15,
-					"growth": 2					
+					"growth": 6				
 				}
 			],
 			"abilities": [

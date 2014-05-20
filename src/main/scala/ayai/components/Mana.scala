@@ -10,7 +10,7 @@ import net.liftweb.json.JsonDSL._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import ayai.statuseffects._
 
-case class Mana(var currentMana: Int, var maximumMana: Int) extends Component {
+case class Mana(var currentMana: Int, var maximumMana: Int, val growth: Int = 10) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
   
   private var currentModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
@@ -25,6 +25,11 @@ case class Mana(var currentMana: Int, var maximumMana: Int) extends Component {
       currentMana = 0
     }
   }
+
+  def levelUp() {
+    maximumMana += growth
+  }
+
   def updateCachedValue() {
     updateCurrentValue()
     updateMaxValue()

@@ -22,6 +22,12 @@ case class AttackTo(position: Position) extends Intent {
   }
 }
 
+case class NoGoal() extends Intent {
+  override def toString: String = {
+    s"No Goal"
+  }
+}
+
 class Goal extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
 

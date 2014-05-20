@@ -74,7 +74,7 @@ object DBCreation {
         transaction {
           CharacterTable.getCharacter("Ness") match {
             case Some(characterRow: CharacterRow) =>
-              AyaiDB.inventory.insert(new InventoryRow(characterRow.id, 0, 1))
+              AyaiDB.inventory.insert(new InventoryRow(characterRow.id, 1, 1))
               AyaiDB.inventory.insert(new InventoryRow(characterRow.id, 3, 1))
               AyaiDB.inventory.insert(new InventoryRow(characterRow.id, 4, 1))
             case _ =>
