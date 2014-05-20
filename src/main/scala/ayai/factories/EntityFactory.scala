@@ -185,7 +185,7 @@ object EntityFactory {
   def createLoot(world: World, item: Item, networkSystem: ActorSystem, position: Position = new Position(100,100)): Entity =  {
     val id = (new UID()).toString
     val entity = world.createEntity(id)
-    entity.components += new Loot("")
+    entity.components += new Loot(id, "")
     val inventory = new Inventory()
     inventory.addItem(item)
     entity.components += inventory
@@ -196,7 +196,7 @@ object EntityFactory {
     entity
   }
 
-  def createAI(world: World, faction: String, position: Position = new Position(300,300), npcValue: NPCValues = null, monsterId: Int = 1): Entity = {
+  def createAI(world: World, faction: String, position: Position = new Position(300,300), npcValue: NPCValues = null, monsterId: Int = 1, roomId: Int = 0): Entity = {
     val id = java.util.UUID.randomUUID.toString
     var name = id
     if(npcValue != null) {
@@ -338,13 +338,14 @@ object EntityFactory {
   ** Take an entity and take its inventory and create a loot entity
   **/
   def characterToLoot(initiator: Entity, lootEntity: Entity) {
-      lootEntity.components += new NPC(0)
+     val id = (new UID()).toString
+     lootEntity.components += new NPC(0)
       val animations = new ArrayBuffer[Animation]()
       animations += new Animation("facedown", 0, 0)
       lootEntity.components += new SpriteSheet("props", animations, 40, 40)
-      lootEntity.components += new Loot(initiator.getComponent(classOf[Character]) match {
+      lootEntity.components += new Loot(id, initiator.getComponent(classOf[Character]) match {
         case Some(character: Character) => character.id
-        case _ => "0"
+        case _ => ""
       })
 
       initiator.getComponent(classOf[Character]) match {

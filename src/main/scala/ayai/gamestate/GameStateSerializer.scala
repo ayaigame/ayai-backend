@@ -100,14 +100,12 @@ class GameStateSerializer(world: World) extends Actor {
         lootJSON = ("loot" -> loot.map{ l => 
           (l.getComponent(classOf[Position]),
             l.getComponent(classOf[SpriteSheet]),
-            l.getComponent(classOf[Loot]),
-            l.getComponent(classOf[Inventory])) match {
+            l.getComponent(classOf[Loot])) match {
               case (Some(position: Position), Some(spritesheet: SpriteSheet)
-                    , Some(lo: Loot), Some(inventory: Inventory)) => 
+                    , Some(lo: Loot)) => 
                 (position.asJson) ~
                 (spritesheet.asJson) ~
-                (lo.asJson) ~
-                (inventory.asJson)
+                (lo.asJson)
               case _ => 
                 log.warn("f3d3275: getComponent failed to return anything BLARG2")
                 JNothing
