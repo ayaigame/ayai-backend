@@ -143,7 +143,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     }
     //if the victims health reaches zero, then take the persons inventory and make it lootable
     if(healthComponent.currentHealth <= 0) {
-      victim.components += new Time(20000, System.currentTimeMillis())
+      victim.components += new Time(1000, System.currentTimeMillis())
       victim.components += new Dead()
       // get experience and add that to the initiators experience
       (initiator.getComponent(classOf[Experience]),
