@@ -229,23 +229,24 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
 
   case ClassPost(request: HttpRequestEvent) =>
     val content: String = request.request.content.toString
+    println(content)
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "")
-    val name = contentSplit(2).replaceAll("name=","")
-    val description = contentSplit(3).replaceAll("description=","")
-    val baseHealth = contentSplit(4).replaceAll("baseHealth=","").toInt
-    val baseMana = contentSplit(5).replaceAll("baseMana=","").toInt
-    val strength = contentSplit(6).replaceAll("strength=","").toInt
-    val defense = contentSplit(7).replaceAll("defense=","").toInt
-    val intelligence = contentSplit(8).replaceAll("intelligence=","").toInt
-    val strengthLevel= contentSplit(9).replaceAll("strengthLevel=","").toInt
-    val defenseLevel = contentSplit(10).replaceAll("defenseLevel=","").toInt
-    val intelligenceLevel = contentSplit(11).replaceAll("intelligenceLevel=","").toInt
-    val spriteSheetLocation = contentSplit(12).replaceAll("spritesheet=","")
+    val id = contentSplit(0).replaceAll("id=", "")
+    val name = contentSplit(1).replaceAll("name=","")
+    val description = contentSplit(2).replaceAll("description=","")
+    val baseHealth = contentSplit(3).replaceAll("baseHealth=","").toInt
+    val baseMana = contentSplit(4).replaceAll("baseMana=","").toInt
+    val strength = contentSplit(5).replaceAll("strength=","").toInt
+    val defense = contentSplit(6).replaceAll("defense=","").toInt
+    val intelligence = contentSplit(7).replaceAll("intelligence=","").toInt
+    val strengthLevel= contentSplit(8).replaceAll("strengthLevel=","").toInt
+    val defenseLevel = contentSplit(9).replaceAll("defenseLevel=","").toInt
+    val intelligenceLevel = contentSplit(10).replaceAll("intelligenceLevel=","").toInt
+    val spriteSheetLocation = contentSplit(11).replaceAll("spritesheet=","")
     
     val stats = new Stats()
     stats.addStat(new Stat("strength", strength, strengthLevel))
