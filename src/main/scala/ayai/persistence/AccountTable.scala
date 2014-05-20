@@ -62,6 +62,22 @@ object AccountTable {
     }
   }
 
+  def getAccountById(id: Long): Option[Account] = {
+    Class.forName("org.h2.Driver");
+    SessionFactory.concreteFactory = Some (() =>
+        Session.create(
+        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
+        new H2Adapter))
+
+    transaction {
+      val accountQuery = AyaiDB.accounts.where(account => account.id === id)
+      if(accountQuery.size == 1)
+        Some(accountQuery.single)
+      else
+        None
+    }
+  }
+
   def createToken(account: Account): String = {
     val token = java.util.UUID.randomUUID.toString
 
