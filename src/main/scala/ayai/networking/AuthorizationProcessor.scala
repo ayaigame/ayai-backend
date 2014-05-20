@@ -123,13 +123,13 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val delimiter2 = content.lastIndexOfSlice("&")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(0).replaceAll("id=", "0")
-    val name = contentSplit(1).replaceAll("name=","unnamed")
-    val description = contentSplit(2).replaceAll("description=","unnamed")
-    val value = contentSplit(3).replaceAll("value=","1").toInt
-    val weight = contentSplit(4).replaceAll("weight=","0").toDouble
+    val id = contentSplit(0).replaceAll("id=", "")
+    val name = contentSplit(1).replaceAll("name=","")
+    val description = contentSplit(2).replaceAll("description=","")
+    val value = contentSplit(3).replaceAll("value=","").toInt
+    val weight = contentSplit(4).replaceAll("weight=","").toDouble
     val imageLocation = contentSplit(5).replaceAll("image=","")
-    val itemType = contentSplit(6).replaceAll("itemType=","consumable")
+    val itemType = contentSplit(6).replaceAll("itemType=","")
 
     println("ItemType: Found" + itemType)
 
@@ -189,19 +189,19 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "0")
-    val name = contentSplit(2).replaceAll("name=","unnamed")
-    val faction = contentSplit(3).replaceAll("faction=","allies")
-    val room = contentSplit(4).replaceAll("room=","1").toInt
-    val weapon1 = contentSplit(5).replaceAll("weapon1=","0").toInt
-    val helmet = contentSplit(6).replaceAll("helmet=","0").toInt
-    val torso = contentSplit(7).replaceAll("torso=","0").toInt
-    val legs = contentSplit(8).replaceAll("legs=","0").toInt
-    val feet = contentSplit(9).replaceAll("feet=","0").toInt
-    val level = contentSplit(10).replaceAll("level=","1").toInt
-    val experience = contentSplit(11).replaceAll("experience=","10").toInt
-    val health = contentSplit(12).replaceAll("health=","50").toInt
-    val mana = contentSplit(13).replaceAll("mana=","50").toInt
+    val id = contentSplit(1).replaceAll("id=", "")
+    val name = contentSplit(2).replaceAll("name=","")
+    val faction = contentSplit(3).replaceAll("faction=","")
+    val room = contentSplit(4).replaceAll("room=","").toInt
+    val weapon1 = contentSplit(5).replaceAll("weapon1=","").toInt
+    val helmet = contentSplit(6).replaceAll("helmet=","").toInt
+    val torso = contentSplit(7).replaceAll("torso=","").toInt
+    val legs = contentSplit(8).replaceAll("legs=","").toInt
+    val feet = contentSplit(9).replaceAll("feet=","").toInt
+    val level = contentSplit(10).replaceAll("level=","").toInt
+    val experience = contentSplit(11).replaceAll("experience=","").toInt
+    val health = contentSplit(12).replaceAll("health=","").toInt
+    val mana = contentSplit(13).replaceAll("mana=","").toInt
 
     //get equipment ids for weapons given
     // val weaponFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(weapon1)
@@ -234,17 +234,17 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val userToken = content.slice(0, delimiter).replaceAll("token=","")
     val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "0")
+    val id = contentSplit(1).replaceAll("id=", "")
     val name = contentSplit(2).replaceAll("name=","")
-    val description = contentSplit(3).replaceAll("description=","description")
-    val baseHealth = contentSplit(4).replaceAll("baseHealth=","50").toInt
-    val baseMana = contentSplit(5).replaceAll("baseMana=","50").toInt
-    val strength = contentSplit(6).replaceAll("strength=","1").toInt
-    val defense = contentSplit(7).replaceAll("defense=","1").toInt
-    val intelligence = contentSplit(8).replaceAll("intelligence=","1").toInt
-    val strengthLevel= contentSplit(9).replaceAll("strengthLevel=","1").toInt
-    val defenseLevel = contentSplit(10).replaceAll("defenseLevel=","1").toInt
-    val intelligenceLevel = contentSplit(11).replaceAll("intelligenceLevel=","1").toInt
+    val description = contentSplit(3).replaceAll("description=","")
+    val baseHealth = contentSplit(4).replaceAll("baseHealth=","").toInt
+    val baseMana = contentSplit(5).replaceAll("baseMana=","").toInt
+    val strength = contentSplit(6).replaceAll("strength=","").toInt
+    val defense = contentSplit(7).replaceAll("defense=","").toInt
+    val intelligence = contentSplit(8).replaceAll("intelligence=","").toInt
+    val strengthLevel= contentSplit(9).replaceAll("strengthLevel=","").toInt
+    val defenseLevel = contentSplit(10).replaceAll("defenseLevel=","").toInt
+    val intelligenceLevel = contentSplit(11).replaceAll("intelligenceLevel=","").toInt
     val spriteSheetLocation = contentSplit(12).replaceAll("spritesheet=","")
     
     val stats = new Stats()
@@ -262,15 +262,13 @@ class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
     val content: String = request.request.content.toString
     val delimiter = content.indexOfSlice("&")
     val delimiter2 = content.lastIndexOfSlice("&")
-    val userToken = content.slice(0, delimiter).replaceAll("token=","")
-    val contentSplit = content.split("&")
     //get item information
-    val id = contentSplit(1).replaceAll("id=", "")
-    val name = contentSplit(2).replaceAll("name=","")
-    val description = contentSplit(3).replaceAll("description=","")
-    val effectType = contentSplit(4).replaceAll("effectType=","")
-    val value:Int = contentSplit(5).replaceAll("value=","").toInt
-    val attribute = contentSplit(6).replaceAll("attribute=","")
+    val id = contentSplit(0).replaceAll("id=", "")
+    val name = contentSplit(1).replaceAll("name=","")
+    val description = contentSplit(2).replaceAll("description=","")
+    val effectType = contentSplit(3).replaceAll("effectType=","")
+    val value:Int = contentSplit(4).replaceAll("value=","").toInt
+    val attribute = contentSplit(5).replaceAll("attribute=","")
 
     
     //get required info needed for these 
