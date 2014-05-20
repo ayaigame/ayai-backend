@@ -56,6 +56,7 @@
         "end_y" : 100,
         "toRoomId" : 0,
         "to_x": 100,
-        "to_y": 100
+        "to_y": 100,
+        "dir": "LeftToRight"
   }]
 }

@@ -1,8 +1,11 @@
 package ayai.systems.mapgenerator
 
 import ayai.factories.{WorldFactory, CreateWorld}
-import ayai.gamestate.RoomWorld
+import ayai.gamestate.{RoomWorld, GetTransportsToRoom}
 import ayai.apps.Constants
+import ayai.maps.TransportInfo
+import ayai.systems.JTransport
+import ayai.components.Position
 
 import java.util.Random
 import java.io._
@@ -51,19 +54,208 @@ class MapGenerator extends Actor {
     }
 
     noise map rescaleRow
- }
+  }
+
+  def findTransportLocation(direction: String, map: Array[Array[Int]], width: Int, height: Int): Position = {
+    var widthOfTransport = 2
+    var heightofTransport = 5
+    var startX = 0
+    var startY = 0
+    var incrX = 0
+    var incrY = 0
+
+    //These are inverted because these are incoming directions
+    direction match {
+      case "RightToLeft" =>
+        incrY = 1
+
+      case "LeftToRight" =>
+        startX = width-2
+        incrY = 1
+
+      case "BottomToTop" =>
+        incrX = 1
+        widthOfTransport = 5
+        heightofTransport = 2
+
+      case "TopToBottom" =>
+        startY = height-2
+        incrX = 1
+        widthOfTransport = 5
+        heightofTransport = 2
+
+      case _ => {
+        println("MISSING TRANSPORT DIRECTION IN MapGenerator.")
+        incrX = 1 //Otherwise the following while loop will never end
+      }
+    }
+
+    while((startX + widthOfTransport) <= width && (startY + heightofTransport) <= height) {
+      var noCollision = true
+
+      for(m <- startX until (startX + widthOfTransport)) {
+        for(n <- startY until (startY + heightofTransport)) {
+          if(map(m)(n) != 1)
+            noCollision = false
+        }
+      }
+
+      //+incr is a trick to give a buffer of clear non-transport tile
+      if(noCollision)
+        return new Position(startX, startY)
+
+      startX = startX + incrX
+      startY = startY + incrY
+    }
+
+    //No valid position found
+    return new Position(-1, -1)
+  }
+
+  // def findFurtherestTransportLocation(direction: String,
+  //                                     map: Array[Array[Int]],
+  //                                     id: Int,
+  //                                     width: Int,
+  //                                     height: Int,
+  //                                     fromX: Int,
+  //                                     fromY: Int
+  //                                   ): Position = {
+
+  // }
+
+  def doesPathExist(startX: Int, startY: Int, endX: Int, endY: Int, map: Array[Array[Int]], width: Int, height: Int): Boolean = {
+    println(s"Finding path from ($startX, $startY) to ($endX, $endY).")
+    var blockedIn = false
+    var currentX = startX
+    var currentY = startY
+    var incrX = 0
+    var incrY = 0
+
+    //Set direction to bias
+    if(startX < endX)
+      incrX = 1
+    else
+      incrX = -1
+
+    if(startY < endY)
+      incrY = 1
+    else
+      incrY = -1
+
+    while(blockedIn == false) {
+      if(currentX == endX && currentY == endY)
+        return true
+
+      if(currentX+incrX > 0 && currentX+incrX < width && map(currentX+incrX)(currentY) != 0){
+        map(currentX)(currentY) = map(currentX)(currentY) - 1
+        currentX = currentX+incrX
+      }
+      else if(currentY+incrY > 0 && currentY+incrY < height && map(currentX)(currentY+incrY) != 0){
+        map(currentX)(currentY) = map(currentX)(currentY) - 1
+        currentY = currentY+incrY
+      }
+      else if(currentX-incrX > 0 && currentX-incrX < width && map(currentX-incrX)(currentY) != 0){
+        map(currentX)(currentY) = map(currentX)(currentY) - 1
+        currentX = currentX-incrX
+      }
+      else if(currentY-incrY > 0 && currentY-incrY < height && map(currentX)(currentY-incrY) != 0){
+        map(currentX)(currentY) = map(currentX)(currentY) - 1
+        currentY = currentY-incrY
+      }
+      else
+        blockedIn = true
+    }
+
+    return false
+  }
+
+  def calculateCollisionMap(map: Array[Array[Int]], width: Int, height: Int): Array[Array[Int]] = {
+    var newMap = Array.ofDim[Int](width, height)
+
+    for(i <- 0 until width) {
+      for(j <- 0 until height) {
+        if(map(i)(j) == 1) {
+          var tileVal = 0
+          if(i+1 < width && map(i+1)(j) ==  1)
+            tileVal = tileVal + 1
+          if(j+1 < height && map(i)(j+1) ==  1)
+            tileVal = tileVal + 1
+          if(i-1 >= 0 && map(i-1)(j)==  1)
+            tileVal = tileVal + 1
+          if(j-1 >= 0 && map(i)(j-1) ==  1)
+            tileVal = tileVal + 1
+          newMap(i)(j) = tileVal
+        }
+        else
+          newMap(i)(j) = 0
+      }
+    }
+
+    return newMap
+  }
+
+  def ensureTraversable(map: Array[Array[Int]], transportPositions: List[Position], width: Int, height: Int): Boolean = {
+  // def ensureTraversable(map: Array[Array[Int]], transportsToRoom: List[TransportInfo], width: Int, height: Int): Boolean = {
+    // var incomingTransportDirections = transportsToRoom map (_.direction)
+
+    // //Add the outbound transport, this is inverted since it's incoming
+    // incomingTransportDirections = incomingTransportDirections ::: List("LeftToRight")
+
+    // var transportPositions: List[Position] = incomingTransportDirections map (findTransportLocation(_, map, width, height))
+    var remainingList = transportPositions
+    val collisionMap: Array[Array[Int]] = calculateCollisionMap(map, width, height)
+
+    while(remainingList.nonEmpty) {
+      val first = remainingList(0)
+      val rest = remainingList.tail
+      for(position <- rest) {
+        if(!doesPathExist(first.x, first.y, position.x, position.y, collisionMap, width, height)) {
+          return false
+        }
+      }
+      remainingList = rest
+    }
+
+    return true
+  }
 
   def receive = {
     case CreateMap(id: Int, width: Int, height: Int) => {
       val noiseGenerator = FractionalBrownianMotionGenerator(NoiseGenerator("perlin"))
 
-      val noise2d = noiseGenerator.getNoise(width, height)
+      // println(findTransportLocation("RightToLeft", rescaledNoise, width, height))
 
-      // println(rescaleNoise(noise2d).map(_.deep.mkString(" ")).mkString("\n"))
+      val roomList = context.system.actorSelection("user/RoomList")
+      val roomListFuture = roomList ? new GetTransportsToRoom(id)
 
-      val rescaledNoise = rescaleNoise(noise2d)
+      var transportsToRoom: List[TransportInfo] =  Await.result(roomListFuture, timeout.duration).asInstanceOf[List[TransportInfo]]
 
-      val fileName = TiledExporter.export(id, rescaledNoise, width, height)
+      //Add the outbound transport, this is inverted since it's incoming
+      val outboundTransport = new TransportInfo(new Position(0, 0), new Position(1, 5), id+1, id, new Position(100, 100), "LeftToRight")
+      transportsToRoom = transportsToRoom ::: List(outboundTransport)
+      // incomingTransportDirections = incomingTransportDirections ::: List("LeftToRight")
+
+      var incomingTransportDirections = transportsToRoom map (_.direction)
+
+      var noise2d = noiseGenerator.getNoise(width, height)
+      var rescaledNoise = rescaleNoise(noise2d)
+
+      var noPositionFound = new Position(-1, -1)
+      var transportPositions: List[Position] = incomingTransportDirections map (findTransportLocation(_, rescaledNoise, width, height))
+
+      while(transportPositions.exists(_ == noPositionFound)
+          || !ensureTraversable(rescaledNoise, transportPositions, width, height)) {
+        println("Whelp that room's untraversable. Lemme make another...")
+        noise2d = noiseGenerator.getNoise(width, height)
+        rescaledNoise = rescaleNoise(noise2d)
+
+        transportPositions = incomingTransportDirections map (findTransportLocation(_, rescaledNoise, width, height))
+      }
+
+      println(rescaledNoise.map(_.deep.mkString(" ")).mkString("\n"))
+      // println(ensureTraversable(rescaledNoise, transportsToRoom, width, height))
+      val jTransports: List[JTransport] = TransportFactory.createTransports(id, transportsToRoom.zip(transportPositions), rescaledNoise, width, height)
+      val fileName = TiledExporter.export(id, jTransports, rescaledNoise, width, height)
 
       val worldFactory = context.system.actorSelection("user/WorldFactory")
       val future = worldFactory ? new CreateWorld(fileName)

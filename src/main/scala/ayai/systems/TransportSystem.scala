@@ -36,7 +36,7 @@ object TransportSystem {
 
 class NoRoomFoundException(msg: String) extends RuntimeException(msg)
 
-case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomId: Int, to_x: Int, to_y: Int) {
+case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoomId: Int, to_x: Int, to_y: Int, dir: String) {
   implicit def asJson(): JObject = {
     ("start_x" -> start_x) ~
     ("start_y" -> start_y) ~
@@ -44,7 +44,8 @@ case class JTransport(start_x: Int, start_y: Int, end_x: Int, end_y: Int, toRoom
     ("end_y" -> end_y) ~
     ("toRoomId" -> toRoomId) ~
     ("to_x" -> to_x) ~
-    ("to_y" -> to_y)
+    ("to_y" -> to_y) ~
+    ("dir" -> dir)
   }
 }
 
@@ -86,16 +87,52 @@ extends EntityProcessingSystem(include=List(classOf[Room],
               newWorld.isLeaf = false
             }
 
-            val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, newWorld)
-            Await.result(future1, timeout.duration)
+            var xOffset = 0
+            var yOffset = 0
+            val landingDirection = transport.direction match {
+              case "RightToLeft" =>
+                xOffset = 2
+                "LeftToRight"
+
+              case "LeftToRight" =>
+                xOffset = -2
+                "RightToLeft"
+
+              case "BottomToTop" =>
+                yOffset = 2
+                "TopToBottom"
+
+              case "TopToBottom" =>
+                yOffset = -2
+                "BottomToTop"
+
+              case _ =>
+                println("MISSING TRANSPORT DIRECTION IN TransportSystem.")
+                "RightToLeft"
+            }
+
+            val newTileMap = newWorld.tileMap
+            val transportOption = newTileMap.transports.find(_.direction == landingDirection)
 
             //Update the room component so it will be saved to the DB on logout
             room.id = roomId
 
-            val newTileMap = newWorld.tileMap
+            //Right here I should look up where the next room's transport is
+            transportOption match {
+              case Some(t: TransportInfo) => {
+                position.x = ((t.startingPosition.x + t.endingPosition.x) / 2 + xOffset) * 32
+                position.y = ((t.startingPosition.y + t.endingPosition.y) / 2 + yOffset) * 32
+                println("Adding character at: " + position.x + ", " + position.y)
+              }
+              case _ =>{
+                println("Error, transport system is unable to match landingDirection.")
+                position.x = transport.toPosition.x
+                position.y = transport.toPosition.y
+              }
+            }
 
-            position.x = transport.toPosition.x
-            position.y = transport.toPosition.y
+            val future1 = actorSystem.actorSelection("user/UserRoomMap") ? SwapWorld(e.tag, newWorld)
+            Await.result(future1, timeout.duration)
 
             implicit val formats = net.liftweb.json.DefaultFormats
             val mapFile = Source.fromFile(new File("src/main/resources/assets/maps/" + newTileMap.file))

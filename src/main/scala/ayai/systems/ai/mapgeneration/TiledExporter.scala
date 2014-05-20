@@ -2,6 +2,8 @@ package ayai.systems.mapgenerator
 
 import ayai.maps.Tileset
 import ayai.systems.JTransport
+import ayai.maps.TransportInfo
+import ayai.components.Position
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,7 +20,7 @@ import net.liftweb.json.JsonDSL._;
 object TiledExporter {
 
 	//returns filename
-	def export(id: Int, map: Array[Array[Int]], width: Int, height: Int): String = {
+	def export(id: Int, transports: List[JTransport], map: Array[Array[Int]], width: Int, height: Int): String = {
 		// var newMap : Array[Array[Int]] = new Array[Array[Int]](width * height)
 		var newMap: Array[Array[Int]] = Array.ofDim[Int](width, height)
 		var collisions: Array[Array[Int]] = Array.fill[Array[Int]](width)(Array.fill[Int](height)(0))
@@ -45,26 +47,34 @@ object TiledExporter {
 			}
 		}
 
-    val transports: ListBuffer[JTransport] = ListBuffer()
-    transports += new JTransport(width-1, 5, width, min(10, height), id+1, 100, 100)
-    transports += new JTransport(0, 5, 1, min(10, height), id-1, width*32-100, 100)
-
 		for(transport <- transports) {
 			for(i <- transport.start_x until transport.end_x) {
 				for(j <- transport.start_y until transport.end_y) {
-					newMap(j)(i) = 347
+					newMap(i)(j) = 347 //Transport Tile
 				}
 			}
 		}
 
-		val list = newMap.flatten.toList
+		def getList(tileMap: Array[Array[Int]]): List[Int] = {
+			val list: ListBuffer[Int] = ListBuffer()
+			for(i <- 0 until width) {
+				for(j <- 0 until height) {
+					list += tileMap(j)(i)
+				}
+			}
+			list.toList
+		}
+
+		// val list = newMap.toList.flatten
 
 		case class Layer(map: List[Int], name: String, visible: Boolean)
 		// case class Tileset()
 
 		val layers: ListBuffer[Layer] = ListBuffer()
-		layers += new Layer(newMap.flatten.toList, "Tile Layer 1", true)
-		layers += new Layer(collisions.flatten.toList, "collision", false)
+		// layers += new Layer(newMap.flatten.toList, "Tile Layer 1", true)
+		// layers += new Layer(collisions.flatten.toList, "collision", false)
+		layers += new Layer(getList(newMap), "Tile Layer 1", true)
+		layers += new Layer(getList(collisions), "collision", false)
 		// val tilesets = ListBuffer(Tileset())
 
 		val tilesets: ListBuffer[Tileset] = ListBuffer()
@@ -93,17 +103,16 @@ object TiledExporter {
 				("tilewidth" -> 32) ~
 				("version" -> 1) ~
 				("transports" -> (transports.toList map (_.asJson)))
-				// ("transports" -> List[Int]())
 			)
 
 		var fw = new FileWriter(new File("src/main/resources/assets/maps/" + name))
 		var bw = new BufferedWriter(fw)
 
+		println(compact(render(json)))
 		bw.write(pretty(render(json)))
 		bw.close()
 		fw.close()
 
 		return name
-
 	}
 }

@@ -8,7 +8,7 @@ import ayai.maps.{Tile, Layer, TransportInfo, Tileset}
 import scala.math._
 
 //128 x 128 is only default
-class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[TransportInfo], var tilesets: List[Tileset]) {
+class TileMap(val array: Array[Array[Tile]], var transports: List[TransportInfo], var tilesets: List[Tileset]) {
   var file: String = ""
   var width: Int = 128
   var height: Int = 128
@@ -21,7 +21,7 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
   def maximumHeight: Int = array(0).length * tileSize
 
   def getTileByPosition(position: Position): Tile = array(valueToTile(position.x))(valueToTile(position.y))
-  
+
   // Get a tile by a x or y value from the array (example: 32 tilesize value, 65 (position) / 32) = 2 tile
   def valueToTile(value: Int): Int = value / tileSize
 
@@ -56,7 +56,7 @@ class TileMap(val array: Array[Array[Tile]], var listOfTransport: List[Transport
   If inside transport area, then return the new transport
   **/
     def checkIfTransport(characterPosition: Position): Option[TransportInfo] = {
-    for(transport <- listOfTransport) {
+    for(transport <- transports) {
       val startPosition = transport.startingPosition
       val endPosition = transport.endingPosition
 

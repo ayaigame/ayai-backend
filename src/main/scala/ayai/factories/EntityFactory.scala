@@ -268,21 +268,22 @@ object EntityFactory {
     val jtransports = (parsedJson \\ "transports").extract[List[JTransport]]
     var transports: List[TransportInfo] = Nil
 
+    //get the overall size and id of maps
+    val id: Int = tmap.id
+    val height: Int = tmap.height
+    val width: Int = tmap.width
+
     for(trans <- jtransports) {
       val startPosition = new Position(trans.start_x, trans.start_y)
       val endPosition = new Position(trans.end_x, trans.end_y)
       val toPosition = new Position(trans.to_x, trans.to_y)
-      transports = new TransportInfo(startPosition, endPosition, trans.toRoomId, toPosition) :: transports
+      transports = new TransportInfo(startPosition, endPosition, id, trans.toRoomId, toPosition, trans.dir) :: transports
     }
 
     val bundles = (parsedJson \\ "layers").extract[List[JTiles]]
     bundles.map{bundle => ("data" -> bundle.data, "height" -> bundle.height, "width" -> bundle.width, "name" -> bundle.name)}
     val arrayTile: Array[Array[Tile]] = Array.fill[Tile](tmap.width, tmap.height)(new Tile(ListBuffer()))
 
-    //get the overall size and id of maps
-    val id: Int = tmap.id
-    val height: Int = tmap.height
-    val width: Int = tmap.width
 
     //get and transorm tiles from a list to multi-dimensional array
     for(i <- 0 until (width*height)) {

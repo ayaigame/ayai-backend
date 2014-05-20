@@ -24,7 +24,7 @@ class WorldGenerator() extends Actor {
 
   def _getRoomsToBuild(room: RoomWorld): Set[Int] = {
     // println("I'm supposed to be expanding room: " + room.id)
-    val transports = room.tileMap.listOfTransport
+    val transports = room.tileMap.transports
 
     val childrenIds = transports map (_.toRoomId)
     // println("Whose children are: " + childrenIds.toString)
@@ -41,7 +41,7 @@ class WorldGenerator() extends Actor {
   def buildRoom(id: Int) = {
     val future = mapGenerator ? new CreateMap(id, 50, 50)
 
-    context.system.actorSelection("user/RoomList") ! new AddWorld(Await.result(future, timeout.duration).asInstanceOf[RoomWorld])
+    context.system.actorSelection("user/RoomList") ! new AddWorld(Await.result(future, Timeout(60 seconds).duration).asInstanceOf[RoomWorld])
 
   }
 

@@ -94,7 +94,8 @@
         "end_y" : 40,
         "toRoomId" : 1,
         "to_x": 100,
-        "to_y": 100
+        "to_y": 100,
+        "dir": "LeftToRight"
         },
         {
         "start_x" : 58,
@@ -103,7 +104,8 @@
         "end_y" : 40,
         "toRoomId" : 2,
         "to_x": 100,
-        "to_y": 100
+        "to_y": 100,
+        "dir": "RightToLeft"
         }],
 
  "npcs" : [{
