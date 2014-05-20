@@ -47,7 +47,7 @@
 			"stats": []
 			},
 			{
-			"id": 3,
+			"id": 4,
 			"name": "Magic Staff",
 			"equipable": true,
 			"itemType": "weapon1",
@@ -73,7 +73,7 @@
 					}]
 			},
 			{
-			"id": 4,
+			"id": 5,
 			"name": "Elven Bow",
 			"equipable": true,
 			"itemType": "weapon1",
@@ -82,7 +82,7 @@
 			"damageType": "physical",
 			"value": 10,
 			"weight": 20,
-			"image" : "http://files.softicons.com/download/game-icons/kingdom-icons-by-mihaiciuc-bogdan/png/32x32/Druid%20Bow.png",
+			"image" : "http://3.bp.blogspot.com/-srfbnjq7ByU/Tpq3zIp5NyI/AAAAAAAABdw/-_RdSS8_KBU/s1600/MayanWeapons_Bow-icon.png",
 			"spritesheet": {"name": "arrows", "xDim": 24, "yDim": 24, "frames":
 				[{"name":"up", "index": 1},
 				{"name":"upRight", "index": 6},
