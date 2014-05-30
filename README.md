@@ -12,6 +12,10 @@ These components are:
 
 THIS PROJECT DOES NOT IMPORT WELL INTO ECLIPSE, USE A TOOL LIKE "SUBLIME TEXT" OR "VIM" TO EDIT.
 
+These instructions are only to run the server.  To run the frontend code, look at the read me here:
+
+https://github.com/ayaigame/ayai-frontend
+
 Instructions for installing
 
 Windows Installation
@@ -20,19 +24,16 @@ Windows Installation
 First you need to install sbt, git and Java 7
 
 http://www.scala-sbt.org/0.13.2/docs/Getting-Started/Setup.html
-===============================================================
 
 Download the SBT Windows MSI executable
 
 You can download git gui and command line tools from 
 
 http://git-scm.com/download/win
-===============================
 
 Download latest java version here
 
 https://www.java.com/en/download/
-=================================
 
 RUNNING IN WINDOWS
 ==================
@@ -92,3 +93,9 @@ to go to a new branch (it is not good to change code in master/develop) do:
 then to run the server do
 
 "sbt run" 
+
+
+RUNNING IN MAC
+==============
+
+Same instructions as windows
