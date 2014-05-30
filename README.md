@@ -103,6 +103,10 @@ Same instructions as windows
 Why choose Scala
 ================
 
+we had a diverse group of team members who excelled in different areas and we voted on a language that could use multiple languages on the JVM (Scala, Java, Clojure).  Scala is similar to java and can even use all of javas code (or you can even write in Java if you want).  But the main reason was for the use of Akka/Socko and its ease of doing concurrency.  Akka handles all our network traffic and we use it to be able to retrieve Items/Quests/Effects/Messages.  Instead of handling the blocking we are able to get all information with ease.
+
+Akka uses things called Actors to handle these.  These are essentially threads that run on their own and do a task that is given to them (Look at ayai/gamestate/ItemMap or ayai/gamestate/MessageProcessor for more examples). These can be called from an actor system which is passed to most systems and holds all information about any actor.  These actors are initialized in the ayai/apps/GameLoop.scala file.
+
 What is an Entity Component System or ECS
 =========================================
 
