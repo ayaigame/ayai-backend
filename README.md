@@ -75,7 +75,6 @@ http://git-scm.com/book/en/Getting-Started-Installing-Git
 Download latest java version here
 
 https://www.java.com/en/download/
-=================================
 
 RUNNING IN WINDOWS
 ==================
@@ -99,3 +98,25 @@ RUNNING IN MAC
 ==============
 
 Same instructions as windows
+
+
+Why choose Scala
+================
+
+What is an Entity Component System or ECS
+=========================================
+
+Ayai is built around a system called an ECS.  An ECS has 4 main sections.  First is the World, the second is the Entity, and the third is the component, and the fourth is a system.
+
+To get started a component is essentially a piece of data for a specific purpose (say health, attack, or velocity).  These components are then used in objects called an Entity (these could be characters, AI's, attacks, anything that has a unique set of data).  These entities are stored in something called a world (in AYAI worlds and rooms are the same thing).  A world has the ability to create, delete, and store entities and directs each entity to its correct system.  Which leads to the last section: Systems.  Systems should be the only thing manipulating data.  A system could be a movement system, a health system, an attack system, or a networking system.  They look for entities which contain a certain set of components and match against that, so there is no chance of that data missing. You can then manipulate and change the data in that system.
+
+What is different about our project is that our MessageProcessor and MessageInterpreter have access to worlds and can create player entities/ItemUse/Attack/AI entities.  Which is why our ECS system has lists than can handle concurrency.
+
+How to add AI
+=============
+
+So it would be a misnomer if you were not able to add AI in a project called AYAI!  And it essentially is one.  In Ayai the hooks are there to set up AI, but does need some more work to work more properly.  To set up AI at an entity level, you should create an AI Component which will either be just an identifier that the entity has AI or holds any information that AI specifically should know (maybe A* functions). Then you should create a system which then acts on that AI component look at src/ayai/systems for examples on how to create systems and to query for components.  You can thne create broad or narrow uses for AI based on what you need, you can have generic AI or specific AI.  So you could have AStar System that may work with only Astar components or have a generic AI Component that works in the same fashion for everything.
+
+We do have some examples of entity AI in the DirectorSystem and GoalSystem, but these need major reworkings.  For something, on a global level, look at the mapgeneration folder inside of ayai/systems/ai/mapgeneration for how we connect and spawn Ai rooms.  This is  special case where this is used as an actor and is called from our networking system.
+
+
