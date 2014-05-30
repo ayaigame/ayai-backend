@@ -46,7 +46,7 @@ using git gui or git command line, in the directory you want, run :
 
 to go to a new branch (it is not good to change code in master/develop) do:
 
-"git branch <new-branch>"
+"git branch new-branch"
 
 then to run the server do
 
@@ -87,7 +87,7 @@ using git gui or git command line, in the directory you want, run :
 
 to go to a new branch (it is not good to change code in master/develop) do:
 
-"git branch <new-branch>"
+"git branch new-branch"
 
 then to run the server do
 
