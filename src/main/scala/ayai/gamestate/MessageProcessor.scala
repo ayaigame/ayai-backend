@@ -4,41 +4,32 @@ package ayai.gamestate
 import ayai.actions._
 import ayai.components._
 import ayai.networking._
-import ayai.networking.chat._
-import ayai.persistence.{CharacterTable, InventoryTable}//Just testing this table
+import ayai.persistence.{CharacterTable, InventoryTable} //Just testing this table
 import ayai.factories.{EntityFactory, SpriteSheetFactory}
-import ayai.apps.{Constants, GameLoop}
+import ayai.apps.Constants
 
 /** Crane Imports **/
-import crane.{Entity}
+import crane.Entity
 
 /** Akka Imports **/
-import akka.actor.{Actor, Props}
+import akka.actor.Actor
 import akka.actor.Status.{Success, Failure}
 import akka.pattern.ask
 import akka.util.Timeout
 
 /** External Imports **/
-import scala.util.Random
-import scala.collection.concurrent.{Map => ConcurrentMap}
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Promise, Future}
-import scala.math._
-
 import java.rmi.server.UID
-
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
-import net.liftweb.json.Serialization.{read, write}
+import org.slf4j.LoggerFactory
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.math._
 
-import org.slf4j.{Logger, LoggerFactory}
 
 object MessageProcessor {
   implicit val timeout = Timeout(2 seconds)
-  import ExecutionContext.Implicits.global
-
 
   def apply(world: RoomWorld) = new MessageProcessor(world)
 }
@@ -69,18 +60,18 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case Some(character : Entity) =>
             CharacterTable.saveCharacter(character)
             InventoryTable.saveInventory(character)
-            character.kill
+            character.kill()
             context.system.actorSelection("user/SocketUserMap") ! RemoveSocketUser(socketId)
         }
         sender ! Success
       }
 
       case MoveMessage(userId: String, start: Boolean, direction: MoveDirection) => {
-        (world.getEntityByTag(s"$userId")) match {
+        world.getEntityByTag(userId) match {
           case None =>
             println(s"Can't find character attached to id: $userId")
           case Some(e: Entity) =>
-              val oldMovement = (e.getComponent(classOf[Actionable])) match {
+              val oldMovement = e.getComponent(classOf[Actionable]) match {
                 case Some(oldMove : Actionable) =>
                   oldMove.active = start
                   if(start)
@@ -96,10 +87,9 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case AttackMessage(userId: String) => {
        //create a projectile
 
-        val bulletId = (new UID()).toString
+        val bulletId = new UID().toString
 
-        (world.getEntityByTag(s"$userId")) match {
-
+        world.getEntityByTag(userId) match {
         case Some(initiator: Entity) =>
           (initiator.getComponent(classOf[Position]),
           initiator.getComponent(classOf[Actionable]),
@@ -137,34 +127,32 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val xDirection = m.xDirection
               val yDirection = m.yDirection
 
+              val p = world.createEntity("ATTACK"+bulletId)
 
-
-              val p: Entity = world.createEntity("ATTACK"+bulletId)
-
-              p.components += (new Attack(initiator));
+              p.components += new Attack(initiator)
 
               //If weapon range >= 100 it is ranged, so fire a projectile
               if(weaponRange >= 100) {
-                p.components += (new Projectile(bulletId))
-                p.components += (new Velocity(Constants.PROJECTILE_VELOCITY, Constants.PROJECTILE_VELOCITY))
-                p.components += (new Actionable(true, a.action))
-                p.components += (new Position(upperLeftx, upperLefty))
-                p.components += (new Bounds(20, 20))
-                p.components += (new Frame(weaponRange/Constants.PROJECTILE_VELOCITY))
+                p.components += new Projectile(bulletId)
+                p.components += new Velocity(Constants.PROJECTILE_VELOCITY, Constants.PROJECTILE_VELOCITY)
+                p.components += new Actionable(true, a.action)
+                p.components += new Position(upperLeftx, upperLefty)
+                p.components += new Bounds(20, 20)
+                p.components += new Frame(weaponRange/Constants.PROJECTILE_VELOCITY)
 
                 if(SpriteSheetFactory.hasSpriteSheet(weaponName))
                   p.components += SpriteSheetFactory.getSpriteSheet(weaponName, xDirection, yDirection)
               }
               else { //it's melee
-                val topLeftOfAttackx = ((weaponRange) * xDirection) + upperLeftx
-                val topLeftOfAttacky = ((weaponRange) * yDirection) + upperLefty
+                val topLeftOfAttackx = (weaponRange * xDirection) + upperLeftx
+                val topLeftOfAttacky = (weaponRange * yDirection) + upperLefty
 
-                p.components += (new Position(topLeftOfAttackx, topLeftOfAttacky))
-                p.components += (new Bounds(weaponRange, weaponRange))
-                p.components += (new Frame(30))
+                p.components += new Position(topLeftOfAttackx, topLeftOfAttacky)
+                p.components += new Bounds(weaponRange, weaponRange)
+                p.components += new Frame(30)
               }
 
-              initiator.components += (new Cooldown(System.currentTimeMillis(), 1000))
+              initiator.components += new Cooldown(System.currentTimeMillis(), 1000)
 
               //p.components += (c)
               world.addEntity(p)
@@ -172,20 +160,15 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             case _ =>
               // log.warn("424e244: Cooldown is present, cannot attack")
           }
-          case _ =>
-            log.warn("8a87265: getComponent failed to return anything")
+          case _ => log.warn("8a87265: getComponent failed to return anything")
       }
-      sender ! Success
 
+      sender ! Success
     }
 
-      case ItemMessage(userId: String, itemAction: ItemAction) => {
-        sender ! Success
-      }
+      case ItemMessage(userId: String, itemAction: ItemAction) => sender ! Success
 
-      case OpenMessage(userId: String, containerId : String) => {
-        sender ! Success
-      }
+      case OpenMessage(userId: String, containerId : String) => sender ! Success
 
       case PublicChatMessage(message: String, sender: String) => {
         //// Will do this later - we don't have accounts working quite yet, so we will wait until that is ready
@@ -201,7 +184,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //}
       }
       case EquipMessage(userId: String, slot: Int, equipmentType: String) =>
-        world.getEntityByTag(s"$userId") match {
+        world.getEntityByTag(userId) match {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
@@ -246,7 +229,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               }
         }
       case UnequipMessage(userId: String, equipmentType: String) =>
-        world.getEntityByTag(s"$userId") match {
+        world.getEntityByTag(userId) match {
           case Some(e: Entity) =>
             (e.getComponent(classOf[Inventory]),
               e.getComponent(classOf[Equipment])) match {
@@ -274,7 +257,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case DropItemMessage(userId: String, slot: Int) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
-            (e.getComponent(classOf[Inventory])) match {
+            e.getComponent(classOf[Inventory]) match {
               case (Some(inventory: Inventory)) =>
                 if(!(inventory.inventory.size <= 0)) {
                   //This should drop by item id not by slot
@@ -291,7 +274,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case AcceptQuestMessage(userId: String, entityId: String, questId: Int) =>
         //might want to calculate interact message here
         // also might want to check distance between npc and player
-        var npcQuest: Quest = world.getEntityByTag(s"$entityId") match {
+        val npcQuest: Quest = world.getEntityByTag(s"$entityId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               var tempQuest: Quest = null
@@ -306,7 +289,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case _ => null
         }
 
-        world.getEntityByTag(s"$userId") match {
+        world.getEntityByTag(userId) match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               questBag.addQuest(npcQuest)
@@ -528,15 +511,15 @@ class MessageProcessor(world: RoomWorld) extends Actor {
     }
   }
 
-
   def isEmptySlot(item: Item): Boolean = {
     item.isInstanceOf[EmptySlot]
   }
 
   def receive = {
-    case ProcessMessage(message) =>
-      processMessage(message)
-    case _ => println("Error: from interpreter.")
+    case ProcessMessage(message) => processMessage(message)
+    case _ => {
+      println("Error: from interpreter.")
       sender ! Failure
+    }
   }
 }

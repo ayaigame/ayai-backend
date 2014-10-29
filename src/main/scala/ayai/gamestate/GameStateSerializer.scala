@@ -9,7 +9,6 @@ import crane.{Entity, World}
 /** Akka Imports **/
 import akka.actor.{Actor, ActorSystem, ActorRef}
 
-
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
 import net.liftweb.json.JsonDSL._
@@ -31,12 +30,14 @@ object GameStateSerializer {
 }
 
 class GameStateSerializer(world: World) extends Actor {
+  // TODO use Option[T]
   private val log = LoggerFactory.getLogger(getClass)
   private var roomJSON: JObject = null
   private var valid: Boolean = false
   private var npcJSON: JObject = null
   private var projectilesJSON: JObject = null
   private var lootJSON: JObject = null
+
   //Returns a list of entities contained within a room.
   def getRoomEntities(roomId: Long): ArrayBuffer[Entity] = {
     world.groups("ROOM" + roomId)
@@ -45,7 +46,7 @@ class GameStateSerializer(world: World) extends Actor {
   //Returns a character's belongings and surroundings.
   def getRoom(e: Entity) = {
     if(!valid) {
-      var entities = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
+      val entities = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
                                                       classOf[Health], classOf[Mana], classOf[SpriteSheet]
                                                       , classOf[Experience]),
                                                      exclude=List(classOf[NPC], classOf[Dead]))
@@ -72,7 +73,7 @@ class GameStateSerializer(world: World) extends Actor {
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
              }})
-        var npcs = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
+        val npcs = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
                                                  classOf[Health], classOf[Mana],
                                                  classOf[NPC], classOf[SpriteSheet]),
                                                   exclude=List(classOf[Dead]))
@@ -95,7 +96,7 @@ class GameStateSerializer(world: World) extends Actor {
                 JNothing
             }})
 
-        var loot = world.getEntitiesWithExclusions(include=List(classOf[Loot]))
+        val loot = world.getEntitiesWithExclusions(include=List(classOf[Loot]))
 
         lootJSON = ("loot" -> loot.map{ l => 
           (l.getComponent(classOf[Position]),
@@ -111,7 +112,7 @@ class GameStateSerializer(world: World) extends Actor {
                 JNothing
             }})        
 
-        var projectiles = world.getEntitiesWithExclusions(include=List(classOf[Projectile], classOf[Position], classOf[SpriteSheet]),
+        val projectiles = world.getEntitiesWithExclusions(include=List(classOf[Projectile], classOf[Position], classOf[SpriteSheet]),
                                                   exclude=List(classOf[Dead]))
 
         projectilesJSON = ("projs" -> projectiles.map{ projectile =>
@@ -163,7 +164,9 @@ class GameStateSerializer(world: World) extends Actor {
     ("models" -> jsonLift)
 
   }
-  //Once characters actually have belonging we'll want to implement this and use it in getCharacterRadius
+
+  // TODO
+  // Once characters actually have belonging we'll want to implement this and use it in getCharacterRadius
   // def getCharacterBelongings(characterId: String) = {
 
   // }
@@ -174,16 +177,17 @@ class GameStateSerializer(world: World) extends Actor {
 
   def sendMapInfo(room: Entity ) = {
     val tileMap = world.asInstanceOf[RoomWorld].tileMap
-    val json =  ("type" -> "map") ~
-                ("tilemap" -> tileMap.file) ~
-                ("tilesets" -> (tileMap.tilesets map (_.asJson)))
+    val json = ("type" -> "map") ~
+               ("tilemap" -> tileMap.file) ~
+               ("tilesets" -> (tileMap.tilesets map(_.asJson)))
 
     try {
       sender ! compact(render(json))
     } catch {
-      case e: Exception =>
+      case e: Exception => {
         e.printStackTrace()
         sender ! ""
+      }
     }
   }
 

@@ -9,13 +9,13 @@ import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
-class Attack(var initiator: Entity, 
-             var victims: ArrayBuffer[Entity] = new ArrayBuffer[Entity](),
-             var attacked: ArrayBuffer[Entity] = new ArrayBuffer[Entity]) extends Component {
+class Attack(val initiator: Entity,
+             val victims: ArrayBuffer[Entity] = new ArrayBuffer[Entity](),
+             val attacked: ArrayBuffer[Entity] = new ArrayBuffer[Entity]) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
 
   def removeVictims() {
-  	victims = new ArrayBuffer[Entity]()
+  	victims.clear()
   }
 
   def addVictim(e: Entity) {
@@ -27,7 +27,8 @@ class Attack(var initiator: Entity,
       if(!attacked.contains(victim)) 
         attacked += victim
     }
-    removeVictims
+
+    removeVictims()
   }
 
   override def toString: String = {

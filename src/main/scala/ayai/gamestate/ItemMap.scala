@@ -13,36 +13,38 @@ case class GetItem(id: String)
 case class RemoveItem(id: String)
 
 class ItemMap() extends Actor {
-	val itemMap: HashMap[String, Item] = HashMap[String, Item]()
 
-	def addItem(id: String, item: Item) = {
-		itemMap(id) = item
-	}
+  // TODO make this thread-safe via java.util.concurrent.ConcurrentHashMap
+	private val itemMap: collection.mutable.HashMap[String, Item] = collection.mutable.HashMap[String, Item]()
 
-	def getItem(id: String) = {
-		try {
-			val item = itemMap(id)
-			sender ! item
-		} catch {
-			case _ : Throwable => sender ! new EmptySlot("")
-		}
-	}
+  def addItem(id: String, item: Item) = {
+    itemMap(id) = item
+  }
 
-	def removeItem(id: String) = {
-		itemMap -= id
-	}
+  def getItem(id: String): Unit = {
+    try {
+      val item = itemMap(id)
+      sender ! item
+    } catch {
+      case _ : Throwable => sender ! new EmptySlot("")
+    }
+  }
 
-	def outputJson() = {
-		val json = (itemMap.map{case (key, value) => value.asJson})
-		sender ! compact(render(json))
-	}
+  def removeItem(id: String): Unit = {
+    itemMap -= id
+  }
 
-	def receive = {
-		case AddItem(id: String, item: Item) => addItem(id, item)
-		case GetItem(id: String) => getItem(id)
-		case RemoveItem(id: String) => removeItem(id)
-		case OutputJson() => outputJson
-		case _ => println("No Command for Items")
-			sender ! Failure
-	}
+  def outputJson(): Unit = {
+    val json = itemMap.mapValues(_.asJson)
+    sender ! compact(render(json))
+  }
+
+  def receive = {
+    case AddItem(id: String, item: Item) => addItem(id, item)
+    case GetItem(id: String) => getItem(id)
+    case RemoveItem(id: String) => removeItem(id)
+    case OutputJson() => outputJson()
+    case _ => println("No Command for Items")
+      sender ! Failure
+  }
 }

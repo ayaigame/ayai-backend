@@ -8,6 +8,5 @@ import crane.Component
 
 class Actionable(var active: Boolean, var action: Action) extends Component {
   override def toString: String = s"Actionable $active $action"
-
 }
 
