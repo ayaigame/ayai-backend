@@ -1,19 +1,22 @@
 package ayai.statuseffects
 
-import crane.Entity
-
 /** External Imports **/
-import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
 // isRelative means that the effect should take the place of the existing value of the stat/health
 // isValueRelative means that the effect should use the stats value with the multiplier
-case class Effect(val id: Int, val name: String, val description: String, 
-          val effectType: String, private val value: Int, 
-          val attribute: TimeAttribute, val multiplier: Multiplier,
-          val isRelative: Boolean = true, val isValueRelative: Boolean = false ) {
-  
+case class Effect(id: Int,
+                  name: String,
+                  description: String,
+                  effectType: String,
+                  private val value: Int,
+                  attribute: TimeAttribute,
+                  multiplier: Multiplier,
+                  isRelative: Boolean = true,
+                  isValueRelative: Boolean = false) {
+
+  // TODO reduce mutability or make thread-safe
   var effectiveValue: Int = 0
   var imageLocation: String = ""
 

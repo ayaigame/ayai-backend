@@ -12,11 +12,8 @@ case class Position (var x: Int, var y: Int) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
 
   implicit def asJson: JObject = {
-    ("position" ->
-      ("x" -> x) ~
-      ("y" -> y))
+    "position" -> ("x" -> x) ~ ("y" -> y)
   }
 
-  override def toString: String = { write(this) }
-
+  override def toString: String = write(this)
 }

@@ -42,7 +42,7 @@ import org.slf4j.{Logger, LoggerFactory}
 **/
 object GameLoop {
 
-  private val log = LoggerFactory.getLogger(getClass)
+  private lazy val log = LoggerFactory.getLogger(getClass)
 
   var running: Boolean = true
 
@@ -53,8 +53,8 @@ object GameLoop {
     // COMMENT ME OUT TO SPEED UP BOOTUP TIME
     //This recreates the database and mapList.json file.
     DBCreation.ensureDbExists()
-    var fwMapList = new FileWriter(new File("src/main/resources/assets/maps/mapList.json"))
-    var bwMapList = new BufferedWriter(fwMapList)
+    val fwMapList = new FileWriter(new File("src/main/resources/assets/maps/mapList.json"))
+    val bwMapList = new BufferedWriter(fwMapList)
 
     bwMapList.write(pretty(render(List("map0.json", "map1.json"))))
     bwMapList.close()
@@ -113,7 +113,7 @@ object GameLoop {
     receptionist.run(Constants.SERVER_PORT)
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
-    while(running) {
+    while (running) {
       val start = System.currentTimeMillis
 
       val processedMessages = new ArrayBuffer[Future[Any]]
@@ -132,12 +132,12 @@ object GameLoop {
 
       Await.result(Future.sequence(processedMessages), 10 seconds)
 
-      for(world <- worlds) {
+      for (world <- worlds) {
         world.process()
       }
 
       val end = System.currentTimeMillis
-      if((end - start) < (1000 / Constants.FRAMES_PER_SECOND)) {
+      if ((end - start) < (1000 / Constants.FRAMES_PER_SECOND)) {
         Thread.sleep((1000 / Constants.FRAMES_PER_SECOND) - (end - start))
       }
     }
