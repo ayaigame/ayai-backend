@@ -51,17 +51,17 @@ class GameStateSerializer(world: World) extends Actor {
                                                       , classOf[Experience]),
                                                      exclude=List(classOf[NPC], classOf[Dead]))
         val jsonLift: JObject =
-            ("players" -> entities.map{ e =>
-             (e.getComponent(classOf[Character]),
-               e.getComponent(classOf[Position]),
-               e.getComponent(classOf[Health]),
-               e.getComponent(classOf[Mana]),
-               e.getComponent(classOf[Actionable]),
-               e.getComponent(classOf[SpriteSheet]),
-               e.getComponent(classOf[Experience])) match {
-                 case (Some(character: Character), Some(position: Position), Some(health: Health),
-                       Some(mana: Mana), Some(actionable: Actionable), Some(spritesheet: SpriteSheet),
-                       Some(experience: Experience)) =>
+            "players" -> entities.map{ e =>
+             (e.getComponent[Character],
+               e.getComponent[Position],
+               e.getComponent[Health],
+               e.getComponent[Mana],
+               e.getComponent[Actionable],
+               e.getComponent[SpriteSheet],
+               e.getComponent[Experience]) match {
+                 case (Some(character), Some(position), Some(health),
+                       Some(mana), Some(actionable), Some(spritesheet),
+                       Some(experience)) =>
                    ((character.asJson) ~
                    (position.asJson) ~
                    (health.asJson) ~
@@ -72,20 +72,20 @@ class GameStateSerializer(world: World) extends Actor {
                  case _ =>
                    log.warn("f3d3275: getComponent failed to return anything BLARG2")
                    JNothing
-             }})
+             }}
         val npcs = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
                                                  classOf[Health], classOf[Mana],
                                                  classOf[NPC], classOf[SpriteSheet]),
                                                   exclude=List(classOf[Dead]))
 
-        npcJSON= ("npcs" -> npcs.map{ npc =>
-          (npc.getComponent(classOf[Character]),
-            npc.getComponent(classOf[Position]),
-            npc.getComponent(classOf[Health]),
-            npc.getComponent(classOf[Mana]),
-            npc.getComponent(classOf[SpriteSheet])) match {
-              case (Some(character: Character), Some(position: Position),
-                Some(health: Health), Some(mana: Mana), Some(spritesheet: SpriteSheet)) =>
+        npcJSON = "npcs" -> npcs.map { npc =>
+          (npc.getComponent[Character],
+            npc.getComponent[Position],
+            npc.getComponent[Health],
+            npc.getComponent[Mana],
+            npc.getComponent[SpriteSheet]) match {
+              case (Some(character), Some(position),
+                Some(health), Some(mana), Some(spritesheet)) =>
                 ((character.asJson) ~
                   (position.asJson) ~
                   (health.asJson) ~
@@ -94,41 +94,40 @@ class GameStateSerializer(world: World) extends Actor {
               case _ =>
                 log.warn("f3d3275: getComponent failed to return anything BLARG2")
                 JNothing
-            }})
+            }}
 
         val loot = world.getEntitiesWithExclusions(include=List(classOf[Loot]))
 
-        lootJSON = ("loot" -> loot.map{ l => 
-          (l.getComponent(classOf[Position]),
-            l.getComponent(classOf[SpriteSheet]),
-            l.getComponent(classOf[Loot])) match {
-              case (Some(position: Position), Some(spritesheet: SpriteSheet)
-                    , Some(lo: Loot)) => 
+        lootJSON = "loot" -> loot.map{ l =>
+          (l.getComponent[Position],
+            l.getComponent[SpriteSheet],
+            l.getComponent[Loot]) match {
+              case (Some(position), Some(spritesheet), Some(lo)) => {
                 (position.asJson) ~
-                (spritesheet.asJson) ~
-                (lo.asJson)
-              case _ => 
+                  (spritesheet.asJson) ~
+                  (lo.asJson)
+              }
+              case _ => {
                 log.warn("f3d3275: getComponent failed to return anything BLARG2")
                 JNothing
-            }})        
+              }
+            }}
 
-        val projectiles = world.getEntitiesWithExclusions(include=List(classOf[Projectile], classOf[Position], classOf[SpriteSheet]),
-                                                  exclude=List(classOf[Dead]))
+        val projectiles = world.getEntitiesWithExclusions(include = List(classOf[Projectile], classOf[Position], classOf[SpriteSheet]), exclude = List(classOf[Dead]))
 
-        projectilesJSON = ("projs" -> projectiles.map{ projectile =>
-          (projectile.getComponent(classOf[Projectile]),
-            projectile.getComponent(classOf[Position]),
-            projectile.getComponent(classOf[SpriteSheet])) match {
-              case (Some(projectileComponent: Projectile),
-                    Some(position: Position),
-                    Some(spritesheet: SpriteSheet)) =>
+        projectilesJSON = "projs" -> projectiles.map{ projectile =>
+          (projectile.getComponent[Projectile],
+            projectile.getComponent[Position],
+            projectile.getComponent[SpriteSheet]) match {
+              case (Some(projectileComponent), Some(position), Some(spritesheet)) =>
                 ((projectileComponent.asJson) ~
                   (position.asJson) ~
                   (spritesheet.asJson))
-              case _ =>
+              case _ => {
                 log.warn("f3d3275: getComponent failed to return anything BLARG2")
                 JNothing
-            }})
+              }
+            }}
             // println(compact(render(npcJSON)))
         try {
            roomJSON = jsonLift
@@ -145,24 +144,25 @@ class GameStateSerializer(world: World) extends Actor {
   }
 
   def getCharacterAssets(entity: Entity): JObject = {
-    val jsonLift = (entity.getComponent(classOf[Inventory]),
-      entity.getComponent(classOf[Equipment]),
-      entity.getComponent(classOf[QuestBag]),
-      entity.getComponent(classOf[Loot]),
-      entity.getComponent(classOf[Stats])) match {
-        case (Some(inventory: Inventory), Some(equipment: Equipment),
-              Some(quests: QuestBag), None, Some(stats: Stats)) =>
+    val jsonLift = (entity.getComponent[Inventory],
+      entity.getComponent[Equipment],
+      entity.getComponent[QuestBag],
+      entity.getComponent[Loot],
+      entity.getComponent[Stats]) match {
+        case (Some(inventory), Some(equipment), Some(quests), None, Some(stats)) => {
           (inventory.asJson) ~
-          (equipment.asJson) ~
-          (quests.asJson) ~
-          (stats.asJson)
-        case (Some(inventory: Inventory), None, None, Some(loot: Loot), None) =>
+            (equipment.asJson) ~
+            (quests.asJson) ~
+            (stats.asJson)
+        }
+        case (Some(inventory), None, None, Some(loot), None) => {
           (inventory.asJson) ~
-          (loot.asJson)
+            (loot.asJson)
+        }
         case _ => JNothing
       }
-    ("models" -> jsonLift)
 
+    ("models" -> jsonLift)
   }
 
   // TODO

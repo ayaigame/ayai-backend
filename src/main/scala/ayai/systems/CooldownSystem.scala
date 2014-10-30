@@ -18,10 +18,10 @@ object CooldownSystem {
 **/
 class CooldownSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Cooldown])) {
 	def processEntity(e: Entity, deltaTime: Int) {
-		e.getComponent(classOf[Cooldown]) match {
+		e.getComponent[Cooldown] match {
 			case Some(cooldown: Cooldown) =>
 			if(cooldown.isReady) {
-				e.removeComponent(classOf[Cooldown])
+				e.removeComponent[Cooldown]
 			}
 		}
 	}

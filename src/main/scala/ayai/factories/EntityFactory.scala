@@ -356,16 +356,9 @@ object EntityFactory {
     animations += new Animation("facedown", 0, 0)
     lootEntity.components += new SpriteSheet("props", animations, 40, 40)
 
-    lootEntity.components += new Loot(id, initiator.getComponent(classOf[Character]) match {
-      case Some(character: Character) => character.id
-      case _ => ""
-    })
+    lootEntity.components += new Loot(id, initiator.getComponent[Character].map(_.id).getOrElse(""))
 
-    initiator.getComponent(classOf[Inventory]) match {
-      case (Some(inv: Inventory)) =>
-        lootEntity.components += inv.copy()
-        case _ =>
-    }
+    initiator.getComponent[Inventory].foreach(lootEntity.components += _.copy())
     lootEntity.components += position
     lootEntity
   }

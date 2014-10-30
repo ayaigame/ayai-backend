@@ -1,6 +1,8 @@
 package ayai.networking
 
 /** Ayai Imports **/
+
+import akka.util.Timeout
 import ayai.gamestate._
 
 /** Socko Imports **/
@@ -14,12 +16,14 @@ import org.mashupbots.socko.webserver.WebServerConfig
 import akka.actor.ActorSystem
 import akka.pattern.ask
 
-import scala.concurrent.Await
+import scala.concurrent.{ExecutionContext, Await}
 import scala.concurrent.duration._
 
 /** SockoServer
  * Runs a server which will pass packets on to the Interpreter
  **/
+
+import ExecutionContext.Implicits.global
 
 object SockoServer {
   def apply(actorSystem: ActorSystem) = new SockoServer(actorSystem)
@@ -29,7 +33,8 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
   val authorization = actorSystem.actorSelection("user/AProcessor")
   val interpreter = actorSystem.actorSelection("user/NMInterpreter")
   val queue = actorSystem.actorSelection("user/MQueue")
-  val timeout = 2 seconds
+  val duration = 2 seconds
+  implicit val timeout = Timeout(duration)
 
   val routes = Routes({
     case HttpRequest(httpRequest) => httpRequest match {
@@ -135,7 +140,7 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
       val userId = value.asInstanceOf[String]
       actorSystem.actorSelection("user/UserRoomMap") ? GetWorld(userId)
     }).map(_.asInstanceOf[RoomWorld])
-    val worldId = Await.result(future, timeout).id
+    val worldId = Await.result(future, duration).id
     println(worldId)
     queue ! new AddInterpretedMessage(worldId, new RemoveCharacter(socketId))
   }

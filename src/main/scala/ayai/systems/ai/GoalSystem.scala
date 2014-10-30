@@ -25,7 +25,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
   }
 
   def findDirection(entity: Entity, tp: Position): MoveDirection = {
-    (entity.getComponent(classOf[Position]): @unchecked) match {
+    (entity.getComponent[Position]: @unchecked) match {
       case Some(ep: Position) =>
         val xDistance = ep.x - tp.x
         val yDistance = ep.y - tp.y
@@ -50,7 +50,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
   override def process(delta: Int) {
     val entities = world.getEntitiesWithExclusions(include=List(classOf[Goal], classOf[Position], classOf[Actionable], classOf[Character]), exclude=List(classOf[Dead]))
     for(entity <- entities) {
-      val goal = (entity.getComponent(classOf[Goal]): @unchecked) match {
+      val goal = (entity.getComponent[Goal]: @unchecked) match {
         case Some(g: Goal) => g.goal
       }
 
@@ -64,7 +64,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
       }
 
       val direction = findDirection(entity, position)
-      (entity.getComponent(classOf[Actionable]), entity.getComponent(classOf[Character]), entity.getComponent(classOf[Position])) match {
+      (entity.getComponent[Actionable], entity.getComponent[Character], entity.getComponent[Position]) match {
         case (Some(actionable: Actionable), Some(character: Character), Some(ep: Position)) => {
   	      goal match {
   	        case mt: MoveTo =>
@@ -82,12 +82,12 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
 
                   entity match {
                     case initiator: Entity => {
-                      (initiator.getComponent(classOf[Position]),
-                      initiator.getComponent(classOf[Actionable]),
-                      initiator.getComponent(classOf[Character]),
-                      initiator.getComponent(classOf[Room]),
-                      initiator.getComponent(classOf[Cooldown]),
-                      initiator.getComponent(classOf[Dead])) match {
+                      (initiator.getComponent[Position],
+                      initiator.getComponent[Actionable],
+                      initiator.getComponent[Character],
+                      initiator.getComponent[Room],
+                      initiator.getComponent[Cooldown],
+                      initiator.getComponent[Dead]) match {
                         case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) => {
 
                           val m = a.action match {
@@ -98,7 +98,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
                           }
 
                           //get the range of the characters weapon
-                          val weaponRange = initiator.getComponent(classOf[Equipment]) match {
+                          val weaponRange = initiator.getComponent[Equipment] match {
                             case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
                               case weapon: Weapon => weapon.range
                               case _ => 30

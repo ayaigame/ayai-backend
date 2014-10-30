@@ -18,18 +18,18 @@ class LevelingSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(in
                                                                                            classOf[Character],
                                                                                            classOf[NetworkingActor])) {
   def processEntity(entity: Entity, deltaTime: Int) {
-    (entity.getComponent(classOf[Experience]), entity.getComponent(classOf[Character]), entity.getComponent(classOf[NetworkingActor])) match {
+    (entity.getComponent[Experience], entity.getComponent[Character], entity.getComponent[NetworkingActor]) match {
       case (Some(experience: Experience), Some(character: Character), Some(na: NetworkingActor)) => {
         val expThresh = Constants.EXPERIENCE_ARRAY(experience.level - 1)
         val leveledUp = experience.levelUp(expThresh)
 
         if (leveledUp) {
-          entity.getComponent(classOf[Stats]) match {
+          entity.getComponent[Stats] match {
             case Some(stats: Stats) => stats.levelUp()
             case _ =>
           }
 
-          (entity.getComponent(classOf[Health]), entity.getComponent(classOf[Mana])) match {
+          (entity.getComponent[Health], entity.getComponent[Mana]) match {
             case (Some(health: Health), Some(mana: Mana)) => {
               health.levelUp()
               mana.levelUp()
