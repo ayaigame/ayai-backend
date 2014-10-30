@@ -3,15 +3,10 @@ package ayai.networking
 /** Ayai Imports **/
 import ayai.actions._
 
-/** Akka Imports **/
-import akka.actor.Actor
-
 /** Socko Imports **/
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
-import scala.collection.mutable._
-/** External Imports **/
-import java.net.Socket
+
 
 sealed trait Message
 sealed trait ProcessorMessage extends Message

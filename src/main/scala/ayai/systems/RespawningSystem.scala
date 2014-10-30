@@ -16,12 +16,12 @@ object RespawningSystem {
 
 class RespawningSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn], classOf[NetworkingActor])) {
   override def processEntity(e: Entity, delta: Int) {
-    var respawn = (e.getComponent(classOf[Respawn]): @unchecked) match {
+    val respawn = (e.getComponent(classOf[Respawn]): @unchecked) match {
       case (Some(r: Respawn)) => r
       case _ => null
     }
     val health = (e.getComponent(classOf[Health]): @unchecked) match {
-      case(Some(h: Health)) => h
+      case (Some(h: Health)) => h
       case _ => null
     }
 
@@ -29,8 +29,6 @@ class RespawningSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
       case Some(p: Position) => p
       case _ => null
     }
-
-
 
     if(respawn.isReady(System.currentTimeMillis())) {
       health.refill()

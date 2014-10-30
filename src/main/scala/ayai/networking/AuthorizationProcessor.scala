@@ -2,206 +2,200 @@ package ayai.networking
 
 import ayai.persistence._
 import ayai.factories.ClassFactory
-import ayai.factories.NPCFactory
 import ayai.statuseffects._
 import ayai.components._
 import ayai.gamestate._
 import ayai.apps.Constants
-/** Akka Imports **/
-import akka.actor.{Actor}
 
 /** Socko Imports **/
 import org.mashupbots.socko.events.{HttpRequestEvent, HttpResponseStatus}
-import scala.concurrent.{Await, ExecutionContext, Promise}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
-import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
+import akka.actor.{Actor, ActorSystem}
 import akka.pattern.ask
 import akka.util.Timeout
+
 /** External Imports **/
 import org.squeryl.Session
 import org.squeryl.SessionFactory
 import org.squeryl.adapters.H2Adapter
-import org.squeryl.PrimitiveTypeMode._
 import com.typesafe.config.ConfigFactory
 import net.liftweb.json._
-import net.liftweb.json.JsonDSL._
 
 class AuthorizationProcessor(networkSystem: ActorSystem) extends Actor {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
-  Class.forName("org.h2.Driver");
+  Class.forName("org.h2.Driver")
     SessionFactory.concreteFactory = Some (() =>
       Session.create(
       java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
       new H2Adapter))
 
   def receive = {
-  case LoginPost(request: HttpRequestEvent) =>
-    val headers = request.request.headers
-    headers.get("Authorization") match {
-    case Some(basicAuth: String) =>
-      val auth = new String(new sun.misc.BASE64Decoder().decodeBuffer(basicAuth.replaceAll("Basic ","")))
-      val delimiter = auth.indexOfSlice(":")
-      val username = auth.slice(0, delimiter)
-      val password = auth.slice(delimiter + 1, auth.length)
+    case LoginPost(request: HttpRequestEvent) =>
+      val headers = request.request.headers
+      headers.get("Authorization") match {
+      case Some(basicAuth: String) => {
+        val auth = new String(new sun.misc.BASE64Decoder().decodeBuffer(basicAuth.replaceAll("Basic ", "")))
+        val delimiter = auth.indexOfSlice(":")
+        val username = auth.slice(0, delimiter)
+        val password = auth.slice(delimiter + 1, auth.length)
 
-      // For signing cookies later
-      val conf = ConfigFactory.load
-      val serverConf = conf.getConfig("server")
-      lazy val secret: String = serverConf.getString("secret")
+        // For signing cookies later
+        val conf = ConfigFactory.load
+        val serverConf = conf.getConfig("server")
+        lazy val secret: String = serverConf.getString("secret")
 
-      var token: String = ""
+        var token: String = ""
 
-      token = AccountTable.validatePassword(username, password)
+        token = AccountTable.validatePassword(username, password)
 
-      token match {
-      case "" =>
-        request.response.write(HttpResponseStatus.UNAUTHORIZED)
-      case _ =>
-        request.response.write(HttpResponseStatus.OK, token)
+        token match {
+          case "" => request.response.write(HttpResponseStatus.UNAUTHORIZED)
+          case _ => request.response.write(HttpResponseStatus.OK, token)
+        }
       }
-    case _ =>
-      request.response.write(HttpResponseStatus.UNAUTHORIZED)
-
+      case _ => request.response.write(HttpResponseStatus.UNAUTHORIZED)
     }
 
-  case RegisterPost(request: HttpRequestEvent) =>
-    val content: String = request.request.content.toString
-    val delimiter = content.indexOfSlice("&")
+    case RegisterPost(request: HttpRequestEvent) =>
+      val content: String = request.request.content.toString
+      val delimiter = content.indexOfSlice("&")
 
-    val username = content.slice(0, delimiter).replaceAll("email=", "")
-    val password = content.slice(delimiter + 1, content.length).replaceAll("password=", "")
-    if(AccountTable.registerUser(username, password)) {
-      var token: String = ""
-      token = AccountTable.validatePassword(username, password)
+      val username = content.slice(0, delimiter).replaceAll("email=", "")
+      val password = content.slice(delimiter + 1, content.length).replaceAll("password=", "")
+      if (AccountTable.registerUser(username, password)) {
+        val token = AccountTable.validatePassword(username, password)
 
-      token match {
-        case "" =>
+        if (token.isEmpty) {
           request.response.write(HttpResponseStatus.UNAUTHORIZED)
-        case _ =>
+        } else {
           request.response.write(HttpResponseStatus.OK, token)
+        }
+      } else {
+        request.response.write(HttpResponseStatus.CONFLICT)
+      }
+
+    case CharactersPost(request: HttpRequestEvent) =>
+      val token: String = request.request.content.toString
+      val accountId = AccountTable.getAccountIdFromToken(token)
+
+      if (accountId == -1) {
+        request.response.write(HttpResponseStatus.UNAUTHORIZED)
+      } else {
+        CharacterTable.characterList(request, accountId)
+      }
+
+    case ClassListGet(request: HttpRequestEvent) => request.response.write(HttpResponseStatus.OK, compact(render(ClassFactory.asJson)))
+
+    case CreateCharacterPost(request: HttpRequestEvent) => {
+      val content: String = request.request.content.toString
+      val delimiter = content.indexOfSlice("&")
+      val delimiter2 = content.lastIndexOfSlice("&")
+
+      val userToken = content.slice(0, delimiter).replaceAll("token=", "")
+      val characterName = content.slice(delimiter + 1, delimiter2).replaceAll("name=", "")
+      val className = content.slice(delimiter2 + 1, content.length).replaceAll("class=", "")
+
+      val accountId = AccountTable.getAccountIdFromToken(userToken)
+
+      if (accountId == -1) {
+        request.response.write(HttpResponseStatus.UNAUTHORIZED)
+      } else {
+        CharacterTable.createCharacter(request, characterName, className, accountId)
       }
     }
-    else
-      request.response.write(HttpResponseStatus.CONFLICT)
 
-  case CharactersPost(request: HttpRequestEvent) =>
-    val token: String = request.request.content.toString
-    var accountId = AccountTable.getAccountIdFromToken(token)
+    case RecoveryPost(request: HttpRequestEvent) => println("RECOVERY")
 
-    if(accountId == -1)
-      request.response.write(HttpResponseStatus.UNAUTHORIZED)
-    else
-      CharacterTable.characterList(request, accountId)
+    case ItemPost(request: HttpRequestEvent) => {
+      val content: String = request.request.content.toString
+      println(content)
+      val delimiter = content.indexOfSlice("&")
+      val delimiter2 = content.lastIndexOfSlice("&")
+      val contentSplit = content.split("&")
+      //get item information
+      val id = contentSplit(0).replaceAll("id=", "")
+      val name = contentSplit(1).replaceAll("name=", "")
+      val description = contentSplit(2).replaceAll("description=", "")
+      val value = contentSplit(3).replaceAll("value=", "").toInt
+      val weight = contentSplit(4).replaceAll("weight=", "").toDouble
+      val imageLocation = contentSplit(5).replaceAll("image=", "")
+      val itemType = contentSplit(6).replaceAll("itemType=", "")
 
-  case ClassListGet(request: HttpRequestEvent) =>
-    request.response.write(HttpResponseStatus.OK, compact(render(ClassFactory.asJson)))
+      println("ItemType: Found" + itemType)
 
-  case CreateCharacterPost(request: HttpRequestEvent) =>
-    val content:String = request.request.content.toString
-    val delimiter = content.indexOfSlice("&")
-    val delimiter2 = content.lastIndexOfSlice("&")
+      var item: Item = null
 
-    val userToken = content.slice(0, delimiter).replaceAll("token=", "")
-    val characterName = content.slice(delimiter + 1, delimiter2).replaceAll("name=", "")
-    val className = content.slice(delimiter2 + 1, content.length).replaceAll("class=", "")
-
-    var accountId = AccountTable.getAccountIdFromToken(userToken)
-
-    if(accountId == -1)
-      request.response.write(HttpResponseStatus.UNAUTHORIZED)
-    else
-      CharacterTable.createCharacter(request, characterName, className, accountId)
-
-  case RecoveryPost(request: HttpRequestEvent) =>
-    println("RECOVERY")
-
-  case ItemPost(request: HttpRequestEvent) =>
-    val content: String = request.request.content.toString
-    println(content)
-    val delimiter = content.indexOfSlice("&")
-    val delimiter2 = content.lastIndexOfSlice("&")
-    val contentSplit = content.split("&")
-    //get item information
-    val id = contentSplit(0).replaceAll("id=", "")
-    val name = contentSplit(1).replaceAll("name=","")
-    val description = contentSplit(2).replaceAll("description=","")
-    val value = contentSplit(3).replaceAll("value=","").toInt
-    val weight = contentSplit(4).replaceAll("weight=","").toDouble
-    val imageLocation = contentSplit(5).replaceAll("image=","")
-    val itemType = contentSplit(6).replaceAll("itemType=","")
-
-    println("ItemType: Found" + itemType)
-
-    var item: Item = null
-
-    itemType.toLowerCase match {
-      case "weapon1" => 
-        println("Inside weapon1")
-        val range = contentSplit(7).replaceAll("range=","").toInt
-        val damage = contentSplit(8).replaceAll("damage=","").toInt
-        val damageType = contentSplit(9).replaceAll("damageType=","")
-        val itemT = "weapon1"
-        item = new Item(id.toLong, name, value, weight, new Weapon(range, damage, damageType, itemT))
-        networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
-        request.response.write(HttpResponseStatus.OK)
-      case "armor" =>
-        val slot = contentSplit(10).replaceAll("slot=","")
-        val protection = contentSplit(11).replaceAll("protection=","").toInt
-        val itemT = contentSplit(12).replaceAll("armorType=","")
-        item = new Item(id.toLong, name, value, weight, new Armor(slot, protection, itemT))
-        networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
-        request.response.write(HttpResponseStatus.OK)
-      case "consumable" => 
-        item = new Item(id.toLong, name, value, weight, new Consumable())
-        networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
-        request.response.write(HttpResponseStatus.OK)
-
-      case _ =>
-        request.response.write(HttpResponseStatus.UNAUTHORIZED)
+      itemType.toLowerCase match {
+        case "weapon1" => {
+          println("Inside weapon1")
+          val range = contentSplit(7).replaceAll("range=", "").toInt
+          val damage = contentSplit(8).replaceAll("damage=", "").toInt
+          val damageType = contentSplit(9).replaceAll("damageType=", "")
+          val itemT = "weapon1"
+          item = new Item(id.toLong, name, value, weight, new Weapon(range, damage, damageType, itemT))
+          networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
+          request.response.write(HttpResponseStatus.OK)
+        }
+        case "armor" => {
+          val slot = contentSplit(10).replaceAll("slot=", "")
+          val protection = contentSplit(11).replaceAll("protection=", "").toInt
+          val itemT = contentSplit(12).replaceAll("armorType=", "")
+          item = new Item(id.toLong, name, value, weight, new Armor(slot, protection, itemT))
+          networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
+          request.response.write(HttpResponseStatus.OK)
+        }
+        case "consumable" => {
+          item = new Item(id.toLong, name, value, weight, new Consumable())
+          networkSystem.actorSelection("user/ItemMap") ! AddItem(id, item)
+          request.response.write(HttpResponseStatus.OK)
+        }
+        case _ => request.response.write(HttpResponseStatus.UNAUTHORIZED)
+      }
     }
 
-  case NPCGet(request: HttpRequestEvent) => 
-    val jsonFuture = networkSystem.actorSelection("user/NPCMap") ? OutputJson()
-    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
-    request.response.write(HttpResponseStatus.OK, json)
+    case NPCGet(request: HttpRequestEvent) =>
+      val jsonFuture = networkSystem.actorSelection("user/NPCMap") ? OutputJson()
+      val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
+      request.response.write(HttpResponseStatus.OK, json)
 
-  case EffectGet(request: HttpRequestEvent) => 
-    val jsonFuture = networkSystem.actorSelection("user/EffectMap") ? OutputJson()
-    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
-    request.response.write(HttpResponseStatus.OK, json)
+    case EffectGet(request: HttpRequestEvent) =>
+      val jsonFuture = networkSystem.actorSelection("user/EffectMap") ? OutputJson()
+      val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
+      request.response.write(HttpResponseStatus.OK, json)
 
-  case ItemGet(request: HttpRequestEvent) => 
-    val jsonFuture = networkSystem.actorSelection("user/ItemMap") ? OutputJson()
-    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
-    request.response.write(HttpResponseStatus.OK, json)
+    case ItemGet(request: HttpRequestEvent) =>
+      val jsonFuture = networkSystem.actorSelection("user/ItemMap") ? OutputJson()
+      val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
+      request.response.write(HttpResponseStatus.OK, json)
 
-  case ClassGet(request: HttpRequestEvent) => 
-    val jsonFuture = networkSystem.actorSelection("user/ClassMap") ? OutputJson()
-    val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
-    request.response.write(HttpResponseStatus.OK, json)
+    case ClassGet(request: HttpRequestEvent) =>
+      val jsonFuture = networkSystem.actorSelection("user/ClassMap") ? OutputJson()
+      val json = Await.result(jsonFuture, timeout.duration).asInstanceOf[String]
+      request.response.write(HttpResponseStatus.OK, json)
 
 
-  case NPCPost(request: HttpRequestEvent) =>
-    val content: String = request.request.content.toString
-    val delimiter = content.indexOfSlice("&")
-    val delimiter2 = content.lastIndexOfSlice("&")
-    val userToken = content.slice(0, delimiter).replaceAll("token=","")
-    val contentSplit = content.split("&")
-    //get item information
-    val id = contentSplit(1).replaceAll("id=", "")
-    val name = contentSplit(2).replaceAll("name=","")
-    val faction = contentSplit(3).replaceAll("faction=","")
-    val room = contentSplit(4).replaceAll("room=","").toInt
-    val weapon1 = contentSplit(5).replaceAll("weapon1=","").toInt
-    val helmet = contentSplit(6).replaceAll("helmet=","").toInt
-    val torso = contentSplit(7).replaceAll("torso=","").toInt
-    val legs = contentSplit(8).replaceAll("legs=","").toInt
-    val feet = contentSplit(9).replaceAll("feet=","").toInt
-    val level = contentSplit(10).replaceAll("level=","").toInt
-    val experience = contentSplit(11).replaceAll("experience=","").toInt
-    val health = contentSplit(12).replaceAll("health=","").toInt
-    val mana = contentSplit(13).replaceAll("mana=","").toInt
+    case NPCPost(request: HttpRequestEvent) =>
+      val content: String = request.request.content.toString
+      val delimiter = content.indexOfSlice("&")
+      val delimiter2 = content.lastIndexOfSlice("&")
+      val userToken = content.slice(0, delimiter).replaceAll("token=","")
+      val contentSplit = content.split("&")
+      //get item information
+      val id = contentSplit(1).replaceAll("id=", "")
+      val name = contentSplit(2).replaceAll("name=","")
+      val faction = contentSplit(3).replaceAll("faction=","")
+      val room = contentSplit(4).replaceAll("room=","").toInt
+      val weapon1 = contentSplit(5).replaceAll("weapon1=","").toInt
+      val helmet = contentSplit(6).replaceAll("helmet=","").toInt
+      val torso = contentSplit(7).replaceAll("torso=","").toInt
+      val legs = contentSplit(8).replaceAll("legs=","").toInt
+      val feet = contentSplit(9).replaceAll("feet=","").toInt
+      val level = contentSplit(10).replaceAll("level=","").toInt
+      val experience = contentSplit(11).replaceAll("experience=","").toInt
+      val health = contentSplit(12).replaceAll("health=","").toInt
+      val mana = contentSplit(13).replaceAll("mana=","").toInt
 
     //get equipment ids for weapons given
     // val weaponFuture = networkSystem.actorSelection("user/ItemMap") ? GetItem(weapon1)

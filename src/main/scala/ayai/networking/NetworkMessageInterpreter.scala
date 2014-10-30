@@ -8,23 +8,21 @@ import ayai.apps.Constants
 import ayai.networking.chat._
 
 /** Akka Imports **/
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 
 /** Socko Imports **/
-import org.mashupbots.socko.routes._
 import org.mashupbots.socko.events.WebSocketFrameEvent
 
 /** External Imports **/
-import scala.util.Random
-import scala.concurrent.{Await, Future}
+import java.rmi.server.UID
+import net.liftweb.json._
+
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.collection.immutable.StringOps
 
-import net.liftweb.json._
-import net.liftweb.json.JsonDSL._
-import java.rmi.server.UID
 
 class NetworkMessageInterpreter extends Actor {
   implicit val timeout = Timeout(2 seconds)

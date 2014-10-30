@@ -2,18 +2,18 @@ package ayai.components
 
 /** Crane Imports **/
 import crane.Component
-import scala.collection.mutable.{ArrayBuffer, HashMap}
+import scala.collection.mutable.ArrayBuffer
 import ayai.statuseffects._
 
 /** External Imports **/
-import net.liftweb.json.Serialization.{read, write}
+import net.liftweb.json.Serialization.write
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
 /**
   currentHealth and maximumHealth should not be touched as they are need to determine what health should be set back to if effect is temporary
 **/
-case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: Int = 20) extends Component {
+case class Health(var currentHealth: Int, var maximumHealth: Int, growth: Int = 20) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
   var currentModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
   var maxModifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
@@ -65,7 +65,8 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: In
     var isAbsolute: Boolean = false 
     var absoluteValue: Effect = null
     val invalidItems = new ArrayBuffer[Effect]()
-    
+
+    // TODO this can definitely be simplified considerably
     for(effect <- maxModifiers) {
       if(!effect.isValid) {
         invalidItems += effect
@@ -84,11 +85,12 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: In
       }
     }
 
-    for(effect <- invalidItems) {
+    for (effect <- invalidItems) {
       maxModifiers -= effect
     }
-    for(effect <- maxModifiers) {
-      if(!effect.isValid) {
+
+    for (effect <- maxModifiers) {
+      if (!effect.isValid) {
         maxModifiers -= effect
       } else {
         if(!effect.isRelative) {
@@ -111,6 +113,8 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: In
         } 
       }
     }
+
+    // TODO is this second loop really needed?
     for(effect <- maxModifiers) {
       if(isAbsolute && absoluteValue != effect) {
         if(effect.isRelative && effect.isValueRelative) {
@@ -130,49 +134,47 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: In
     var isAbsolute: Boolean = false 
     var absoluteValue: Effect = null
     val invalidItems = new ArrayBuffer[Effect]()
-    for(effect <- currentModifiers) {
-      if(!effect.isValid) {
+    for (effect <- currentModifiers) {
+      if (!effect.isValid) {
         invalidItems += effect
       } else {
-        if(!effect.isRelative) {
+        if (!effect.isRelative) {
           isAbsolute = true
-          if(effect.isReady) {
+          if (effect.isReady) {
             effect.process(currentHealth)
             absoluteValue = effect
             currentCached = effect.effectiveValue
-
           }
         }
       }
     }
 
-    for(effect <- invalidItems) {
+    for (effect <- invalidItems) {
       currentModifiers -= effect
     }
 
-    for(effect <- currentModifiers) {
-      if(isAbsolute && absoluteValue != effect) {
-        if(!effect.isValueRelative) {
+    for (effect <- currentModifiers) {
+      if (isAbsolute && absoluteValue != effect) {
+        if (!effect.isValueRelative) {
           effect.process(currentHealth)
           currentCached = currentCached + effect.effectiveValue
         }
-      } 
-      else if(!isAbsolute) {
-        if(effect.isRelative && !effect.isValueRelative) {
+      } else if (!isAbsolute) {
+        if (effect.isRelative && !effect.isValueRelative) {
           effect.process(currentHealth)
           currentCached = currentCached + effect.effectiveValue
         } 
       }
     }
-    for(effect <- currentModifiers) {
-      if(isAbsolute && absoluteValue != effect) {
-        if(effect.isValueRelative) {
+
+    for (effect <- currentModifiers) {
+      if (isAbsolute && absoluteValue != effect) {
+        if (effect.isValueRelative) {
           effect.process(currentHealth)
           currentCached = currentCached + effect.process(currentCached)
         }
-      } 
-      else if(!isAbsolute) {
-        if(effect.isRelative && effect.isValueRelative) {
+      } else if (!isAbsolute) {
+        if (effect.isRelative && effect.isValueRelative) {
           effect.process(currentHealth)
           currentCached = currentCached + effect.process(currentCached)
         } 
@@ -180,21 +182,15 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, val growth: In
     }
   }
 
-  def getCurrentValue(): Int = {
-    currentCached
-  }
-  def getMaxValue(): Int = {
-    maxCached
-  }
+  def getCurrentValue: Int = currentCached
+
+  def getMaxValue: Int = maxCached
 
   def addEffect(effect: Effect) {
     effect.effectType match {
-      case "currentHealth" => 
-      currentModifiers += effect
-      case "maxHealth" => maxModifiers += effect
-      case _ => 
-        println(effect.effectType)
-        /// print error 
-    } 
+      case "currentHealth" => currentModifiers += effect
+      case "maxHealth"     => maxModifiers += effect
+      case _ => println(effect.effectType)
+    }
   }  
 }

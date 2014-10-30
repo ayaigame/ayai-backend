@@ -27,14 +27,16 @@ case class Effect(id: Int,
 
   def process(effectValue: Int = 0): Int = {
     updateValue(value)
-    if(attribute.isReady) {
+    if (attribute.isReady) {
       attribute.process()
-      if(isValueRelative) {
+
+      if (isValueRelative) {
         updateValue(effectValue)
       } else {
         effectiveValue
       }
-    } 
+    }
+
     0
   }
 
@@ -42,12 +44,9 @@ case class Effect(id: Int,
     effectiveValue = multiplier.process(value)
   }
 
-  def isReady(): Boolean = {
-    attribute.isReady
-  }
-  def isValid(): Boolean = {
-    attribute.isValid
-  }
+  def isReady: Boolean = attribute.isReady
+
+  def isValid: Boolean = attribute.isValid
 
   def asJson(): JObject = {
     ("effect" ->
