@@ -1,12 +1,10 @@
 package ayai.gamestate
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import scala.collection.mutable.HashMap
+import akka.actor.Actor
 import ayai.components._
-import akka.actor.Status.{Success, Failure}
+import akka.actor.Status.Failure
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-
 
 case class AddItem(id: String, item: Item)
 case class GetItem(id: String)

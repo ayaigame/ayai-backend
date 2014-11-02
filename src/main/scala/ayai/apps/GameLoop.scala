@@ -2,39 +2,29 @@ package ayai.apps
 
 /** Ayai Imports **/
 import ayai.networking._
-import ayai.components._
 import ayai.persistence._
 import ayai.gamestate._
 import ayai.factories._
 import ayai.systems.mapgenerator.{WorldGenerator, ExpandRoom}
 
-//Temp for testing!!!
-import ayai.systems.mapgenerator.MapGenerator
-
 /** Akka Imports **/
-import akka.actor.{Actor, ActorRef, ActorSystem, Status, Props}
-import akka.actor.Status.{Success, Failure}
+import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 
 /** External Imports **/
-import scala.concurrent.{Await, ExecutionContext, Promise, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.concurrent.{Map => ConcurrentMap, TrieMap}
-import scala.collection.JavaConversions._
-import scala.collection.mutable.{ArrayBuffer, HashMap}
-import java.util.Random
+import scala.collection.mutable.ArrayBuffer
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
+import java.io.{File, FileWriter, BufferedWriter}
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import org.slf4j.{Logger, LoggerFactory}
+import org.slf4j.LoggerFactory
 
 /**
 ** The main loop of the Ayai Game
@@ -48,7 +38,6 @@ object GameLoop {
 
   def main(args: Array[String]) {
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
-    import ExecutionContext.Implicits.global
 
     // COMMENT ME OUT TO SPEED UP BOOTUP TIME
     //This recreates the database and mapList.json file.
@@ -92,7 +81,7 @@ object GameLoop {
     val classFactory = ClassFactory.bootup(networkSystem)
     val effectFactory = EffectFactory.bootup(networkSystem)
 
-    for(file <- rooms){
+    for (file <- rooms) {
       val future = worldFactory ? new CreateWorld(file)
       val result = Await.result(future, timeout.duration).asInstanceOf[RoomWorld]
       roomList ! AddWorld(result)
@@ -119,7 +108,7 @@ object GameLoop {
       val processedMessages = new ArrayBuffer[Future[Any]]
       val futureWorlds = roomList ? new GetAllWorlds()
       val worlds = Await.result(futureWorlds, timeout.duration).asInstanceOf[ArrayBuffer[RoomWorld]]
-      for(world <- worlds) {
+      for (world <- worlds) {
         val id = world.id
         val future = mQueue ? FlushMessages(id)
         val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]

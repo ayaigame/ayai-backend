@@ -7,34 +7,27 @@ import ayai.actions._
 import ayai.statuseffects._
 import ayai.gamestate._
 import ayai.networking.ConnectionWrite
-import ayai.actions.MoveDirection
-import ayai.persistence.{AyaiDB, CharacterTable, CharacterRow, InventoryTable}
+import ayai.persistence.{CharacterTable, CharacterRow, InventoryTable}
 import ayai.apps.Constants
 import ayai.systems.JTransport
 
 /** Crane Imports **/
-import crane.Component
-import crane.Entity
-import crane.World
-
+import crane.{Entity, World}
 
 /** External Imports **/
+import java.io.File
+import java.rmi.server.UID
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-
-import scala.concurrent.{Await, ExecutionContext, Promise}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.io.Source
 
-import java.io.File
-
 /** Akka Imports **/
-import akka.actor.{Actor, ActorSystem, ActorRef, Props, ActorSelection}
+import akka.actor.{ActorSystem, ActorSelection}
 import akka.pattern.ask
 import akka.util.Timeout
-import java.rmi.server.UID
-import ayai.apps._
 
 object EntityFactory {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
@@ -102,11 +95,9 @@ object EntityFactory {
         val itemSelection = networkSystem.actorSelection("user/ItemMap")
 
         InventoryTable.getInventory(p) foreach ((itemId: Long) => {
-          var future = itemSelection ? GetItem(itemId.toString)
+          val future = itemSelection ? GetItem(itemId.toString)
           inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
         })
-
-
 
         // var future = itemSelection ? GetItem("ITEM" + itemId)
         // inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
@@ -122,9 +113,10 @@ object EntityFactory {
         val equipment = new Equipment()
 
         InventoryTable.getEquipment(p) foreach {
-        case (slot: String, itemId: Long) =>
-            var future = itemSelection ? GetItem(itemId.toString)
+          case (slot: String, itemId: Long) => {
+            val future = itemSelection ? GetItem(itemId.toString)
             equipment.equipItem(Await.result(future, timeout.duration).asInstanceOf[Item], slot)
+          }
         }
 
         p.components += equipment
@@ -133,10 +125,8 @@ object EntityFactory {
 
         //I think that there should probably be a lookup based on the character's room here.
         val roomInfo = world.getEntityByTag("ROOM"+characterRow.room_id) match {
-          case Some(e: Entity) =>
-            e
-          case _ => //load default here (too bored to implement now)
-            null
+          case Some(e: Entity) => e
+          case _ => null //load default here (too bored to implement now) <- thanks
         }
 
         val tileMap = world.asInstanceOf[RoomWorld].tileMap
@@ -144,16 +134,13 @@ object EntityFactory {
         val tileMapString = mapFile.mkString.filterNot({_ == "\n"})
         mapFile.close()
 
-        val json = (
-          ("type" -> "id") ~
+        val json =("type" -> "id") ~
           ("id" -> entityId) ~
           ("x" -> x) ~
           ("y" -> y) ~
           ("tilemap" -> tileMapString) ~
           ("tilesets" -> (tileMap.tilesets map (_.asJson))) ~
           (spritesheet.asJson)
-
-        )
 
         val actorSelection = networkSystem.actorSelection(s"user/SockoSender$entityId")
         actorSelection ! new ConnectionWrite(compact(render(json)))
@@ -171,7 +158,7 @@ object EntityFactory {
   ** Create all NPCS given in npcs.json
   **/
   def createNPC(world: World, faction: String, npcValue: AllNPCValues, questBuffer: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()): Entity = {
-    val id = (new UID()).toString
+    val id = new UID().toString
     val p: Entity = world.createEntity(tag=id)
     p.components += new Position(npcValue.xposition, npcValue.yposition)
     p.components += new Bounds(32, 32)
@@ -235,7 +222,7 @@ object EntityFactory {
     animations += new Animation("attackup", 30, 33)
     val inventory = new Inventory()
     val itemSelection = networkSystem.actorSelection("user/ItemMap")
-    var future = itemSelection ? GetItem("5")
+    val future = itemSelection ? GetItem("5")
     inventory.addItem(Await.result(future, timeout.duration).asInstanceOf[Item])
     entity.components += inventory
     entity.components += new SpriteSheet("guy", animations, 32 ,32)
@@ -313,16 +300,15 @@ object EntityFactory {
 
 
     //get and transorm tiles from a list to multi-dimensional array
-    for(i <- 0 until (width*height)) {
-      for(bundle <- bundles) {
-        if(bundle.data(i) != 0 ) {
-          val relativePosition: Position = new Position((i % width)*32+16,(i / width)*32+16)
+    for (i <- 0 until width * height) {
+      for (bundle <- bundles) {
+        if (bundle.data(i) != 0 ) {
+          val relativePosition: Position = new Position((i % width) * 32 + 16, (i / width) * 32 + 16)
           arrayTile(i%width)(i/width).tilePosition = relativePosition
           arrayTile(i%width)(i/width).indexPosition = new Position(i % width,i / width)
-          if(bundle.name != "collision") {
+          if (bundle.name != "collision") {
             arrayTile(i % width)(i / width).layers += new NormalLayer(bundle.data(i))
-          }
-          else {
+          } else {
             arrayTile(i % width)(i / width).layers += new CollidableLayer(bundle.data(i))
           }
         }
@@ -350,7 +336,7 @@ object EntityFactory {
   ** Take an entity and take its inventory and create a loot entity
   **/
   def characterToLoot(world: World, initiator: Entity, position: Position): Entity = {
-    val id = (new UID()).toString
+    val id = new UID().toString
     val lootEntity: Entity = world.createEntity(tag=id)
     val animations = new ArrayBuffer[Animation]()
     animations += new Animation("facedown", 0, 0)

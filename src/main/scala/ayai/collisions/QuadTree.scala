@@ -4,7 +4,7 @@ package ayai.collisions
 import ayai.components.{Position, Bounds}
 
 /** Crane Imports **/
-import crane.{Component, Entity}
+import crane.Entity
 
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
@@ -18,7 +18,7 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
   private val MAX_LEVELS: Int = 8
 
   private val objects: ArrayBuffer[Entity] = new ArrayBuffer[Entity]()
-  private var nodes: Array[QuadTree]  = new Array[QuadTree](4)
+  private val nodes: Array[QuadTree]  = new Array[QuadTree](4)
 
   def clear(): Unit = {
     objects.clear()
@@ -60,9 +60,7 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
           else if (bottomQuadrant) {
             index = 2
           }
-        }
-        // Object can completely fit within the right quadrants
-        else if (p.x > verticalMidpoint) {
+        } else if (p.x > verticalMidpoint) { // Object can completely fit within the right quadrants
           if (topQuadrant) {
             index = 0
           }
@@ -115,7 +113,7 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
   * Return all objects that could collide with the given object
   */
   def retrieve(e: Entity): ArrayBuffer[Entity] = {
-    val returnObjects: ArrayBuffer[Entity] = ArrayBuffer.empty[Entity]
+    val returnObjects = ArrayBuffer.empty[Entity]
     val index = getIndex(e)
 
     if (index != -1 && nodes.headOption.isDefined) {

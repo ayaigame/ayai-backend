@@ -2,21 +2,17 @@ package ayai.components
 
 import crane.Component
 
-
 /** External Imports **/
 import scala.collection.mutable.ArrayBuffer
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
 
-
-
-case class Inventory (val inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()) extends Component {
+case class Inventory (inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()) extends Component {
   implicit val formats = Serialization.formats(NoTypeHints)
 
   implicit def asJson: JObject = {
-    ("inventory" -> inventory.map{ i =>
-        (i.asJson)})
+    "inventory" -> inventory.map{ i => (i.asJson) }
   }
 
   override def toString: String = {
@@ -24,7 +20,7 @@ case class Inventory (val inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()
   }
 
   def addItem(itemToAdd: Item) = {
-    if(itemToAdd != null) {
+    if (itemToAdd != null) {
       inventory += itemToAdd
     }
   }
@@ -42,12 +38,14 @@ case class Inventory (val inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()
   }
 
   def getItemById(itemId: Int): Item = {
-    for(item <- inventory) {
-      if(item.id == itemId) {
+    for (item <- inventory) {
+      if (item.id == itemId) {
         return item
       }
     }
-    return null
+
+    // TODO make this return an option
+    null
   }
 
   def totalWeight : Double = {
@@ -55,11 +53,6 @@ case class Inventory (val inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()
   }
 
   def copy(): Inventory = {
-    var copyInventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()
-    for(item <- inventory) {
-      copyInventory += item.copy
-    }
-    new Inventory(copyInventory)
+    new Inventory(inventory.map(_.copy()))
   }
-
 }

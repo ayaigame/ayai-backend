@@ -44,13 +44,13 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, growth: Int = 
   }
 
   implicit def asJson(): JObject = {
-    ("health" ->
+    "health" ->
       ("currHealth" -> currentCached) ~
       ("maximumHealth" -> maxCached) ~
-      ("currentEffects" -> (currentModifiers.map{ce => ce.asJson}))~
-      ("maximumEffects" -> (maxModifiers.map{me => me.asJson}))
-    )
+      ("currentEffects" -> currentModifiers.map{ce => ce.asJson}) ~
+      ("maximumEffects" -> maxModifiers.map{me => me.asJson})
   }
+
   /*
     Will first check if to process the effect again, and if invalid then remove the effect
   */
@@ -67,13 +67,13 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, growth: Int = 
     val invalidItems = new ArrayBuffer[Effect]()
 
     // TODO this can definitely be simplified considerably
-    for(effect <- maxModifiers) {
-      if(!effect.isValid) {
+    for (effect <- maxModifiers) {
+      if (!effect.isValid) {
         invalidItems += effect
       } else {
-        if(!effect.isRelative) {
+        if (!effect.isRelative) {
           isAbsolute = true
-          if(effect.isReady) {
+          if (effect.isReady) {
             effect.process(maximumHealth)
             absoluteValue = effect
             maxCached = effect.effectiveValue
@@ -93,7 +93,7 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, growth: Int = 
       if (!effect.isValid) {
         maxModifiers -= effect
       } else {
-        if(!effect.isRelative) {
+        if (!effect.isRelative) {
           isAbsolute = true
           absoluteValue = effect
           maxCached = effect.effectiveValue
@@ -101,28 +101,26 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, growth: Int = 
       }
     }
 
-    for(effect <- maxModifiers) {
-      if(isAbsolute && absoluteValue != effect) {
-        if(effect.isRelative && !effect.isValueRelative) {
+    for (effect <- maxModifiers) {
+      if (isAbsolute && absoluteValue != effect) {
+        if (effect.isRelative && !effect.isValueRelative) {
           maxCached = maxCached + effect.effectiveValue
         }
-      } 
-      else if(!isAbsolute) {
-        if(effect.isRelative && !effect.isValueRelative) {
+      } else if (!isAbsolute) {
+        if (effect.isRelative && !effect.isValueRelative) {
           maxCached = maxCached + effect.effectiveValue
         } 
       }
     }
 
     // TODO is this second loop really needed?
-    for(effect <- maxModifiers) {
-      if(isAbsolute && absoluteValue != effect) {
-        if(effect.isRelative && effect.isValueRelative) {
+    for (effect <- maxModifiers) {
+      if (isAbsolute && absoluteValue != effect) {
+        if (effect.isRelative && effect.isValueRelative) {
           maxCached = maxCached + effect.process(maxCached)
         }
-      } 
-      else if(!isAbsolute) {
-        if(effect.isRelative && effect.isValueRelative) {
+      } else if (!isAbsolute) {
+        if (effect.isRelative && effect.isValueRelative) {
           maxCached = maxCached + effect.process(maxCached)
         } 
       }

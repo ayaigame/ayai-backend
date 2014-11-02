@@ -146,9 +146,11 @@ class SockoServer(actorSystem: ActorSystem) extends Logger {
   }
 
   def run(port: Int) {
-    val webServer = new WebServer(WebServerConfig(port=port, hostname="0.0.0.0"), routes, actorSystem)
+    val webServer = new WebServer(WebServerConfig(port=port, hostname = "0.0.0.0"), routes, actorSystem)
     Runtime.getRuntime.addShutdownHook(new Thread {
-      override def run() { webServer.stop() }
+      override def run() {
+        webServer.stop()
+      }
     })
 
     webServer.start()

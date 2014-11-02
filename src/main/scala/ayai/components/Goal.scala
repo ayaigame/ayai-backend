@@ -11,21 +11,15 @@ import net.liftweb.json.JsonDSL._
 trait Intent
 
 case class MoveTo(position: Position) extends Intent {
-  override def toString: String = {
-    s"Move To $position" 
-  }
+  override def toString: String = s"Move To $position"
 }
 
 case class AttackTo(position: Position) extends Intent {
-  override def toString: String = {
-    s"Attack To $position" 
-  }
+  override def toString: String = s"Attack To $position"
 }
 
 case class NoGoal() extends Intent {
-  override def toString: String = {
-    s"No Goal"
-  }
+  override def toString: String = "No Goal"
 }
 
 class Goal extends Component {
@@ -33,9 +27,7 @@ class Goal extends Component {
 
   var goal: Intent = new MoveTo(new Position(0, 0))
 
-  override def toString: String = {
-    write(this)
-  }
+  override def toString: String = write(this)
 
   //implicit def asJson: JObject = {
   //  ("goal" -> 

@@ -5,12 +5,10 @@ import ayai.gamestate._
 
 /** Crane Imports **/
 
+import akka.actor.ActorSystem
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-
 import scala.collection.mutable._
-
-import akka.actor.ActorSystem
 
 case class InvalidJsonException(smth: String)  extends Exception
 
@@ -28,19 +26,18 @@ object ClassFactory {
 
     def getStatsJson: JValue = {
       baseStats match {
-        case Some(stats: List[Stat]) =>
+        case Some(stats) => {
           // var jsonStats =
           var statsArray = new ArrayBuffer[Stat]()
           statsArray appendAll stats
           statsArray += new Stat("health", baseHealth, 0)
           statsArray += new Stat("mana", baseMana, 0)
 
-          var statsMapping = statsArray map ((stat: Stat) => (stat.attributeType -> stat.magnitude))
-          var statsMap = statsMapping.toMap
+          val statsMapping = statsArray map (stat => (stat.attributeType -> stat.magnitude))
+          val statsMap = statsMapping.toMap
           statsMap
-
-        case _ =>
-          throw new InvalidJsonException("Cannot read stats in class factory.")
+        }
+        case _ => throw new InvalidJsonException("Cannot read stats in class factory.")
       }
     }
 

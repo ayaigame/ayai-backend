@@ -23,7 +23,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.collection.immutable.StringOps
 
-
 class NetworkMessageInterpreter extends Actor {
   implicit val timeout = Timeout(2 seconds)
   val queue = context.system.actorSelection("user/MQueue")
@@ -79,8 +78,8 @@ class NetworkMessageInterpreter extends Actor {
     }
 
     msgType match {
-      case "init" =>
-        val id = (new UID()).toString
+      case "init" => {
+        val id = new UID().toString
 
         val characterName: String = stripQuotes(compact(render(rootJSON \ "name")))
 
@@ -95,14 +94,14 @@ class NetworkMessageInterpreter extends Actor {
         context.system.actorSelection("user/UserRoomMap") ! AddAssociation(id, lookUpWorldById(worldId))
 
         queue ! new AddInterpretedMessage(worldId, new AddNewCharacter(id, characterName, Constants.STARTING_X, Constants.STARTING_Y))
-
-      case "move" =>
+      }
+      case "move" => {
         //TODO: Add exceptions and maybe parse shit a bit more intelligently
         val start: Boolean = compact(render(rootJSON \ "start")).toBoolean
-        var direction: MoveDirection = new MoveDirection(0,0)
-        if(start) {
+        var direction: MoveDirection = new MoveDirection(0, 0)
+        if (start) {
           val dir: Int = compact(render(rootJSON \ "dir")).toInt
-          direction  = dir match {
+          direction = dir match {
             case 0 => UpDirection
             case 1 => UpRightDirection
             case 2 => RightDirection
@@ -113,16 +112,16 @@ class NetworkMessageInterpreter extends Actor {
             case 7 => UpLeftDirection
             case _ => {
               println("Direction not found, in Interpreter")
-              new MoveDirection(0,0)
+              new MoveDirection(0, 0)
             }
           }
         }
         queue ! new AddInterpretedMessage(worldId, new MoveMessage(userId, start, direction))
+      }
 
-      case "attack" =>
-        queue ! new AddInterpretedMessage(worldId, new AttackMessage(userId))
+      case "attack" => queue ! new AddInterpretedMessage(worldId, new AttackMessage(userId))
 
-      case "chat" =>
+      case "chat" => {
         val message: String = stripQuotes(compact(render(rootJSON \ "message")))
         val sender: String = stripQuotes(compact(render(rootJSON \ "sender")))
         val characterOption = CharacterTable.getCharacter(sender)
@@ -132,54 +131,62 @@ class NetworkMessageInterpreter extends Actor {
           case _ =>
             println(s"Could not find user $sender")
         }
-
-      case "open" =>
+      }
+      case "open" => {
         val containerId: String = (rootJSON \ "containerId").extract[String]
         queue ! new AddInterpretedMessage(worldId, new OpenMessage(userId, containerId))
-
-      case "chars" =>
+      }
+      case "chars" => {
         val accountName: String = (rootJSON \ "accountName").extract[String]
         queue ! new CharacterList(userId, accountName)
-      case "equip" =>
+      }
+      case "equip" => {
         val slot: Int = (rootJSON \ "slot").extract[Int]
         val equipmentType: String = (rootJSON \ "equipmentType").extract[String]
         queue ! new AddInterpretedMessage(worldId, new EquipMessage(userId, slot, equipmentType))
-      case "unequip" =>
+      }
+      case "unequip" => {
         val equipmentType = (rootJSON \ "equipmentType").extract[String]
         queue ! new AddInterpretedMessage(worldId, new UnequipMessage(userId, equipmentType))
-      case "dropitem" =>
+      }
+      case "dropitem" => {
         val slot = (rootJSON \ "slot").extract[Int]
         queue ! new AddInterpretedMessage(worldId, new DropItemMessage(userId, slot))
-      case "quest-accept" =>
+      }
+      case "quest-accept" => {
         println(wsFrame.readText)
         val entityId = (rootJSON \ "entityId").extract[String]
         val questId = (rootJSON \ "questId").extract[Int]
         queue ! new AddInterpretedMessage(worldId, new AcceptQuestMessage(userId, entityId, questId))
-      case "quest-abandon" =>
+      }
+      case "quest-abandon" => {
         val questId = (rootJSON \ "questId").extract[Int]
         queue ! new AddInterpretedMessage(worldId, new AbandonQuestMessage(userId, questId))
-      case "loot-pickup" =>
+      }
+      case "loot-pickup" => {
         val entityId = (rootJSON \ "entityId").extract[String]
         val inventoryIds = (rootJSON \ "itemId").extract[Int]
         queue ! new AddInterpretedMessage(worldId, new LootMessage(userId, entityId, inventoryIds))
-      case "interact" =>
+      }
+      case "interact" => {
         val entityId = (rootJSON \ "entityId").extract[String]
         queue ! new AddInterpretedMessage(worldId, new InteractMessage(userId, entityId))
-      case "createai" =>
-        queue ! new AddInterpretedMessage(worldId, CreateAIMessage)
-      case "useitem" =>
+      }
+      case "createai" => queue ! new AddInterpretedMessage(worldId, CreateAIMessage)
+      case "useitem" => {
         // println("use item received")
         val itemId = (rootJSON \ "itemId").extract[Int]
         queue ! new AddInterpretedMessage(worldId, new UseItemMessage(userId, itemId))
-      case "spawn" =>
+      }
+      case "spawn" => {
         println("spawned")
         val entityType = (rootJSON \ "entityType").extract[String]
         val entityTypeId = (rootJSON \ "entityTypeId").extract[Int]
         val x = (rootJSON \ "x").extract[Int]
         val y = (rootJSON \ "y").extract[Int]
         queue ! new AddInterpretedMessage(worldId, new SpawnMessage(userId, entityType, entityTypeId, x, y))
-      case _ =>
-        println("Unknown message in NetworkMessageInterpreter: " + msgType)
+      }
+      case _ => println("Unknown message in NetworkMessageInterpreter: " + msgType)
     }
   }
 
