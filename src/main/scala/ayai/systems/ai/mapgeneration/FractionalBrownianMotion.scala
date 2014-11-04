@@ -26,7 +26,7 @@ class FractionalBrownianMotionGenerator(val noiseGenerator: NoiseGenerator) {
     var amplitude = 0.95
 
     //The first two octaves are skipped, so subtract 2
-    val octaves = floor(log(min(width, height))).toInt - 2
+    val octaves = floor(log(min(width, height)) / log(2)).toInt - 2
     // var octaves = 7
 
     var totalNoise = noiseGenerator.getNoise(width, height, 1)
