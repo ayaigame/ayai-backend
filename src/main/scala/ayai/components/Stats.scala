@@ -3,8 +3,8 @@ package ayai.components
 /** Crane Imports **/
 import crane.Component
 import ayai.statuseffects._
+
 /** External Imports **/
-import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
@@ -13,6 +13,7 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 case class Stat(attributeType: String, var magnitude: Int, growth: Int) {
   var cachedValue: Int = 0
   var modifiers: ArrayBuffer[Effect] = new ArrayBuffer[Effect]
+
   def asJson: JObject = {
     (attributeType -> magnitude) ~
     ("growth" -> growth)
@@ -25,11 +26,11 @@ case class Stat(attributeType: String, var magnitude: Int, growth: Int) {
     var isAbsolute: Boolean = false 
     var absoluteValue: Effect = null
     cachedValue = magnitude
-    for(effect <- modifiers) {
-      if(!effect.isValid) {
+    for (effect <- modifiers) {
+      if (!effect.isValid) {
         modifiers -= effect
       } else {
-        if(!effect.isRelative) {
+        if (!effect.isRelative) {
           isAbsolute = true
           absoluteValue = effect
           cachedValue = effect.effectiveValue
@@ -37,31 +38,31 @@ case class Stat(attributeType: String, var magnitude: Int, growth: Int) {
       }
     }
 
-    for(effect <- modifiers) {
-      if(isAbsolute && absoluteValue != effect) {
-        if(effect.isRelative && !effect.isValueRelative) {
+    for (effect <- modifiers) {
+      if (isAbsolute && absoluteValue != effect) {
+        if (effect.isRelative && !effect.isValueRelative) {
           cachedValue = cachedValue + effect.effectiveValue
         }
-      } 
-      else if(!isAbsolute) {
-        if(effect.isRelative && !effect.isValueRelative) {
+      } else if (!isAbsolute) {
+        if (effect.isRelative && !effect.isValueRelative) {
           cachedValue = cachedValue + effect.effectiveValue
         } 
       }
     }
-    for(effect <- modifiers) {
-      if(isAbsolute && absoluteValue != effect) {
-        if(effect.isRelative && effect.isValueRelative) {
+
+    for (effect <- modifiers) {
+      if (isAbsolute && absoluteValue != effect) {
+        if (effect.isRelative && effect.isValueRelative) {
           cachedValue = cachedValue + effect.process(cachedValue)
         }
-      } 
-      else if(!isAbsolute) {
-        if(effect.isRelative && effect.isValueRelative) {
+      } else if (!isAbsolute) {
+        if (effect.isRelative && effect.isValueRelative) {
           cachedValue = cachedValue + effect.process(cachedValue)
         } 
       }
     }
-    return cachedValue
+
+    cachedValue
   }
 
   def addEffect(effect: Effect) {
@@ -72,9 +73,7 @@ case class Stat(attributeType: String, var magnitude: Int, growth: Int) {
     modifiers -= effect
   }
 
-  def getValue(): Int = {
-    cachedValue
-  }
+  def getValue(): Int = cachedValue
 
   def levelUp() {
     magnitude = magnitude + growth
@@ -83,36 +82,38 @@ case class Stat(attributeType: String, var magnitude: Int, growth: Int) {
 
 class Stats(val stats: ArrayBuffer[Stat] = new ArrayBuffer[Stat]()) extends Component {
 
-  def addStat(newStat: Stat) = {
+  def addStat(newStat: Stat): Unit = {
     stats += newStat
   }
 
-  def addStat(attributeType: String, magnitude: Int, growth: Int) = {
+  def addStat(attributeType: String, magnitude: Int, growth: Int): Unit = {
     stats += Stat(attributeType, magnitude, growth)
   }
 
   //Removes all stats which match the statName
   //hopefully should only ever be 1 match
-  def removeStat(statName: String) = {
+  def removeStat(statName: String): Unit = {
     stats.remove(stats.indexWhere((stat: Stat) => stat.attributeType == statName))
   }
 
   def getAttributeByType(attributeType: String): Stat = {
-    for(stat <- stats) {
-      if(stat.attributeType == attributeType) {
+    for (stat <- stats) {
+      if (stat.attributeType == attributeType) {
         return stat
       }
     }
-    return new Stat("", 0, 0)
+
+    new Stat("", 0, 0)
   }
 
   def getValueByAttribute(attributeType: String): Int = {
-    for(stat <- stats) {
-      if(stat.attributeType == attributeType) {
+    for (stat <- stats) {
+      if (stat.attributeType == attributeType) {
         return stat.getValue()
       }
     }
-    return 0    
+
+    0
   }
 
   def addEffect(effect: Effect) {
@@ -121,22 +122,19 @@ class Stats(val stats: ArrayBuffer[Stat] = new ArrayBuffer[Stat]()) extends Comp
   }
 
   def updateCachedValue() {
-    for(stat <- stats) {
-      stat.updateCachedValue
-    }
+    stats.foreach(_.updateCachedValue())
   }
 
   def levelUp() {
-    stats.foreach{stat => stat.levelUp}
-
+    stats.foreach(_.levelUp())
   }
 
   def asJson(): JObject = {
-    ("stats" -> stats.map{ stat => (stat.asJson)})
+    "stats" -> stats.map(_.asJson)
   }
 
-  override def toString = {
-      "STAT"
+  override def toString: String = {
+    "STAT"
 //    "Stat: " + stats(0).attributeType + ", magnitude: " + stats(0).magnitude
   }
 }

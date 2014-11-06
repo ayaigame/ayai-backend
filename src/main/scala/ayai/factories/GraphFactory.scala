@@ -29,7 +29,7 @@ object GraphFactory {
 
   def inBounds(max: Int, indexes: Int*): Boolean = {
     indexes.foreach{index =>
-      if(index > max || index < 0)
+      if (index > max || index < 0)
         return false // NEEDS TO BE EXPLICIT
     }
     true
@@ -42,12 +42,13 @@ object GraphFactory {
     val entityArray = Array.fill[Node](tileMap.width, tileMap.height) { Node(NORMAL)  }
 
     entities.foreach { entity =>
-      val position = entity.getComponent(classOf[Position])
+      val position = entity.getComponent[Position]
       (position: @unchecked) match {
-        case Some(p: Position) =>
+        case Some(p) =>
           val gridPosition = convertPositionToGrid(p, tileMap.tileSize.toFloat)
-          if(inBounds(gridPosition._1, gridPosition._2))
+          if (inBounds(gridPosition._1, gridPosition._2)) {
             entityArray(gridPosition._1)(gridPosition._2) = Node(IMPASS)
+          }
       }
     }
 

@@ -24,7 +24,7 @@ import net.liftweb.json.Serialization.{read, write}
 object CharacterTable {
 
   //This should check for an existing character with characterName
-  def createCharacter(request: HttpRequestEvent, characterName: String, className: String, accountId: Long) {
+  def createCharacter(request: HttpRequestEvent, characterName: String, className: String, accountId: Long): Unit = {
     this.createCharacter(request, characterName, className, accountId, Constants.STARTING_ROOM_ID, Constants.STARTING_X, Constants.STARTING_Y)
   }
 
@@ -36,13 +36,11 @@ object CharacterTable {
                       startingX: Int,
                       startingY: Int) {
     getCharacter(characterName) match {
-      case Some(character: CharacterRow) =>
-        request.response.write(HttpResponseStatus.CONFLICT)
-
-      case _ =>
-        Class.forName("org.h2.Driver");
-        SessionFactory.concreteFactory = Some (() =>
-            Session.create(
+      case Some(character: CharacterRow) => request.response.write(HttpResponseStatus.CONFLICT)
+      case _ => {
+        Class.forName("org.h2.Driver")
+        SessionFactory.concreteFactory = Some(() =>
+          Session.create(
             java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
             new H2Adapter))
 
@@ -51,7 +49,7 @@ object CharacterTable {
           val characterQuery =
             from(AyaiDB.characters)(row =>
               where(row.name === characterName)
-              select(row)
+                select (row)
             )
 
           //give them some starting items
@@ -63,11 +61,12 @@ object CharacterTable {
 
           request.response.write(HttpResponseStatus.OK, "GOOD")
         }
+      }
     }
   }
 
   def getCharacter(characterName: String): Option[CharacterRow] = {
-    Class.forName("org.h2.Driver");
+    Class.forName("org.h2.Driver")
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
         java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
@@ -75,57 +74,42 @@ object CharacterTable {
 
     transaction {
       val characterQuery = AyaiDB.characters.where(character => character.name === characterName)
-      if(characterQuery.size == 1)
+      if (characterQuery.size == 1) {
         Some(characterQuery.single)
-      else
+      } else {
         None
+      }
     }
   }
 
-  def getCharacter(characterId: Long) = {
-    Class.forName("org.h2.Driver");
-    SessionFactory.concreteFactory = Some (() =>
-        Session.create(
-        java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
-        new H2Adapter))
-
-    transaction {
-      val characterQuery = AyaiDB.characters.where(character => character.id === characterId)
-      if(characterQuery.size == 1)
-        Some(characterQuery.single)
-      else
-        None
-    }
-  }
-
-  def saveCharacter(entity: Entity) = {
-  (entity.getComponent(classOf[Position]),
-    entity.getComponent(classOf[Character]),
-    entity.getComponent(classOf[Room]),
-    entity.getComponent(classOf[Experience])) match {
-      case(Some(position : Position), Some(character : Character), Some(room : Room), Some(experience: Experience)) =>
-        Class.forName("org.h2.Driver");
-        SessionFactory.concreteFactory = Some (() =>
-            Session.create(
+  def saveCharacter(entity: Entity): Unit = {
+  (entity.getComponent[Position],
+    entity.getComponent[Character],
+    entity.getComponent[Room],
+    entity.getComponent[Experience]) match {
+      case(Some(position), Some(character), Some(room), Some(experience)) => {
+        Class.forName("org.h2.Driver")
+        SessionFactory.concreteFactory = Some(() =>
+          Session.create(
             java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
             new H2Adapter))
 
         transaction {
           update(AyaiDB.characters)(dbCharacter =>
             where(dbCharacter.name === character.name)
-            set(dbCharacter.experience := experience.baseExperience,
-                dbCharacter.level := experience.level,
-                dbCharacter.pos_x := position.x,
-                dbCharacter.pos_y := position.y,
-                dbCharacter.room_id := room.id))
+              set(dbCharacter.experience := experience.baseExperience,
+              dbCharacter.level := experience.level,
+              dbCharacter.pos_x := position.x,
+              dbCharacter.pos_y := position.y,
+              dbCharacter.room_id := room.id))
         }
-      case _ =>
-        println("Can't get entites for some reason.")
+      }
+      case _ => println("Can't get entites for some reason.")
     }
   }
 
-  def characterList(request: HttpRequestEvent, accountId: Long) = {
-    Class.forName("org.h2.Driver");
+  def characterList(request: HttpRequestEvent, accountId: Long): Unit = {
+    Class.forName("org.h2.Driver")
     SessionFactory.concreteFactory = Some (() =>
         Session.create(
         java.sql.DriverManager.getConnection("jdbc:h2:ayai"),

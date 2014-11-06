@@ -16,21 +16,18 @@ object DirectorSystem {
 class DirectorSystem(actorSystem: ActorSystem) extends TimedSystem(3000) {
   override def processTime(delta: Int) {
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[Faction])
-    val factions = entities.groupBy(e => (e.getComponent(classOf[Faction])) match {
-      case(Some(f: Faction)) => f.name
-      case _ => ""
-    })
+    val factions = entities.groupBy(e => e.getComponent[Faction]).filterKeys(_.isDefined).map {
+      case (key, value) => (key.get.name, value)
+    }
 
     // Create enough entities to make it even in healthwise-ness
 
     val factionHealths = factions.map {
-      case(key, faction) => (key, faction.foldLeft(0){
+      case (key, faction) => (key, faction.foldLeft(0) {
         (x: Int, y: Entity) =>  
-          (y.getComponent(classOf[Health])) match {
-            case Some(yh: Health) =>
-              x + yh.maximumHealth
-            case _ =>
-              x
+          y.getComponent[Health] match {
+            case Some(yh) => x + yh.maximumHealth
+            case _ => x
           }
       })
     }
@@ -38,7 +35,7 @@ class DirectorSystem(actorSystem: ActorSystem) extends TimedSystem(3000) {
 
     val factionToAdd = factionHealths.map{
       case (name, factionHealth) =>
-        if(factionHealth > 0) {
+        if (factionHealth > 0) {
           (name, (factionHealths.values.max / factionHealth) - 1)
         }
         else {
@@ -61,12 +58,12 @@ class DirectorSystem(actorSystem: ActorSystem) extends TimedSystem(3000) {
         case _ => i + 1
       }
 
-      val position = factions.values.toList(otherIndex)(0).getComponent(classOf[Position]: @unchecked) match {
+      val position = (factions.values.toList(otherIndex)(0).getComponent[Position]: @unchecked) match {
         case(Some(p: Position)) => p
       }
 
       faction.foreach{ entity => 
-        (entity.getComponent(classOf[Goal]): @unchecked) match {
+        (entity.getComponent[Goal]: @unchecked) match {
           case(Some(g: Goal)) => g.goal = new AttackTo(position)
           case _ => ()
         }

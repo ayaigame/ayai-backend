@@ -25,7 +25,7 @@ object InventoryTable {
 
   //returns a list of item ids which are in the character's id
   def getInventory(characterEntity: Entity): List[Long] = {
-    characterEntity.getComponent(classOf[Character]) match {
+    characterEntity.getComponent[Character] match {
       case Some(character: Character) =>
         Class.forName("org.h2.Driver");
         SessionFactory.concreteFactory = Some (() =>
@@ -53,7 +53,7 @@ object InventoryTable {
 
   //returns a map of slots to item ids
   def getEquipment(characterEntity: Entity): Map[String, Long] = {
-    characterEntity.getComponent(classOf[Character]) match {
+    characterEntity.getComponent[Character] match {
       case Some(character: Character) =>
         Class.forName("org.h2.Driver");
         SessionFactory.concreteFactory = Some (() =>
@@ -86,7 +86,7 @@ object InventoryTable {
   //This is so it can be done multiple times within a single transaction.
   //Deletes all copies of the item in the character's inventory
   def deleteAllOfItem(item: Item, characterEntity: Entity) {
-    characterEntity.getComponent(classOf[Character]) match {
+    characterEntity.getComponent[Character] match {
       case Some(character: Character) =>
         val characterQuery =
           from(AyaiDB.characters)(row =>
@@ -120,7 +120,7 @@ object InventoryTable {
   //MUST BE CALLED FROM WITHIN TRANSACTION
   //This is so it can be done multiple times within a single transaction.
   def decrementItem(item: Item, characterEntity: Entity) {
-    characterEntity.getComponent(classOf[Character]) match {
+    characterEntity.getComponent[Character] match {
       case Some(character: Character) =>
         val characterQuery =
             from(AyaiDB.characters)(row =>
@@ -137,7 +137,7 @@ object InventoryTable {
 
         if (itemQuery.size == 1) {
           var inventoryRow = itemQuery.single
-          if(inventoryRow.quantity > 0) {
+          if (inventoryRow.quantity > 0) {
             var newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity - 1)
             AyaiDB.inventory.update(newRow)
           }
@@ -160,9 +160,9 @@ object InventoryTable {
   //Deletes all item rows for the character out of both InventoryTable and EquipmentTable.
   //Then saves all items from Inventory to InventoryTable and Equipment to EquipmentTable.
   def saveInventory(entity: Entity) {
-    (entity.getComponent(classOf[Inventory]),
-      entity.getComponent(classOf[Character]),
-      entity.getComponent(classOf[Equipment])) match {
+    (entity.getComponent[Inventory],
+      entity.getComponent[Character],
+      entity.getComponent[Equipment]) match {
       case (Some(inventory: Inventory), Some(character: Character), Some(equipment: Equipment)) =>
         CharacterTable.getCharacter(character.name) match {
           case Some(characterRow: CharacterRow) =>
@@ -230,9 +230,9 @@ object InventoryTable {
   //  If it does exist it will increment the quantity field by the quantity parameter.
   //Don't use this in a loop. Each call will be a seperate transaction.
   def incrementItemMultiple(item: Item, characterEntity: Entity, quantity: Int) {
-    characterEntity.getComponent(classOf[Character]) match {
+    characterEntity.getComponent[Character] match {
       case Some(character : Character) =>
-        Class.forName("org.h2.Driver");
+        Class.forName("org.h2.Driver")
         SessionFactory.concreteFactory = Some (() =>
             Session.create(
             java.sql.DriverManager.getConnection("jdbc:h2:ayai"),
@@ -252,7 +252,7 @@ object InventoryTable {
               select(row)
             )
 
-          if(itemQuery.size == 0) {
+          if (itemQuery.size == 0) {
             AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, item.id, quantity))
           }
           else if (itemQuery.size == 1) {

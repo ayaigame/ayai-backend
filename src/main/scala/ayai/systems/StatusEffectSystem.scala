@@ -16,40 +16,34 @@ object StatusEffectSystem {
 /**
 ** Take status effects on character and apply them to designated areas
 **/
-class StatusEffectSystem() extends EntityProcessingSystem(
-                          include=List(classOf[Character]),
-                                                    exclude=List()) {
+class StatusEffectSystem() extends EntityProcessingSystem(include = List(classOf[Character]), exclude = Nil) {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
   def processEntity(e: Entity, deltaTime: Int) {
-    e.getComponent(classOf[Health]) match {
-      case Some(health: Health) =>
-        if(health.currentModifiers.size >= 1) {
+    e.getComponent[Health] match {
+      case Some(health: Health) => {
+        if (health.currentModifiers.size >= 1) {
           println("Status Effecting")
           println(health.currentModifiers)
-
         }
-        health.updateCachedValue() 
+        health.updateCachedValue()
+      }
       case _ =>
     }
-    e.getComponent(classOf[Mana]) match {
-      case Some(mana: Mana) =>
-        mana.updateCachedValue() 
+    e.getComponent[Mana] match {
+      case Some(mana: Mana) => mana.updateCachedValue()
       case _ =>
     }
-    e.getComponent(classOf[Experience]) match {
-      case Some(experience: Experience) =>
-        experience.updateCachedValue() 
+    e.getComponent[Experience] match {
+      case Some(experience: Experience) => experience.updateCachedValue()
       case _ =>
     }
-    e.getComponent(classOf[Stats]) match {
-      case Some(stats: Stats) =>
-        stats.updateCachedValue() 
+    e.getComponent[Stats] match {
+      case Some(stats: Stats) => stats.updateCachedValue()
       case _ =>
     }
-    e.getComponent(classOf[Velocity]) match {
-      case Some(velocity: Velocity) =>
-        velocity.updateCachedValue() 
+    e.getComponent[Velocity] match {
+      case Some(velocity: Velocity) => velocity.updateCachedValue()
       case _ =>
     }
   }

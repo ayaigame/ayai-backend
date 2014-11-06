@@ -1,5 +1,3 @@
 package ayai.actions
 
-class ItemAct {
-  
-}
+class ItemAct

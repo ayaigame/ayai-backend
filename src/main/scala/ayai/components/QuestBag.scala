@@ -13,10 +13,9 @@ case class QuestBag(quests: ArrayBuffer[Quest] = new ArrayBuffer[Quest]()) exten
     ("quests" -> quests.map{quest => quest.asJson})
   }
 
-  def addQuest(questToAdd: Quest) = {
-      if(questToAdd != null) {
-        quests += questToAdd
-      }
-  
+  def addQuest(questToAdd: Quest): Unit = {
+    if (questToAdd != null) {
+      quests += questToAdd
     }
+  }
 }
