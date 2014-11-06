@@ -70,5 +70,5 @@ class ClassMap() extends Actor {
       println("No Command for Classes")
       sender ! Failure
     }
-	}
+  }
 }

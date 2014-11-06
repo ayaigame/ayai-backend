@@ -137,7 +137,7 @@ object InventoryTable {
 
         if (itemQuery.size == 1) {
           var inventoryRow = itemQuery.single
-          if(inventoryRow.quantity > 0) {
+          if (inventoryRow.quantity > 0) {
             var newRow = new InventoryRow(inventoryRow.characterId, inventoryRow.itemId, inventoryRow.quantity - 1)
             AyaiDB.inventory.update(newRow)
           }
@@ -252,7 +252,7 @@ object InventoryTable {
               select(row)
             )
 
-          if(itemQuery.size == 0) {
+          if (itemQuery.size == 0) {
             AyaiDB.inventory.insert(new InventoryRow(characterQuery.single.id, item.id, quantity))
           }
           else if (itemQuery.size == 1) {

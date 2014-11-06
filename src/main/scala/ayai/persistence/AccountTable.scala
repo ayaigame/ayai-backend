@@ -40,7 +40,7 @@ object AccountTable {
 
     transaction {
       val accountQuery = AyaiDB.accounts.where(account => account.username === username)
-      if(accountQuery.size == 1)
+      if (accountQuery.size == 1)
         Some(accountQuery.single)
       else
         None
@@ -56,7 +56,7 @@ object AccountTable {
 
     transaction {
       val accountQuery = AyaiDB.accounts.where(account => account.id === id)
-      if(accountQuery.size == 1)
+      if (accountQuery.size == 1)
         Some(accountQuery.single)
       else
         None
@@ -102,7 +102,7 @@ object AccountTable {
     transaction {
       val tokenQuery = AyaiDB.tokens.where(tokenRow => tokenRow.token === token)
 
-      if(tokenQuery.size == 1)
+      if (tokenQuery.size == 1)
         return tokenQuery.single.account_id
       else
         return -1

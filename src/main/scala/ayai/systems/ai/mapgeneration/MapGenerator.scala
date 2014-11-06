@@ -162,19 +162,19 @@ class MapGenerator extends Actor {
         return true
       }
 
-      if(currentX+incrX > 0 && currentX+incrX < width && map(currentX+incrX)(currentY) != 0){
+      if (currentX + incrX > 0 && currentX + incrX < width && map(currentX + incrX)(currentY) != 0){
         map(currentX)(currentY) = map(currentX)(currentY) - 1
-        currentX = currentX+incrX
+        currentX = currentX + incrX
       }
-      else if(currentY+incrY > 0 && currentY+incrY < height && map(currentX)(currentY+incrY) != 0){
+      else if (currentY + incrY > 0 && currentY + incrY < height && map(currentX)(currentY + incrY) != 0){
         map(currentX)(currentY) = map(currentX)(currentY) - 1
-        currentY = currentY+incrY
+        currentY = currentY + incrY
       }
-      else if(currentX-incrX > 0 && currentX-incrX < width && map(currentX-incrX)(currentY) != 0){
+      else if (currentX-incrX > 0 && currentX-incrX < width && map(currentX-incrX)(currentY) != 0){
         map(currentX)(currentY) = map(currentX)(currentY) - 1
         currentX = currentX-incrX
       }
-      else if(currentY-incrY > 0 && currentY-incrY < height && map(currentX)(currentY-incrY) != 0){
+      else if (currentY-incrY > 0 && currentY-incrY < height && map(currentX)(currentY-incrY) != 0){
         map(currentX)(currentY) = map(currentX)(currentY) - 1
         currentY = currentY-incrY
       }
@@ -182,35 +182,40 @@ class MapGenerator extends Actor {
         blockedIn = true
     }
 
-    return false
+    false
   }
 
   //Creates a map of tiles where each tile's value is equal to how many
   //non-colllidable neighbors it has. Collidable tiles value is 0.
   def calculateCollisionMap(map: Array[Array[Int]], width: Int, height: Int): Array[Array[Int]] = {
-    var newMap = Array.ofDim[Int](width, height)
+    val newMap = Array.ofDim[Int](width, height)
     val nonCollisionTile = 1
 
-    for(i <- 0 until width) {
-      for(j <- 0 until height) {
-        if(map(i)(j) == nonCollisionTile) {
+    for (i <- 0 until width) {
+      for (j <- 0 until height) {
+        if (map(i)(j) == nonCollisionTile) {
           var tileVal = 0
-          if(i+1 < width && map(i+1)(j) ==  nonCollisionTile)
+          if (i + 1 < width && map(i + 1)(j) ==  nonCollisionTile) {
             tileVal = tileVal + 1
-          if(j+1 < height && map(i)(j+1) ==  nonCollisionTile)
+          }
+          if (j + 1 < height && map(i)(j + 1) ==  nonCollisionTile) {
             tileVal = tileVal + 1
-          if(i-1 >= 0 && map(i-1)(j)==  nonCollisionTile)
+          }
+          if (i - 1 >= 0 && map(i - 1)(j)==  nonCollisionTile) {
             tileVal = tileVal + 1
-          if(j-1 >= 0 && map(i)(j-1) ==  nonCollisionTile)
+          }
+          if (j - 1 >= 0 && map(i)(j - 1) ==  nonCollisionTile) {
             tileVal = tileVal + 1
+          }
           newMap(i)(j) = tileVal
         }
-        else
+        else {
           newMap(i)(j) = 0
+        }
       }
     }
 
-    return newMap
+    newMap
   }
 
   def ensureTraversable(map: Array[Array[Int]], transportPositions: List[Position], width: Int, height: Int): Boolean = {
@@ -220,15 +225,15 @@ class MapGenerator extends Actor {
     while(remainingList.nonEmpty) {
       val first = remainingList(0)
       val rest = remainingList.tail
-      for(position <- rest) {
-        if(!doesPathExist(first.x, first.y, position.x, position.y, collisionMap, width, height)) {
+      for (position <- rest) {
+        if (!doesPathExist(first.x, first.y, position.x, position.y, collisionMap, width, height)) {
           return false
         }
       }
       remainingList = rest
     }
 
-    return true
+    true
   }
 
   def receive = {

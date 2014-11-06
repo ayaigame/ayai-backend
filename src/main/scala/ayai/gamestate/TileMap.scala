@@ -73,7 +73,7 @@ class TileMap(val array: Array[Array[Tile]], var transports: List[TransportInfo]
       val startPosition = transport.startingPosition
       val endPosition = transport.endingPosition
 
-      if((characterPosition.x >= (startPosition.x * tileSize) && characterPosition.y >= (startPosition.y * tileSize)) &&
+      if ((characterPosition.x >= (startPosition.x * tileSize) && characterPosition.y >= (startPosition.y * tileSize)) &&
          (characterPosition.x < (endPosition.x * tileSize) && characterPosition.y < (endPosition.y * tileSize))) {
         // TODO CHANGE STARTING POSITION
         // return transport.toRoomId

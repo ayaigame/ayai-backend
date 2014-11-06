@@ -13,7 +13,7 @@ case class RemoveItem(id: String)
 class ItemMap() extends Actor {
 
   // TODO make this thread-safe via java.util.concurrent.ConcurrentHashMap
-	private val itemMap: collection.mutable.HashMap[String, Item] = collection.mutable.HashMap[String, Item]()
+  private val itemMap: collection.mutable.HashMap[String, Item] = collection.mutable.HashMap[String, Item]()
 
   def addItem(id: String, item: Item) = {
     itemMap(id) = item

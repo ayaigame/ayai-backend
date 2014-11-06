@@ -75,7 +75,7 @@ extends EntityProcessingSystem(include = List(classOf[Room], classOf[Position], 
               case _ => throw new NoRoomFoundException("Cannot match room " + roomId)
             }
 
-            if(newWorld.isLeaf) {
+            if (newWorld.isLeaf) {
               //Generate all of its children
               val worldGenerator = actorSystem.actorSelection("user/WorldGenerator")
               worldGenerator ! new ExpandRoom(newWorld)

@@ -11,11 +11,11 @@ class Quest(var id: Int,
             var recommendLevel: Int,
             var objectives: List[KillObjective]) extends Component {
 
-	def asJson(): JObject = {
+  def asJson(): JObject = {
     ("id" -> id) ~
       ("title" -> title) ~
       ("description" -> description) ~
       ("recommendLevel" -> recommendLevel) ~
       ("objectives" -> objectives.map{obj => obj.asJson})
-	}
+  }
 }

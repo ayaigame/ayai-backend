@@ -35,7 +35,7 @@ case class AllEffectValues(
 object EffectFactory {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
-  def bootup(networkSystem: ActorSystem) = {
+  def bootup(networkSystem: ActorSystem): Unit = {
     val effects: List[AllEffectValues] = getEffectList("src/main/resources/effects/effects.json")
     effects.foreach(effectData => {
       val att = effectData.attribute.toLowerCase match {
@@ -56,7 +56,7 @@ object EffectFactory {
       )
 
       effect.imageLocation = effectData.image
-      networkSystem.actorSelection("user/EffectMap") ! AddEffect("Effect"+effectData.id, effect)
+      networkSystem.actorSelection("user/EffectMap") ! AddEffect("Effect" + effectData.id, effect)
     })
   }
 

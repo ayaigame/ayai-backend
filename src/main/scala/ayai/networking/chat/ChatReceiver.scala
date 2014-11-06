@@ -67,7 +67,7 @@ class ChatReceiver extends Actor {
         // TODO: Private Chats
         //val targetFuture = context.system.actorSelection("user/SockoSender" + receiver.id).resolveOne(100.milliseconds)
         //val targetRef = Await.result(targetFuture, 100.milliseconds)
-        //if(targetRef.isTerminated) {
+        //if (targetRef.isTerminated) {
         //  return false
         //} else {
         //  targetRef ! chatHolder

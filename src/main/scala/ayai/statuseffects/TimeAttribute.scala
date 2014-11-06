@@ -95,7 +95,7 @@ case class Duration(maxTime: Long) extends TimeAttribute() {
   }
 
   def process(): Boolean = {
-    if(isReady) {
+    if (isReady) {
       timesProcessed += 1
       true
     } else {

@@ -26,47 +26,47 @@ case class NPCValues(
       maximumMana: Int,
       xposition: Int = 100,
       yposition: Int = 100) {
-	
-	def asJson(): JObject = {
-		("id" -> id) ~
-		("name" -> name) ~
-		("faction" -> faction) ~
-		("roomId" -> roomId) ~
-		("weapon1" -> weapon1) ~
-		("legs" -> legs) ~
-		("helmet" -> helmet) ~
-		("feet" -> feet) ~
-		("torso" -> torso) ~
-		("level" -> level) ~
-		("experience" -> experience) ~
-		("maximumHealth" -> maximumHealth) ~
-		("maximumMana" -> maximumMana)
-	}
+  
+  def asJson(): JObject = {
+    ("id" -> id) ~
+    ("name" -> name) ~
+    ("faction" -> faction) ~
+    ("roomId" -> roomId) ~
+    ("weapon1" -> weapon1) ~
+    ("legs" -> legs) ~
+    ("helmet" -> helmet) ~
+    ("feet" -> feet) ~
+    ("torso" -> torso) ~
+    ("level" -> level) ~
+    ("experience" -> experience) ~
+    ("maximumHealth" -> maximumHealth) ~
+    ("maximumMana" -> maximumMana)
+  }
 }
 class NPCMap() extends Actor {
-	val npcMap: HashMap[String, NPCValues] = HashMap[String, NPCValues]()
+  val npcMap: HashMap[String, NPCValues] = HashMap[String, NPCValues]()
 
-	def addNPC(id: String, npc: NPCValues) = {
-		npcMap(id) = npc
-	}
+  def addNPC(id: String, npc: NPCValues) = {
+    npcMap(id) = npc
+  }
 
-	def removeNPC(id: String) = {
-		npcMap -= id
-	}
+  def removeNPC(id: String) = {
+    npcMap -= id
+  }
 
-	def getNPC(id: String) = {
-		sender ! npcMap(id)
-	}
+  def getNPC(id: String) = {
+    sender ! npcMap(id)
+  }
 
-	def outputJson() = {
-		sender ! compact(render((npcMap.map{case (key, value) => (value.asJson)})))
-	}
-	def receive = {
-		case AddNPC(id: String, npc: NPCValues) => addNPC(id, npc)
-		case RemoveNPC(id: String) => removeNPC(id)
-		case GetNPC(id: String) => getNPC(id)
-		case OutputJson() => outputJson
-		case _ =>
-			sender ! Failure
-	}
+  def outputJson() = {
+    sender ! compact(render((npcMap.map{case (key, value) => (value.asJson)})))
+  }
+  def receive = {
+    case AddNPC(id: String, npc: NPCValues) => addNPC(id, npc)
+    case RemoveNPC(id: String) => removeNPC(id)
+    case GetNPC(id: String) => getNPC(id)
+    case OutputJson() => outputJson
+    case _ =>
+      sender ! Failure
+  }
 }

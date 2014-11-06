@@ -19,21 +19,21 @@ case class Inventory (inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()) ex
     write(this)
   }
 
-  def addItem(itemToAdd: Item) = {
+  def addItem(itemToAdd: Item): Unit = {
     if (itemToAdd != null) {
       inventory += itemToAdd
     }
   }
 
-  def removeItem(itemToRemove: Item) = {
+  def removeItem(itemToRemove: Item): Unit = {
     inventory -= itemToRemove
   }
 
-  def hasItem(itemToCheck: Item) : Boolean = {
+  def hasItem(itemToCheck: Item): Boolean = {
     inventory.contains(itemToCheck)
   }
 
-  def getItem(itemLocation : Int) : Item = {
+  def getItem(itemLocation : Int): Item = {
     inventory(itemLocation)
   }
 
@@ -48,8 +48,8 @@ case class Inventory (inventory: ArrayBuffer[Item] = new ArrayBuffer[Item]()) ex
     null
   }
 
-  def totalWeight : Double = {
-    inventory map (_.weight) reduceLeft (_+_)
+  def totalWeight: Double = {
+    inventory.map(_.weight).sum
   }
 
   def copy(): Inventory = {

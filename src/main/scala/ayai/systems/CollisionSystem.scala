@@ -51,20 +51,20 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
       entityA.getComponent[Health],
       entityB.getComponent[Health]) match {
       case(Some(attackComponentA: Attack), None, Some(frameComponentA: Frame), None, None, Some(healthComponentB: Health)) =>
-          if(attackComponentA.initiator != entityB) {
+          if (attackComponentA.initiator != entityB) {
             attackComponentA.addVictim(entityB)
 
             //If it's sticking around for more than 30 frames it is a projectile.
             //The first collision a projectile has should trigger it ending.
-            if(frameComponentA.framesActive > 30)
-              frameComponentA.framesActive = 1
+            if (frameComponentA.framesActive > 30) frameComponentA.framesActive = 1
           }
+
           true
       case (None, Some(attackComponentB : Attack), None, Some(frameComponentB: Frame), Some(healthComponentA : Health), None) =>
-          if(attackComponentB.initiator != entityA) {
+          if (attackComponentB.initiator != entityA) {
             attackComponentB.addVictim(entityA)
 
-            if(frameComponentB.framesActive > 30)
+            if (frameComponentB.framesActive > 30)
               frameComponentB.framesActive = 1
           }
           true
@@ -89,13 +89,13 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
           val yOverlap: Boolean = valueInRange(positionA.y, positionB.y, positionB.y + boundsB.height) ||
                                   valueInRange(positionB.y, positionA.y, positionA.y + boundsA.height)
 
-          if(xOverlap && yOverlap) {
+          if (xOverlap && yOverlap) {
             if (handleAttack(entityA, entityB)) {
               return // EXPLICIT RETURN TO ESCAPE handleCollision
             }
             // // check to see if they are movable
-            // if(abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
-            //   if(positionA.x < positionB.x) {
+            // if (abs(positionA.y - positionB.y) < abs(positionA.x - positionB.x)) {
+            //   if (positionA.x < positionB.x) {
             //     LeftDirection.process(entityA)
             //     RightDirection.process(entityB)
             //   } else {
@@ -104,7 +104,7 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
             //   }
             // }
             // else {
-            //   if(positionA.y < positionB.y) {
+            //   if (positionA.y < positionB.y) {
             //     UpDirection.process(entityA)
             //     DownDirection.process(entityB)
             //   } else {

@@ -27,11 +27,11 @@
     </check>
     <check level="warning" class="org.scalastyle.scalariform.NoWhitespaceBeforeLeftBracketChecker" enabled="true"/>
     <check level="warning" class="org.scalastyle.scalariform.NoWhitespaceAfterLeftBracketChecker" enabled="true"/>
-    <check customId="println" level="warning" class="org.scalastyle.file.RegexChecker" enabled="true">
-        <parameters>
-            <parameter name="regex"><![CDATA[\n\s*println]]></parameter>
-        </parameters>
-    </check>
+    <!--<check customId="println" level="warning" class="org.scalastyle.file.RegexChecker" enabled="true">-->
+        <!--<parameters>-->
+            <!--<parameter name="regex"><![CDATA[\n\s*println]]></parameter>-->
+        <!--</parameters>-->
+    <!--</check>-->
     <check level="warning" class="org.scalastyle.file.RegexChecker" enabled="true">
         <parameters>
             <parameter name="regex"><![CDATA[if\(]]></parameter>

@@ -10,7 +10,7 @@ import net.liftweb.json._
 import akka.actor.ActorSystem
 
 object QuestFactory {
-	case class AllQuestValues(
+  case class AllQuestValues(
       id: Int,
       title: String,
       description: String,

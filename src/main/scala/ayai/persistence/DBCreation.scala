@@ -22,7 +22,7 @@ object DBCreation {
     println("Recreating DataBase....")
 
     // If DB Doesn't exist, create it
-    if(Files.exists(Paths.get("ayai.h2.db"))){
+    if (Files.exists(Paths.get("ayai.h2.db"))){
       Files.delete(Paths.get("ayai.h2.db"))
     }
 

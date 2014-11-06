@@ -82,17 +82,17 @@ case class Stat(attributeType: String, var magnitude: Int, growth: Int) {
 
 class Stats(val stats: ArrayBuffer[Stat] = new ArrayBuffer[Stat]()) extends Component {
 
-  def addStat(newStat: Stat) = {
+  def addStat(newStat: Stat): Unit = {
     stats += newStat
   }
 
-  def addStat(attributeType: String, magnitude: Int, growth: Int) = {
+  def addStat(attributeType: String, magnitude: Int, growth: Int): Unit = {
     stats += Stat(attributeType, magnitude, growth)
   }
 
   //Removes all stats which match the statName
   //hopefully should only ever be 1 match
-  def removeStat(statName: String) = {
+  def removeStat(statName: String): Unit = {
     stats.remove(stats.indexWhere((stat: Stat) => stat.attributeType == statName))
   }
 
@@ -133,8 +133,8 @@ class Stats(val stats: ArrayBuffer[Stat] = new ArrayBuffer[Stat]()) extends Comp
     "stats" -> stats.map(_.asJson)
   }
 
-  override def toString = {
-      "STAT"
+  override def toString: String = {
+    "STAT"
 //    "Stat: " + stats(0).attributeType + ", magnitude: " + stats(0).magnitude
   }
 }

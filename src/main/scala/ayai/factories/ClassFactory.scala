@@ -52,7 +52,7 @@ object ClassFactory {
   /**
   ** Load all loaded classes into classMap actor
   **/
-  def bootup(networkSystem: ActorSystem) = {
+  def bootup(networkSystem: ActorSystem): Unit = {
     classes.foreach(classData => {
       val classComponent = new ClassValues(
         classData.id,

@@ -23,7 +23,7 @@ case class Health(var currentHealth: Int, var maximumHealth: Int, growth: Int = 
 
   def addDamage(damage: Float) {
     currentCached -= damage.toInt
-    if(currentCached <= 0) {
+    if (currentCached <= 0) {
       currentCached = 0
       currentHealth = 0
     }

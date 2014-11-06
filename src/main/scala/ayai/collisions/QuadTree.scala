@@ -128,8 +128,7 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
   /** Return all quadrants **/
   def quadrants: ArrayBuffer[ArrayBuffer[Entity]] = {
     var returnObjects = new ArrayBuffer[ArrayBuffer[Entity]]
-  
-    if (objects.length > 0) 
+
     returnObjects += objects
 
     nodes.foreach(returnObjects ++= _.quadrants)

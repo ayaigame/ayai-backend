@@ -45,7 +45,7 @@ class GameStateSerializer(world: World) extends Actor {
 
   //Returns a character's belongings and surroundings.
   def getRoom(e: Entity) = {
-    if(!valid) {
+    if (!valid) {
       val entities = world.getEntitiesWithExclusions(include=List(classOf[Character], classOf[Position],
                                                       classOf[Health], classOf[Mana], classOf[SpriteSheet]
                                                       , classOf[Experience]),

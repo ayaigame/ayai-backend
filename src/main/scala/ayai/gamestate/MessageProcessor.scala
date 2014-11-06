@@ -68,17 +68,18 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
       case MoveMessage(userId: String, start: Boolean, direction: MoveDirection) => {
         world.getEntityByTag(userId) match {
-          case None =>
-            println(s"Can't find character attached to id: $userId")
-          case Some(e: Entity) =>
-              val oldMovement = e.getComponent[Actionable] match {
-                case Some(oldMove : Actionable) =>
-                  oldMove.active = start
-                  if(start)
-                    oldMove.action = direction
-                case _ =>
-                  log.warn("a07270d: getComponent failed to return anything")
+          case None => println(s"Can't find character attached to id: $userId")
+          case Some(e: Entity) => {
+            val oldMovement = e.getComponent[Actionable] match {
+              case Some(oldMove: Actionable) => {
+                oldMove.active = start
+                if (start) {
+                  oldMove.action = direction
+                }
               }
+              case _ => log.warn("a07270d: getComponent failed to return anything")
+            }
+          }
         }
         sender ! Success
       }
@@ -125,12 +126,12 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               val xDirection = m.xDirection
               val yDirection = m.yDirection
 
-              val p = world.createEntity("ATTACK"+bulletId)
+              val p = world.createEntity("ATTACK" + bulletId)
 
               p.components += new Attack(initiator)
 
               //If weapon range >= 100 it is ranged, so fire a projectile
-              if(weaponRange >= 100) {
+              if (weaponRange >= 100) {
                 p.components += new Projectile(bulletId)
                 p.components += new Velocity(Constants.PROJECTILE_VELOCITY, Constants.PROJECTILE_VELOCITY)
                 p.components += new Actionable(true, a.action)
@@ -138,7 +139,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 p.components += new Bounds(20, 20)
                 p.components += new Frame(weaponRange/Constants.PROJECTILE_VELOCITY)
 
-                if(SpriteSheetFactory.hasSpriteSheet(weaponName))
+                if (SpriteSheetFactory.hasSpriteSheet(weaponName))
                   p.components += SpriteSheetFactory.getSpriteSheet(weaponName, xDirection, yDirection)
               }
               else { //it's melee
@@ -207,13 +208,11 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                     case _ => 
 
                   }
-                  if(equipment.equipItem(item)) {
+                  if (equipment.equipItem(item)) {
                     inventory.removeItem(item)
                     equipItem.itemType match {
-                      case empty: Weapon => 
-                        inventory.inventory += equipItem
-                      case armor: Armor => 
-                        inventory.inventory += equipItem
+                      case empty: Weapon =>  inventory.inventory += equipItem
+                      case armor: Armor => inventory.inventory += equipItem
                       case empty: EmptyType =>
                       case _ =>
                     }
@@ -231,23 +230,23 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case Some(e: Entity) =>
             (e.getComponent[Inventory],
               e.getComponent[Equipment]) match {
-                case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
+                case (Some(inventory: Inventory), Some(equipment: Equipment)) => {
                   val equippedItem = equipment.unequipItem(equipmentType)
                   equippedItem.itemType match {
-                    case weapon: Weapon =>
+                    case weapon: Weapon => {
                       inventory.inventory += equippedItem
                       equipment.equipmentMap(equipmentType) = new EmptySlot(equipmentType)
-                    case armor: Armor =>
+                    }
+                    case armor: Armor => {
                       inventory.inventory += equippedItem
                       equipment.equipmentMap(equipmentType) = new EmptySlot(equipmentType)
-                    case _ =>
-                      println(equipmentType + " not valiid")
+                    }
+                    case _ => println(equipmentType + " not valiid")
                   }
-                case _ =>
-                  println(s"User $userId cannot equip $equipmentType.")
+                }
+                case _ => println(s"User $userId cannot equip $equipmentType.")
               }
-          case _ =>
-            println(s"User $userId not found while unequiping.")
+          case _ => println(s"User $userId not found while unequiping.")
         }
         println("UnequipingMessage: " + equipmentType)
         sender ! Success
@@ -257,7 +256,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case Some(e: Entity) =>
             e.getComponent[Inventory] match {
               case (Some(inventory: Inventory)) =>
-                if(!(inventory.inventory.size <= 0)) {
+                if (!(inventory.inventory.size <= 0)) {
                   //This should drop by item id not by slot
                   val item = inventory.inventory(slot)
                   inventory.inventory -= item
@@ -277,7 +276,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             case Some(questBag: QuestBag) =>
               var tempQuest: Quest = null
               for(quest <- questBag.quests) {
-                if(quest.id == questId) {
+                if (quest.id == questId) {
                   tempQuest = quest
                 }
               }
@@ -300,7 +299,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case Some(e: Entity) => e.getComponent[QuestBag] match {
             case Some(questBag: QuestBag) =>
               for(quest <- questBag.quests) {
-                if(quest.id == questId) {
+                if (quest.id == questId) {
                   questBag.quests -= quest
                   // tell frontend that quest is removed
                 }
@@ -328,7 +327,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             na.actor
         }
         //if valid distance then pick up items
-        if(isValidDistance) {
+        if (isValidDistance) {
           val loot = entity.getComponent[Inventory] match {
             case Some(inv: Inventory) => inv
             case _ => null
@@ -346,7 +345,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               case (Some(quests: QuestBag), None) =>
                 typename = quests.typename
                 //fix this for a list
-                if(!quests.quests.isEmpty) {
+                if (!quests.quests.isEmpty) {
                   ("quest" -> quests.quests(0).asJson) ~
                   ("entityId" -> entityId)
                 } else {
@@ -364,7 +363,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               case _ => null
           }
 
-          if(jsonObject != null) {
+          if (jsonObject != null) {
             // check for quest and loot status on a player (will add more later)
             val json = ("type" -> typename)~jsonObject
             println(compact(render(json)))
@@ -403,7 +402,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
 
         //if valid distance then pick up items
-        if(isValidDistance) {
+        if (isValidDistance) {
           val loot = itemEntity.getComponent[Inventory] match {
             case Some(inv: Inventory) => inv
             case _ =>  {
@@ -424,13 +423,13 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           //take item and put it in player inventory
           var itemToRemove: Item  = null
           for(itemInv <- loot.inventory) {
-            if(itemInv.id == itemId) {
+            if (itemInv.id == itemId) {
               personInv.addItem(itemInv)
               InventoryTable.incrementItem(itemInv, userEntity)
               itemToRemove = itemInv
             }
           }
-          if(itemToRemove != null) {
+          if (itemToRemove != null) {
             loot.removeItem(itemToRemove)
           }
 
@@ -462,7 +461,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             e.getComponent[Inventory] match {
               case Some(inventory: Inventory) =>
                 val item = inventory.getItemById(itemId) 
-                if(item != null) {
+                if (item != null) {
                   entity.components += new ItemUse(e, item, e)
                   world.addEntity(entity)
                 }
@@ -482,7 +481,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             case "item" => 
               val itemFuture = actorSystem.actorSelection("user/ItemMap") ? GetItem("ITEM"+entityTypeId)
               val item = Await.result(itemFuture, timeout.duration).asInstanceOf[Item]
-              if(item != null) {
+              if (item != null) {
                 val entity = EntityFactory.createLoot(world, item, actorSystem, new Position(x,y))
                 world.addEntity(entity)
               } else {

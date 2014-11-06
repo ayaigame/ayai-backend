@@ -24,7 +24,7 @@ class FrameExpirationSystem(actorSystem: ActorSystem) extends EntityProcessingSy
   def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent[Frame] match {
       case Some(frame: Frame) => {
-        if(frame.isReady) {
+        if (frame.isReady) {
           e.getComponent[Projectile] match {
             case Some(projectile: Projectile) => {
               val json = ("type" -> "disconnect") ~

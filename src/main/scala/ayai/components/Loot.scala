@@ -15,9 +15,9 @@ case class Loot(id: String, looter: String) extends Component {
     looterId == looter
   }
 
-	def asJson(): JObject = {
+  def asJson(): JObject = {
     "loot" ->
       ("id" -> id) ~
         ("looter" -> looter)
-	}
+  }
 }

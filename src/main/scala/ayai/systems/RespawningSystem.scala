@@ -30,7 +30,7 @@ class RespawningSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
       case _ => null
     }
 
-    if(respawn.isReady(System.currentTimeMillis())) {
+    if (respawn.isReady(System.currentTimeMillis())) {
       health.refill()
       e.removeComponent[Respawn]
       e.removeComponent[Dead]

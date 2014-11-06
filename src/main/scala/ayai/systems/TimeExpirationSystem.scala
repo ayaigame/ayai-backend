@@ -14,7 +14,7 @@ class TimeExpirationSystem() extends EntityProcessingSystem(include = List(class
   def processEntity(e: Entity, deltaTime: Int) {
     // e.getComponent(classOf[Time]) match {
     //   case Some(time: Time) => 
-    //   if(time.isReady(System.currentTimeMillis)) {
+    //   if (time.isReady(System.currentTimeMillis)) {
     //     e.kill()
     //   }
     //   case _ =>

@@ -11,10 +11,10 @@ class Class(id: Int, name: String, baseHealth: Int, baseMana: Int) extends Compo
   }
 
   def asJson(): JObject = {
-  	("class" ->
-  		("id" -> id) ~
-  		("name" -> name) ~
-  		("baseHealth" -> baseHealth) ~
-  		("baseMana" -> baseMana))
+    ("class" ->
+      ("id" -> id) ~
+        ("name" -> name) ~
+        ("baseHealth" -> baseHealth) ~
+        ("baseMana" -> baseMana))
   }
 }

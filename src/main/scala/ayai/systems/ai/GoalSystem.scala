@@ -55,7 +55,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
       }
 
       val position = goal match {
-	      case mt: MoveTo =>
+        case mt: MoveTo =>
           mt.position
         case at: AttackTo =>
           at.position
@@ -66,8 +66,8 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
       val direction = findDirection(entity, position)
       (entity.getComponent[Actionable], entity.getComponent[Character], entity.getComponent[Position]) match {
         case (Some(actionable: Actionable), Some(character: Character), Some(ep: Position)) => {
-  	      goal match {
-  	        case mt: MoveTo =>
+          goal match {
+            case mt: MoveTo =>
                 // val tp = mt.position
                 // actionable.active = !(ep.x == tp.x && ep.y == tp.y)
                 // actionable.action = direction
@@ -76,7 +76,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
                 actionable.active = !(ep.x == tp.x && ep.y == tp.y)
                 actionable.active = false
                 actionable.action = direction
-                if(getScore(ep, tp) < 64) {
+                if (getScore(ep, tp) < 64) {
 
                   val bulletId = (new UID()).toString
 

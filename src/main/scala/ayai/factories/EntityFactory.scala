@@ -34,7 +34,7 @@ object EntityFactory {
 
   //Should take characterId: Long as a parameter instead of characterName
   //However can't do that until front end actually gives me the characterId
-  def loadCharacter(world: World, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem) = {
+  def loadCharacter(world: World, entityId: String, characterName: String, x: Int, y: Int, actor: ActorSelection, networkSystem: ActorSystem): Unit = {
     CharacterTable.getCharacter(characterName) match {
       case Some(characterRow: CharacterRow) => {
         val p: Entity = world.createEntity(tag=entityId)
@@ -46,8 +46,9 @@ object EntityFactory {
         println(classValues)
         // calculate stats to add 
         val stats: Stats = new Stats()
-        classValues.baseStats.stats.foreach{stat => stats.addStat(new Stat(stat.attributeType,
-          stat.magnitude+(stat.growth*characterRow.level), stat.growth))}
+        classValues.baseStats.stats.foreach(stat => {
+          stats.addStat(new Stat(stat.attributeType, stat.magnitude+(stat.growth * characterRow.level), stat.growth))
+        })
         p.components += stats
 
         p.components += new Position(characterRow.pos_x,characterRow.pos_y)
@@ -192,10 +193,13 @@ object EntityFactory {
     entity
   }
 
-  def createAI(world: World, faction: String, networkSystem: ActorSystem, position: Position = new Position(300,300), npcValue: NPCValues = null, monsterId: Int = 1, roomId: Int = 0): Entity = {
+  def createAI(world: World,
+               faction: String,
+               networkSystem: ActorSystem,
+               position: Position = new Position(300,300), npcValue: NPCValues = null, monsterId: Int = 1, roomId: Int = 0): Entity = {
     val id = java.util.UUID.randomUUID.toString
     var name = id
-    if(npcValue != null) {
+    if (npcValue != null) {
       name = npcValue.name
     }
 
