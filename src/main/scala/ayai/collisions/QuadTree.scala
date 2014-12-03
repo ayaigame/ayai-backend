@@ -82,7 +82,7 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
    * objects to their corresponding nodes.
    */
   def insert(e: Entity) {
-    if (nodes.headOption.isDefined) {
+    if (Option(nodes.head).isDefined) {
       val index = getIndex(e)
       if (getIndex(e) != -1) {
         nodes(index).insert(e)
@@ -131,7 +131,7 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
 
     returnObjects += objects
 
-    nodes.foreach(returnObjects ++= _.quadrants)
+    nodes.flatMap(Option.apply(_)).foreach(returnObjects ++= _.quadrants)
 
     returnObjects
   }
