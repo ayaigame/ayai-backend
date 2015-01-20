@@ -141,11 +141,11 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       case Some(position: Position) => position
       case _ => new Position(100,100)
     }
-    //if the victims health reaches zero, then take the persons inventory and make it lootable
+    //if the victim's health reaches zero, then take the persons inventory and make it lootable
     if (healthComponent.currentHealth <= 0) {
       victim.components += new Time(1000, System.currentTimeMillis())
       victim.components += new Dead()
-      // get experience and add that to the initiators experience
+      // get experience and add that to the initiator's experience
       (initiator.getComponent[Experience],
         victim.getComponent[Experience],
         initiator.getComponent[NPC],
@@ -165,7 +165,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
             case _ =>
           }
         case _ =>
-          //character should not get experience (usually NPCS (they have no need to level up))
+          //character should not get experience (usually NPCs (they have no need to level up))
       }
 
       val loot = EntityFactory.characterToLoot(world, victim, victimPosition)

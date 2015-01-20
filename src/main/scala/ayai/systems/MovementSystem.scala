@@ -56,13 +56,13 @@ class MovementSystem extends EntityProcessingSystem(include=List(classOf[Positio
 
         //if on tile Collision go back to original position
         val collision = tileMap.onTileCollision(position, bounds)
-
-        //get room and check if player should change rooms
-        //add transport to players (roomchanging system will take over)
         if (collision) {
           position.x = originalPosition.x
           position.y = originalPosition.y
         }
+
+        //get room and check if player should change rooms
+        //add Transport to players (RoomChangingSystem will take over)
       }
       case _ => log.warn("bb12e5d: getComponent failed to get anything")
     }
