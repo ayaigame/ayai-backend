@@ -33,10 +33,10 @@ class MovementSystem extends EntityProcessingSystem(include=List(classOf[Positio
 
   //this will only move characters who have received a movement key and the current component is still set to True
   override def processEntity(e: Entity, delta: Int) {
-  (e.getComponent[Actionable],
-    e.getComponent[Position],
-    e.getComponent[Velocity],
-    e.getComponent[Bounds]) match {
+  (e.getComponent(classOf[Actionable]),
+    e.getComponent(classOf[Position]),
+    e.getComponent(classOf[Velocity]),
+    e.getComponent(classOf[Bounds])) match {
       case (Some(actionable: Actionable), Some(position: Position), Some(velocity: Velocity), Some(bounds: Bounds)) => {
         val originalPosition = new Position(position.x, position.y)
         //if moving then process for the given direction

@@ -22,10 +22,10 @@ object FrameExpirationSystem {
 **/
 class FrameExpirationSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Frame])) {
   def processEntity(e: Entity, deltaTime: Int) {
-    e.getComponent[Frame] match {
+    e.getComponent(classOf[Frame]) match {
       case Some(frame: Frame) => {
-        if (frame.isReady) {
-          e.getComponent[Projectile] match {
+        if(frame.isReady) {
+          e.getComponent(classOf[Projectile]) match {
             case Some(projectile: Projectile) => {
               val json = ("type" -> "disconnect") ~
                           ("id" -> projectile.id)

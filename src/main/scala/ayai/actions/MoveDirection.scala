@@ -18,8 +18,8 @@ class MoveDirection(val xDirection: Int, val yDirection: Int) extends Action {
   ** Take the current velocity and multiplies it by the current xDirection and adds that to the position
   **/
   override def process(e: Entity) {
-    (e.getComponent[Position], e.getComponent[Velocity]) match {
-      case (Some(position), Some(velocity)) => {
+    (e.getComponent(classOf[Position]), e.getComponent(classOf[Velocity])) match {
+      case (Some(position: Position), Some(velocity: Velocity)) => {
         position.x += xDirection * velocity.x
         position.y += yDirection * velocity.y
       }

@@ -16,26 +16,26 @@ object RespawningSystem {
 
 class RespawningSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Room], classOf[Character], classOf[Respawn], classOf[NetworkingActor])) {
   override def processEntity(e: Entity, delta: Int) {
-    val respawn = (e.getComponent[Respawn]: @unchecked) match {
+    val respawn = (e.getComponent(classOf[Respawn]): @unchecked) match {
       case (Some(r: Respawn)) => r
       case _ => null
     }
-    val health = (e.getComponent[Health]: @unchecked) match {
+    val health = (e.getComponent(classOf[Health]): @unchecked) match {
       case (Some(h: Health)) => h
       case _ => null
     }
 
-    val position = (e.getComponent[Position]: @unchecked) match {
+    val position = (e.getComponent(classOf[Position]): @unchecked) match {
       case Some(p: Position) => p
       case _ => null
     }
 
     if (respawn.isReady(System.currentTimeMillis())) {
       health.refill()
-      e.removeComponent[Respawn]
-      e.removeComponent[Dead]
+      e.removeComponent(classOf[Respawn])
+      e.removeComponent(classOf[Dead])
     } else {
-      val na = (e.getComponent[NetworkingActor]) match {
+      val na = (e.getComponent(classOf[NetworkingActor])) match {
         case Some(networkActor: NetworkingActor) =>
           val json = ("type" -> "chat") ~
             ("message" -> ("Respawn in: " + respawn.timeLeft(System.currentTimeMillis()).toString)) ~

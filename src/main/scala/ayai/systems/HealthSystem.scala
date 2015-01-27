@@ -18,11 +18,11 @@ object HealthSystem {
 class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health], classOf[Character]), 
                                                     exclude=List(classOf[Respawn])) {
   override def processEntity(e: Entity, deltaTime: Int) {
-    val character = (e.getComponent[Character]: @unchecked) match {
+    val character = (e.getComponent(classOf[Character]): @unchecked) match {
       case(Some(c: Character)) => c
     }
-    val health = (e.getComponent[Health]: @unchecked) match {
-      case Some(h: Health) => h
+    val health = (e.getComponent(classOf[Health]): @unchecked) match {
+      case(Some(h: Health)) => h
     }
     //look at the status effects of the character
 
@@ -30,7 +30,7 @@ class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health]
       health.currentCached = health.maxCached
     }
 
-    if (health.getCurrentValue <= 0) {
+    if(health.getCurrentValue <= 0) {
       println("dead :D")
       //attach respawn to entity
       e.components += new Dead()
