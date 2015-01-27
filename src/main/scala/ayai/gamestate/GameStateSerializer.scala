@@ -111,7 +111,7 @@ class GameStateSerializer(world: World) extends Actor {
                 JNothing
             }})        
 
-        var projectiles = world.getEntitiesWithExclusions(include=List(classOf[Projectile], classOf[Position], classOf[SpriteSheet]),
+        val projectiles = world.getEntitiesWithExclusions(include=List(classOf[Projectile], classOf[Position], classOf[SpriteSheet]),
                                                   exclude=List(classOf[Dead]))
 
         projectilesJSON = ("projs" -> projectiles.map{ projectile =>
@@ -161,7 +161,6 @@ class GameStateSerializer(world: World) extends Actor {
         case _ => JNothing
       }
     ("models" -> jsonLift)
-
   }
   //Once characters actually have belonging we'll want to implement this and use it in getCharacterRadius
   // def getCharacterBelongings(characterId: String) = {

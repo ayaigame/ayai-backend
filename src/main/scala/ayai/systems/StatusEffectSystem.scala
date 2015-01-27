@@ -23,33 +23,30 @@ class StatusEffectSystem() extends EntityProcessingSystem(
 
   def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[Health]) match {
-      case Some(health: Health) =>
-        if(health.currentModifiers.size >= 1) {
+      case Some(health: Health) => {
+        if (health.currentModifiers.size >= 1) {
           println("Status Effecting")
           println(health.currentModifiers)
 
         }
-        health.updateCachedValue() 
+        health.updateCachedValue()
+      }
       case _ =>
     }
     e.getComponent(classOf[Mana]) match {
-      case Some(mana: Mana) =>
-        mana.updateCachedValue() 
+      case Some(mana: Mana) => mana.updateCachedValue()
       case _ =>
     }
     e.getComponent(classOf[Experience]) match {
-      case Some(experience: Experience) =>
-        experience.updateCachedValue() 
+      case Some(experience: Experience) => experience.updateCachedValue()
       case _ =>
     }
     e.getComponent(classOf[Stats]) match {
-      case Some(stats: Stats) =>
-        stats.updateCachedValue() 
+      case Some(stats: Stats) => stats.updateCachedValue()
       case _ =>
     }
     e.getComponent(classOf[Velocity]) match {
-      case Some(velocity: Velocity) =>
-        velocity.updateCachedValue() 
+      case Some(velocity: Velocity) => velocity.updateCachedValue()
       case _ =>
     }
   }

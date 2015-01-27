@@ -80,7 +80,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case None =>
             println(s"Can't find character attached to id: $userId")
           case Some(e: Entity) =>
-              val oldMovement = (e.getComponent(classOf[Actionable])) match {
+              val oldMovement = e.getComponent(classOf[Actionable]) match {
                 case Some(oldMove : Actionable) =>
                   oldMove.active = start
                   if(start)
@@ -274,7 +274,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case DropItemMessage(userId: String, slot: Int) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
-            (e.getComponent(classOf[Inventory])) match {
+            e.getComponent(classOf[Inventory]) match {
               case (Some(inventory: Inventory)) =>
                 if(!(inventory.inventory.size <= 0)) {
                   //This should drop by item id not by slot
@@ -291,7 +291,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case AcceptQuestMessage(userId: String, entityId: String, questId: Int) =>
         //might want to calculate interact message here
         // also might want to check distance between npc and player
-        var npcQuest: Quest = world.getEntityByTag(s"$entityId") match {
+        val npcQuest: Quest = world.getEntityByTag(s"$entityId") match {
           case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               var tempQuest: Quest = null
