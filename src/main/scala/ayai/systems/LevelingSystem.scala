@@ -18,33 +18,32 @@ class LevelingSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(in
                                                                                            classOf[Character],
                                                                                            classOf[NetworkingActor])) {
   def processEntity(entity: Entity, deltaTime: Int) {
-    (entity.getComponent(classOf[Experience]),
-      entity.getComponent(classOf[Character]),
-      entity.getComponent(classOf[NetworkingActor])) match {
-      case (Some(experience: Experience), Some(character: Character), Some(na: NetworkingActor)) => 
-        var expThresh = Constants.EXPERIENCE_ARRAY(experience.level-1)
-        var leveledUp = experience.levelUp(expThresh)
-        
-        if(leveledUp) {
+    (entity.getComponent(classOf[Experience]), entity.getComponent(classOf[Character]), entity.getComponent(classOf[NetworkingActor])) match {
+      case (Some(experience: Experience), Some(character: Character), Some(na: NetworkingActor)) => {
+        val expThresh = Constants.EXPERIENCE_ARRAY(experience.level - 1)
+        val leveledUp = experience.levelUp(expThresh)
+
+        if (leveledUp) {
           entity.getComponent(classOf[Stats]) match {
-            case Some(stats: Stats) => 
-              stats.levelUp()
+            case Some(stats: Stats) => stats.levelUp()
             case _ =>
           }
 
           (entity.getComponent(classOf[Health]), entity.getComponent(classOf[Mana])) match {
-            case (Some(health: Health), Some(mana: Mana)) =>
+            case (Some(health: Health), Some(mana: Mana)) => {
               health.levelUp()
               mana.levelUp()
-            case _ => 
+            }
+            case _ =>
           }
-          
+
           val json = ("type" -> "chat") ~
             ("message" -> ("Leveled Up to level " + experience.level.toString)) ~
             ("sender" -> "system")
           val actorSelection = na.actor
           actorSelection ! ConnectionWrite(compact(render(json)))
         }
+      }
       case _ =>
     }
     

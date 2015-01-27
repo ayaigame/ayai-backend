@@ -54,7 +54,7 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
     val entities = world.getEntitiesByComponents(classOf[Character], classOf[NetworkingActor])
 
     for(characterEntity <- entities) {
-      val characterId: String = (characterEntity.getComponent(classOf[Character])) match {
+      val characterId = characterEntity.getComponent(classOf[Character]) match {
         case Some(c: Character) => c.id
         case _ =>
           log.warn("8192c19: getComponent failed to return anything")
@@ -65,9 +65,8 @@ class NetworkingSystem(networkSystem: ActorSystem) extends TimedSystem(1000/30) 
       val future = serializer ? GetRoomJson(characterEntity)
       val result = Await.result(future, timeout.duration).asInstanceOf[String]
       characterEntity.getComponent(classOf[NetworkingActor]) match {
-            case Some(na : NetworkingActor) =>
-              na.actor ! new ConnectionWrite(result)
-            case _ =>
+        case Some(na : NetworkingActor) => na.actor ! new ConnectionWrite(result)
+        case _ =>
       }
     }
     serializer ! Refresh
