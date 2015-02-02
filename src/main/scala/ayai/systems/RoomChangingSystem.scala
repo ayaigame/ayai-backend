@@ -32,14 +32,14 @@ class RoomChangingSystem(networkSystem: ActorSystem) extends EntityProcessingSys
   val userRoomMap = networkSystem.actorSelection("user/UserRoomMap")
   override def processEntity(e: Entity, delta: Int) {
     //get information from transport class
-    (e.getComponent[Transport],
-      e.getComponent[Room],
-      e.getComponent[Position]) match {
+    (e.getComponent(classOf[Transport]),
+      e.getComponent(classOf[Room]),
+      e.getComponent(classOf[Position])) match {
       case(Some(transport: Transport), Some(room: Room),
         Some(position: Position)) =>
         userRoomMap ! SwapWorld(e.tag, transport.toRoom)
         InventoryTable.saveInventory(e)
-        e.removeComponent[Transport]
+        e.removeComponent(classOf[Transport])
       case _ =>
         log.warn("052ef02: getComponent failed to return anything")
     }

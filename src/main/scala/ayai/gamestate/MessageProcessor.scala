@@ -70,7 +70,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         world.getEntityByTag(userId) match {
           case None => println(s"Can't find character attached to id: $userId")
           case Some(e: Entity) => {
-            val oldMovement = e.getComponent[Actionable] match {
+            val oldMovement = e.getComponent(classOf[Actionable]) match {
               case Some(oldMove: Actionable) => {
                 oldMove.active = start
                 if (start) {
@@ -92,12 +92,12 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
         world.getEntityByTag(userId) match {
         case Some(initiator: Entity) =>
-          (initiator.getComponent[Position],
-          initiator.getComponent[Actionable],
-          initiator.getComponent[Character],
-          initiator.getComponent[Room],
-          initiator.getComponent[Cooldown],
-          initiator.getComponent[Dead]) match {
+          (initiator.getComponent(classOf[Position]),
+          initiator.getComponent(classOf[Actionable]),
+          initiator.getComponent(classOf[Character]),
+          initiator.getComponent(classOf[Room]),
+          initiator.getComponent(classOf[Cooldown]),
+          initiator.getComponent(classOf[Dead])) match {
             case(Some(pos: Position), Some(a: Actionable), Some(c: Character), Some(r: Room), None, None) =>
 
               val m = a.action match {
@@ -111,14 +111,16 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               var weaponRange = 30
               var weaponName = ""
 
-              initiator.getComponent[Equipment].foreach(e => {
-                val item = e.equipmentMap("weapon1")
-                weaponName = item.name
-                item.itemType match {
-                  case weapon: Weapon => weaponRange = weapon.range
-                  case _ =>
+              initiator.getComponent(classOf[Equipment]) match {
+                case Some(e: Equipment) =>
+                  val item = e.equipmentMap("weapon1")
+                  weaponName = item.name
+                  item.itemType match {
+                    case weapon: Weapon =>
+                      weaponRange = weapon.range
+                    case _ =>
                 }
-              })
+              }
 
               val upperLeftx = pos.x
               val upperLefty = pos.y
@@ -185,27 +187,27 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case EquipMessage(userId: String, slot: Int, equipmentType: String) =>
         world.getEntityByTag(userId) match {
           case Some(e: Entity) =>
-            (e.getComponent[Inventory],
-              e.getComponent[Equipment]) match {
+            (e.getComponent(classOf[Inventory]),
+              e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) =>
                   val item = inventory.inventory(slot)
-                  e.getComponent[NetworkingActor] match {
+                  e.getComponent(classOf[NetworkingActor]) match {
                     case Some(na: NetworkingActor) =>
                       val json = ("type" -> "chat") ~
                         ("message" -> ("Equiping Item: " + item.name)) ~
                         ("sender" -> "system")
                       na.actor ! ConnectionWrite(compact(render(json)))
-                    case _ => 
+                    case _ =>
 
                   }
                   val equipItem = equipment.unequipItem(equipmentType)
-                  e.getComponent[NetworkingActor] match {
+                  e.getComponent(classOf[NetworkingActor]) match {
                     case Some(na: NetworkingActor) =>
                       val json = ("type" -> "chat") ~
                         ("message" -> ("Unequipped Item: " + equipItem.name)) ~
                         ("sender" -> "system")
                       na.actor ! ConnectionWrite(compact(render(json)))
-                    case _ => 
+                    case _ =>
 
                   }
                   if (equipment.equipItem(item)) {
@@ -228,8 +230,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case UnequipMessage(userId: String, equipmentType: String) =>
         world.getEntityByTag(userId) match {
           case Some(e: Entity) =>
-            (e.getComponent[Inventory],
-              e.getComponent[Equipment]) match {
+            (e.getComponent(classOf[Inventory]),
+              e.getComponent(classOf[Equipment])) match {
                 case (Some(inventory: Inventory), Some(equipment: Equipment)) => {
                   val equippedItem = equipment.unequipItem(equipmentType)
                   equippedItem.itemType match {
@@ -254,7 +256,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
       case DropItemMessage(userId: String, slot: Int) =>
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
-            e.getComponent[Inventory] match {
+            e.getComponent(classOf[Inventory]) match {
               case (Some(inventory: Inventory)) =>
                 if (!(inventory.inventory.size <= 0)) {
                   //This should drop by item id not by slot
@@ -272,7 +274,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         //might want to calculate interact message here
         // also might want to check distance between npc and player
         val npcQuest: Quest = world.getEntityByTag(s"$entityId") match {
-          case Some(e: Entity) => e.getComponent[QuestBag] match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               var tempQuest: Quest = null
               for(quest <- questBag.quests) {
@@ -287,7 +289,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         }
 
         world.getEntityByTag(userId) match {
-          case Some(e: Entity) => e.getComponent[QuestBag] match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               questBag.addQuest(npcQuest)
           }
@@ -296,7 +298,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         sender ! Success
       case AbandonQuestMessage(userId: String, questId: Int) =>
         world.getEntityByTag(s"$userId") match {
-          case Some(e: Entity) => e.getComponent[QuestBag] match {
+          case Some(e: Entity) => e.getComponent(classOf[QuestBag]) match {
             case Some(questBag: QuestBag) =>
               for(quest <- questBag.quests) {
                 if (quest.id == questId) {
@@ -316,29 +318,29 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         val userEntity = world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) => e
         }
-        val isValidDistance: Boolean = (userEntity.getComponent[Position],
-                                        entity.getComponent[Position]) match {
+        val isValidDistance: Boolean = (userEntity.getComponent(classOf[Position]),
+                                        entity.getComponent(classOf[Position])) match {
           case (Some(userPosition: Position), Some(entityPosition: Position)) =>
             sqrt(pow(userPosition.x-entityPosition.x,2)+pow(userPosition.y-entityPosition.y,2)) <= Constants.SPACE_FOR_INTERACTION
           case _ => false
         }
-        val actorSelection = userEntity.getComponent[NetworkingActor] match {
+        val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
           case Some(na: NetworkingActor) =>
             na.actor
         }
         //if valid distance then pick up items
-        if (isValidDistance) {
-          val loot = entity.getComponent[Inventory] match {
+        if(isValidDistance) {
+          val loot = entity.getComponent(classOf[Inventory]) match {
             case Some(inv: Inventory) => inv
             case _ => null
           }
-          val playerInventory = userEntity.getComponent[Inventory] match {
+          val playerInventory = userEntity.getComponent(classOf[Inventory]) match {
             case Some(inv: Inventory) => inv
             case _ => null
           }
           var typename: String = ""
-          val jsonObject: JObject = (entity.getComponent[QuestBag],
-            entity.getComponent[Loot]) match {
+          val jsonObject: JObject = (entity.getComponent(classOf[QuestBag]),
+            entity.getComponent(classOf[Loot])) match {
               case (Some(quests: QuestBag), Some(loot: Loot)) =>
                 typename = quests.typename
                 quests.asJson
@@ -353,7 +355,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                 }
               case ( None, Some(loot: Loot)) =>
                 typename = loot.typename
-                entity.getComponent[Inventory] match {
+                entity.getComponent(classOf[Inventory]) match {
                   case Some(inventory: Inventory) =>
                    ("loot" -> loot.asJson)~
                    (inventory.asJson)
@@ -393,8 +395,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           case Some(e: Entity) => e
         }
 
-        val isValidDistance: Boolean = (userEntity.getComponent[Position],
-                                        itemEntity.getComponent[Position]) match {
+        val isValidDistance: Boolean = (userEntity.getComponent(classOf[Position]),
+                                        itemEntity.getComponent(classOf[Position])) match {
           case (Some(userPosition: Position), Some(itemPosition:Position)) =>
             sqrt(pow(userPosition.x-itemPosition.x,2)+pow(userPosition.y-itemPosition.y,2)) <= Constants.SPACE_FOR_INTERACTION
           case _ => false
@@ -402,8 +404,8 @@ class MessageProcessor(world: RoomWorld) extends Actor {
 
 
         //if valid distance then pick up items
-        if (isValidDistance) {
-          val loot = itemEntity.getComponent[Inventory] match {
+        if(isValidDistance) {
+          val loot = itemEntity.getComponent(classOf[Inventory]) match {
             case Some(inv: Inventory) => inv
             case _ =>  {
               println("Could not find inventory")
@@ -411,7 +413,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
             }
           }
 
-          val personInv = userEntity.getComponent[Inventory] match {
+          val personInv = userEntity.getComponent(classOf[Inventory]) match {
             case Some(inv: Inventory) => inv
             case _ => {
               println("PlayerInventory could not be made")
@@ -439,7 +441,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
           val json = ("type" -> "chat") ~
             ("message" -> "Not withing distance of item") ~
             ("sender" -> "error")
-          val actorSelection = userEntity.getComponent[NetworkingActor] match {
+          val actorSelection = userEntity.getComponent(classOf[NetworkingActor]) match {
             case Some(na: NetworkingActor) =>
               na.actor
           }
@@ -458,7 +460,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
         world.getEntityByTag(s"$userId") match {
           case Some(e: Entity) =>
           val entity = world.createEntity("ITEMUSE"+itemUseId)
-            e.getComponent[Inventory] match {
+            e.getComponent(classOf[Inventory]) match {
               case Some(inventory: Inventory) =>
                 val item = inventory.getItemById(itemId) 
                 if (item != null) {
@@ -487,7 +489,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
               } else {
                 world.getEntityByTag(s"$userId") match {
                   case Some(e: Entity) =>
-                    e.getComponent[NetworkingActor] match {
+                    e.getComponent(classOf[NetworkingActor]) match {
                       case Some(na: NetworkingActor) => 
                         val json = ("type" -> "chat") ~
                           ("message" -> ("Could not create item with id " + entityTypeId)) ~

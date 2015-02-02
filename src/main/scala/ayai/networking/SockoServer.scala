@@ -16,14 +16,13 @@ import org.mashupbots.socko.webserver.WebServerConfig
 import akka.actor.ActorSystem
 import akka.pattern.ask
 
-import scala.concurrent.{ExecutionContext, Await}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 /** SockoServer
  * Runs a server which will pass packets on to the Interpreter
  **/
-
-import ExecutionContext.Implicits.global
 
 object SockoServer {
   def apply(actorSystem: ActorSystem) = new SockoServer(actorSystem)

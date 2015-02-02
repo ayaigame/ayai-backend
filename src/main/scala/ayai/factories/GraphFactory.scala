@@ -42,13 +42,12 @@ object GraphFactory {
     val entityArray = Array.fill[Node](tileMap.width, tileMap.height) { Node(NORMAL)  }
 
     entities.foreach { entity =>
-      val position = entity.getComponent[Position]
+      val position = entity.getComponent(classOf[Position])
       (position: @unchecked) match {
-        case Some(p) =>
+        case Some(p: Position) =>
           val gridPosition = convertPositionToGrid(p, tileMap.tileSize.toFloat)
-          if (inBounds(gridPosition._1, gridPosition._2)) {
+          if(inBounds(gridPosition._1, gridPosition._2))
             entityArray(gridPosition._1)(gridPosition._2) = Node(IMPASS)
-          }
       }
     }
 

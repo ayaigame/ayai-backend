@@ -12,12 +12,12 @@ object CooldownSystem {
 ** If Cooldown components are ready to be removed then remove them from the entity
 **/
 class CooldownSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Cooldown])) {
-  def processEntity(e: Entity, deltaTime: Int) {
-    e.getComponent[Cooldown] match {
-      case Some(cooldown: Cooldown) =>
-      if (cooldown.isReady) {
-        e.removeComponent[Cooldown]
-      }
-    }
-  }
+	def processEntity(e: Entity, deltaTime: Int) {
+		e.getComponent(classOf[Cooldown]) match {
+			case Some(cooldown: Cooldown) =>
+			if(cooldown.isReady) {
+				e.removeComponent(classOf[Cooldown])
+			}
+		}
+	}
 }

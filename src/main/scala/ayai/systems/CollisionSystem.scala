@@ -44,12 +44,12 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
   ** Then add that victim to the attacks victim array
   **/
   def handleAttack(entityA: Entity, entityB: Entity):Boolean = {
-    (entityA.getComponent[Attack],
-      entityB.getComponent[Attack],
-      entityA.getComponent[Frame],
-      entityB.getComponent[Frame],
-      entityA.getComponent[Health],
-      entityB.getComponent[Health]) match {
+    (entityA.getComponent(classOf[Attack]),
+      entityB.getComponent(classOf[Attack]),
+      entityA.getComponent(classOf[Frame]),
+      entityB.getComponent(classOf[Frame]),
+      entityA.getComponent(classOf[Health]),
+      entityB.getComponent(classOf[Health])) match {
       case(Some(attackComponentA: Attack), None, Some(frameComponentA: Frame), None, None, Some(healthComponentB: Health)) =>
           if (attackComponentA.initiator != entityB) {
             attackComponentA.addVictim(entityB)
@@ -74,10 +74,10 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
 
 
   def handleCollision(entityA: Entity, entityB: Entity) {
-      (entityA.getComponent[Position],
-        entityA.getComponent[Bounds],
-        entityB.getComponent[Position],
-        entityB.getComponent[Bounds]) match {
+      (entityA.getComponent(classOf[Position]),
+        entityA.getComponent(classOf[Bounds]),
+        entityB.getComponent(classOf[Position]),
+        entityB.getComponent(classOf[Bounds])) match {
         case(Some(positionA: Position), Some(boundsA: Bounds), Some(positionB: Position), Some(boundsB: Bounds)) =>
           // Remember to end a line with an operator of some sort (., +, &&, ||) if you need
           // to not fall afoul of the automatic end of statement guesser
@@ -120,10 +120,10 @@ class CollisionSystem(actorSystem: ActorSystem) extends System {
 
   override def process(delta: Int) {
     // get all entities that are not dead or in respawn, but do have a position and bounds
-    val entities = world.getEntitiesWithExclusions(include = List(classOf[Position], classOf[Bounds]),
-                                                   exclude = List(classOf[Respawn], classOf[Transport], classOf[Dead]))
-    val tileMap = world.asInstanceOf[RoomWorld].tileMap
-    val quadTree: QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.maximumWidth, tileMap.maximumHeight))
+    var entities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds]),
+                                                   exclude=List(classOf[Respawn], classOf[Transport], classOf[Dead]))
+    var tileMap = world.asInstanceOf[RoomWorld].tileMap
+    var quadTree: QuadTree = new QuadTree(0, new Rectangle(0,0,tileMap.maximumWidth, tileMap.maximumHeight))
     for(entity <- entities) {
       quadTree.insert(entity)
     }

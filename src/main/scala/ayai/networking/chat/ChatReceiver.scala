@@ -78,7 +78,7 @@ class ChatReceiver extends Actor {
       case PublicChat(text, sender) =>
         val entities = world.getEntitiesByComponents(classOf[NetworkingActor])
         entities.foreach{ e =>  
-          (e.getComponent[NetworkingActor]: @unchecked) match {
+          (e.getComponent(classOf[NetworkingActor]): @unchecked) match {
             case(Some(na: NetworkingActor)) =>
               na.actor! new ConnectionWrite(new JChat(sender.name, text).toString)
           }

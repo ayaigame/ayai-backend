@@ -44,8 +44,8 @@ class QuadTree(var level: Int, var bounds: Rectangle) {
   private def getIndex(e: Entity): Int = {
     var index  = -1
 
-    (e.getComponent[Position], e.getComponent[Bounds]) match {
-      case(Some(p), Some(bound)) => {
+    (e.getComponent(classOf[Position]), e.getComponent(classOf[Bounds])) match {
+      case(Some(p: Position), Some(bound: Bounds)) => {
         val verticalMidpoint: Double = bounds.x + (bounds.width / 2)
         val horizontalMidpoint: Double = bounds.y + (bounds.height / 2)
 

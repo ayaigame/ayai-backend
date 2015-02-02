@@ -30,7 +30,7 @@ libraryDependencies += "org.skife.com.typesafe.config" % "typesafe-config" % "0.
 
 libraryDependencies += "org.mindrot" % "jbcrypt" % "0.3m"
 
-libraryDependencies += "net.timothyhahn" % "crane_2.10" % "0.3.1"
+libraryDependencies += "net.timothyhahn" % "crane_2.10" % "0.2.7"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test"
 

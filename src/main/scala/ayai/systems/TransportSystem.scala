@@ -57,9 +57,9 @@ extends EntityProcessingSystem(include = List(classOf[Room], classOf[Position], 
   private val log = LoggerFactory.getLogger(getClass)
   //this will only move characters who have received a movement key and the current component is still set to True
   override def processEntity(e: Entity, delta : Int) {
-  (e.getComponent[Room],
-    e.getComponent[Position],
-    e.getComponent[NetworkingActor]) match {
+  (e.getComponent(classOf[Room]),
+    e.getComponent(classOf[Position]),
+    e.getComponent(classOf[NetworkingActor])) match {
       case (Some(room: Room), Some(position: Position), Some(networkingActor: NetworkingActor)) => {
         val tileMap: TileMap = world.asInstanceOf[RoomWorld].tileMap
         val transportOption: Option[TransportInfo] = tileMap.checkIfTransport(position)
