@@ -80,6 +80,10 @@ object EntityFactory {
         p.components += new Character(entityId, characterRow.name)
         p.components += new Faction("allies")
 
+        p.components += new Vision()
+        p.components += new Hearing()
+        p.components += new Memory()
+
         // get stats needed for class
 
         val questbag = new QuestBag()
@@ -176,6 +180,11 @@ object EntityFactory {
     p.components += new Room(npcValue.roomId)
     p.components += new Character(id, npcValue.name)
     p.components += new Faction(faction)
+
+    p.components += new Vision()
+    p.components += new Hearing()
+    p.components += new Memory()
+
     p
   }
 

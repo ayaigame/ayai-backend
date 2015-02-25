@@ -51,6 +51,13 @@ class WorldFactory extends Actor {
       world.addSystem(CollisionSystem(context.system))
       world.addSystem(AttackSystem(context.system))
       world.addSystem(CooldownSystem(context.system))
+
+      world.addSystem(PerceptionSystem(context.system))
+      world.addSystem(VisionSystem(context.system))
+      world.addSystem(SoundSystem(context.system))
+      world.addSystem(MemorySystem(context.system))
+      world.addSystem(CommunicationSystem(context.system))
+
       val serializer = context.system.actorOf(Props(GameStateSerializer(world)), s"Serializer$id")
       val nmProcessor = context.system.actorOf(Props(MessageProcessorSupervisor(world)), name=s"MProcessor$id")
 
