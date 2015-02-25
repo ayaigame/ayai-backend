@@ -16,9 +16,7 @@
 			"feet": 0,
 			"helmet": 0,
 			"experience": 100,
-			"quests": [{
-				"questId": 2
-			}]
+			"quests": []
 		},
 		{
 			"id": 2,
@@ -36,8 +34,6 @@
 			"maximumHealth": 500,
 			"maximumMana": 400,
 			"experience": 2000,
-			"quests": [{
-				"questId": 2
-			}]
+			"quests": []
 		}]
 }
