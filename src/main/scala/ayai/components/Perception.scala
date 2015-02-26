@@ -48,7 +48,7 @@ class WuLOS extends Vision {
 
 class MemoryContents {
   var entityID: Int = -1
-  var entityPosition: Position = null
+  var entityPosition: Option[Position] = None
   var relationship: Int = -1
 }
 
