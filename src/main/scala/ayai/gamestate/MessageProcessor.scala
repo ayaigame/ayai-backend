@@ -107,7 +107,7 @@ class MessageProcessor(world: RoomWorld) extends Actor {
                   new MoveDirection(0, 0)
               }
 
-              //get the range and name of the characters weapon
+              //get the range and name of the character's weapon
               var weaponRange = 30
               var weaponName = ""
 

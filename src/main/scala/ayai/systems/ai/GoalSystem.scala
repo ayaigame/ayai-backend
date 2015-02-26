@@ -97,7 +97,7 @@ class GoalSystem(actorSystem: ActorSystem) extends System {
                               new MoveDirection(0, 0)
                           }
 
-                          //get the range of the characters weapon
+                          //get the range of the character's weapon
                           val weaponRange = initiator.getComponent(classOf[Equipment]) match {
                             case Some(e: Equipment) => e.equipmentMap("weapon1").itemType match {
                               case weapon: Weapon => weapon.range
