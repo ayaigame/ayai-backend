@@ -5,34 +5,32 @@ import ayai.components._
 import ayai.gamestate._
 
 /** Crane Imports **/
-import crane.World
 import crane.Entity
 
 /** External Imports **/
 import scala.collection.mutable._
 import net.liftweb.json._
-import net.liftweb.json.JsonDSL._
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import akka.actor.Status.{Success, Failure}
+import akka.actor.ActorSystem
 
 object ItemFactory {
 
   case class AllItemValues(
-      id: Int,
-      name: String,
-      equipable: Boolean,
-      itemType: String,
-      value: Int,
-      weight: Double,
-      range: Option[Int],
-      damage: Option[Int],
-      damageType: Option[String],
-      slot: Option[String],
-      protection: Option[Int],
-      stackable: Option[Boolean],
-      stats: Option[List[Stat]],
-      spriteSheet: Option[SpriteSheet],
-      image: Option[String])
+    id: Int,
+    name: String,
+    equipable: Boolean,
+    itemType: String,
+    value: Int,
+    weight: Double,
+    range: Option[Int],
+    damage: Option[Int],
+    damageType: Option[String],
+    slot: Option[String],
+    protection: Option[Int],
+    stackable: Option[Boolean],
+    stats: Option[List[Stat]],
+    spriteSheet: Option[SpriteSheet],
+    image: Option[String]
+  )
 
   def bootup(networkSystem: ActorSystem) = {
     val items: List[AllItemValues] = getItemsList("src/main/resources/configs/items/items.json")
@@ -47,21 +45,23 @@ object ItemFactory {
   }
 
   def buildStats(item: AllItemValues): Stats = {
-    var statsArray = new ArrayBuffer[Stat]()
+    val statsArray = new ArrayBuffer[Stat]()
     statsArray.appendAll(item.stats.get)
     new Stats(statsArray)
   }
 
   def instantiateWeapons(networkSystem: ActorSystem, items: List[AllItemValues]) = {
-    items.foreach (item => {
-      var weapon = new Item(
+    items.foreach(item => {
+      val weapon = new Item(
         item.id,
         item.name,
         item.value,
         item.weight,
         new Weapon(item.range.get,
         item.damage.get,
-        item.damageType.get, item.itemType))
+        item.damageType.get, item.itemType)
+      )
+
       weapon.image = item.image.get
 
       networkSystem.actorSelection("user/ItemMap") ! AddItem(item.id.toString, weapon)
@@ -70,28 +70,30 @@ object ItemFactory {
 
   def instantiateArmor(networkSystem: ActorSystem, items: List[AllItemValues]) = {
     items.foreach (item => {
-      var armor = new Item(
+      val armor = new Item(
         item.id,
         item.name,
         item.value,
         item.weight,
         new Armor(item.slot.get,
-        item.protection.get, item.itemType))
+        item.protection.get, item.itemType)
+      )
+
       armor.image = ""
 
       networkSystem.actorSelection("user/ItemMap") ! AddItem(item.id.toString, armor)
     })
   }
 
-  def instantiateConsumables(networkSystem: ActorSystem, items: List[AllItemValues]) = {
+  def instantiateConsumables(networkSystem: ActorSystem, items: List[AllItemValues]): Unit = {
 
   }
 
-  def instantiateBaseItems(networkSystem: ActorSystem,  items: List[AllItemValues]) = {
+  def instantiateBaseItems(networkSystem: ActorSystem, items: List[AllItemValues]): Unit = {
 
   }
 
-  def addStats(item: Entity, stats: Stats) = {
+  def addStats(item: Entity, stats: Stats): Unit = {
 
   }
 
@@ -109,10 +111,10 @@ object ItemFactory {
 
     val listOfLists: List[List[AllItemValues]] = otherPaths.map((path: String) => getItemsList(path))
 
-    var itemsList = new ArrayBuffer[AllItemValues]()
+    val itemsList = new ArrayBuffer[AllItemValues]()
     itemsList.appendAll(rootItems)
 
-    listOfLists.foreach(e => itemsList.appendAll(e))
+    listOfLists.foreach(itemsList.appendAll)
     itemsList.toList
   }
 }

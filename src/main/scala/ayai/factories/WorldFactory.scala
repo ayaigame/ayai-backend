@@ -1,22 +1,15 @@
 package ayai.factories
 
 /** Ayai Imports **/
-import ayai.apps.Constants
 import ayai.systems._
-import ayai.gamestate.{RoomWorld, GameStateSerializer, MessageProcessorSupervisor, TileMap}
-
-/** Akka Imports **/
-import akka.actor.{ActorSystem, Props}
+import ayai.gamestate.{RoomWorld, GameStateSerializer, MessageProcessorSupervisor}
 
 /** External Imports **/
 import net.liftweb.json._
-import net.liftweb.json.JsonDSL._
 
 /** Akka Imports **/
-import akka.actor.{Actor, ActorRef, Props}
-import akka.actor.Status.{Success, Failure}
-import akka.pattern.ask
-import akka.util.Timeout
+import akka.actor.{Actor, Props}
+import akka.actor.Status.Failure
 
 import scala.io.Source
 import java.io.File
@@ -40,7 +33,7 @@ class WorldFactory extends Actor {
       val tileMap = EntityFactory.loadRoomFromJson(jsonFile, parsedJson)
       val id = (parsedJson \ "id").extract[Int]
 
-      var world: RoomWorld = RoomWorld(id, tileMap, true)
+      val world = RoomWorld(id, tileMap, isLeaf = true)
       world.addSystem(MovementSystem(), 1)
       world.addSystem(TransportSystem(context.system), 2)
       world.addSystem(HealthSystem())
@@ -58,6 +51,13 @@ class WorldFactory extends Actor {
       world.addSystem(CollisionSystem(context.system))
       world.addSystem(AttackSystem(context.system))
       world.addSystem(CooldownSystem(context.system))
+
+      world.addSystem(PerceptionSystem(context.system))
+      world.addSystem(VisionSystem(context.system))
+      world.addSystem(SoundSystem(context.system))
+      world.addSystem(MemorySystem(context.system))
+      world.addSystem(CommunicationSystem(context.system))
+
       val serializer = context.system.actorOf(Props(GameStateSerializer(world)), s"Serializer$id")
       val nmProcessor = context.system.actorOf(Props(MessageProcessorSupervisor(world)), name=s"MProcessor$id")
 
@@ -67,7 +67,9 @@ class WorldFactory extends Actor {
 
       sender ! world
     }
-    case _ => println("Error: from WorldFactory.")
+    case _ => {
+      println("Error: from WorldFactory.")
       sender ! Failure
+    }
   }
 }

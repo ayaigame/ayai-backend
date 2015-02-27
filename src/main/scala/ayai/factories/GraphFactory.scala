@@ -29,7 +29,7 @@ object GraphFactory {
 
   def inBounds(max: Int, indexes: Int*): Boolean = {
     indexes.foreach{index =>
-      if(index > max || index < 0)
+      if (index > max || index < 0)
         return false // NEEDS TO BE EXPLICIT
     }
     true

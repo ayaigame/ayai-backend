@@ -35,25 +35,28 @@ case class AllEffectValues(
 object EffectFactory {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
-  def bootup(networkSystem: ActorSystem) = {
-    var effects: List[AllEffectValues] = getEffectList("src/main/resources/effects/effects.json")
-    effects.foreach(effectData => 
-    {
-
+  def bootup(networkSystem: ActorSystem): Unit = {
+    val effects: List[AllEffectValues] = getEffectList("src/main/resources/effects/effects.json")
+    effects.foreach(effectData => {
       val att = effectData.attribute.toLowerCase match {
-        case "oneoff" => 
-          new OneOff()
-        case "duration" =>
-          new ayai.statuseffects.Duration(effectData.length.get)
-        case "timedinterval" => 
-          new TimedInterval(effectData.length.get, effectData.interval.get)
+        case "oneoff" => new OneOff()
+        case "duration" => new ayai.statuseffects.Duration(effectData.length.get)
+        case "timedinterval" => new TimedInterval(effectData.length.get, effectData.interval.get)
       }
       
-      val effect = new Effect(effectData.id, effectData.name, effectData.description,
-                              effectData.effectType, effectData.value, att, new Multiplier(effectData.multiplier),
-                              effectData.isRelative, effectData.isValueRelative)
+      val effect = new Effect(effectData.id,
+        effectData.name,
+        effectData.description,
+        effectData.effectType,
+        effectData.value,
+        att,
+        new Multiplier(effectData.multiplier),
+        effectData.isRelative,
+        effectData.isValueRelative
+      )
+
       effect.imageLocation = effectData.image
-      networkSystem.actorSelection("user/EffectMap") ! AddEffect("Effect"+effectData.id, effect)
+      networkSystem.actorSelection("user/EffectMap") ! AddEffect("Effect" + effectData.id, effect)
     })
   }
 
@@ -68,12 +71,6 @@ object EffectFactory {
 
     val rootClasses = (parsedJson \\ "effects").extract[List[AllEffectValues]]
 
-    // val listOfLists: List[List[Quest]] = rootClasses.map((path: String) => getClassesList(path))
-    
-    var effectList = new ArrayBuffer[AllEffectValues]()
-    effectList.appendAll(rootClasses)
-    effectList.toList
-    // listOfLists.foreach(e => questList.appendAll(e))
-    // questList.toList
+    rootClasses.toList
   }
 }

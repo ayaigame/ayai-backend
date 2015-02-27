@@ -3,19 +3,14 @@ package ayai.factories
 import ayai.components._
 import ayai.gamestate._
 import ayai.quests._
+
 /** Crane Imports **/
-import crane.{Entity, World}
-
 import net.liftweb.json._
-import net.liftweb.json.JsonDSL._
 
-import scala.collection.mutable._
-
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import akka.actor.Status.{Success, Failure}
+import akka.actor.ActorSystem
 
 object QuestFactory {
-	case class AllQuestValues(
+  case class AllQuestValues(
       id: Int,
       title: String,
       description: String,
@@ -26,7 +21,7 @@ object QuestFactory {
     val quests: List[Quest] = getQuestList("src/main/resources/quests/quests.json")
 
     quests.foreach (questData => {
-      var questComponent = new Quest(
+      val questComponent = new Quest(
         questData.id,
         questData.title,
         questData.description,
@@ -36,7 +31,6 @@ object QuestFactory {
       networkSystem.actorSelection("user/QuestMap") ! AddQuest("QUEST"+questData.id, questComponent)
     })
   }
-
 
   def getQuestList(path: String): List[Quest] = {
     implicit val formats = net.liftweb.json.DefaultFormats
@@ -51,9 +45,7 @@ object QuestFactory {
 
     // val listOfLists: List[List[Quest]] = rootClasses.map((path: String) => getClassesList(path))
     
-    var questList = new ArrayBuffer[Quest]()
-    questList.appendAll(rootClasses)
-    questList.toList
+    rootClasses
     // listOfLists.foreach(e => questList.appendAll(e))
     // questList.toList
   }

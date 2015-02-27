@@ -1,13 +1,8 @@
 package ayai.systems
 
-import crane.{Component, Entity, World, EntityProcessingSystem}
+import crane.{Entity, EntityProcessingSystem}
 import ayai.components._
-import ayai.networking._
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import java.rmi.server.UID
-import ayai.factories._
-import net.liftweb.json._
-import net.liftweb.json.JsonDSL._
+import akka.actor.ActorSystem
 
 object CooldownSystem {
   def apply(actorSystem: ActorSystem) = new CooldownSystem(actorSystem)

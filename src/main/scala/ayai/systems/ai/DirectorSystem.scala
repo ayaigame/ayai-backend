@@ -38,7 +38,7 @@ class DirectorSystem(actorSystem: ActorSystem) extends TimedSystem(3000) {
 
     val factionToAdd = factionHealths.map{
       case (name, factionHealth) =>
-        if(factionHealth > 0) {
+        if (factionHealth > 0) {
           (name, (factionHealths.values.max / factionHealth) - 1)
         }
         else {

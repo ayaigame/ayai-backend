@@ -1,22 +1,22 @@
 package ayai.statuseffects
 
-import crane.Entity
 /** External Imports **/
-import scala.collection.mutable._
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-abstract class TimeAttribute() {
-    def process(): Boolean
-    def asJson(): JObject
-    def isReady(): Boolean
-    def initialize()
-    def isValid(): Boolean
+abstract class TimeAttribute {
+  def process(): Boolean
+  def asJson(): JObject
+  def isReady: Boolean
+  def initialize()
+  def isValid: Boolean
 }
 
-case class OneOff() extends TimeAttribute() {
-  var timesUsed = 0;
-  override def initialize() {
+case class OneOff() extends TimeAttribute {
+  // TODO get rid of mutability or make thread-safe
+  var timesUsed = 0
+
+  def initialize(): Unit = {
     timesUsed = 0
   }
 
@@ -26,101 +26,80 @@ case class OneOff() extends TimeAttribute() {
   }
 
   def asJson(): JObject = {
-    ("type" -> "oneoff")
+    "type" -> "oneoff"
   }
 
-  def isReady(): Boolean = {
-    if(timesUsed >= 1) {
-      false
-    } else {
-      true
-    }
-  }
+  def isReady: Boolean = timesUsed < 1
 
-  def isValid(): Boolean = {
-    if(timesUsed >= 1) {
-        false
-    } else {
-        true
-    }
-  }
+  def isValid: Boolean = timesUsed < 1
 }
 
 
 // maxTime will be in seconds
 // Will active every interval until maxTime
 // Example if you want to process every 5 seconds for 20 seconds do an interval of 5 and maxtime of 20
-case class TimedInterval(val interval: Long,
-                         val maxTime: Long) extends TimeAttribute() {
-    var timesProcessed: Int = 0
-    var startTime: Long = 0
-    var currentTime: Long = 0
-    var endTime: Long = 0
+case class TimedInterval(interval: Long, maxTime: Long) extends TimeAttribute {
 
-    override def initialize() {
-        timesProcessed = 0
-        var time: Long = System.currentTimeMillis
-        startTime = time
-        endTime = time + (maxTime * 1000)
-        process()
-    }
-
-    def process(): Boolean = {
-        if(isReady()) {
-            timesProcessed += 1
-            true
-        } else {
-            false
-        }
-    }
-
-    def asJson(): JObject = {
-        ("type" -> "interval") ~
-        ("timeleft" -> getTimeLeft)
-    }
-
-    def isReady(): Boolean = {
-      val nextTimeToProcess = timesProcessed * interval
-      currentTime = System.currentTimeMillis
-      if((currentTime - startTime) >= (startTime+((interval*1000) * timesProcessed) )) {
-          true
-      } else {
-          false
-      }
-    }
-
-    def getTimeLeft(): Long = {
-        currentTime = System.currentTimeMillis
-        return maxTime - currentTime
-    }
-    def isValid(): Boolean = {
-        if(timesProcessed == (maxTime / interval)) {
-            true
-        } else {
-            false
-        }
-    }
-}
-case class Duration(val maxTime: Long) extends TimeAttribute() {
   var timesProcessed: Int = 0
-  var startTime: Long = 0
-  var currentTime: Long = 0
-  var endTime: Long = 0
+  var startTime = 0L
+  var currentTime = 0L
+  var endTime  = 0L
+
+  override def initialize() {
+      timesProcessed = 0
+      startTime = System.currentTimeMillis
+      endTime = startTime + (maxTime * 1000)
+      process()
+  }
+
+  def process(): Boolean = {
+      if (isReady) {
+        timesProcessed += 1
+        true
+      } else {
+        false
+      }
+  }
+
+  def asJson(): JObject = {
+      ("type" -> "interval") ~
+      ("timeleft" -> getTimeLeft)
+  }
+
+  def isReady: Boolean = {
+    val nextTimeToProcess = timesProcessed * interval
+    currentTime = System.currentTimeMillis
+    (currentTime - startTime) >= (startTime + ((interval * 1000) * timesProcessed))
+  }
+
+  def getTimeLeft: Long = {
+      currentTime = System.currentTimeMillis
+      maxTime - currentTime
+  }
+
+  def isValid: Boolean = timesProcessed == (maxTime / interval)
+}
+
+case class Duration(maxTime: Long) extends TimeAttribute() {
+  var timesProcessed: Int = 0
+  var startTime = 0L
+  var currentTime = 0L
+  var endTime = 0L
   
   def initialize() {
     timesProcessed = 0
-    var time: Long = System.currentTimeMillis
+    val time: Long = System.currentTimeMillis
     startTime = time
     endTime = time + (maxTime * 1000)
     process()    
   }
 
   def process(): Boolean = {
-    if(isReady()) {
-        timesProcessed += 1
-        true
+    if (isReady) {
+      timesProcessed += 1
+      true
     } else {
-        false
+      false
     }
   }
 
@@ -129,20 +108,14 @@ case class Duration(val maxTime: Long) extends TimeAttribute() {
     ("timeleft" -> getTimeLeft)
   }
 
-  def isReady(): Boolean = {
+  def isReady: Boolean = {
     false
   }
 
-  def getTimeLeft(): Long = {
+  def getTimeLeft: Long = {
     currentTime = System.currentTimeMillis
-    return endTime - currentTime
+    endTime - currentTime
   }
 
-  def isValid(): Boolean = {
-    if(getTimeLeft() <= 0) {
-        false
-    } else {
-        true
-    }
-  }
+  def isValid: Boolean = getTimeLeft > 0
 }

@@ -4,18 +4,13 @@ import ayai.components._
 import ayai.gamestate._
 
 /** Crane Imports **/
-import crane.{Entity, World}
 
+import akka.actor.ActorSystem
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-import net.liftweb.json.Extraction._
-// import net.liftweb.json.Printer._
-
 import scala.collection.mutable._
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-
-case class InvalidJsonException(smth:String)  extends Exception
+case class InvalidJsonException(smth: String)  extends Exception
 
 object ClassFactory {
   implicit val formats = net.liftweb.json.DefaultFormats
@@ -31,19 +26,18 @@ object ClassFactory {
 
     def getStatsJson: JValue = {
       baseStats match {
-        case Some(stats: List[Stat]) =>
+        case Some(stats) => {
           // var jsonStats =
           var statsArray = new ArrayBuffer[Stat]()
           statsArray appendAll stats
           statsArray += new Stat("health", baseHealth, 0)
           statsArray += new Stat("mana", baseMana, 0)
 
-          var statsMapping = statsArray map ((stat: Stat) => (stat.attributeType -> stat.magnitude))
-          var statsMap = statsMapping.toMap
+          val statsMapping = statsArray map (stat => (stat.attributeType -> stat.magnitude))
+          val statsMap = statsMapping.toMap
           statsMap
-
-        case _ =>
-          throw new InvalidJsonException("Cannot read stats in class factory.")
+        }
+        case _ => throw new InvalidJsonException("Cannot read stats in class factory.")
       }
     }
 
@@ -58,9 +52,9 @@ object ClassFactory {
   /**
   ** Load all loaded classes into classMap actor
   **/
-  def bootup(networkSystem: ActorSystem) = {
+  def bootup(networkSystem: ActorSystem): Unit = {
     classes.foreach(classData => {
-      var classComponent = new ClassValues(
+      val classComponent = new ClassValues(
         classData.id,
         classData.name,
         classData.description,
@@ -77,15 +71,12 @@ object ClassFactory {
   }
 
   def buildStats(stats: Option[List[Stat]]): Stats = {
-    var statsArray = new ArrayBuffer[Stat]()
-    statsArray.appendAll(stats.get)
+    val statsArray = new ArrayBuffer[Stat]()
+    statsArray ++= stats.get
     new Stats(statsArray)
   }
 
-  def asJson: JObject = {
-    ("classes" -> classes.map{ c =>
-        (c.asJson)})
-  }
+  def asJson: JObject = "classes" -> classes.map(_.asJson)
 
   /**
   ** Get all classes that are listed in classes.json
@@ -104,10 +95,10 @@ object ClassFactory {
 
     val listOfLists: List[List[AllClassValues]] = otherPaths.map((path: String) => getClassesList(path))
 
-    var classesList = new ArrayBuffer[AllClassValues]()
-    classesList.appendAll(rootClasses)
+    val classesList = new ArrayBuffer[AllClassValues]()
+    classesList ++= rootClasses
 
-    listOfLists.foreach(e => classesList.appendAll(e))
+    listOfLists.foreach(classesList ++=)
     classesList.toList
   }
 }

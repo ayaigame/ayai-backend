@@ -18,22 +18,23 @@ import scala.concurrent.duration._
 import ayai.apps._ 
 
 case class AllNPCValues(
-      id: Int,
-      name: String,
-      roomId: Int,
-      faction: String,
-      level: Int,
-      experience: Long,
-      maximumHealth: Int,
-      maximumMana: Int,
-      xposition: Int,
-      yposition: Int,
-      quests: QuestValue,
-      weapon1: Int,
-      helmet: Int,
-      torso: Int,
-      legs: Int,
-      feet: Int)
+  id: Int,
+  name: String,
+  roomId: Int,
+  faction: String,
+  level: Int,
+  experience: Long,
+  maximumHealth: Int,
+  maximumMana: Int,
+  xposition: Int,
+  yposition: Int,
+  quests: QuestValue,
+  weapon1: Int,
+  helmet: Int,
+  torso: Int,
+  legs: Int,
+  feet: Int
+)
 case class QuestValue(questId: Int)
 case class InventoryValue(itemId: Int)
 case class EquipmentValues(weapon1: Int, helmet: Int, torso: Int, legs: Int, feet: Int)
@@ -42,16 +43,17 @@ object NPCFactory {
   implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
 
   def bootup(networkSystem: ActorSystem) = {
-    var npcs: List[AllNPCValues] = getNPCList("src/main/resources/npcs/npcs.json")
+    val npcs: List[AllNPCValues] = getNPCList("src/main/resources/npcs/npcs.json")
     val roomList = networkSystem.actorSelection("user/RoomList")
     val questMap = networkSystem.actorSelection("user/QuestMap")
     val itemMap = networkSystem.actorSelection("user/ItemMap")
-    for(npc <- npcs) {
+    for (npc <- npcs) {
       val future = roomList ? GetWorldById(npc.roomId)
       val roomWorld = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]] match {
         case Some(room: RoomWorld) => room
         case _ => null
       }
+
       val ent: Entity = EntityFactory.createNPC(roomWorld, npc.faction, npc)
       val questfuture =  questMap ? GetQuest("QUEST"+npc.quests.questId)
       Await.result(questfuture, timeout.duration).asInstanceOf[Quest] match {
@@ -116,9 +118,7 @@ object NPCFactory {
 
     // val listOfLists: List[List[Quest]] = rootClasses.map((path: String) => getClassesList(path))
     
-    var npcList = new ArrayBuffer[AllNPCValues]()
-    npcList.appendAll(rootClasses)
-    npcList.toList
+    rootClasses
     // listOfLists.foreach(e => questList.appendAll(e))
     // questList.toList
   }
