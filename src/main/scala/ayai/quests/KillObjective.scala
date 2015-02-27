@@ -10,7 +10,7 @@ class KillObjective(name: String, totalCompleted: Int, totalNeeded:Int) extends 
 		("totalNeeded" -> totalNeeded)
 	}
 
-  override def isComplete(): Boolean = {
-    return totalCompleted >= totalNeeded
+  override def isComplete: Boolean = {
+    totalCompleted >= totalNeeded
   }
 }

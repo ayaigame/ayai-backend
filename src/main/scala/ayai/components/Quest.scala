@@ -1,7 +1,7 @@
 package ayai.components
 
 import crane.Component
-import ayai.quests.{Objective}
+import ayai.quests.Objective
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 

@@ -10,8 +10,8 @@ class FetchObjective(name: String, target: String, recipient: String) extends Ob
       ("recipient" -> recipient)
   }
 
-  override def isComplete(): Boolean = {
+  override def isComplete: Boolean = {
     // do something fancy here to check if the target has been delivered.
-    return false
+    false
   }
 }
