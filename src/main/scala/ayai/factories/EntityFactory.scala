@@ -2,6 +2,7 @@ package ayai.factories
 
 /** Ayai Imports **/
 import ayai.components._
+import ayai.components.pathfinding.{ManhattanDistance, AStar}
 import ayai.maps._
 import ayai.actions._
 import ayai.statuseffects._
@@ -184,6 +185,8 @@ object EntityFactory {
     p.components += new Vision()
     p.components += new Hearing()
     p.components += new Memory()
+
+    p.components += new AStar(new ManhattanDistance)
 
     p
   }
