@@ -52,6 +52,7 @@ class WorldFactory extends Actor {
       world.addSystem(AttackSystem(context.system))
       world.addSystem(CooldownSystem(context.system))
 
+      world.addSystem(QuestGenerationSystem(context.system))
       world.addSystem(PerceptionSystem(context.system))
       world.addSystem(VisionSystem(context.system))
       world.addSystem(SoundSystem(context.system))

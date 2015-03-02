@@ -84,6 +84,8 @@ object EntityFactory {
         p.components += new Hearing()
         p.components += new Memory()
 
+        p.components += new QuestHistory()
+
         // get stats needed for class
 
         val questbag = new QuestBag()
