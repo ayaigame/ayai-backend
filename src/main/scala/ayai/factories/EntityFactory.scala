@@ -187,6 +187,9 @@ object EntityFactory {
     p.components += new Hearing()
     p.components += new Memory()
 
+    p.components += new QuestHistory()
+    //p.components += new GenerateQuest()
+
     p
   }
 

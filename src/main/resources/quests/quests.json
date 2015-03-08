@@ -6,6 +6,7 @@
 			"description": "Kill Wild Boars",
 			"recommendLevel": 1,
 			"objectives": [{
+				"jsonClass": "KillObjective",
 				"name": "Kill 8 Boars",
 				"totalCompleted": 0,
 				"totalNeeded": 8
@@ -18,6 +19,7 @@
 			"description": "Kurt hasn't been paying this week, find him at the house and kill him",
 			"recommendLevel": 2,
 			"objectives": [{
+				"jsonClass": "KillObjective",
 				"name": "Kill Kurt",
 				"totalCompleted": 0,
 				"totalNeeded": 1
