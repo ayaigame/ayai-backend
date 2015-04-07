@@ -19,21 +19,16 @@ class SenseComponent extends Component {
   }
 }
 
-class Hearing extends SenseComponent {
-  var hearingAbility : Int = -1
+class Hearing( var hearingAbility : Double) extends SenseComponent {
 }
 
-class SoundProducing extends Component {
-  var intensity : Int = -1
+class SoundProducing( var intensity : Int) extends Component {
 }
 
-class SoundEntity extends Entity {
-  var intensity : Int = -1
+class SoundEntity( var intensity : Int, var origin : Position ) extends Entity {
 }
 
-class Vision( var los : LOS ) extends SenseComponent {
-  var visionRange : Int = -1
-
+class Vision( var los : LOS, var visionRange : Int ) extends SenseComponent {
   def drawLine(start: Position, end : Position, bounds: Bounds, tileMap: TileMap): Boolean = {
     return los.drawLine(start, end, bounds, tileMap)
   }
