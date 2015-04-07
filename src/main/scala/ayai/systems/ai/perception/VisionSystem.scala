@@ -24,9 +24,9 @@ class VisionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     (e.getComponent(classOf[Position]),
       e.getComponent(classOf[Bounds]), e.getComponent(classOf[Vision]), e.getComponent(classOf[Actionable])) match {
       case (Some(position: Position), Some(bounds: Bounds), Some(vision: Vision), Some(actionable: Actionable)) => {
-        if ( actionable.active) {
+        if (actionable.active) {
 
-          var allEntities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds]),
+          val allEntities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds]),
             exclude=List(classOf[Respawn], classOf[Transport], classOf[Dead], classOf[Attack]))
           val tileMap = world.asInstanceOf[RoomWorld].tileMap
 
@@ -35,8 +35,8 @@ class VisionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
               case (Some(position2: Position)) => {
 
                 if (position != position2) {
-                  var entity1LOS = vision.drawLine(position, position2, bounds, tileMap)
-                  var entity2LOS = vision.drawLine(position2, position, bounds, tileMap)
+                  val entity1LOS = vision.drawLine(position, position2, bounds, tileMap)
+                  val entity2LOS = vision.drawLine(position2, position, bounds, tileMap)
 
                   if (entity1LOS == true) {
 
@@ -56,7 +56,6 @@ class VisionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
 
                         if (spamLog) log.warn(char2.name + " sees " + char1.name)
                       }
-
                     }
                   }
                 }
@@ -69,10 +68,8 @@ class VisionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     }
   }
 
-  def getDistance(p1: Position, p2 : Position): Int = {
-    var result = 0
-    result += math.abs(p1.x - p2.x)
-    result += math.abs(p1.y - p2.y)
-    result
+  def getDistance(p1: Position, p2: Position): Int = {
+    // Manhattan distance
+    math.abs(p1.x - p2.x) + math.abs(p1.y - p2.y)
   }
 }
