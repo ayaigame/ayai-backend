@@ -45,9 +45,9 @@ class DiagonalDistance extends DistanceHeuristic {
 /**
  * Heuristic class for calculating the Euclidean distance between two points
  *
- * d(p, q) = d(q, p) = sqrt((q1 - p1)^2, ..., (qn - pn)^2)
+ * d(p, q) = d(q, p) = sqrt((q1 - p1)^2 + … + (qn - pn)^2)
  * NOTE: This implementation doesn't take the square root to save unnecessary cycles
- * As a heuristic, we only need to know distances relative to each other -- we don't care what the distance actually is
+ * As a heuristic, we only need to know distances relative to each other – we don't care what the distance actually is
  *
  * http://en.wikipedia.org/wiki/Euclidean_distance
  */
@@ -58,6 +58,6 @@ class EuclideanDistance extends DistanceHeuristic {
     val dx = math.abs(start.x - end.x)
     val dy = math.abs(start.y - end.y)
 
-    SCALE_FACTOR * (dx * dx + dy * dy)
+    SCALE_FACTOR * (dx*dx + dy*dy)
   }
 }
