@@ -81,9 +81,12 @@ object EntityFactory {
         p.components += new Character(entityId, characterRow.name)
         p.components += new Faction("allies")
 
-        p.components += new Vision()
-        p.components += new Hearing()
+        p.components += new Vision(new WuLOS(), 2000)
+        p.components += new Hearing(.5)
+        p.components += new SoundProducing(3200)
         p.components += new Memory()
+
+        p.components += new QuestHistory()
 
         // get stats needed for class
 
@@ -182,11 +185,15 @@ object EntityFactory {
     p.components += new Character(id, npcValue.name)
     p.components += new Faction(faction)
 
-    p.components += new Vision()
-    p.components += new Hearing()
+    p.components += new Vision(new WuLOS(), 2000)
+    p.components += new Hearing(.5)
+    p.components += new SoundProducing(2000)
     p.components += new Memory()
 
     p.components += new AStar(new ManhattanDistance)
+
+    p.components += new QuestHistory()
+    //p.components += new GenerateQuest()
 
     p
   }

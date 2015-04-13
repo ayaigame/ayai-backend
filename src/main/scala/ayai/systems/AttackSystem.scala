@@ -38,7 +38,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
             }
           }
         }
-        //moves victims to another array so they arent hit again
+        //moves victims to another array so they aren't hit again
         attack.moveVictims()
       }
       case _ =>
@@ -47,7 +47,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
   }
 
   /**
-  ** Return the amount of weapon damage the initator has
+  ** Return the amount of weapon damage the initiator has
   **/
   def getWeaponStat(entity: Entity): Int = {
     var playerBase: Int = 5
@@ -141,7 +141,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       case Some(position: Position) => position
       case _ => new Position(100,100)
     }
-    //if the victim's health reaches zero, then take the persons inventory and make it lootable
+    //if the victim's health reaches zero, then take the person's inventory and make it lootable
     if (healthComponent.currentHealth <= 0) {
       victim.components += new Time(1000, System.currentTimeMillis())
       victim.components += new Dead()
