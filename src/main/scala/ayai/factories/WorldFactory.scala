@@ -3,6 +3,7 @@ package ayai.factories
 /** Ayai Imports **/
 import ayai.systems._
 import ayai.gamestate.{RoomWorld, GameStateSerializer, MessageProcessorSupervisor}
+import ayai.systems.ai.pathfinding.PathfindingSystem
 
 /** External Imports **/
 import net.liftweb.json._
@@ -34,6 +35,7 @@ class WorldFactory extends Actor {
       val id = (parsedJson \ "id").extract[Int]
 
       val world = RoomWorld(id, tileMap, isLeaf = true)
+      world.addSystem(PathfindingSystem(context.system), 1)
       world.addSystem(MovementSystem(), 1)
       world.addSystem(TransportSystem(context.system), 2)
       world.addSystem(HealthSystem())

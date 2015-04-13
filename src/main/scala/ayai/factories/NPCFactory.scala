@@ -48,6 +48,8 @@ object NPCFactory {
     val questMap = networkSystem.actorSelection("user/QuestMap")
     val itemMap = networkSystem.actorSelection("user/ItemMap")
     for (npc <- npcs) {
+      println(s"Loading NPC ID = ${npc.id}, name = ${npc.name}")
+
       val future = roomList ? GetWorldById(npc.roomId)
       val roomWorld = Await.result(future, timeout.duration).asInstanceOf[Option[RoomWorld]] match {
         case Some(room: RoomWorld) => room
