@@ -26,7 +26,7 @@ class SoundSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(inclu
 
           val soundEntity = new SoundEntity(soundProd.intensity, soundPosition)
 
-          var hearingEntities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds], classOf[Hearing]),
+          val hearingEntities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds], classOf[Hearing]),
             exclude=List(classOf[Respawn], classOf[Transport], classOf[Dead]))
 
           for (entity <- hearingEntities) {
@@ -40,7 +40,6 @@ class SoundSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(inclu
                     case (Some(char1: Character), Some(char2: Character)) => {
 
                       if (spamLog) log.warn(char2.name + " hears " + char1.name)
-
                     }
                   }
                 }
@@ -56,10 +55,8 @@ class SoundSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(inclu
 
   }
 
-  def getDistance(p1: Position, p2 : Position): Int = {
-    var result = 0
-    result += math.abs(p1.x - p2.x)
-    result += math.abs(p1.y - p2.y)
-    result
+  def getDistance(p1: Position, p2: Position): Int = {
+    // Manhattan distance
+    math.abs(p1.x - p2.x) + math.abs(p1.y - p2.y)
   }
 }
