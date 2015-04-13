@@ -47,7 +47,8 @@ class DiagonalDistance extends DistanceHeuristic {
  *
  * d(p, q) = d(q, p) = sqrt((q1 - p1)^2 + … + (qn - pn)^2)
  * NOTE: This implementation doesn't take the square root to save unnecessary cycles
- * As a heuristic, we only need to know distances relative to each other – we don't care what the distance actually is
+ * As a heuristic, we only need to know distances relative to other distances calculated by
+ * the same heuristic – we don't care what the distance actually is
  *
  * http://en.wikipedia.org/wiki/Euclidean_distance
  */
