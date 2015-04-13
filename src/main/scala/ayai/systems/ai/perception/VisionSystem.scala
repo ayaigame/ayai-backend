@@ -21,14 +21,15 @@ class VisionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
 
   override def processEntity(e: Entity, deltaTime: Int): Unit = {
 
-    var allEntities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds]),
-      exclude=List(classOf[Respawn], classOf[Transport], classOf[Dead]))
-    val tileMap = world.asInstanceOf[RoomWorld].tileMap
-
     (e.getComponent(classOf[Position]),
       e.getComponent(classOf[Bounds]), e.getComponent(classOf[Vision]), e.getComponent(classOf[Actionable])) match {
       case (Some(position: Position), Some(bounds: Bounds), Some(vision: Vision), Some(actionable: Actionable)) => {
         if ( actionable.active) {
+
+          var allEntities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds]),
+            exclude=List(classOf[Respawn], classOf[Transport], classOf[Dead], classOf[Attack]))
+          val tileMap = world.asInstanceOf[RoomWorld].tileMap
+
           for (entity <- allEntities) {
             (entity.getComponent(classOf[Position])) match {
               case (Some(position2: Position)) => {
@@ -64,8 +65,6 @@ class VisionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
           }
         }
       }
-
-      // vision.seen? See AttackSystem, namely attack.victims comparison
 
     }
   }
