@@ -23,7 +23,7 @@ class PerceptionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
   }
 
   def notify(evt: PerceptionEvent) = {
-    for (PerceptionSystem sys: senseSystems) {
+    senseSystems.foreach {
       sys.notify();
     }
     if (spamLog) log.warn(evt.getMain().name + evt.getAction() + evt.getTarget().name)
