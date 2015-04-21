@@ -15,6 +15,8 @@ object PerceptionSystem {
 
 class PerceptionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[SenseComponent])) {
   var senseSystems: ArrayBuffer[PerceptionSystem] = new ArrayBuffer[PerceptionSystem]()
+  private val log = LoggerFactory.getLogger(getClass)
+  private val spamLog = false
 
   override def processEntity(e: Entity, deltaTime: Int): Unit = {
 
@@ -24,6 +26,7 @@ class PerceptionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
     for (PerceptionSystem sys: senseSystems) {
       sys.notify();
     }
+    if (spamLog) log.warn(evt.getMain().name + evt.getAction() + evt.getTarget().name)
   }
 
 }
