@@ -14,9 +14,16 @@ object PerceptionSystem {
 }
 
 class PerceptionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[SenseComponent])) {
-  var senseSystems: ArrayBuffer[System] = new ArrayBuffer[System]()
+  var senseSystems: ArrayBuffer[PerceptionSystem] = new ArrayBuffer[PerceptionSystem]()
 
   override def processEntity(e: Entity, deltaTime: Int): Unit = {
 
   }
+
+  def notify(evt: PerceptionEvent) = {
+    for (PerceptionSystem sys: senseSystems) {
+      sys.notify();
+    }
+  }
+
 }

@@ -13,7 +13,10 @@ object MemorySystem {
   def apply(actorSystem: ActorSystem) = new MemorySystem(actorSystem)
 }
 
-class MemorySystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Memory])) {
+class MemorySystem(actorSystem: ActorSystem) extends PerceptionSystem(include=List(classOf[Memory])) {
+  private val log = LoggerFactory.getLogger(getClass)
+  private val spamLog = false
+
   override def processEntity(e: Entity, deltaTime: Int): Unit = {
 
   }

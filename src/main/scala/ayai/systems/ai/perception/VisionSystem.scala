@@ -15,7 +15,7 @@ object VisionSystem {
   def apply(actorSystem: ActorSystem) = new VisionSystem(actorSystem)
 }
 
-class VisionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Vision])) {
+class VisionSystem(actorSystem: ActorSystem) extends PerceptionSystem(include=List(classOf[Vision])) {
   private val log = LoggerFactory.getLogger(getClass)
   private val spamLog = false
 
@@ -55,6 +55,7 @@ class VisionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
                       case (Some(char1: Character), Some(char2: Character)) => {
 
                         if (spamLog) log.warn(char2.name + " sees " + char1.name)
+
                       }
 
                     }
