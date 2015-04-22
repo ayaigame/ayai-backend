@@ -15,7 +15,7 @@ object VisionSystem {
   def apply(actorSystem: ActorSystem) = new VisionSystem(actorSystem)
 }
 
-class VisionSystem(actorSystem: ActorSystem) extends PerceptionSystem(include=List(classOf[Vision])) {
+class VisionSystem(actorSystem: ActorSystem) extends PerceptionSystem(actorSystem, include=List(classOf[Vision])) {
   private val log = LoggerFactory.getLogger(getClass)
   private val spamLog = false
 

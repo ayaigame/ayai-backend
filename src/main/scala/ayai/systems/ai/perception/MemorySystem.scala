@@ -6,6 +6,7 @@ import ayai.actions._
 import crane.{Component, Entity, World, EntityProcessingSystem}
 
 import akka.actor.ActorSystem
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -13,7 +14,7 @@ object MemorySystem {
   def apply(actorSystem: ActorSystem) = new MemorySystem(actorSystem)
 }
 
-class MemorySystem(actorSystem: ActorSystem) extends PerceptionSystem(include=List(classOf[Memory])) {
+class MemorySystem(actorSystem: ActorSystem) extends PerceptionSystem(actorSystem, include=List(classOf[Memory])) {
   private val log = LoggerFactory.getLogger(getClass)
   private val spamLog = false
 

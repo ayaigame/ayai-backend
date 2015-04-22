@@ -1,6 +1,6 @@
 package ayai.systems
 
-import ayai.components._
+import ayai.components.SenseComponent
 
 import crane.{Entity, EntityProcessingSystem}
 import akka.actor.ActorSystem
@@ -11,8 +11,8 @@ object PerceptionSystem {
   def apply(actorSystem: ActorSystem) = new PerceptionSystem(actorSystem)
 }
 
-class PerceptionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[SenseComponent])) {
-  var senseSystems: ArrayBuffer[PerceptionSystem] = new ArrayBuffer[PerceptionSystem]()
+class PerceptionSystem[S](actorSystem: ActorSystem, include: List[Class[S]] = List(classOf[SenseComponent])) extends EntityProcessingSystem(include=include) {
+  var senseSystems: ArrayBuffer[PerceptionSystem[SenseComponent]] = new ArrayBuffer[PerceptionSystem[SenseComponent]]()
   private val log = LoggerFactory.getLogger(getClass)
   private val spamLog = false
 
@@ -20,8 +20,8 @@ class PerceptionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
 
   }
 
-  def notify(evt: PerceptionEvent) = {
-    senseSystems.foreach(sys => sys.notify())
+  def notify(evt: PerceptionEvent): Unit = {
+    for (sys <- senseSystems) { sys.notify(evt) }
     if (spamLog) log.warn(evt.main.name + " " + evt.action + " " + evt.target.name)
   }
 
