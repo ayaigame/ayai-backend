@@ -1,12 +1,10 @@
 package ayai.systems
 
 import ayai.components._
-import ayai.actions._
 
-import crane.{Component, Entity, World, EntityProcessingSystem}
-
+import crane.{Entity, EntityProcessingSystem}
 import akka.actor.ActorSystem
-
+import org.slf4j.LoggerFactory
 import scala.collection.mutable.ArrayBuffer
 
 object PerceptionSystem {
@@ -23,10 +21,8 @@ class PerceptionSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(
   }
 
   def notify(evt: PerceptionEvent) = {
-    senseSystems.foreach {
-      sys.notify();
-    }
-    if (spamLog) log.warn(evt.getMain().name + evt.getAction() + evt.getTarget().name)
+    senseSystems.foreach(sys => sys.notify())
+    if (spamLog) log.warn(evt.main.name + " " + evt.action + " " + evt.target.name)
   }
 
 }
