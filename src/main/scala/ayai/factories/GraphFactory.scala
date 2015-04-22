@@ -13,13 +13,14 @@ object NodeState extends Enumeration {
 import NodeState.{NodeState, IMPASS, NORMAL, SLOW}
 
 case class Node(val state: NodeState) {
-  def printableState = state match {
+  override def toString = s"$printableState Node"
+
+  private def printableState = state match {
     case IMPASS => "Impassable"
     case NORMAL => "Normal"
     case SLOW => "Slow"
     case _ => "Unknown"
   }
-  override def toString = s"Node $printableState"
 }
 
 object GraphFactory {
@@ -28,7 +29,7 @@ object GraphFactory {
     val entities = world.getEntitiesByComponents(classOf[Position], classOf[Bounds])
 
     // start by assuming all nodes are passable
-    val entityArray = Array.fill[Node](tileMap.width, tileMap.height) { Node(NORMAL)  }
+    val entityArray = Array.fill[Node](tileMap.width, tileMap.height) { Node(NORMAL) }
 
     // mark locations where an entity is standing as impassable
     entities.foreach { entity =>
@@ -63,6 +64,6 @@ object GraphFactory {
   }
 
   private def inBounds(max: Int, indexes: Int*): Boolean = {
-    indexes.forall{ index => Range.inclusive(0, max).contains(index) }
+    indexes.forall(Range.inclusive(0, max).contains)
   }
 }
