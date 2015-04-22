@@ -13,7 +13,7 @@ object CommunicationSystem {
   def apply(actorSystem: ActorSystem) = new CommunicationSystem(actorSystem)
 }
 
-class CommunicationSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[SenseComponent])) {
+class CommunicationSystem(actorSystem: ActorSystem) extends PerceptionSystem(include=List(classOf[SenseComponent])) {
   override def processEntity(e: Entity, deltaTime: Int): Unit = {
 
   }

@@ -14,7 +14,7 @@ object SoundSystem {
   def apply(actorSystem: ActorSystem) = new SoundSystem(actorSystem)
 }
 
-class SoundSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(include=List(classOf[Hearing])) {
+class SoundSystem(actorSystem: ActorSystem) extends PerceptionSystem(include=List(classOf[Hearing])) {
   private val log = LoggerFactory.getLogger(getClass)
   private val spamLog = false
 
@@ -40,6 +40,7 @@ class SoundSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(inclu
                     case (Some(char1: Character), Some(char2: Character)) => {
 
                       if (spamLog) log.warn(char2.name + " hears " + char1.name)
+
                     }
                   }
                 }
