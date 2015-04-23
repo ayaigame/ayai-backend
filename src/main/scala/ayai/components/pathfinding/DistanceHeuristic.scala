@@ -25,13 +25,13 @@ class ManhattanDistance extends DistanceHeuristic {
 }
 
 /**
- * Heuristic class for calculating the Diagonal distance between two points
+ * Heuristic class for calculating the Chebyshev distance between two points
  *
  * d(p, q) = for all coordinates i: max(|pi - qi|)
  *
  * http://en.wikipedia.org/wiki/Chebyshev_distance
  */
-class DiagonalDistance extends DistanceHeuristic {
+class ChebyshevDistance extends DistanceHeuristic {
   private val SCALE_FACTOR = 1
 
   def estimateDistance(start: Position, end: Position): Double = {
