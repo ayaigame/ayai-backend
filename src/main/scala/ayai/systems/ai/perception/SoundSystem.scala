@@ -17,38 +17,51 @@ object SoundSystem {
 class SoundSystem(actorSystem: ActorSystem) extends PerceptionSystem(actorSystem, include=List(classOf[Hearing])) {
   private val log = LoggerFactory.getLogger(getClass)
   private val spamLog = false
+  private val TICKS_BETWEEN_PROCESSING = 10
+
+  private var counter = 0
 
   override def processEntity(e: Entity, deltaTime: Int): Unit = {
-    (e.getComponent(classOf[Position]), e.getComponent(classOf[Bounds]),
-      e.getComponent(classOf[SoundProducing]), e.getComponent(classOf[Actionable])) match {
-      case (Some(soundPosition: Position), Some(bounds: Bounds), Some(soundProd: SoundProducing), Some(actionable: Actionable)) => {
-        if (actionable.active) {
+    if (counter == TICKS_BETWEEN_PROCESSING) {
+      var soundProducingEntity = e
+      (soundProducingEntity.getComponent(classOf[Position]), soundProducingEntity.getComponent(classOf[Bounds]),
+        soundProducingEntity.getComponent(classOf[SoundProducing]), soundProducingEntity.getComponent(classOf[Actionable])) match {
+        case (Some(soundPosition: Position), Some(bounds: Bounds), Some(soundProd: SoundProducing), Some(actionable: Actionable)) => {
+          if (actionable.active) {
 
-          val soundEntity = new SoundEntity(soundProd.intensity, soundPosition)
+            val soundEntity = new SoundEntity(soundProd.intensity, soundPosition)
 
-          val hearingEntities = world.getEntitiesWithExclusions(include=List(classOf[Position], classOf[Bounds], classOf[Hearing]),
-            exclude=List(classOf[Respawn], classOf[Transport], classOf[Dead]))
+            val hearingEntities = world.getEntitiesWithExclusions(include = List(classOf[Position], classOf[Bounds], classOf[Hearing]),
+              exclude = List(classOf[Respawn], classOf[Transport], classOf[Dead]))
 
-          for (entity <- hearingEntities) {
-            (entity.getComponent(classOf[Position]), entity.getComponent(classOf[Hearing])) match {
-              case (Some(hearPosition: Position), Some(hearing : Hearing)) => {
+            for (hearingEntity <- hearingEntities) {
+              (hearingEntity.getComponent(classOf[Position]), hearingEntity.getComponent(classOf[Hearing])) match {
+                case (Some(hearPosition: Position), Some(hearing: Hearing)) => {
 
-                if (e != entity && (soundEntity.intensity * hearing.hearingAbility) > getDistance(soundEntity.origin, hearPosition)) {
+                  if (soundProducingEntity != hearingEntity && (soundEntity.intensity * hearing.hearingAbility) > getDistance(soundEntity.origin, hearPosition)) {
 
-                  (e.getComponent(classOf[Character]),
-                    entity.getComponent(classOf[Character])) match {
-                    case (Some(char1: Character), Some(char2: Character)) => {
+                    (soundProducingEntity.getComponent(classOf[Character]),
+                      hearingEntity.getComponent(classOf[Character])) match {
+                      case (Some(char1: Character), Some(char2: Character)) => {
 
-                      if (spamLog) log.warn(char2.name + " hears " + char1.name)
+                        if (spamLog) log.warn(char2.name + " hears " + char1.name)
 
+                      }
+                      case _ =>
                     }
                   }
                 }
+                case _ =>
               }
             }
           }
         }
+        case _ =>
       }
+      counter = 0
+    }
+    else {
+      counter+=1
     }
   }
 
