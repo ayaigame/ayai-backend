@@ -1,6 +1,6 @@
 package ayai.gamestate
 
-import crane.World
+import crane.{Entity, World}
 
 object RoomWorld {
   def apply(id: Int, tileMap: TileMap, isLeaf: Boolean) = new RoomWorld(id, tileMap, isLeaf)

@@ -1,3 +1,4 @@
+/*
 package ayai.persistence
 
 /** External Imports **/
@@ -39,3 +40,4 @@ class UserSpec extends FlatSpec with Matchers {
     }
   }
 }
+*/

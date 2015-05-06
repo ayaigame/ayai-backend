@@ -8,14 +8,12 @@ package ayai.gamestate
 import ayai.networking._
 
 /** Akka Imports **/
-import akka.actor.{Actor, ActorRef, Props, OneForOneStrategy}
+import akka.actor.{Actor, Props, OneForOneStrategy}
 import akka.actor.SupervisorStrategy.Escalate
-import akka.routing.{FromConfig, RoundRobinRouter}
+import akka.routing.RoundRobinRouter
 
 /** External Imports **/
 import scala.concurrent.duration._
-import scala.collection.concurrent.{Map => ConcurrentMap}
-import scala.collection.mutable.HashMap
 
 object MessageProcessorSupervisor {
   def apply(world: RoomWorld) = new MessageProcessorSupervisor(world)
@@ -34,10 +32,8 @@ class MessageProcessorSupervisor(world: RoomWorld) extends Actor {
                 name = s"processorrouter$id")
 
   def receive = {
-    case message: ProcessMessage =>
-      router forward message
-    case _ =>
-      println("Error: in procesor supervisor")
+    case message: ProcessMessage => router forward message
+    case _ => println("Error: in procesor supervisor")
   }
 
 }

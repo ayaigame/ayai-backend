@@ -26,11 +26,11 @@ class HealthSystem() extends EntityProcessingSystem(include=List(classOf[Health]
     }
     //look at the status effects of the character
 
-    if(health.currentCached > health.maxCached) {
+    if (health.currentCached > health.maxCached) {
       health.currentCached = health.maxCached
     }
 
-    if(health.getCurrentValue() <= 0) {
+    if(health.getCurrentValue <= 0) {
       println("dead :D")
       //attach respawn to entity
       e.components += new Dead()

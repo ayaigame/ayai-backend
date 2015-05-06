@@ -1,6 +1,8 @@
 ayai-backend
 ============
 
+![](https://travis-ci.org/ayai-ai/ayai-backend.svg?branch=develop)
+
 This repository contains the Java and Scala source files for the backend components of the AyAI server.
 These components are:
 

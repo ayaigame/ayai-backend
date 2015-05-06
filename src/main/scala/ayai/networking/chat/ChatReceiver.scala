@@ -1,4 +1,5 @@
 package ayai.networking.chat
+
 /**
  * ayai.networking.chat.ChatReceiver
  * Actor that receives chats sent by the player over sockets and stores them
@@ -9,7 +10,6 @@ package ayai.networking.chat
 import ayai.networking.ConnectionWrite
 import ayai.components.NetworkingActor
 import ayai.persistence.AyaiDB
-//import ayai.persistence.{StoredChat, StoredChats, NewStoredChat}
 
 /** Akka Imports **/
 import akka.actor.Actor
@@ -19,8 +19,6 @@ import crane.World
 
 /** External Imports **/
 //import scala.slick.driver.H2Driver.simple.{Database,Session}
-import scala.concurrent.duration._
-import scala.concurrent.Await
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import net.liftweb.json.Serialization.{read, write}
@@ -69,12 +67,12 @@ class ChatReceiver extends Actor {
         // TODO: Private Chats
         //val targetFuture = context.system.actorSelection("user/SockoSender" + receiver.id).resolveOne(100.milliseconds)
         //val targetRef = Await.result(targetFuture, 100.milliseconds)
-        //if(targetRef.isTerminated) {
+        //if (targetRef.isTerminated) {
         //  return false
         //} else {
         //  targetRef ! chatHolder
         println("Not yet implemented")
-        return true
+        true
         //}
       // Send Public Chat to every chat sender
       case PublicChat(text, sender) =>
@@ -85,7 +83,7 @@ class ChatReceiver extends Actor {
               na.actor! new ConnectionWrite(new JChat(sender.name, text).toString)
           }
         }
-        return true
+        true
     }
   }
 }

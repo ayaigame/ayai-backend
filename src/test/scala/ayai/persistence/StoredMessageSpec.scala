@@ -1,3 +1,4 @@
+/*
 package ayai.persistence
 
 /** External Imports **/
@@ -43,3 +44,4 @@ class StoredMessageSpec extends FlatSpec with Matchers {
     }
   }
 }
+*/

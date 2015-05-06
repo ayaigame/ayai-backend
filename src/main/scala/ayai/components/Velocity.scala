@@ -14,11 +14,11 @@ class Velocity (var x: Int, var y: Int) extends Component {
     var absoluteValue: Effect = null
     cachedValue = x
     
-    for(effect <- modifiers) {
-      if(!effect.isValid) {
+    for (effect <- modifiers) {
+      if (!effect.isValid) {
         modifiers -= effect
       } else {
-        if(!effect.isRelative) {
+        if (!effect.isRelative) {
           isAbsolute = true
           absoluteValue = effect
           cachedValue = effect.effectiveValue
@@ -26,42 +26,37 @@ class Velocity (var x: Int, var y: Int) extends Component {
       }
     }
 
-    for(effect <- modifiers) {
-      if(isAbsolute && absoluteValue != effect) {
-        if(effect.isRelative && !effect.isValueRelative) {
+    for (effect <- modifiers) {
+      if (isAbsolute && absoluteValue != effect) {
+        if (effect.isRelative && !effect.isValueRelative) {
           cachedValue = cachedValue + effect.effectiveValue
         }
-      } 
-      else if(!isAbsolute) {
-        if(effect.isRelative && !effect.isValueRelative) {
+      } else if (!isAbsolute) {
+        if (effect.isRelative && !effect.isValueRelative) {
           cachedValue = cachedValue + effect.effectiveValue
         } 
       }
     }
-    for(effect <- modifiers) {
-      if(isAbsolute && absoluteValue != effect) {
-        if(effect.isRelative && effect.isValueRelative) {
+
+    for (effect <- modifiers) {
+      if (isAbsolute && absoluteValue != effect) {
+        if (effect.isRelative && effect.isValueRelative) {
           cachedValue = cachedValue + effect.process(cachedValue)
         }
-      } 
-      else if(!isAbsolute) {
-        if(effect.isRelative && effect.isValueRelative) {
+      } else if (!isAbsolute) {
+        if (effect.isRelative && effect.isValueRelative) {
           cachedValue = cachedValue + effect.process(cachedValue)
         } 
       }
     }
   }
 
-  def getValue(): Int = {
-    cachedValue
-  }
+  def getValue(): Int = cachedValue
 
   def addEffect(effect: Effect) {
     effect.effectType match {
       case "velocity" => modifiers += effect
-      case _ => 
-        /// print error 
+      case _ =>
     }
-    
   }
 }

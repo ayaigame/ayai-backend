@@ -19,16 +19,16 @@ import net.liftweb.json.JsonDSL._;
 
 object TransportFactory {
 
-	def createTransports(id: Int,
-          						 toTransports: List[(TransportInfo, Position)],
-          						 map: Array[Array[Int]],
-          						 width: Int,
-          						 height: Int
-          					): List[JTransport] = {
-		var transports = new ListBuffer[JTransport]()
+  def createTransports(id: Int,
+                       toTransports: List[(TransportInfo, Position)],
+                       map: Array[Array[Int]],
+                       width: Int,
+                       height: Int
+                    ): List[JTransport] = {
+    var transports = new ListBuffer[JTransport]()
 
     //Transport to the next room
-		// transports += new JTransport(width-1, 5, width, min(10, height), id+1, 100, 100, "RightToLeft")
+    // transports += new JTransport(width-1, 5, width, min(10, height), id+1, 100, 100, "RightToLeft")
 
     //Create a transport to get back to each transport pointing here.
     for((transport, position) <- toTransports){

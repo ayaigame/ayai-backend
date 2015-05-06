@@ -7,3 +7,6 @@ target/*
 /.cache
 *.swp
 *.db
+
+# IntelliJ IDEA
+.idea/

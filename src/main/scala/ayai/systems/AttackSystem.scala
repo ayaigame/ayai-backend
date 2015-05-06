@@ -10,7 +10,7 @@ import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
 object AttackSystem {
-  def apply(actorSystem: ActorSystem) = new AttackSystem(actorSystem)
+  def apply(actorSystem: ActorSystem): AttackSystem = new AttackSystem(actorSystem)
 }
 
 /**
@@ -22,7 +22,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
   def processEntity(e: Entity, deltaTime: Int) {
     e.getComponent(classOf[Attack]) match {
       case Some(attack: Attack) =>
-      if(!attack.victims.isEmpty) {
+      if (!attack.victims.isEmpty) {
         for(victim <- attack.victims) {
           if(!attack.attacked.contains(victim)) {
             val victimFaction = victim.getComponent(classOf[Faction]) match {
@@ -33,12 +33,12 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
               case Some(faction: Faction) => faction.name
               case _ => ""
             }
-            if(victimFaction != initiatorFaction) {
+            if (victimFaction != initiatorFaction) {
               processAttack(attack.initiator, victim)
             }
           }
         }
-        //moves victims to another array so they arent hit again
+        //moves victims to another array so they aren't hit again
         attack.moveVictims()
       }
       case _ =>
@@ -47,7 +47,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
   }
 
   /**
-  ** Return the amount of weapon damage the initator has
+  ** Return the amount of weapon damage the initiator has
   **/
   def getWeaponStat(entity: Entity): Int = {
     var playerBase: Int = 5
@@ -55,7 +55,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     entity.getComponent(classOf[Stats]) match {
       case Some(stats: Stats) =>
         for(stat <- stats.stats) {
-          if(stat.attributeType == "strength"){
+          if (stat.attributeType == "strength"){
             playerBase = stat.magnitude
           }
         }
@@ -77,7 +77,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     weaponValue + playerBase
   }
 
-  def handleAttackDamage(damage: Int, victim: Health) = {
+  def handleAttackDamage(damage: Int, victim: Health): Unit = {
     victim.addDamage(damage)
   }
 
@@ -90,7 +90,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
     entity.getComponent(classOf[Stats]) match {
       case Some(stats : Stats) =>
         for(stat <- stats.stats) {
-          if(stat.attributeType == "defense"){
+          if (stat.attributeType == "defense"){
             playerBase += stat.magnitude
           }
         }
@@ -141,8 +141,8 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
       case Some(position: Position) => position
       case _ => new Position(100,100)
     }
-    //if the victims health reaches zero, then take the persons inventory and make it lootable
-    if(healthComponent.currentHealth <= 0) {
+    //if the victim's health reaches zero, then take the person's inventory and make it lootable
+    if (healthComponent.currentHealth <= 0) {
       victim.components += new Time(1000, System.currentTimeMillis())
       victim.components += new Dead()
       // get experience and add that to the initiators experience
@@ -150,7 +150,7 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
         victim.getComponent(classOf[Experience]),
         initiator.getComponent(classOf[NPC]),
         victim.getComponent(classOf[NPC])) match {
-        case (Some(initiatorExperience: Experience), Some(victimExperience: Experience), None, Some(npc: NPC)) => 
+        case (Some(initiatorExperience: Experience), Some(victimExperience: Experience), None, Some(npc: NPC)) =>
           initiatorExperience.baseExperience += victimExperience.baseExperience
           initiator.getComponent(classOf[NetworkingActor]) match {
             case Some(na: NetworkingActor) => 
@@ -158,13 +158,14 @@ class AttackSystem(actorSystem: ActorSystem) extends EntityProcessingSystem(incl
                         ("earned" -> victimExperience.baseExperience) 
               na.actor ! new ConnectionWrite(compact(render(att)))
               val ch =  ("type" -> "chat") ~
-                        ("message" -> ("earned: " + victimExperience.baseExperience.toString + " total experience now " + initiatorExperience.baseExperience.toString))  ~
+                        ("message" ->
+                          ("earned: " + victimExperience.baseExperience.toString + " total experience now " + initiatorExperience.baseExperience.toString)) ~
                         ("sender" -> "system")
               na.actor ! new ConnectionWrite(compact(render(ch)))
             case _ =>
           }
         case _ =>
-          //character should not get experience (usually NPCS (they have no need to level up))
+          //character should not get experience (usually NPCs (they have no need to level up))
       }
 
       val loot = EntityFactory.characterToLoot(world, victim, victimPosition)

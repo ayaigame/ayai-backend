@@ -2,39 +2,29 @@ package ayai.apps
 
 /** Ayai Imports **/
 import ayai.networking._
-import ayai.components._
 import ayai.persistence._
 import ayai.gamestate._
 import ayai.factories._
 import ayai.systems.mapgenerator.{WorldGenerator, ExpandRoom}
 
-//Temp for testing!!!
-import ayai.systems.mapgenerator.MapGenerator
-
 /** Akka Imports **/
-import akka.actor.{Actor, ActorRef, ActorSystem, Status, Props}
-import akka.actor.Status.{Success, Failure}
+import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 
 /** External Imports **/
-import scala.concurrent.{Await, ExecutionContext, Promise, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.concurrent.{Map => ConcurrentMap, TrieMap}
-import scala.collection.JavaConversions._
-import scala.collection.mutable.{ArrayBuffer, HashMap}
-import java.util.Random
+import scala.collection.mutable.ArrayBuffer
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
+import java.io.{File, FileWriter, BufferedWriter}
 
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import org.slf4j.{Logger, LoggerFactory}
+import org.slf4j.LoggerFactory
 
 /**
 ** The main loop of the Ayai Game
@@ -42,19 +32,18 @@ import org.slf4j.{Logger, LoggerFactory}
 **/
 object GameLoop {
 
-  private val log = LoggerFactory.getLogger(getClass)
+  private lazy val log = LoggerFactory.getLogger(getClass)
 
   var running: Boolean = true
 
   def main(args: Array[String]) {
     implicit val timeout = Timeout(Constants.NETWORK_TIMEOUT seconds)
-    import ExecutionContext.Implicits.global
 
     // COMMENT ME OUT TO SPEED UP BOOTUP TIME
     //This recreates the database and mapList.json file.
     DBCreation.ensureDbExists()
-    var fwMapList = new FileWriter(new File("src/main/resources/assets/maps/mapList.json"))
-    var bwMapList = new BufferedWriter(fwMapList)
+    val fwMapList = new FileWriter(new File("src/main/resources/assets/maps/mapList.json"))
+    val bwMapList = new BufferedWriter(fwMapList)
 
     bwMapList.write(pretty(render(List("map0.json", "map1.json"))))
     bwMapList.close()
@@ -92,7 +81,7 @@ object GameLoop {
     val classFactory = ClassFactory.bootup(networkSystem)
     val effectFactory = EffectFactory.bootup(networkSystem)
 
-    for(file <- rooms){
+    for (file <- rooms) {
       val future = worldFactory ? new CreateWorld(file)
       val result = Await.result(future, timeout.duration).asInstanceOf[RoomWorld]
       roomList ! AddWorld(result)
@@ -113,13 +102,13 @@ object GameLoop {
     receptionist.run(Constants.SERVER_PORT)
 
     //GAME LOOP RUNS AS LONG AS SERVER IS UP
-    while(running) {
+    while (running) {
       val start = System.currentTimeMillis
 
       val processedMessages = new ArrayBuffer[Future[Any]]
       val futureWorlds = roomList ? new GetAllWorlds()
       val worlds = Await.result(futureWorlds, timeout.duration).asInstanceOf[ArrayBuffer[RoomWorld]]
-      for(world <- worlds) {
+      for (world <- worlds) {
         val id = world.id
         val future = mQueue ? FlushMessages(id)
         val result = Await.result(future, timeout.duration).asInstanceOf[QueuedMessages]
@@ -132,12 +121,12 @@ object GameLoop {
 
       Await.result(Future.sequence(processedMessages), 10 seconds)
 
-      for(world <- worlds) {
+      for (world <- worlds) {
         world.process()
       }
 
       val end = System.currentTimeMillis
-      if((end - start) < (1000 / Constants.FRAMES_PER_SECOND)) {
+      if ((end - start) < (1000 / Constants.FRAMES_PER_SECOND)) {
         Thread.sleep((1000 / Constants.FRAMES_PER_SECOND) - (end - start))
       }
     }

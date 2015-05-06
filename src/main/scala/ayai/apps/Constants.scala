@@ -2,9 +2,6 @@ package ayai.apps
 
 /** External Imports **/
 import net.liftweb.json._
-import net.liftweb.json.JsonDSL._
-
-import java.rmi.server.UID
 
 object Constants {
   implicit val formats = net.liftweb.json.DefaultFormats
@@ -18,12 +15,12 @@ object Constants {
   source.close()
 
   val configJSON = parse(lines)
-  val NETWORK_TIMEOUT:Int = compact(render(configJSON \ "NETWORK_TIMEOUT")).toInt
-  val LOAD_RADIUS:Int = compact(render(configJSON \ "LOAD_RADIUS")).toInt
-  val SERVER_PORT:Int = compact(render(configJSON \ "SERVER_PORT")).toInt
-  val FRAMES_PER_SECOND = compact(render(configJSON \ "FRAMES_PER_SECOND")).toInt
-  val STARTING_X: Int = compact(render(configJSON \ "STARTING_X")).toInt
-  val STARTING_Y: Int = compact(render(configJSON \ "STARTING_Y")).toInt
+  val NETWORK_TIMEOUT = extractValue[Int]("NETWORK_TIMEOUT")
+  val LOAD_RADIUS = extractValue[Int]("LOAD_RADIUS")
+  val SERVER_PORT = extractValue[Int]("SERVER_PORT")
+  val FRAMES_PER_SECOND = extractValue[Int]("FRAMES_PER_SECOND")
+  val STARTING_X = extractValue[Int]("STARTING_X")
+  val STARTING_Y = extractValue[Int]("STARTING_Y")
 
   val experienceSource = scala.io.Source.fromFile("src/main/resources/configs/classes/experience.json")
   val experienceLines = experienceSource.mkString
@@ -31,4 +28,8 @@ object Constants {
   experienceSource.close()
 
   val EXPERIENCE_ARRAY = parse(experienceLines).extract[List[Int]]
+
+  private def extractValue[T](key: String)(implicit mf: Manifest[T]): T = {
+    (configJSON \ key).extract[T]
+  }
 }

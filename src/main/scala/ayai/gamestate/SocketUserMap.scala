@@ -1,24 +1,17 @@
 package ayai.gamestate
 
-import crane.Entity
-
 import akka.actor.Actor
-
-import scala.collection.mutable.HashMap
 
 case class AddSocketUser(socketId: String, userId: String)
 case class RemoveSocketUser(socketId: String)
 case class GetUserId(socketId: String)
 
 class SocketUserMap extends Actor {
-  val socketUserMap: HashMap[String, String] = HashMap[String, String]()
+  val socketUserMap = collection.mutable.HashMap[String, String]()
 
   def receive = {
-    case AddSocketUser(socketId: String, userId: String) =>
-      socketUserMap(socketId) = userId
-    case RemoveSocketUser(socketId: String) => socketUserMap -= socketId
-    case GetUserId(socketId: String) =>
-      sender ! socketUserMap(socketId)
+    case AddSocketUser(socketId, userId) => socketUserMap(socketId) = userId
+    case RemoveSocketUser(socketId) => socketUserMap -= socketId
+    case GetUserId(socketId) => sender ! socketUserMap(socketId)
   }
-
 }

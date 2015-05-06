@@ -1,8 +1,4 @@
 package ayai.networking.chat
-/**
- * ayai.networking.chat.Chat
- * Classes and Traits used in the Messaging services
- */
 
 /** Ayai Imports **/
 import ayai.persistence.CharacterRow
