@@ -2,7 +2,7 @@ package ayai.systems.ai.pathfinding
 
 import akka.actor.ActorSystem
 import ayai.components.Position
-import ayai.components.pathfinding.{AStar, Pathfinder}
+import ayai.components.pathfinding.{AStarPathfinder, Pathfinder}
 import ayai.factories.GraphFactory
 import ayai.gamestate.RoomWorld
 import crane.{Entity, EntityProcessingSystem}
@@ -11,7 +11,7 @@ object PathfindingSystem {
   val COMPONENT_INCLUDES: List[AnyRef] = List(
     // TODO: currently Crane doesn't allow for specifying component types by root class (superclass)
     // It would be nice to change this so we could query for all entities which have components inheriting from "Pathfinder"
-    classOf[AStar],
+    classOf[AStarPathfinder],
     classOf[Position]
   )
 
@@ -25,10 +25,10 @@ class PathfindingSystem(actorSystem: ActorSystem) extends EntityProcessingSystem
     val map = GraphFactory.generateGraph(roomWorld)
 
     for {
-      pathfinding <- e.getComponent(classOf[AStar]).toList.map(_.asInstanceOf[AStar])
+      pathfinding <- e.getComponent(classOf[AStarPathfinder]).toList.map(_.asInstanceOf[AStarPathfinder])
       position <- e.getComponent(classOf[Position]).toList.map(_.asInstanceOf[Position])
     } {
-//      println(s"Processing entity = ${e.uuid} for AStar at position $position")
+      //println(s"Processing entity = ${e.uuid} for AStar at position $position")
 
       // TODO: replace with real target
       pathfinding.findPath(map, position, position) match {

@@ -2,7 +2,7 @@ package ayai.factories
 
 /** Ayai Imports **/
 import ayai.components._
-import ayai.components.pathfinding.{ManhattanDistance, AStar}
+import ayai.components.pathfinding.{ManhattanMovementStyle, AStarPathfinder}
 import ayai.maps._
 import ayai.actions._
 import ayai.statuseffects._
@@ -190,7 +190,7 @@ object EntityFactory {
     p.components += new SoundProducing(2000)
     p.components += new Memory()
 
-    p.components += new AStar(new ManhattanDistance)
+    p.components += new AStarPathfinder(new ManhattanMovementStyle)
 
     p.components += new QuestHistory()
     //p.components += new GenerateQuest()
